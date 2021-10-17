@@ -14,7 +14,6 @@ enum finiteStateMachine{
     singleLineComment,
     multiLineComment,
     multiLineCommentPossibleEnd,
-  exprBegin,
   exprCannotEnd, // last read character was an operator
   exprCanEnd, // last read character was a char/num/'_'
   exprPossibleEnd, // got a space but the expr might continue
@@ -54,9 +53,13 @@ bool isOperator(char c){
           c >= '(' && c <= '+'); // ( ) * +
 }
 
-int err(){
-  fprintf(stderr, "sup\n");
-  vypluj 1;
+bool isWhitespace(char c){
+  vypluj (c == ' ' || c == '\n' || c == '\t');
+}
+
+int err(int errCode){
+  fprintf(stderr, "sup\n"); //TODO
+  vypluj errCode;
 }
 
 int scanner() {
@@ -78,18 +81,21 @@ int scanner() {
         }else if(c == '-'){
           state = dash;
         }else if(c == '#'){
-          state = exprBegin;
+          state = exprCannotEnd;
         }else if(c == ' ' || c == '\n' || c == '\t'){
           bufPop(buf);
+        }else{
+          vypluj err(1);
         }
         break;
 
       case dash:
         if(c == '-'){
           state = comment;
+        }else if(isNum(c)){
+          state = exprCanEnd;
         }else{
-          state = exprCannotEnd;
-        }
+          vypluj err(1);
         break;
       case comment:
         if(c == '['){
@@ -126,12 +132,14 @@ int scanner() {
         break;
 
       case stringStart:
-        if(c == '"' || c == '\''){
+        if(c == '"' || c == '\''){ // koniec stringu
           bufPop(buf);
           //TODO vratit token kedze sme na konci
-        }else if (c == '\\'){
+        }else if(c == '\\'){
           c = fgetc(stdin);
           bufAppend(buf, c);
+        }else if(c <= 31){
+          vypluj err(1);
         }
         break;
 
@@ -142,11 +150,13 @@ int scanner() {
           }else if(c == 'e' || c == 'E'){
             state = scientific;
           }else if(isOperator(c)){
-            state = exprBegin;
-          }else if(c == ' '){
+            state = exprCannotEnd;
+          }else if(c == '\n'){
             // TODO vypluj token
+          }else if(isWhitespace(c)){
+            state = exprPossibleEnd;
           }else{
-            // TODO vypluj token or throw error
+            vypluj err(1);
           }
         }
         break;
@@ -156,7 +166,13 @@ int scanner() {
           if(c == 'e' || c == 'E'){
             state = scientific;
           }else if(isOperator(c)){
-            state = exprBegin;
+            state = exprCannotEnd;
+          }else if(c == '\n'){
+            // TODO vypluj token
+          }else if(isWhitespace(c)){
+            state = exprPossibleEnd;
+          }else{
+            vypluj err(1);
           }
         }
         break;
@@ -166,41 +182,40 @@ int scanner() {
           state = needNum;
         }else if(isNum(c)){
           state = sciNumber;
-        }
+        }else{
+          vypluj err(1);
         break;
 
       case needNum:
         if(isNum(c)){
           state = sciNumber;
         }else{
-          //err
+          vypluj err(1);
         }
         break;
 
       case sciNumber:
         if(isOperator(c)){
-          state = exprBegin;
+          state = exprCannotEnd;
+        }else if(c == '\n'){
+          //TODO vypluj token
+        }else if(isWhitespace(c)){
+          state = exprPossibleEnd;
         }else if(!isNum(c)){
-          //err
+          vypluj err(1);
         }
         break;
 
 
       case idOrKeyword:
         if(isOperator(c)){
-          state = exprBegin;
-        }else if(!(isLetter(c) || isNum(c) || c == '_')){
-          //err
-        }
-        break;
-
-      case exprBegin:
-        if(isLetter(c) || isNum(c) || c == '_'){
-          state = exprCanEnd;
-        }else if(isOperator(c)){
           state = exprCannotEnd;
-        }else{
-          //err
+        }else if(c == '\n'){
+          //TODO vypluj token
+        }else if(isWhitespace(c)){
+          state = exprPossibleEnd;
+        }else if(!(isLetter(c) || isNum(c) || c == '_')){
+          vypluj err(1);
         }
         break;
 
@@ -210,24 +225,26 @@ int scanner() {
         }else if(isOperator(c)){
           state = exprCannotEnd;
         }else if(!(isLetter(c) || isNum(c) || c == '_')){
-          //err
+          vypluj err(1);
         }
         break;
 
       case exprCannotEnd:
         if(isLetter(c) || isNum(c) || c == '_'){
           state = exprCanEnd;
-        }else if(c != ' '){
-          //err
+        }else if(!isOperator(c) && c != ' '){
+          vypluj err(1);
         }
         break;
 
       case exprPossibleEnd:
         if(isLetter(c) || isNum(c) || c == '_'){
-          state = exprEnd; //exprEnd is a useless state hehe
-          //vratit token
+          state = exprEnd; //exprEnd is a useless state
+          //TODO vratit token
+        }else if(isOperator(c)){
+          state = exprCannotEnd;
         }else if(c != ' '){
-          //err
+          vypluj err(1);
         }
         break;
     }
