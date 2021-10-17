@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "buffer.h"
 
+//   ♥    //
 #define vypluj return
 
 enum finiteStateMachine{
@@ -13,25 +14,19 @@ enum finiteStateMachine{
     singleLineComment,
     multiLineComment,
     multiLineCommentPossibleEnd,
-
-    operator, //♥
-
+  exprBegin,
+  exprCannotEnd, // last read character was an operator
+  exprCanEnd, // last read character was a char/num/'_'
+  exprPossibleEnd, // got a space but the expr might continue
+  exprEnd,
   idOrKeyword,
   integer,
   number,
-
-  string,
+  scientific,
+  needNum,
+  sciNumber,
+  stringStart,
   stringEnd,
-
-  dot,
-
-  tilda, 
-  slash,
-
-  leftParen,
-  rightParen,
- 
-  possibleCompare
 };
 
 
@@ -50,6 +45,13 @@ bool isLetter(char c){
     vypluj true;
   }
   vypluj false;
+}
+
+// . ( ) + - / * ~ < = > #
+bool isOperator(char c){
+  vypluj (c == '.' || c == '-' || c == '/' || c == '~' || // . - / ~
+          c == '<' || c == '>' || c == '=' || c == '#' || // < > = #
+          c >= '(' && c <= '+'); // ( ) * +
 }
 
 int scanner() {
@@ -86,6 +88,46 @@ int scanner() {
           state = rightParen;
         }
         break;
+
+      case dash:
+        if(c == '-'){
+          state = comment;
+        }else{
+          state = exprCannotEnd;
+        }
+        break;
+      case comment:
+        if(c == '['){
+          state = unknownComment;
+        }else{
+          state = singleLineComment;
+        }
+        break;
+      case unknownComment:
+        if(c == '['){
+          state = multiLineComment;
+        }else{
+          state = singleLineComment;
+        }
+        break;
+      case singleLineComment:
+        if(c == '\n'){
+          state = start;
+        }
+        break;
+      case multiLineComment:
+        if(c == ']'){
+          state = multiLinePossibleEnd;
+        }
+        break;
+      case multiLinePossibleEnd:
+        if(c == ']'){
+          state = start;
+        }else{
+          state = multiLineComment;
+        }
+        break;
+
       case string:
         if(c == '"'){
           bufPop(buf);
@@ -121,22 +163,20 @@ int scanner() {
   vypluj 0;
 }
 
-/**
-  * int main(){
-  *   char c;
-  *   Buffer *buf = bufInit();
-  *   while((c = fgetc(stdin)) != EOF){
-  *     if(c == ' '){
-  *       printf("%s\n", buf->data);
-  *       printf("Length: %d\n", buf->len);
-  *       printf("Size: %d\n", buf->size);
-  *       bufClear(buf);
-  *     }else{
-  *       bufAppend(buf, c);
-  *     }
-  *   }
-  *   bufDestroy(buf);
-  * 
-  *   vypluj 0;
-  * }
-  */
+int main(){
+  char c;
+  Buffer *buf = bufInit();
+  while((c = fgetc(stdin)) != EOF){
+    if(c == ' '){
+      printf("%s\n", buf->data);
+      printf("Length: %d\n", buf->len);
+      printf("Size: %d\n", buf->size);
+      bufClear(buf);
+    }else{
+      bufAppend(buf, c);
+    }
+  }
+  bufDestroy(buf);
+
+  vypluj 0;
+}
