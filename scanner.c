@@ -96,6 +96,7 @@ int scanner() {
           state = exprCanEnd;
         }else{
           vypluj err(1);
+        }
         break;
       case comment:
         if(c == '['){
@@ -184,6 +185,7 @@ int scanner() {
           state = sciNumber;
         }else{
           vypluj err(1);
+        }
         break;
 
       case needNum:
