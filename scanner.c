@@ -54,6 +54,11 @@ bool isOperator(char c){
           c >= '(' && c <= '+'); // ( ) * +
 }
 
+int err(){
+  fprintf(stderr, "sup\n");
+  vypluj 1;
+}
+
 int scanner() {
   Buffer *buf = bufInit();
   int state = start;
@@ -63,8 +68,8 @@ int scanner() {
     bufAppend(buf, c);
     switch (state){
       case start: 
-        if(c == '"'){
-          state = string;
+        if(c == '"' || c == '\''){
+          state = stringStart;
           bufPop(buf); // We don't need the starting '"'
         }else if(isNum(c)){
           state = integer;
@@ -72,20 +77,10 @@ int scanner() {
           state = idOrKeyword;
         }else if(c == '-'){
           state = dash;
-        }else if(c == '.'){
-          state = dot;
-        }else if(c == '<' || c == '>' || c == '='){
-          state = possibleCompare;
-        }else if(c == '#' || c == '*' || c == '+' || c == ':'){
-          state = operator;
-        }else if(c == '~'){
-          state = tilda;
-        }else if(c == '/'){
-          state = slash;
-        }else if(c == '('){
-          state = leftParen;
-        }else if(c == ')'){
-          state = rightParen;
+        }else if(c == '#'){
+          state = exprBegin;
+        }else if(c == ' ' || c == '\n' || c == '\t'){
+          bufPop(buf);
         }
         break;
 
@@ -112,24 +107,26 @@ int scanner() {
         break;
       case singleLineComment:
         if(c == '\n'){
+          bufClear(buf);
           state = start;
         }
         break;
       case multiLineComment:
         if(c == ']'){
-          state = multiLinePossibleEnd;
+          state = multiLineCommentPossibleEnd;
         }
         break;
-      case multiLinePossibleEnd:
+      case multiLineCommentPossibleEnd:
         if(c == ']'){
+          bufClear(buf);
           state = start;
         }else{
           state = multiLineComment;
         }
         break;
 
-      case string:
-        if(c == '"'){
+      case stringStart:
+        if(c == '"' || c == '\''){
           bufPop(buf);
           //TODO vratit token kedze sme na konci
         }else if (c == '\\'){
@@ -137,10 +134,15 @@ int scanner() {
           bufAppend(buf, c);
         }
         break;
+
       case integer:
         if(!isNum(c)){
           if(c == '.'){
             state = number;
+          }else if(c == 'e' || c == 'E'){
+            state = scientific;
+          }else if(isOperator(c)){
+            state = exprBegin;
           }else if(c == ' '){
             // TODO vypluj token
           }else{
@@ -148,11 +150,86 @@ int scanner() {
           }
         }
         break;
+
       case number:
         if(!isNum(c)){
+          if(c == 'e' || c == 'E'){
+            state = scientific;
+          }else if(isOperator(c)){
+            state = exprBegin;
+          }
         }
         break;
-        
+
+      case scientific:
+        if(c == '+' || c == '-'){
+          state = needNum;
+        }else if(isNum(c)){
+          state = sciNumber;
+        }
+        break;
+
+      case needNum:
+        if(isNum(c)){
+          state = sciNumber;
+        }else{
+          //err
+        }
+        break;
+
+      case sciNumber:
+        if(isOperator(c)){
+          state = exprBegin;
+        }else if(!isNum(c)){
+          //err
+        }
+        break;
+
+
+      case idOrKeyword:
+        if(isOperator(c)){
+          state = exprBegin;
+        }else if(!(isLetter(c) || isNum(c) || c == '_')){
+          //err
+        }
+        break;
+
+      case exprBegin:
+        if(isLetter(c) || isNum(c) || c == '_'){
+          state = exprCanEnd;
+        }else if(isOperator(c)){
+          state = exprCannotEnd;
+        }else{
+          //err
+        }
+        break;
+
+      case exprCanEnd:
+        if(c == ' '){
+          state = exprPossibleEnd;
+        }else if(isOperator(c)){
+          state = exprCannotEnd;
+        }else if(!(isLetter(c) || isNum(c) || c == '_')){
+          //err
+        }
+        break;
+
+      case exprCannotEnd:
+        if(isLetter(c) || isNum(c) || c == '_'){
+          state = exprCanEnd;
+        }else if(c != ' '){
+          //err
+        }
+        break;
+
+      case exprPossibleEnd:
+        if(isLetter(c) || isNum(c) || c == '_'){
+          state = exprEnd; //exprEnd is a useless state hehe
+          //vratit token
+        }else if(c != ' '){
+          //err
+        }
+        break;
     }
 
 
