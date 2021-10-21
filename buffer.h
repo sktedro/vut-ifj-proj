@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #define BUFINITLEN 16
 
 typedef struct{
@@ -47,7 +49,7 @@ void bufPop(Buffer *buf){
 }
 
 // Clear all characters of the buffer
-int bufClear(Buffer *buf){
+void bufClear(Buffer *buf){
   buf->data[0] = '\0';
   buf->len = 0;
 }

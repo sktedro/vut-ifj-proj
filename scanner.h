@@ -8,25 +8,25 @@
 #define vypluj return
 
 enum finiteStateMachine{
-  start,
-  dash,
-    comment,
-    unknownComment,
-    singleLineComment,
-    multiLineComment,
-    multiLineCommentPossibleEnd,
-  exprCannotEnd, // last read character was an operator
-  exprCanEnd, // last read character was a char/num/'_'
-  exprPossibleEnd, // got a space but the expr might continue
-  exprEnd,
-  idOrKeyword,
-  integer,
-  number,
-  scientific,
-  needNum,
-  sciNumber,
-  stringStart,
-  stringEnd,
+  s_start,
+  s_dash,
+    s_comment,
+    s_unknownComment,
+    s_singleLineComment,
+    s_multiLineComment,
+    s_multiLineCommentPossibleEnd,
+  s_exprCannotEnd, // last read character was an operator
+  s_exprCanEnd, // last read character was a char/num/'_'
+  s_exprPossibleEnd, // got a space but the s_expr might continue
+  s_exprEnd,
+  s_idOrKeyword,
+  s_integer,
+  s_number,
+  s_scientific,
+  s_needNum,
+  s_sciNumber,
+  s_stringStart,
+  s_stringEnd,
 };
 
 
@@ -40,8 +40,8 @@ bool isNum(char c){
 }
 
 bool isLetter(char c){
-  if( c >= 'a' && c <= 'z' ||
-      c >= 'A' && c <= 'Z'){
+  if((c >= 'a' && c <= 'z')||
+     (c >= 'A' && c <= 'Z')){
     vypluj true;
   }
   vypluj false;
@@ -51,7 +51,7 @@ bool isLetter(char c){
 bool isOperator(char c){
   vypluj (c == '.' || c == '-' || c == '/' || c == '~' || // . - / ~
           c == '<' || c == '>' || c == '=' || c == '#' || // < > = #
-          c >= '(' && c <= '+'); // ( ) * +
+         (c >= '(' && c <= '+')); // ( ) * +
 }
 
 bool isWhitespace(char c){
@@ -65,24 +65,24 @@ int err(int errCode){
 
 int scanner() {
   Buffer *buf = bufInit();
-  int state = start;
+  int state = s_start;
   char c;
   while(1){
     c = fgetc(stdin);
     bufAppend(buf, c);
     switch (state){
-      case start: 
+      case s_start: 
         if(c == '"' || c == '\''){
-          state = stringStart;
+          state = s_stringStart;
           bufPop(buf); // We don't need the starting '"'
         }else if(isNum(c)){
-          state = integer;
+          state = s_integer;
         }else if(isLetter(c) || c == '_'){
-          state = idOrKeyword;
+          state = s_idOrKeyword;
         }else if(c == '-'){
-          state = dash;
+          state = s_dash;
         }else if(c == '#'){
-          state = exprCannotEnd;
+          state = s_exprCannotEnd;
         }else if(c == ' ' || c == '\n' || c == '\t'){
           bufPop(buf);
         }else{
@@ -90,50 +90,50 @@ int scanner() {
         }
         break;
 
-      case dash:
+      case s_dash:
         if(c == '-'){
-          state = comment;
+          state = s_comment;
         }else if(isNum(c)){
-          state = exprCanEnd;
+          state = s_exprCanEnd;
         }else{
           vypluj err(1);
         }
         break;
-      case comment:
+      case s_comment:
         if(c == '['){
-          state = unknownComment;
+          state = s_unknownComment;
         }else{
-          state = singleLineComment;
+          state = s_singleLineComment;
         }
         break;
-      case unknownComment:
+      case s_unknownComment:
         if(c == '['){
-          state = multiLineComment;
+          state = s_multiLineComment;
         }else{
-          state = singleLineComment;
+          state = s_singleLineComment;
         }
         break;
-      case singleLineComment:
+      case s_singleLineComment:
         if(c == '\n'){
           bufClear(buf);
-          state = start;
+          state = s_start;
         }
         break;
-      case multiLineComment:
+      case s_multiLineComment:
         if(c == ']'){
-          state = multiLineCommentPossibleEnd;
+          state = s_multiLineCommentPossibleEnd;
         }
         break;
-      case multiLineCommentPossibleEnd:
+      case s_multiLineCommentPossibleEnd:
         if(c == ']'){
           bufClear(buf);
-          state = start;
+          state = s_start;
         }else{
-          state = multiLineComment;
+          state = s_multiLineComment;
         }
         break;
 
-      case stringStart:
+      case s_stringStart:
         if(c == '"' || c == '\''){ // koniec stringu
           bufPop(buf);
           //TODO vratit token kedze sme na konci
@@ -145,107 +145,107 @@ int scanner() {
         }
         break;
 
-      case integer:
+      case s_integer:
         if(!isNum(c)){
           if(c == '.'){
-            state = number;
+            state = s_number;
           }else if(c == 'e' || c == 'E'){
-            state = scientific;
+            state = s_scientific;
           }else if(isOperator(c)){
-            state = exprCannotEnd;
+            state = s_exprCannotEnd;
           }else if(c == '\n'){
             // TODO vypluj token
           }else if(isWhitespace(c)){
-            state = exprPossibleEnd;
+            state = s_exprPossibleEnd;
           }else{
             vypluj err(1);
           }
         }
         break;
 
-      case number:
+      case s_number:
         if(!isNum(c)){
           if(c == 'e' || c == 'E'){
-            state = scientific;
+            state = s_scientific;
           }else if(isOperator(c)){
-            state = exprCannotEnd;
+            state = s_exprCannotEnd;
           }else if(c == '\n'){
             // TODO vypluj token
           }else if(isWhitespace(c)){
-            state = exprPossibleEnd;
+            state = s_exprPossibleEnd;
           }else{
             vypluj err(1);
           }
         }
         break;
 
-      case scientific:
+      case s_scientific:
         if(c == '+' || c == '-'){
-          state = needNum;
+          state = s_needNum;
         }else if(isNum(c)){
-          state = sciNumber;
+          state = s_sciNumber;
         }else{
           vypluj err(1);
         }
         break;
 
-      case needNum:
+      case s_needNum:
         if(isNum(c)){
-          state = sciNumber;
+          state = s_sciNumber;
         }else{
           vypluj err(1);
         }
         break;
 
-      case sciNumber:
+      case s_sciNumber:
         if(isOperator(c)){
-          state = exprCannotEnd;
+          state = s_exprCannotEnd;
         }else if(c == '\n'){
           //TODO vypluj token
         }else if(isWhitespace(c)){
-          state = exprPossibleEnd;
+          state = s_exprPossibleEnd;
         }else if(!isNum(c)){
           vypluj err(1);
         }
         break;
 
 
-      case idOrKeyword:
+      case s_idOrKeyword:
         if(isOperator(c)){
-          state = exprCannotEnd;
+          state = s_exprCannotEnd;
         }else if(c == '\n'){
           //TODO vypluj token
         }else if(isWhitespace(c)){
-          state = exprPossibleEnd;
+          state = s_exprPossibleEnd;
         }else if(!(isLetter(c) || isNum(c) || c == '_')){
           vypluj err(1);
         }
         break;
 
-      case exprCanEnd:
+      case s_exprCanEnd:
         if(c == ' '){
-          state = exprPossibleEnd;
+          state = s_exprPossibleEnd;
         }else if(isOperator(c)){
-          state = exprCannotEnd;
+          state = s_exprCannotEnd;
         }else if(!(isLetter(c) || isNum(c) || c == '_')){
           vypluj err(1);
         }
         break;
 
-      case exprCannotEnd:
+      case s_exprCannotEnd:
         if(isLetter(c) || isNum(c) || c == '_'){
-          state = exprCanEnd;
+          state = s_exprCanEnd;
         }else if(!isOperator(c) && c != ' '){
           vypluj err(1);
         }
         break;
 
-      case exprPossibleEnd:
+      case s_exprPossibleEnd:
         if(isLetter(c) || isNum(c) || c == '_'){
-          state = exprEnd; //exprEnd is a useless state
+          state = s_exprEnd; //s_exprEnd is a useless state
           //TODO vratit token
         }else if(isOperator(c)){
-          state = exprCannotEnd;
+          state = s_exprCannotEnd;
         }else if(c != ' '){
           vypluj err(1);
         }
@@ -260,20 +260,22 @@ int scanner() {
   vypluj 0;
 }
 
-int main(){
-  char c;
-  Buffer *buf = bufInit();
-  while((c = fgetc(stdin)) != EOF){
-    if(c == ' '){
-      printf("%s\n", buf->data);
-      printf("Length: %d\n", buf->len);
-      printf("Size: %d\n", buf->size);
-      bufClear(buf);
-    }else{
-      bufAppend(buf, c);
-    }
-  }
-  bufDestroy(buf);
-
-  vypluj 0;
-}
+/*
+ * int main(){
+ *   char c;
+ *   Buffer *buf = bufInit();
+ *   while((c = fgetc(stdin)) != EOF){
+ *     if(c == ' '){
+ *       printf("%s\n", buf->data);
+ *       printf("Length: %d\n", buf->len);
+ *       printf("Size: %d\n", buf->size);
+ *       bufClear(buf);
+ *     }else{
+ *       bufAppend(buf, c);
+ *     }
+ *   }
+ *   bufDestroy(buf);
+ * 
+ *   vypluj 0;
+ * }
+ */

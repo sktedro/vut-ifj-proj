@@ -5,7 +5,7 @@
 
 #define ATTRIBUTEINITLEN 16
 
-enum Token{
+enum TokenEnum{
   identificator, // one token for both identificator and a keyword??
   keyword,
   expression,
@@ -13,20 +13,21 @@ enum Token{
   number,
   scientificNumber,
   string,
-}
+};
+
+// Do we need more attributes in one token? If not, this structure is redundant
+// and in Token struct, there should be just char data instead of
+// TokenAttribute
+typedef struct TokenAttribute TokenAttribute;
+struct TokenAttribute{
+  char *data;
+  TokenAttribute *nextAttribute;
+};
 
 typedef struct{
   int type;
   TokenAttribute *attribute;
 } Token;
-
-// Do we need more attributes in one token? If not, this structure is redundant
-// and in Token struct, there should be just char data instead of
-// TokenAttribute
-typedef struct{
-  char *data;
-  TokenAttribute *nextAttribute;
-} TokenAttribute;
 
 
 Token *tokenInit(int type){
@@ -34,6 +35,7 @@ Token *tokenInit(int type){
   if(!token){
     return NULL;
   }
+  token->type = type;
   return token;
 }
 
