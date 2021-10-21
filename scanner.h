@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "buffer.h"
+#include "token.h"
 
 //   ♥    //
 #define vypluj return
