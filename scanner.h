@@ -59,16 +59,19 @@ bool isWhitespace(char c){
 }
 
 int err(int errCode){
-  fprintf(stderr, "sup\n"); //TODO
+  fprintf(stderr, "error\n"); //TODO
   vypluj errCode;
 }
 
-int scanner() {
+int scanner(Token **token) {
   Buffer *buf = bufInit();
   int state = s_start;
   char c;
   while(1){
     c = fgetc(stdin);
+    if(c == EOF){
+      return 0;
+    }
     bufAppend(buf, c);
     switch (state){
       case s_start: 
@@ -136,10 +139,11 @@ int scanner() {
       case s_stringStart:
         if(c == '"' || c == '\''){ // end of string
           bufPop(buf);
-          Token *token = tokenInit(t_string);
-          if(!tokenAddAttribute(token, buf->data)){
+          *token = tokenInit(t_string);
+         if(!tokenAddAttribute(*token, buf->data)){
             vypluj err(99);
           }
+          return 0;
         }else if(c == '\\'){
           c = fgetc(stdin);
           bufAppend(buf, c);
@@ -157,10 +161,11 @@ int scanner() {
           }else if(isOperator(c)){
             state = s_exprCannotEnd;
           }else if(c == '\n'){
-            Token *token = tokenInit(t_integer);
-            if(!tokenAddAttribute(token, buf->data)){
+            *token = tokenInit(t_integer);
+            if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
+            return 0;
           }else if(isWhitespace(c)){
             state = s_exprPossibleEnd;
           }else{
@@ -176,10 +181,11 @@ int scanner() {
           }else if(isOperator(c)){
             state = s_exprCannotEnd;
           }else if(c == '\n'){
-            Token *token = tokenInit(t_number);
-            if(!tokenAddAttribute(token, buf->data)){
+            *token = tokenInit(t_number);
+            if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
+            return 0;
           }else if(isWhitespace(c)){
             state = s_exprPossibleEnd;
           }else{
@@ -210,10 +216,11 @@ int scanner() {
         if(isOperator(c)){
           state = s_exprCannotEnd;
         }else if(c == '\n'){
-            Token *token = tokenInit(t_scientificNumber);
-            if(!tokenAddAttribute(token, buf->data)){
+            *token = tokenInit(t_scientificNumber);
+            if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
+            return 0;
         }else if(isWhitespace(c)){
           state = s_exprPossibleEnd;
         }else if(!isNum(c)){
@@ -226,10 +233,11 @@ int scanner() {
         if(isOperator(c)){
           state = s_exprCannotEnd;
         }else if(c == '\n'){
-            Token *token = tokenInit(t_idOrKeyword);
-            if(!tokenAddAttribute(token, buf->data)){
+            *token = tokenInit(t_idOrKeyword);
+            if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
+            return 0;
         }else if(isWhitespace(c)){
           state = s_exprPossibleEnd;
         }else if(!(isLetter(c) || isNum(c) || c == '_')){
@@ -258,10 +266,11 @@ int scanner() {
       case s_exprPossibleEnd:
         if(isLetter(c) || isNum(c) || c == '_'){
           state = s_exprEnd; // s_exprEnd is a useless state
-          Token *token = tokenInit(t_expression);
-          if(!tokenAddAttribute(token, buf->data)){
+          *token = tokenInit(t_expression);
+          if(!tokenAddAttribute(*token, buf->data)){
             vypluj err(99);
           }
+          return 0;
         }else if(isOperator(c)){
           state = s_exprCannotEnd;
         }else if(c != ' '){

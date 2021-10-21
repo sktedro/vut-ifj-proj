@@ -12,5 +12,5 @@ all:
 	mkdir -p $(OUTPUTDIR)
 	$(CC) $(MAIN) $(LIBS) -o $(OUTPUT) $(CFLAGS)
 
-run:
+run: all
 	$(OUTPUT)
