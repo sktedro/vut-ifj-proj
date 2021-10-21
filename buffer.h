@@ -6,10 +6,10 @@ typedef struct{
   int size;
 } Buffer;
 
-
 // Allocate a buffer
 Buffer *bufInit(){
-  Buffer *buf = (Buffer*)malloc(sizeof(char*) + 2 * sizeof(int));
+  // Buffer *buf = (Buffer*)malloc(sizeof(char*) + 2 * sizeof(int));
+  Buffer *buf = (Buffer*)malloc(sizeof(Buffer));
   if(buf == NULL){
     return NULL;
   }
