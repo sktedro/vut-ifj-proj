@@ -4,9 +4,10 @@
 #include "scanner.h"
 
 int main(int argc, char *argv[]){
-  Token *token = NULL;
+  Token *token;
   int ret;
   while(1){
+    token = NULL;
     ret = scanner(&token);
     printf("returned %d while processing token:\n", ret);
     if(token){

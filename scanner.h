@@ -4,27 +4,36 @@
 #include "buffer.h"
 #include "token.h"
 
+// TODO:
+// get character from charMem!
+// return what we have when we reach the last input character 
+
 //   ♥    //
 #define vypluj return
 
 enum finiteStateMachine{
   s_start,
   s_dash,
-    s_comment,
-    s_unknownComment,
-    s_singleLineComment,
-    s_multiLineComment,
-    s_multiLineCommentPossibleEnd,
+
+  s_comment,
+  s_unknownComment,
+  s_singleLineComment,
+  s_multiLineComment,
+  s_multiLineCommentPossibleEnd,
+
   s_exprCannotEnd, // last read character was an operator
   s_exprCanEnd, // last read character was a char/num/'_'
   s_exprPossibleEnd, // got a space but the s_expr might continue
   s_exprEnd,
+
   s_idOrKeyword,
+
   s_integer,
   s_number,
   s_scientific,
   s_needNum,
   s_sciNumber,
+
   s_stringStart,
   s_stringEnd,
 };
@@ -67,12 +76,21 @@ int scanner(Token **token) {
   Buffer *buf = bufInit();
   int state = s_start;
   char c;
-  while(1){
+  bool lastChar = false;
+  while(!lastChar){
     c = fgetc(stdin);
-    if(c == EOF){
-      return 0;
+    if(c != EOF){
+      bufAppend(buf, c);
+    }else{
+      lastChar = true;
+      /*
+       * *token = tokenInit(t_expression);
+       * if(!tokenAddAttribute(*token, buf->data)){
+       *   vypluj err(99);
+       * }
+       * vypluj 0;
+       */
     }
-    bufAppend(buf, c);
     switch (state){
       case s_start: 
         if(c == '"' || c == '\''){
@@ -143,7 +161,7 @@ int scanner(Token **token) {
          if(!tokenAddAttribute(*token, buf->data)){
             vypluj err(99);
           }
-          return 0;
+          vypluj 0;
         }else if(c == '\\'){
           c = fgetc(stdin);
           bufAppend(buf, c);
@@ -165,7 +183,7 @@ int scanner(Token **token) {
             if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
-            return 0;
+            vypluj 0;
           }else if(isWhitespace(c)){
             state = s_exprPossibleEnd;
           }else{
@@ -185,7 +203,7 @@ int scanner(Token **token) {
             if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
-            return 0;
+            vypluj 0;
           }else if(isWhitespace(c)){
             state = s_exprPossibleEnd;
           }else{
@@ -220,7 +238,7 @@ int scanner(Token **token) {
             if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
-            return 0;
+            vypluj 0;
         }else if(isWhitespace(c)){
           state = s_exprPossibleEnd;
         }else if(!isNum(c)){
@@ -237,7 +255,7 @@ int scanner(Token **token) {
             if(!tokenAddAttribute(*token, buf->data)){
               vypluj err(99);
             }
-            return 0;
+            vypluj 0;
         }else if(isWhitespace(c)){
           state = s_exprPossibleEnd;
         }else if(!(isLetter(c) || isNum(c) || c == '_')){
@@ -264,13 +282,13 @@ int scanner(Token **token) {
         break;
 
       case s_exprPossibleEnd:
-        if(isLetter(c) || isNum(c) || c == '_'){
+        if(isLetter(c) || isNum(c) || c == '_' || lastChar){
           state = s_exprEnd; // s_exprEnd is a useless state
           *token = tokenInit(t_expression);
           if(!tokenAddAttribute(*token, buf->data)){
             vypluj err(99);
           }
-          return 0;
+          vypluj 0;
         }else if(isOperator(c)){
           state = s_exprCannotEnd;
         }else if(c != ' '){
@@ -278,11 +296,7 @@ int scanner(Token **token) {
         }
         break;
     }
-
-
-
   }
-
   bufDestroy(buf);
   vypluj 0;
 }
