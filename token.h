@@ -6,13 +6,12 @@
 #define ATTRIBUTEINITLEN 16
 
 enum TokenEnum{
-  identificator, // one token for both identificator and a keyword??
-  keyword,
-  expression,
-  integer,
-  number,
-  scientificNumber,
-  string,
+  t_idOrKeyword, // one token for both identificator and a keyword??
+  t_expression,
+  t_integer,
+  t_number,
+  t_scientificNumber,
+  t_string,
 };
 
 // Do we need more attributes in one token? If not, this structure is redundant
@@ -65,15 +64,20 @@ bool tokenAddAttribute(Token *token, char *data){
     }
   }
 
+
   //TODO!
   // Allocate space for data
   attribute->data = malloc(strlen(data) + 1);
   if(!attribute->data){
     return false;
   }
-  // .. and TODO write the data to the allocated space
+  // .. and write the data to the allocated space
+  memcpy(attribute->data, data, strlen(data) + 1);
+
   // Or just copy the *data pointer?
-  attribute->data = data;
+  // attribute->data = data;
+
+
   return true;
 }
 
