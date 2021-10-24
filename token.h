@@ -7,11 +7,16 @@
 
 enum TokenEnum{
   t_idOrKeyword, // one token for both identificator and a keyword??
-  t_expression,
   t_integer,
   t_number,
-  t_scientificNumber,
+  t_sciNumber,
   t_string,
+  t_rightParen,
+  t_leftParen,
+  t_arithmOp,
+  t_strOp,
+  t_relOp,
+  t_assignment,
 };
 
 // Do we need more attributes in one token? If not, this structure is redundant

@@ -10,24 +10,24 @@
 //   ♥    //
 #define vypluj return
 
-enum finiteStateMachine{
-  // s_start,
+enum FSMEnum{
+  s_start,
 
-  // s_idOrKeyword
+  s_idOrKeyword,
 
-  // s_integer,
-  // s_number,
-  // s_scientific,
-  // s_needNum,
-  // s_sciNumber,
+  s_integer,
+  s_number,
+  s_scientific,
+  s_needNum,
+  s_sciNumber,
 
-  // s_comment,
-  // s_unknownComment,
-  // s_singleLineComment,
-  // s_multiLineComment,
-  // s_multiLineCommentPossibleEnd,
+  s_comment,
+  s_unknownComment,
+  s_singleLineComment,
+  s_multiLineComment,
+  s_multiLineCommentPossibleEnd,
 
-  // s_arithmOpDash,
+  s_arithmOpDash,
   s_arithmOpDiv,
   s_arithmOp,
   s_dot,
@@ -37,8 +37,8 @@ enum finiteStateMachine{
   s_relOp,
   s_assignment,
 
-  // s_stringStart,
-  // s_stringEnd
+  s_stringStart,
+  s_stringEnd
 };
 
 
@@ -88,7 +88,7 @@ int err(int errCode){
 }
 
 int returnToken(Token **token, int type, Buffer *buf){
-  *token = tokenInit(t_integer);
+  *token = tokenInit(type);
   if(!tokenAddAttribute(*token, buf->data)){
     vypluj err(99);
   }
@@ -127,7 +127,7 @@ int scanner(Token **token) {
           state = s_arithmOpDash;
         }else if(c == '+' || c == '-' || c == '*'){
           // state = s_arithmOp;
-          // VYPLUT TOKEN
+          return returnToken(token, t_arithmOp, buf);
         }else if(c == '/'){
           state = s_arithmOpDiv;
         }else if(c == '#'){
@@ -141,9 +141,11 @@ int scanner(Token **token) {
         }else if(c == '='){
           state = s_assignment;
         }else if(c == '('){
-          state = s_leftParen;
+          return returnToken(token, t_leftParen, buf);
+          // state = s_leftParen;
         }else if(c == ')'){
-          state = s_rightParen;
+          // state = s_rightParen;
+          return returnToken(token, t_rightParen, buf);
         }else if(isWhitespace(c)){
           bufPop(buf); // We don't need the starting '"'
         }else if(c == EOF){
@@ -151,6 +153,7 @@ int scanner(Token **token) {
         }else{
           vypluj err(1);
         }
+        break;
 
 
       case s_arithmOpDash:
@@ -159,8 +162,7 @@ int scanner(Token **token) {
         }else{
           charMem = c;
           bufPop(buf);
-          return returnToken(token, 0 /*TODO token enum*/, buf);
-          //TODO vypluj token
+          return returnToken(token, t_arithmOp, buf);
         }
         break;
 
@@ -209,7 +211,8 @@ int scanner(Token **token) {
       case s_stringStart:
         if(c == '"'){ // end of string
           bufPop(buf);
-          // vypluj token
+          // state = s_stringEnd
+          return returnToken(token, t_string, buf);
         }else if(c == '\\'){
           c = fgetc(stdin);
           if(c <= 31){ //TODO nepovolene znaky???
@@ -230,7 +233,7 @@ int scanner(Token **token) {
             state = s_scientific;
           }else if(isWhitespace(c)){
             bufPop(buf);
-            // vypluj token
+            return returnToken(token, t_integer, buf);
           }else{
             vypluj err(1);
           }
@@ -243,7 +246,7 @@ int scanner(Token **token) {
             state = s_scientific;
           }else if(isWhitespace(c)){
             bufPop(buf);
-            // vypluj token
+            return returnToken(token, t_number, buf);
           }else{
             vypluj err(1);
           }
@@ -273,7 +276,7 @@ int scanner(Token **token) {
           if(isWhitespace(c) || isOperator(c)){
             charMem = c;
             bufPop(buf);
-            // vypluj token
+            return returnToken(token, t_sciNumber, buf);
           }else{
             vypluj err(1);
           }
@@ -285,14 +288,14 @@ int scanner(Token **token) {
         if(!(isLetter(c) || isNum(c) || c == '_')){
           charMem = c;
           bufPop(buf);
-          // vypluj token
+          return returnToken(token, t_idOrKeyword, buf);
         }
         break;
 
       case s_arithmOpDiv:
         if(c == '/'){
           // state = s_arithmOp;
-          //vypluj token celociselne delenie (//)
+          return returnToken(token, t_arithmOp, buf);
         }else{
           //err
         }
@@ -309,7 +312,7 @@ int scanner(Token **token) {
       case s_tilde:
         if(c == '='){
           // state = s_relOp
-          // vypluj token
+          return returnToken(token, t_relOp, buf);
         }else{
            //err
         }
@@ -317,20 +320,21 @@ int scanner(Token **token) {
       case s_relOpSimple:
         if(c == '='){
           // state = s_relOp
-          // vypluj token
+          return returnToken(token, t_relOp, buf);
         }else{
           charMem = c;
           bufPop(buf);
-          //vypluj token;
+          return returnToken(token, t_relOp, buf);
+        }
         break;
       case s_assignment:
         if(c == '='){
           // state = s_relOp
-          // vypluj token
+          return returnToken(token, t_relOp, buf);
         }else{
           charMem = c;
           bufPop(buf);
-          //vypluj token;
+          return returnToken(token, t_assignment, buf);
         }
         break;
 
