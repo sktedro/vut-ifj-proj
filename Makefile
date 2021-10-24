@@ -14,3 +14,10 @@ all:
 
 run: all
 	$(OUTPUT)
+
+tests:
+	$(CC) test.c $(LIBS) -o ./build/test $(CFLAGS)
+
+test: tests
+	./build/test
+
