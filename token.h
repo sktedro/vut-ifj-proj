@@ -35,6 +35,7 @@ Token *tokenInit(int type){
     return NULL;
   }
   token->type = type;
+  token->attribute = NULL;
   return token;
 }
 
@@ -43,39 +44,47 @@ bool tokenAddAttribute(Token *token, char *data){
     return false;
   }
 
-  // Attribute to which we will be writing the data
-  TokenAttribute *attribute = token->attribute;
+  
 
-  // If the first attribute is not allocated, allocate it now
-  if(!attribute){
-    attribute = malloc(sizeof(TokenAttribute));
-    if(!attribute){
-      return false;
-    }
-  // If there is already at least one attribute, add this one at the end
-  }else{
-    while(attribute->nextAttribute != NULL){
-      attribute = attribute->nextAttribute;
-    }
-    attribute->nextAttribute = malloc(sizeof(TokenAttribute));
-    attribute = attribute->nextAttribute;
-    if(!attribute){
-      return false;
-    }
+  // Allocate an attribute
+  TokenAttribute *newAttribute = malloc(sizeof(TokenAttribute));
+  if(!newAttribute){
+    return false;
   }
-
 
   //TODO!
   // Allocate space for data
-  attribute->data = malloc(strlen(data) + 1);
-  if(!attribute->data){
+  newAttribute->data = malloc(strlen(data) + 1);
+  if(!newAttribute->data){
     return false;
   }
-  // .. and write the data to the allocated space
-  memcpy(attribute->data, data, strlen(data) + 1);
+  newAttribute->nextAttribute = NULL;
 
+  // .. and write the data to the allocated space
+  memcpy(newAttribute->data, data, strlen(data) + 1);
   // Or just copy the *data pointer?
   // attribute->data = data;
+
+  token->attribute = newAttribute;
+/*   // TODO!!!
+ * 
+ *   // Attribute to which we will be writing the data
+ *   TokenAttribute *attribute = token->attribute;
+ * 
+ *   // If there is already at least one attribute, add this one at the end
+ *   if(attribute){
+ *     while(attribute->nextAttribute != NULL){
+ *       attribute = attribute->nextAttribute;
+ *     }
+ *     // attribute->nextAttribute = malloc(sizeof(TokenAttribute));
+ *     attribute->nextAttribute = newAttribute;
+ *     if(!attribute){
+ *       return false;
+ *     }
+ *   }
+ */
+
+
 
 
   return true;

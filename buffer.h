@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #define BUFINITLEN 16
 
@@ -44,7 +45,8 @@ int bufAppend(Buffer *buf, char c){
 
 void bufPop(Buffer *buf){
   if(buf && buf->len){
-    buf->data[buf->len - 1] = '\0';
+    (buf->len)--;
+    buf->data[buf->len] = '\0';
   }
 }
 
