@@ -77,6 +77,8 @@ bool restoreChar(Buffer *buf, char *c){
 }
 
 /**
+ * @brief returns true if c is a number
+ *
  * @param char
  *
  * @return true if char is a number from 0 to 9
@@ -89,6 +91,8 @@ bool isNum(char c){
 }
 
 /**
+ * @brief returns true if c is a letter
+ *
  * @param char
  *
  * @return true if char is a letter (upper or lowercase) from a to z
@@ -102,6 +106,8 @@ bool isLetter(char c){
 }
 
 /**
+ * @brief returns true if c is an operator
+ *
  * @param char
  *
  * @return true if char is an operator (list: . ( ) + - / * ~ < = > #)
@@ -123,6 +129,8 @@ bool isWhitespace(char c){
 }
 
 /**
+ * @brief Returns a token (writes it to the provided pointer)
+ * 
  * @param token: pointer to address where the new token should be written
  * @param type: type of the token that is to be returned
  * @param buf: buffer from which the token data should be read
@@ -131,6 +139,10 @@ bool isWhitespace(char c){
  */
 int returnToken(Token **token, int type, Buffer *buf){
   *token = tokenInit(type);
+  if(!(*token)){
+    bufDestroy(buf);
+    vypluj err(99);
+  }
   if(!tokenAddAttribute(*token, buf->data)){
     bufDestroy(buf);
     vypluj err(99);

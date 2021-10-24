@@ -3,7 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-enum TokenEnum{
+// Enumeration of the token types
+enum TokenTypeEnum{
   t_idOrKeyword, // one token for both identificator and a keyword??
   t_int,
   t_num,
@@ -17,22 +18,32 @@ enum TokenEnum{
   t_assignment,
 };
 
+// TODO
 // Do we need more attributes in one token? If not, this structure is redundant
 // and in Token struct, there should be just char data instead of
 // TokenAttrib
-typedef struct TokenAttrib TokenAttrib;
 
+// Structure defining a token attribute
+typedef struct TokenAttrib TokenAttrib;
 struct TokenAttrib{
   char *data;
   TokenAttrib *nextAttrib;
 };
 
+// Structure defining a token
 typedef struct{
   int type;
   TokenAttrib *attrib;
 } Token;
 
 
+/**
+ * @brief allocates memory for a new token and assigns it a type
+ *
+ * @param type of the new token
+ *
+ * @return token (pointer)
+ */
 Token *tokenInit(int type){
   Token *token = malloc(sizeof(Token));
   if(!token){
@@ -43,12 +54,19 @@ Token *tokenInit(int type){
   return token;
 }
 
+
+/**
+ * @brief add a new attribute to the token (allocate and write the data)
+ *
+ * @param token: token to which the new attribute should be added
+ * @param data: data which are to be written to the token
+ *
+ * @return true if successful
+ */
 bool tokenAddAttrib(Token *token, char *data){
   if(!token){
     return false;
   }
-
-  
 
   // Allocate an attribute
   TokenAttrib *newAttrib = malloc(sizeof(TokenAttrib));
@@ -89,12 +107,14 @@ bool tokenAddAttrib(Token *token, char *data){
  *   }
  */
 
-
-
-
   return true;
 }
 
+/*
+ * @brief Recursively free all memory allocated for attributes
+ *
+ * @param attrib: first attribute. All 'nextAttributes' will be freed too
+ */
 void tokenAttribDestroy(TokenAttrib *attrib){
   if(attrib->nextAttrib){
     tokenAttribDestroy(attrib->nextAttrib);
@@ -103,6 +123,11 @@ void tokenAttribDestroy(TokenAttrib *attrib){
   free(attrib);
 }
 
+/**
+ * @brief Free all memory allocated for attributes and the token
+ *
+ * @param token to destroy
+ */
 void tokenDestroy(Token *token){
   if(token){
     if(token->attrib){
