@@ -12,9 +12,9 @@ int main(int argc, char *argv[]){
     printf("returned %d while processing token:\n", ret);
     if(token){
       printf("token type: %d\n", token->type);
-      if(token->attribute){
-        if(token->attribute->data){
-          printf("attribute data: %s\n", token->attribute->data);
+      if(token->attrib){
+        if(token->attrib->data){
+          printf("attribute data: %s\n", token->attrib->data);
         }
       }
     }else{

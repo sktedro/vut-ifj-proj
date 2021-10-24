@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 
 // Enumeration of the token types
@@ -61,24 +60,24 @@ Token *tokenInit(int type){
  * @param token: token to which the new attribute should be added
  * @param data: data which are to be written to the token
  *
- * @return true if successful
+ * @return 0 if successful
  */
-bool tokenAddAttrib(Token *token, char *data){
+int tokenAddAttrib(Token *token, char *data){
   if(!token){
-    return false;
+    return 1;
   }
 
   // Allocate an attribute
   TokenAttrib *newAttrib = malloc(sizeof(TokenAttrib));
   if(!newAttrib){
-    return false;
+    return 1;
   }
 
   //TODO
   // Allocate space for data
   newAttrib->data = malloc(strlen(data) + 1);
   if(!newAttrib->data){
-    return false;
+    return 1;
   }
   newAttrib->nextAttrib = NULL;
 
@@ -107,7 +106,7 @@ bool tokenAddAttrib(Token *token, char *data){
  *   }
  */
 
-  return true;
+  return 0;
 }
 
 /*

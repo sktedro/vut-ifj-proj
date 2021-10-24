@@ -1,15 +1,9 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include "buffer.h"
 #include "token.h"
 #include "misc.h"
 
 // TODO:
 // return what we have when we reach the last input character 
-
-//   ♥    //
-#define vypluj return
 
 // Enumeration of states of the finite state machine
 // The commented out states are not used, as instead of setting them as the
@@ -42,7 +36,7 @@ enum FSMEnum{
   s_relOpSimple,
   s_assignment,
   // s_arithmOp,
-  // s_strOp,
+  s_strOp,
   // s_relOp,
 
     // Parentheses
@@ -68,7 +62,9 @@ char charMem = '\0';
  */
 bool restoreChar(Buffer *buf, char *c){
   if(charMem != '\0'){
-    bufAppend(buf, charMem);
+    if(bufAppend(buf, charMem)){
+      return err(99);
+    }
     *c = charMem;
     charMem = '\0';
     vypluj true;
@@ -143,7 +139,7 @@ int returnToken(Token **token, int type, Buffer *buf){
     bufDestroy(buf);
     vypluj err(99);
   }
-  if(!tokenAddAttribute(*token, buf->data)){
+  if(tokenAddAttrib(*token, buf->data)){
     bufDestroy(buf);
     vypluj err(99);
   }
@@ -161,6 +157,9 @@ int returnToken(Token **token, int type, Buffer *buf){
 int scanner(Token **token) {
   // Token data (characters composing it) will be written here
   Buffer *buf = bufInit();
+  if(!buf){
+    return err(99);
+  }
 
   // Starting state of the finite state machine is s_start
   int state = s_start;
@@ -180,7 +179,9 @@ int scanner(Token **token) {
     if(!restoreChar(buf, &c)){
       c = fgetc(stdin);
       if(c != EOF){
-        bufAppend(buf, c);
+        if(bufAppend(buf, c)){
+          return err(99);
+        }
       }else{
         lastChar = true;
         /*
@@ -342,7 +343,9 @@ int scanner(Token **token) {
           if(c <= 31){ //TODO nepovolene znaky???
             vypluj err(1);
           }
-          bufAppend(buf, c);
+          if(bufAppend(buf, c)){
+            return err(99);
+          }
         }else if(c <= 31){ //TODO nepovolene znaky??
           vypluj err(1);
         }

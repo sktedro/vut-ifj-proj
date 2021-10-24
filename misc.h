@@ -1,3 +1,10 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+//   ♥    //
+#define vypluj return
+
 /**
  * @brief Writes an error message to stdout and returns back the error code
  *
