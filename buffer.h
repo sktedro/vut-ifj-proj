@@ -6,6 +6,7 @@ typedef struct{
   int size;
 } Buffer;
 
+// TODO exit
 
 // Allocate a buffer
 Buffer *bufInit(){
