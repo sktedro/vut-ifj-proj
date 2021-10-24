@@ -3,14 +3,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define ATTRIBUTEINITLEN 16
-
 enum TokenEnum{
   t_idOrKeyword, // one token for both identificator and a keyword??
-  t_integer,
-  t_number,
-  t_sciNumber,
-  t_string,
+  t_int,
+  t_num,
+  t_sciNum,
+  t_str,
   t_rightParen,
   t_leftParen,
   t_arithmOp,
@@ -21,16 +19,17 @@ enum TokenEnum{
 
 // Do we need more attributes in one token? If not, this structure is redundant
 // and in Token struct, there should be just char data instead of
-// TokenAttribute
-typedef struct TokenAttribute TokenAttribute;
-struct TokenAttribute{
+// TokenAttrib
+typedef struct TokenAttrib TokenAttrib;
+
+struct TokenAttrib{
   char *data;
-  TokenAttribute *nextAttribute;
+  TokenAttrib *nextAttrib;
 };
 
 typedef struct{
   int type;
-  TokenAttribute *attribute;
+  TokenAttrib *attrib;
 } Token;
 
 
@@ -40,11 +39,11 @@ Token *tokenInit(int type){
     return NULL;
   }
   token->type = type;
-  token->attribute = NULL;
+  token->attrib = NULL;
   return token;
 }
 
-bool tokenAddAttribute(Token *token, char *data){
+bool tokenAddAttrib(Token *token, char *data){
   if(!token){
     return false;
   }
@@ -52,38 +51,39 @@ bool tokenAddAttribute(Token *token, char *data){
   
 
   // Allocate an attribute
-  TokenAttribute *newAttribute = malloc(sizeof(TokenAttribute));
-  if(!newAttribute){
+  TokenAttrib *newAttrib = malloc(sizeof(TokenAttrib));
+  if(!newAttrib){
     return false;
   }
 
-  //TODO!
+  //TODO
   // Allocate space for data
-  newAttribute->data = malloc(strlen(data) + 1);
-  if(!newAttribute->data){
+  newAttrib->data = malloc(strlen(data) + 1);
+  if(!newAttrib->data){
     return false;
   }
-  newAttribute->nextAttribute = NULL;
+  newAttrib->nextAttrib = NULL;
 
   // .. and write the data to the allocated space
-  memcpy(newAttribute->data, data, strlen(data) + 1);
-  // Or just copy the *data pointer?
-  // attribute->data = data;
+  memcpy(newAttrib->data, data, strlen(data) + 1);
 
-  token->attribute = newAttribute;
-/*   // TODO!!!
+  token->attrib = newAttrib;
+
+/*   // TODO
+ *   // How to write to the nextAttrib??
+ *   // Might not be needed though, so it's ok for now
  * 
- *   // Attribute to which we will be writing the data
- *   TokenAttribute *attribute = token->attribute;
+ *   // Attrib to which we will be writing the data
+ *   TokenAttrib *attrib = token->attrib;
  * 
- *   // If there is already at least one attribute, add this one at the end
- *   if(attribute){
- *     while(attribute->nextAttribute != NULL){
- *       attribute = attribute->nextAttribute;
+ *   // If there is already at least one attrib, add this one at the end
+ *   if(attrib){
+ *     while(attrib->nextAttrib != NULL){
+ *       attrib = attrib->nextAttrib;
  *     }
- *     // attribute->nextAttribute = malloc(sizeof(TokenAttribute));
- *     attribute->nextAttribute = newAttribute;
- *     if(!attribute){
+ *     // attrib->nextAttrib = malloc(sizeof(TokenAttrib));
+ *     attrib->nextAttrib = newAttrib;
+ *     if(!attrib){
  *       return false;
  *     }
  *   }
@@ -95,18 +95,18 @@ bool tokenAddAttribute(Token *token, char *data){
   return true;
 }
 
-void tokenAttributeDestroy(TokenAttribute *attribute){
-  if(attribute->nextAttribute){
-    tokenAttributeDestroy(attribute->nextAttribute);
+void tokenAttribDestroy(TokenAttrib *attrib){
+  if(attrib->nextAttrib){
+    tokenAttribDestroy(attrib->nextAttrib);
   }
-  free(attribute->data);
-  free(attribute);
+  free(attrib->data);
+  free(attrib);
 }
 
 void tokenDestroy(Token *token){
   if(token){
-    if(token->attribute){
-      tokenAttributeDestroy(token->attribute);
+    if(token->attrib){
+      tokenAttribDestroy(token->attrib);
     }
     free(token);
   }
