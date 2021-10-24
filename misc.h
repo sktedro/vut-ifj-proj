@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+
+#ifndef misc
+#define misc
 
 //   ♥    //
 #define vypluj return
@@ -21,3 +25,4 @@ int err(int errCode){
   vypluj errCode;
 }
 
+#endif

@@ -1,6 +1,6 @@
+#include "misc.h"
 #include "buffer.h"
 #include "token.h"
-#include "misc.h"
 
 // TODO:
 // return what we have when we reach the last input character 

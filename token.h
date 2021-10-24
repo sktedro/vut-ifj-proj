@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "misc.h"
 
 // Enumeration of the token types
 enum TokenTypeEnum{

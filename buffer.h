@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include "misc.h"
 
 // Initial buffer data length (space allocated)
 #define BUFINITLEN 16
