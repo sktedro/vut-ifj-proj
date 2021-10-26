@@ -1,8 +1,28 @@
-//
-// Created by alex on 26. 10. 2021.
-//
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
-#ifndef VUT_IFJ_PROJ_MISC_H
-#define VUT_IFJ_PROJ_MISC_H
+#ifndef misc
+#define misc
 
-#endif //VUT_IFJ_PROJ_MISC_H
+//   ♥    //
+#define vypluj return
+
+/**
+ * @brief Writes an error message to stdout and returns back the error code
+ *
+ * @param errCode
+ *
+ * @return errCode
+ */
+int err(int errCode){
+    if(errCode == 1){
+        fprintf(stderr, "Lexical analysis error.\n"); //TODO
+    }else if(errCode == 99){
+        fprintf(stderr, "Internal error.\n"); //TODO
+    }
+    vypluj errCode;
+}
+
+#endif
