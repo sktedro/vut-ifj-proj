@@ -12,9 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="153fca42-4470-4088-9a64-8e5362bd3719" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scanner.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/buffer.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/token" beforeDir="false" afterPath="$PROJECT_DIR$/tests/token/basic/b1" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +61,11 @@
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests/token" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
@@ -90,7 +95,7 @@
       <workItem from="1634814411725" duration="1320000" />
       <workItem from="1635063935725" duration="15750000" />
       <workItem from="1635089035922" duration="1851000" />
-      <workItem from="1635251759645" duration="1505000" />
+      <workItem from="1635251759645" duration="3706000" />
     </task>
     <servers />
   </component>
