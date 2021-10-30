@@ -11,7 +11,7 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 /**
- *
+ * Node structure for the binary search tree.
  */
 typedef struct node {
     Buffer *key; // id string
@@ -20,41 +20,36 @@ typedef struct node {
     struct node *rightChild;
 } Node;
 
-
-
+/**
+ * Selected node to work with.
+ */
 Node *activeNode = NULL;
 
-
-Buffer *copyStringToBuffer(char *orig) { //TODO not tested
-    Buffer *buffer = bufInit();
-
-    for (unsigned int i = 0; i < strlen(orig); i++) {
-        bufAppend(buffer,orig[i]);
-    }
-
-    vypluj buffer;
-}
-
 /**
+ * Creates a new node with the given key and data, allocates memory.
  *
+ * @param data data of the new node
+ * @param key key of the new node
+ * @return
  */
-int newNode(Node **node, char *data, char *key) {
-    *node = (Node *) malloc(sizeof(Node));
-    if(*node == NULL) {
+Node *newNode(char *data, char *key) {
+    Node *node = (Node *) malloc(sizeof(Node));
+    if(node == NULL) {
         fprintf(stderr, "Error allocating memory\n");
         exit(1);
     }
-    (*node)->rightChild = NULL;
-    (*node)->leftChild = NULL;
-    (*node)->data = copyStringToBuffer(data);
-    (*node)->key = copyStringToBuffer(key);
-    vypluj 0;
+    node->rightChild = NULL;
+    node->leftChild = NULL;
+    bufAppendString(data, &(node->data));
+    bufAppendString(key, &(node->key));
+    vypluj node;
 }
 
 /**
- *
+ * Destroys the whole tree and frees all used memory. If the pointer is null nothing happens.
+ * @param root a pointer to a tree
  */
-void treeDestroy(Node *root) { // TODO not tested
+void treeDestroy(Node *root) {
     if(root == NULL) {
         vypluj;
     }
@@ -67,27 +62,14 @@ void treeDestroy(Node *root) { // TODO not tested
     vypluj;
 }
 
-/** probably not needed
- *
- */
-int treeHeight(Node *root) { // TODO not tested
-    int leftHeight;
-    int rightHeight;
-    if(root == NULL) {
-        vypluj 0;
-    }
-
-    leftHeight = treeHeight(root->leftChild);
-    rightHeight = treeHeight(root->rightChild);
-    vypluj MAX(leftHeight, rightHeight);
-}
-
 /**
- * A very ugly print, WORKS WITH SATA AS INT
- * Prints from tree to leaves, from left to right
+ * A very ugly print, WORKS WITH DATA AS INT
+ * Prints from tree to leaves, from left to right (preorder?)
  * TODO pretty printing
+ *
+ * @param root root to the tree to be printed
  */
-void treePrint(Node *root) { // seems to work
+void treePrint(Node *root) {
     if(root == NULL) {
         fprintf(stderr, "NULL\n");
         vypluj;
@@ -98,26 +80,15 @@ void treePrint(Node *root) { // seems to work
     vypluj;
 }
 
-/** probably not needed
- *
- *
+/**
+ * Creates and inserts a new noe to the tree, placing it according to the key value.
+ * @param data data of the new node
+ * @param key key of the new node
+ * @param root pointer to an initialised tree
  */
-int areTreesEqual(Node *tree, Node *alsoATree) { // TODO not tested
-    if ((tree == NULL)||(alsoATree == NULL)){
-        return tree == alsoATree;
-    }
-    else {
-        return (areTreesEqual(tree->leftChild,alsoATree->leftChild) &&
-        areTreesEqual(tree->rightChild,alsoATree->rightChild)
-         && (tree->data == alsoATree->data)); // TODO here change the function to compare tokens
-    }
-}
-
-
-
 void treeInsert(char *data, char *key, Node **root) {
     if(*root == NULL) {
-        newNode(root, data, key);
+        *root = newNode(data, key);
         vypluj;
     }
 
@@ -128,54 +99,62 @@ void treeInsert(char *data, char *key, Node **root) {
             treeInsert(data, key, &((*root)->rightChild));
         } else {
             free((*root)->data);
-            (*root)->data = copyStringToBuffer(data);
+            bufAppendString(data, &((*root)->data));
         }
     }
 }
 
-
-
-int treeDelete(Node *root, char *key) {
-
+/**
+ * Deletes a node with the given key, frees the memory. If the root is null nothing happens.
+ * @param root
+ * @param key
+ * @return
+ */
+void treeDelete(Node **root, char *key) {
     if(root == NULL){
-        return root;
-    }else{
-        if(strcmp(key, (*root)->key->data) < 0) {
-            //rootPtr->lPtr ← BVSDelete(rootPtr->lPtr,k)
-            //return rootPtr
-            treeDelete(root->leftChild, key);
-            return root;
-        } else if(strcmp(key, (*root)->key->data) > 0) {
-            //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,k)
-            //return rootPtr
-            treeDelete(root->rightChild, key);
-            return root;
-        } else if(root->rightChild == NULL && root->leftChild == NULL) {
-            free(*root);
-            return root->rightChild; //je jedno či dáme return rch alebo lch lebo oba sú NULL
-        }else if(root->rightChild != NULL && root->leftChild != NULL) {
+        vypluj;
+    }
 
+    if(strcmp(key, (*root)->key->data) < 0) {
+        //rootPtr->lPtr ← BVSDelete(rootPtr->lPtr,k)
+        //return rootPtr
+        treeDelete(&((*root)->leftChild), key);
+        vypluj;
+    } else if(strcmp(key, (*root)->key->data) > 0) {
+        //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,k)
+        //return rootPtr
+        treeDelete(&((*root)->rightChild), key);
+        vypluj;
+    } else if((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
+        free(*root);
+        *root = NULL;
+        vypluj;
+    }else if((*root)->rightChild != NULL && (*root)->leftChild != NULL) { //TODO
             //TNode *min ← BVSMin(rootPtr->rPtr) // najdi minimum
-            //rootPtr->key ←  min->key // nahraď
-            //rootPtr->data ← min->data
-            //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,min->key
+        TreeMin(root, key);
+        //rootPtr->key ←  min->key // nahraď
+        //rootPtr->data ← min->data
+        //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,min->key
 
             //volanie funk
 
-
-
-            return root;
         }
-    }
-
-    vypluj 0;
 }
+
 
 Bufferr* TreeMin(Node *root, char *key) {
 
+    //if rootPtr->lPtr = NULL
+    //then // další levý už neexistuje
+    //return rootPtr
+    //else // pokračujeme vlevo
+    //return BVSMin(rootPtr->lPtr)
+    
+    if(root->leftChild == NULL){
+        return  root; //dalsi levi uz neexistuje
+    }
 
-
-
+    TreeMin(root, key);
 };
 
 
