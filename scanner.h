@@ -35,6 +35,7 @@ enum FSMEnum{
   s_tilde,
   s_relOpSimple,
   s_assignment,
+  s_colon,   // :
   // s_arithmOp,
   s_strOp,
   // s_relOp,
@@ -111,7 +112,7 @@ bool isLetter(char c){
 bool isOperator(char c){
   vypluj (c == '.' || c == '-' || c == '/' || c == '~' || // . - / ~
           c == '<' || c == '>' || c == '=' || c == '#' || // < > = #
-         (c >= '(' && c <= '+')); // ( ) * +
+         (c >= '(' && c <= '+') || c == ':'); // ( ) * +
 }
 
 
@@ -185,9 +186,10 @@ int scanner(Token **token) {
       }else{
         lastChar = true;
         /*
-         * vyplut token???
+         * vyplut token??? TODO
          */
       }
+
     }
 
     // Main switch to change the program flow based on the actual FSM state
@@ -215,6 +217,11 @@ int scanner(Token **token) {
         }else if(c == '+' || c == '-' || c == '*'){
           // state = s_arithmOp;
           return returnToken(token, t_arithmOp, buf);
+
+        // :
+        }else if(c == ':'){
+          // state = s_colon;
+          return returnToken(token, t_assignment, buf);
 
         // /
         }else if(c == '/'){
@@ -247,7 +254,7 @@ int scanner(Token **token) {
 
         // )
         }else if(c == ')'){
-          // state = s_rightParen;
+          // state = s_rigcase s_colon:htParen;
           return returnToken(token, t_rightParen, buf);
 
         // space, \n, \t
@@ -358,11 +365,12 @@ int scanner(Token **token) {
             state = s_num;
           }else if(c == 'e' || c == 'E'){
             state = s_scientific;
-          }else if(isWhitespace(c)){
-            bufPop(buf);
-            return returnToken(token, t_int, buf);
-          }else{
-            vypluj err(1);
+          }else {
+              if (!isWhitespace(c)) {
+                  charMem = c;
+              }
+              bufPop(buf);
+              return returnToken(token, t_int, buf);
           }
         }
         break;
@@ -373,11 +381,12 @@ int scanner(Token **token) {
         if(!isNum(c)){
           if(c == 'e' || c == 'E'){
             state = s_scientific;
-          }else if(isWhitespace(c)){
+          }else {
+              if (!isWhitespace(c)) {
+                  charMem = c;
+              }
             bufPop(buf);
             return returnToken(token, t_num, buf);
-          }else{
-            vypluj err(1);
           }
         }
         break;
@@ -409,13 +418,9 @@ int scanner(Token **token) {
       // returned
       case s_sciNum:
         if(!isNum(c)){
-          if(isWhitespace(c) || isOperator(c)){
             charMem = c;
             bufPop(buf);
             return returnToken(token, t_sciNum, buf);
-          }else{
-            vypluj err(1);
-          }
         }
         break;
 
@@ -424,7 +429,7 @@ int scanner(Token **token) {
         if(!(isLetter(c) || isNum(c) || c == '_')){
           charMem = c;
           bufPop(buf);
-          return returnToken(token, t_idOrKeyword, buf);
+          vypluj returnToken(token, t_idOrKeyword, buf);
         }
         break;
 
