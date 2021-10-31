@@ -59,3 +59,18 @@ void bufDestroy(Buffer *buf){
   free(buf);
   buf = NULL;
 }
+
+/**
+ * Appends a string to an existing buffer or initialises a new buffer if the given pointer is null.
+ * @param orig a string to append
+ * @param buffer a pointer to a buffer
+ */
+void bufAppendString(char *orig, Buffer **buffer) {
+    if(*buffer == NULL) {
+        *buffer = bufInit();
+    }
+
+    for (unsigned int i = 0; i < strlen(orig); i++) {
+        bufAppend(*buffer,orig[i]);
+    }
+}

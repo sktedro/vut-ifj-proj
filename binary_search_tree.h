@@ -59,7 +59,6 @@ void treeDestroy(Node *root) {
     bufDestroy(root->key);
     free(root);
     root = NULL;
-    vypluj;
 }
 
 /**
@@ -105,57 +104,81 @@ void treeInsert(char *data, char *key, Node **root) {
 }
 
 /**
+ * Replaces the target node with the rightmost node from the given subtree.
+ * @param target node to replace
+ * @param tree meh
+ */
+void replaceByRightmost(Node *target, Node **tree) {
+    if((*tree)->rightChild != NULL) {
+        replaceByRightmost(target, &(*tree)->rightChild);
+    }
+    else {
+        Node *tmp;
+        target->key = (*tree)->key;
+        target->data = (*tree)->data;
+        tmp = (*tree)->leftChild;
+        free(*tree);
+        *tree = tmp;
+    }
+}
+
+/**
  * Deletes a node with the given key, frees the memory. If the root is null nothing happens.
  * @param root
  * @param key
  * @return
  */
 void treeDelete(Node **root, char *key) {
+    Node *tmp = NULL;
     if(root == NULL){
         vypluj;
     }
-
+    if(((*root)->rightChild == NULL && (*root)->leftChild == NULL) && strcmp(key, (*root)->key->data) != 0) {
+        vypluj;
+    }
     if(strcmp(key, (*root)->key->data) < 0) {
-        //rootPtr->lPtr ← BVSDelete(rootPtr->lPtr,k)
-        //return rootPtr
         treeDelete(&((*root)->leftChild), key);
         vypluj;
-    } else if(strcmp(key, (*root)->key->data) > 0) {
-        //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,k)
-        //return rootPtr
+    }
+    if(strcmp(key, (*root)->key->data) > 0) {
         treeDelete(&((*root)->rightChild), key);
         vypluj;
-    } else if((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
+    }
+
+    if((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
         free(*root);
         *root = NULL;
         vypluj;
-    }else if((*root)->rightChild != NULL && (*root)->leftChild != NULL) { //TODO
-            //TNode *min ← BVSMin(rootPtr->rPtr) // najdi minimum
-        TreeMin(root, key);
-        //rootPtr->key ←  min->key // nahraď
-        //rootPtr->data ← min->data
-        //rootPtr->rPtr ← BVSDelete(rootPtr->rPtr,min->key
-
-            //volanie funk
-
-        }
+    }
+    else if((*root)->rightChild == NULL) {
+        tmp = (*root)->leftChild;
+        free(*root);
+        *root = tmp;
+    }
+    else if((*root)->leftChild == NULL) {
+        tmp = (*root)->rightChild;
+        free(*root);
+        *root = tmp;
+    }
+    else {
+        replaceByRightmost(*root, &(*root)->leftChild);
+    }
 }
 
-
-Bufferr* TreeMin(Node *root, char *key) {
-
-    //if rootPtr->lPtr = NULL
-    //then // další levý už neexistuje
-    //return rootPtr
-    //else // pokračujeme vlevo
-    //return BVSMin(rootPtr->lPtr)
-    
-    if(root->leftChild == NULL){
-        return  root; //dalsi levi uz neexistuje
+int treeGetData(Node *root, char *key, Buffer *data) {
+    if(root == NULL) {
+        vypluj -1;
     }
-
-    TreeMin(root, key);
-};
-
+    if(strcmp(key, root->key->data) < 0) {
+        vypluj treeGetData(root->leftChild, key, data);
+    }
+    else if(strcmp(key, root->key->data) > 0) {
+        vypluj treeGetData(root->rightChild, key, data);
+    }
+    else {
+        bufAppendString(root->data->data, &data);
+        vypluj 0;
+    }
+}
 
 /* end of file binary_tree.h */
