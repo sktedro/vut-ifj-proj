@@ -7,8 +7,6 @@
 #include "buffer.h"
 
 #define vypluj return
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 /**
  * Node structure for the binary search tree.
@@ -20,17 +18,13 @@ typedef struct node {
     struct node *rightChild;
 } Node;
 
-/**
- * Selected node to work with.
- */
-Node *activeNode = NULL;
 
 /**
  * Creates a new node with the given key and data, allocates memory.
  *
  * @param data data of the new node
  * @param key key of the new node
- * @return
+ * @return ptr to the created node
  */
 Node *newNode(char *data, char *key) {
     Node *node = (Node *) malloc(sizeof(Node));
@@ -45,8 +39,10 @@ Node *newNode(char *data, char *key) {
     vypluj node;
 }
 
+
 /**
- * Destroys the whole tree and frees all used memory. If the pointer is null nothing happens.
+ * Destroys the whole tree and frees all used memory including buffers.
+ * If the pointer is null nothing happens.
  * @param root a pointer to a tree
  */
 void treeDestroy(Node *root) {
@@ -60,6 +56,7 @@ void treeDestroy(Node *root) {
     free(root);
     root = NULL;
 }
+
 
 /**
  * A very ugly print, WORKS WITH DATA AS INT
@@ -76,65 +73,59 @@ void treePrint(Node *root) {
     printf("%s\n", root->data->data);
     treePrint(root->leftChild);
     treePrint(root->rightChild);
-    vypluj;
 }
 
+
 /**
- * Creates and inserts a new noe to the tree, placing it according to the key value.
+ * Creates and inserts a new node to the tree, placing it accordingly to the key value.
  * @param data data of the new node
  * @param key key of the new node
- * @param root pointer to an initialised tree
+ * @param root an initialised tree
  */
 void treeInsert(char *data, char *key, Node **root) {
     if(*root == NULL) {
         *root = newNode(data, key);
         vypluj;
     }
-
-    else {
-        if(strcmp(key, (*root)->key->data) < 0) {
-            treeInsert(data, key, &((*root)->leftChild));
-        } else if(strcmp(key, (*root)->key->data) > 0) {
-            treeInsert(data, key, &((*root)->rightChild));
-        } else {
-            free((*root)->data);
-            bufAppendString(data, &((*root)->data));
-        }
+    if(strcmp(key, (*root)->key->data) < 0) {
+        treeInsert(data, key, &((*root)->leftChild));
+    } else if(strcmp(key, (*root)->key->data) > 0) {
+        treeInsert(data, key, &((*root)->rightChild));
+    } else {
+        free((*root)->data);
+        bufAppendString(data, &((*root)->data));
     }
 }
+
 
 /**
  * Replaces the target node with the rightmost node from the given subtree.
  * @param target node to replace
- * @param tree meh
+ * @param tree an initialised tree with at least one right child
  */
 void replaceByRightmost(Node *target, Node **tree) {
     if((*tree)->rightChild != NULL) {
         replaceByRightmost(target, &(*tree)->rightChild);
+        vypluj;
     }
-    else {
-        Node *tmp;
-        target->key = (*tree)->key;
-        target->data = (*tree)->data;
-        tmp = (*tree)->leftChild;
-        free(*tree);
-        *tree = tmp;
-    }
+    Node *tmp;
+    target->key = (*tree)->key;
+    target->data = (*tree)->data;
+    tmp = (*tree)->leftChild;
+    free(*tree);
+    *tree = tmp;
 }
+
 
 /**
  * Deletes a node with the given key, frees the memory. If the root is null nothing happens.
- * @param root
- * @param key
- * @return
+ * @param root an initialised tree
+ * @param key this is the key we are looking for
  */
 void treeDelete(Node **root, char *key) {
     Node *tmp = NULL;
-    if(root == NULL){
-        vypluj;
-    }
-    if(((*root)->rightChild == NULL && (*root)->leftChild == NULL) && strcmp(key, (*root)->key->data) != 0) {
-        vypluj;
+    if(*root == NULL) {
+        vypluj; // key not found
     }
     if(strcmp(key, (*root)->key->data) < 0) {
         treeDelete(&((*root)->leftChild), key);
@@ -145,40 +136,43 @@ void treeDelete(Node **root, char *key) {
         vypluj;
     }
 
+    // key found
     if((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
         free(*root);
         *root = NULL;
         vypluj;
     }
-    else if((*root)->rightChild == NULL) {
-        tmp = (*root)->leftChild;
-        free(*root);
-        *root = tmp;
-    }
-    else if((*root)->leftChild == NULL) {
+    if((*root)->leftChild == NULL) {
         tmp = (*root)->rightChild;
         free(*root);
         *root = tmp;
+        vypluj;
     }
-    else {
-        replaceByRightmost(*root, &(*root)->leftChild);
-    }
+    replaceByRightmost(*root, &(*root)->leftChild);
 }
 
+
+/**
+ * Finds a node and saves its data.
+ * @param root a tree
+ * @param key this is the key we are looking for
+ * @param data where the data will be saved (buffer does not have to be initialised)
+ * @return
+ */
 int treeGetData(Node *root, char *key, Buffer *data) {
     if(root == NULL) {
-        vypluj -1;
+        vypluj -1; // key not found
     }
     if(strcmp(key, root->key->data) < 0) {
         vypluj treeGetData(root->leftChild, key, data);
     }
-    else if(strcmp(key, root->key->data) > 0) {
+    if(strcmp(key, root->key->data) > 0) {
         vypluj treeGetData(root->rightChild, key, data);
     }
-    else {
-        bufAppendString(root->data->data, &data);
-        vypluj 0;
-    }
+
+    // key found
+    bufAppendString(root->data->data, &data);
+    vypluj 0;
 }
 
-/* end of file binary_tree.h */
+/* end of file binary_search_tree.h */
