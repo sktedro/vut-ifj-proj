@@ -1,0 +1,7 @@
+Lexical analysis error.
+Returned <0> and token: 	type=<0>	attribute=<code>
+Returned <0> and token: 	type=<0>	attribute=<--multi>
+Returned <0> and token: 	type=<0>	attribute=<line>
+Returned <0> and token: 	type=<0>	attribute=<comment>
+a
+Returned <1> and token: 	NULL
