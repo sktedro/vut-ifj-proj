@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 # COLORS
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+BLUE=`tput setaf 4`
+NC=`tput sgr0` # No color
+# RED='\033[0;31m'
+# GREEN='\033[0;32m'
+# BLUE='\033[0;34m'
+# NC='\033[0m' # No color
 
 help() {
   echo "Usage: test [-h|--help]"
@@ -16,35 +20,12 @@ help() {
   echo "COMMAND"
   echo "  -a ALL        all tests to selected target"
   echo
-  # echo "  -b BASIC      just testing with basic tests selected target"
-  # echo
-  # echo "  -e EXPRESSION testing how good scanner will work with EXPRESSION"
-  # echo "                THIS COMMAND IS AVAILABLE JUST FOR SCANNER AS TARGET"
-  # echo
-  # echo "  -c COMMENT    testing single-line and multi-line comments"
-  # echo "                THIS COMMAND IS AVAILABLE JUST FOR SCANNER AS TARGET"
-  # echo
-  # echo "  -s STRING     testing how scanner deals with strings"
-  # echo "                THIS COMMAND IS AVAILABLE JUST FOR SCANNER AS TARGET"
-  # echo
-  # echo "  -cd CODE      testing with IFJ21 teal code"
-  # echo
 }
 
 all() {
   testTarget=scanner
   runTests
 }
-
-# Basic() {
-  # echo "$SCANNER"
-  # echo "ALL"
-# }
-
-# Code() {
-  # echo "CODE"
-# }
-
 
 runTests() {
   # This is the test case name and at the same time, folder in which the tests are
@@ -111,39 +92,29 @@ runTests() {
 
 while [ "$#" -gt 0 ]; do
   case $1 in
+
     -h | --help)
       help
       exit 0
       ;;
+
     -a | all | ALL)
       all
       exit 0
       ;;
-    SCANNER | scanner)
-      testTarget=scanner
-      runTests
+
+    *)
+      # Convert to lowercase
+      testTarget=$(echo "$1" | tr A-Z a-z)
+
+      # If there is no directory containing tests for that target
+      if [ ! -d ./"$testTarget" ]; then
+        echo ${RED}Tests for target \'"$testTarget"\' do not exist!
+      else
+        runTests
+      fi
       shift
       ;;
-    # -b | basic | BASIC)
-      # Basic
-      # exit 0
-      # ;;
-    # -c | comment | COMMENT)
-      # EXEC="${EXEC} ${1}"
-      # echo "$EXEC"
-      # shift
-      # ;;
-    # -s | string | STRING)
-      # EXEC="${EXEC} ${1}"
-      # echo "$EXEC"
-      # shift
-      # ;;
-    # -cd | code | CODE)
-      # Code
-      # shift
-      # ;;
-    # *)
-      # exit 0
-      # ;;
+
   esac
 done
