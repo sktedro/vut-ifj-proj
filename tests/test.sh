@@ -50,6 +50,13 @@ runTests() {
 
 
   echo ${BLUE}========================================${NC}
+
+  # Check if a test case exists
+  if [ ! -f "$inputsFolder"/* ]; then
+    echo ${RED}There are no inputs for this test target
+    exit 1
+  fi
+
   # Run tests for each file in $inputsFolder
   for input in "$inputsFolder"/*; do
 
@@ -59,13 +66,26 @@ runTests() {
     # Check if a reference file to the input exists
     if [ ! -f "$referenceFolder"/"$inputName" ]; then
       echo ${RED}Reference output to test "$inputName" for "$testTarget" does not exist!
-      exit 1
+      echo Would you like to run the test anyway? [y/n]${NC}
+      read run
+      if [ "$run" != "y" ] && [ "$run" != "Y" ]; then
+        echo ${RED}Tests cancelled
+        exit 1
+      else
+        run=y
+      fi
     fi
 
     # Run the test (save stdout AND STDERR to the output folder)
     echo ${BLUE}Testing "$inputName" input ${NC}
     "$testFile" < $input > "$outputsFolder"/"$inputName" 2>&1
     testReturnCode="$?"
+
+    # If there was no reference output, stop here
+    if [ "$run" = "y" ]; then
+      echo ${GREEN}Test output was written to outputs/ folder ${NC}
+      return
+    fi
 
     # Compare the generated output with the reference output
     output=$(diff -s "$outputsFolder"/"$inputName" "$referenceFolder"/"$inputName")
