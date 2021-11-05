@@ -12,7 +12,6 @@ typedef struct{
 
 // TODO exit
 
-// Allocate a buffer
 /**
  * @brief Allocate a new buffer
  *

@@ -1,3 +1,0 @@
-/home/jija/Desktop/ifj_project/vut-ifj-proj/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/jija/Desktop/ifj_project/vut-ifj-proj/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/jija/Desktop/ifj_project/vut-ifj-proj/cmake-build-debug/CMakeFiles/vut_ifj_proj.dir

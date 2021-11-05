@@ -1,1 +1,0 @@
-/usr/bin/cc -g CMakeFiles/vut_ifj_proj.dir/binary_tree_TESTS.c.o CMakeFiles/vut_ifj_proj.dir/scanner.c.o -o vut_ifj_proj 

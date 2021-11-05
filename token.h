@@ -84,25 +84,25 @@ int tokenAddAttrib(Token *token, char *data){
 
   token->attrib = newAttrib;
 
-/*   // TODO
- *   // How to write to the nextAttrib??
- *   // Might not be needed though, so it's ok for now
- * 
- *   // Attrib to which we will be writing the data
- *   TokenAttrib *attrib = token->attrib;
- * 
- *   // If there is already at least one attrib, add this one at the end
- *   if(attrib){
- *     while(attrib->nextAttrib != NULL){
- *       attrib = attrib->nextAttrib;
- *     }
- *     // attrib->nextAttrib = malloc(sizeof(TokenAttrib));
- *     attrib->nextAttrib = newAttrib;
- *     if(!attrib){
- *       return false;
- *     }
- *   }
- */
+  /*   // TODO
+   *   // How to write to the nextAttrib??
+   *   // Might not be needed though, so it's ok for now
+   *
+   *   // Attrib to which we will be writing the data
+   *   TokenAttrib *attrib = token->attrib;
+   *
+   *   // If there is already at least one attrib, add this one at the end
+   *   if(attrib){
+   *     while(attrib->nextAttrib != NULL){
+   *       attrib = attrib->nextAttrib;
+   *     }
+   *     // attrib->nextAttrib = malloc(sizeof(TokenAttrib));
+   *     attrib->nextAttrib = newAttrib;
+   *     if(!attrib){
+   *       return false;
+   *     }
+   *   }
+   */
 
   return 0;
 }

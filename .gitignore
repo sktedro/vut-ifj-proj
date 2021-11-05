@@ -2,3 +2,5 @@
 build/
 logs/
 .idea/
+tests/*/outputs/
+cmake-build-debug/
