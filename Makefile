@@ -5,7 +5,7 @@ CFLAGS=-Wall -Wextra -g
 MAIN=main.c
 LIBS=scanner.h token.h buffer.h
 
-TESTSCRIPT=./tests/test.sh
+TESTSCRIPT=./test.sh
 
 OUTPUTDIR=./build
 
@@ -22,10 +22,13 @@ run: all
 	$(OUTPUTDIR)/main
 
 
-# Run all tests (for individual tests please run test.sh individually..)
+# Run tests for a target given by an argument (eg. make test target=scanner)
+# TODO
 .PHONY: test
 test:
-	$(TESTSCRIPT) -a
+	@echo To run tests from the base directory, run eg. \'make test target=scanner\'
+	@cd tests && \
+	$(TESTSCRIPT) $(target)
 
 
 clean:

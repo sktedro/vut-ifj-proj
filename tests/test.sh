@@ -12,20 +12,26 @@ NC=`tput sgr0` # No color
 
 help() {
   echo "Usage: test [-h|--help]"
-  echo "       test [TARGET] [COMMAND]"
+  # echo "       test [TARGET] [COMMAND]"
+  echo "       test [TARGETS]"
+  echo
+  echo "If you are executing the tests using make, please follow this example:"
+  echo "  make test target=[TARGET]"
   echo
   echo "TARGET"
-  echo "  SCANNER       scanner test"
+  echo "  SCANNER       scanner tests"
+  echo "  TOKEN         token tests"
+  echo "  ..."
   echo
-  echo "COMMAND"
-  echo "  -a ALL        all tests to selected target"
-  echo
+  # echo "COMMAND"
+  # echo "  -a ALL        all tests to selected target"
+  # echo
 }
 
-all() {
-  testTarget=scanner
-  runTests
-}
+# all() {
+  # testTarget=scanner
+  # runTests
+# }
 
 runTests() {
   # This is the test case name and at the same time, folder in which the tests are
@@ -52,8 +58,8 @@ runTests() {
   echo ${BLUE}========================================${NC}
 
   # Check if a test case exists
-  if [ ! -f "$inputsFolder"/* ]; then
-    echo ${RED}There are no inputs for this test target
+  if [ ! -n "$(ls -A "$inputsFolder" 2>/dev/null)" ]; then
+    echo ${RED}There are no inputs for test target \'"$testTarget"\'
     exit 1
   fi
 
@@ -78,13 +84,13 @@ runTests() {
 
     # Run the test (save stdout AND STDERR to the output folder)
     echo ${BLUE}Testing "$inputName" input ${NC}
-    "$testFile" < $input > "$outputsFolder"/"$inputName" 2>&1
+    "$testFile" < "$input" > "$outputsFolder"/"$inputName" 2>&1
     testReturnCode="$?"
 
     # If there was no reference output, stop here
     if [ "$run" = "y" ]; then
       echo ${GREEN}Test output was written to outputs/ folder ${NC}
-      return
+      continue
     fi
 
     # Compare the generated output with the reference output
@@ -110,6 +116,12 @@ runTests() {
 
 # EXEC=""
 
+if [ -z "$1" ]; then
+  echo ${RED}Please type targets as arguments ${NC}
+  help
+fi
+
+
 while [ "$#" -gt 0 ]; do
   case $1 in
 
@@ -118,10 +130,10 @@ while [ "$#" -gt 0 ]; do
       exit 0
       ;;
 
-    -a | all | ALL)
-      all
-      exit 0
-      ;;
+    # -a | all | ALL)
+      # all
+      # exit 0
+      # ;;
 
     *)
       # Convert to lowercase
