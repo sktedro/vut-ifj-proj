@@ -24,7 +24,6 @@ Help()
   echo
   echo "  -cd CODE      testing with IFJ21 teal code"
   echo
-
 }
 
 All() {

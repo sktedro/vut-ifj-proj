@@ -1,16 +1,40 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "scanner.c"
+#include "../scanner.c"
 
-void debugPrint(char c, int realState, int expectedState) {
-    printf("%c", c);
-    printf(" : ");
-    //printEnum(expectedState);
-    printf(":");
-    //printEnum(realState);
-    printf("\n");
+// Calls the scanner until it returns no token. For each token it prints the
+// value scanner returned, the token type and attribute data
+int main(int argc, char *argv[]){
+  Token *token;
+  int ret;
+  while(1){
+    token = NULL;
+    ret = scanner(&token);
+    printf("Returned <%d> and token: ", ret);
+    if(token){
+      printf("\ttype=<%d>", token->type);
+      if(token->attrib && token->attrib->data){
+        printf("\tattribute=<%s>\n", token->attrib->data);
+      }
+    }else{
+      printf("\tNULL\n");
+      break;
+    }
+  }
+  return 0;
 }
+
+/**
+  * void debugPrint(char c, int realState, int expectedState) {
+  *     printf("%c", c);
+  *     printf(" : ");
+  *     //printEnum(expectedState);
+  *     printf(":");
+  *     //printEnum(realState);
+  *     printf("\n");
+  * }
+  */
 
 /*void printEnum(int state) {
     switch (state) {
@@ -77,13 +101,3 @@ void debugPrint(char c, int realState, int expectedState) {
     }
 }*/
 
-int main() {
-
-    //debugPrint('a',5,4);
-
-    //testSingleLineComment();
-
-    scanner();
-    printf("\nDONE\n");
-    return 0;
-}
