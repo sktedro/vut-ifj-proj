@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g #-Wall -Wextra
 
-LIBS=../scanner.h ../token.h ../buffer.h
+LIBS=../binary_search_tree.h ../buffer.h ../misc.h ../scanner.h ../token.h
 
 .PHONY: none
 none: 
@@ -18,4 +18,3 @@ token:
 	@echo Compiling token tests:
 	@mkdir -p ../build/tests/token
 	$(CC) token/token_tests.c $(LIBS) -o ../build/tests/token/token_tests $(CFLAGS)
-
