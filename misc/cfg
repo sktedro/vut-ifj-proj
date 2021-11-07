@@ -1,0 +1,72 @@
+<start>           -> <req> <codeBody>
+<req>             -> require "ifj21"
+<codeBody>        -> eps
+<codeBody>        -> <fn> <codeBody>
+<codeBody>        -> <fnCall> <codeBody>
+
+<fn>              -> function [id] ( <fnArgList> ) <fnRet> <body> <ret> end
+<fn>              -> global [id] : function ( <typeList> ) <fnRet>
+<fnCall>          -> [id] ( <fnCallArgList> )
+<fnRet>           -> eps
+<fnRet>           -> : <type> <nextType>
+
+<fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+<nextFnCallArg>   -> eps
+<nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+<fnCallArg>       -> [id]
+<fnCallArg>       -> [literal]
+
+<ret>             -> eps
+<ret>             -> return <retArgList>
+
+<stat>            -> [id] <idOperation>
+<idOperation>     -> <fnCall>
+<idOperation>     -> = <expr>
+<idOperation>     -> <nextAssign> <expr>
+
+<assign>          -> [id] <nextAssign> <expr>
+<nextAssign>      -> , [id] <nextAssign> <expr> ,
+<nextAssign>      -> =
+
+<fnArgList>       -> [id] : <type> <nextFnArg>
+<nextFnArg>       -> eps
+<nextFnArg>       -> , [id] : <type> <nextFnArg>
+
+<retArgList>      -> <retArg> <retNextArg>
+<retNextArg>      -> eps
+<retNextArg>      -> , <retArg> <retNextArg>
+
+<retArg>          -> <fnCall>
+<retArg>          -> <expr>
+<retArg>          -> [id]
+<retArg>          -> [literal]
+
+<typeList>        -> eps
+<typeList>        -> <type> <nextType>
+<nextType>        -> eps
+<nextType>        -> , <type> <nextType>
+
+<body>            -> eps
+<body>            -> <stat> <body>
+
+<stat>            -> <fnCall>
+<stat>            -> <newId>
+<stat>            -> <assign>
+<stat>            -> while <expr> do <body> end
+<stat>            -> if <expr> then <body> else <body> end
+
+<newId>           -> local <idList> : <type> <newId2>
+<newId2>          -> eps
+<newId2>          -> = <exprList>
+
+<idList>          -> [id] <nextId>
+<nextId>          -> eps
+<nextId>          -> , [id] <nextId>
+
+<exprList>        -> <expr> <nextExpr>
+<nextExpr>        -> eps
+<nextExpr>        -> , <expr> <nextExpr>
+
+<type>            -> integer
+<type>            -> number
+<type>            -> string
