@@ -19,7 +19,7 @@
 
 
 /*
- * Enumerations:
+ * Enumerations
  */
 
 
@@ -138,6 +138,15 @@ typedef struct SStackElem{
 typedef struct{
   SStackElem *top;
 } SStack;
+
+
+// Node structure for the binary search tree.
+typedef struct node {
+    Buffer *key; // id string
+    Buffer *data; // id value
+    struct node *leftChild;
+    struct node *rightChild;
+} Node;
 
 
 
