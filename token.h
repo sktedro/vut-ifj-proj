@@ -1,27 +1,11 @@
+/*
+ * Operations with a token structure
+ */
+
+#ifndef TOKEN
+#define TOKEN
+
 #include "misc.h"
-
-// Enumeration of the token types
-enum TokenTypeEnum{
-  t_idOrKeyword, // one token for both identificator and a keyword??
-  t_int,
-  t_num,
-  t_sciNum,
-  t_str,
-  t_colon,
-  t_comma,
-  t_rightParen,
-  t_leftParen,
-  t_arithmOp,
-  t_strOp,
-  t_relOp,
-  t_assignment,
-};
-
-// Structure defining a token
-typedef struct{
-  int type;
-  char *data;
-} Token;
 
 
 /**
@@ -80,3 +64,5 @@ void tokenDestroy(Token *token){
     free(token);
   }
 }
+
+#endif

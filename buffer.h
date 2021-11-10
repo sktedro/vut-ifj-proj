@@ -1,14 +1,16 @@
+/*
+ * A buffer - basically just a dynamic-sized string
+ */
+
+#ifndef BUFFER
+#define BUFFER
+
 #include "misc.h"
+
 
 // Initial buffer data length (space allocated)
 #define BUFINITLEN 16
 
-// Structure defining the buffer
-typedef struct{
-  char *data;
-  int len; // Actual buffer data length
-  int size; // Size allocated for the buffer
-} Buffer;
 
 /**
  * @brief Allocate a new buffer
@@ -101,3 +103,5 @@ void bufAppendString(char *orig, Buffer **buffer) {
     bufAppend(*buffer,orig[i]);
   }
 }
+
+#endif
