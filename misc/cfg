@@ -1,0 +1,67 @@
+01. <start>           -> require <req> <codeBody>
+02. <req>             -> "ifj21"
+03. 
+04. <codeBody>        -> eps
+05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+07. <codeBody>        -> [id] <fnCall> <codeBody>
+08. 
+09. <fnCall>          -> ( <fnCallArgList> )
+10. <fnRet>           -> eps
+11. <fnRet>           -> : <typeList>
+12. <fnCallArgList>   -> eps
+13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+14. <nextFnCallArg>   -> eps
+15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+16. <fnCallArg>       -> [id]
+17. <fnCallArg>       -> [literal]
+18. 
+19. <ret>             -> eps
+20. <ret>             -> return <retArgList>
+21. 
+22. <stat>            -> eps
+23. <stat>            -> [id] <statWithId> <stat>
+24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+25. <stat>            -> if <expr> then <body> else <body> end <stat>
+26. <stat>            -> while <expr> do <body> end <stat>
+27. <statWithId>      -> <nextAssign> <expr>
+28. <statWithId>      -> = <expr>
+29. <statWithId>      -> <fnCall>
+30. 
+31. <nextAssign>      -> , [id] <nextAssign> <expr> ,
+32. <nextAssign>      -> =
+33. 
+34. <fnArgList>       -> eps
+35. <fnArgList>       -> [id] : <type> <nextFnArg>
+36. <nextFnArg>       -> eps
+37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+38. 
+39. <retArgList>      -> eps
+40. <retArgList>      -> <expr> <retNextArg>
+41. <retNextArg>      -> eps
+42. <retNextArg>      -> , <expr> <retNextArg>
+43. 
+44. <typeList>        -> eps
+45. <typeList>        -> integer <nextType>
+46. <typeList>        -> number <nextType>
+47. <typeList>        -> string <nextType>
+48. <typeList>        -> nil <nextType>
+49. 
+50. <nextType>        -> eps
+51. <nextType>        -> , <type> <nextType>
+52. 
+53. <type>            -> integer
+54. <type>            -> number
+55. <type>            -> string
+56. <type>            -> nil
+57. 
+58. <idList>          -> [id] <nextId>
+59. <nextId>          -> eps
+60. <nextId>          -> , [id] <nextId>
+61. 
+62. <newIdAssign>     -> eps
+63. <newIdAssign>     -> = <exprList>
+64. 
+65. <exprList>        -> <expr> <nextExpr>
+66. <nextExpr>        -> eps
+67. <nextExpr>        -> , <expr> <nextExpr>
