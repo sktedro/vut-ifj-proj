@@ -21,12 +21,12 @@
 21. 
 22. <stat>            -> eps
 23. <stat>            -> [id] <statWithId> <stat>
-24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>      // local
+24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
 25. <stat>            -> if <expr> then <body> else <body> end <stat>
 26. <stat>            -> while <expr> do <body> end <stat>
-27. <statWithId>      -> <nextAssign> <expr> // ,
-28. <statWithId>      -> = <expr>            // =
-29. <statWithId>      -> <fnCall>            // (
+27. <statWithId>      -> <nextAssign> <expr>
+28. <statWithId>      -> = <expr>
+29. <statWithId>      -> <fnCall>
 30. 
 31. <nextAssign>      -> , [id] <nextAssign> <expr> ,
 32. <nextAssign>      -> =
@@ -45,20 +45,23 @@
 45. <typeList>        -> integer <nextType>
 46. <typeList>        -> number <nextType>
 47. <typeList>        -> string <nextType>
-48. <nextType>        -> eps
-49. <nextType>        -> , <type> <nextType>
-50. <type>            -> integer
-51. <type>            -> number
-52. <type>            -> string
-53. 
-54. <idList>          -> [id] <nextId>
-55. <nextId>          -> eps
-56. <nextId>          -> , [id] <nextId>
+48. <typeList>        -> nil <nextType>
+49. 
+50. <nextType>        -> eps
+51. <nextType>        -> , <type> <nextType>
+52. 
+53. <type>            -> integer
+54. <type>            -> number
+55. <type>            -> string
+56. <type>            -> nil
 57. 
-58. <newIdAssign>     -> eps
-59. <newIdAssign>     -> = <exprList>
-60. 
-61. <exprList>        -> <expr> <nextExpr>
-62. <nextExpr>        -> eps
-63. <nextExpr>        -> , <expr> <nextExpr>
+58. <idList>          -> [id] <nextId>
+59. <nextId>          -> eps
+60. <nextId>          -> , [id] <nextId>
+61. 
+62. <newIdAssign>     -> eps
+63. <newIdAssign>     -> = <exprList>
 64. 
+65. <exprList>        -> <expr> <nextExpr>
+66. <nextExpr>        -> eps
+67. <nextExpr>        -> , <expr> <nextExpr>
