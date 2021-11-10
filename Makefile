@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -g
 
 
 MAIN=main.c
-LIBS=scanner.h token.h buffer.h
+LIBS=scanner.h token.h buffer.h symbol_stack.h
 
 TESTSCRIPT=./test.sh
 
