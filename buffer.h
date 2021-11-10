@@ -10,8 +10,6 @@ typedef struct{
   int size; // Size allocated for the buffer
 } Buffer;
 
-// TODO exit
-
 /**
  * @brief Allocate a new buffer
  *
@@ -95,11 +93,11 @@ void bufDestroy(Buffer *buf){
  * @param buffer a pointer to a buffer
  */
 void bufAppendString(char *orig, Buffer **buffer) {
-    if(*buffer == NULL) {
-        *buffer = bufInit();
-    }
+  if(*buffer == NULL) {
+    *buffer = bufInit();
+  }
 
-    for (unsigned int i = 0; i < strlen(orig); i++) {
-        bufAppend(*buffer,orig[i]);
-    }
+  for (unsigned int i = 0; i < strlen(orig); i++) {
+    bufAppend(*buffer,orig[i]);
+  }
 }
