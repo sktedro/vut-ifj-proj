@@ -38,34 +38,27 @@
 38. 
 39. <retArgList>      -> eps
 40. <retArgList>      -> <expr> <retNextArg>
-41. <retArgList>      -> [literal] <retNextArg>
-42. <retArgList>      -> [id] <retWithId> <retNextArg>
-43. <retNextArg>      -> eps
-44. <retNextArg>      -> , <retArg> <retNextArg>
-45. <retWithId>       -> eps
-46. <retWithId>       -> <fnCall>
-47. <retArg>          -> <expr>
-48. <retArg>          -> [id] <retWithId>
-49. <retArg>          -> [literal]
-50. 
-51. <typeList>        -> eps
-52. <typeList>        -> integer <nextType>
-53. <typeList>        -> number <nextType>
-54. <typeList>        -> string <nextType>
-55. <nextType>        -> eps
-56. <nextType>        -> , <type> <nextType>
-57. <type>            -> integer
-58. <type>            -> number
-59. <type>            -> string
+41. <retNextArg>      -> eps
+42. <retNextArg>      -> , <expr> <retNextArg>
+43. 
+44. <typeList>        -> eps
+45. <typeList>        -> integer <nextType>
+46. <typeList>        -> number <nextType>
+47. <typeList>        -> string <nextType>
+48. <nextType>        -> eps
+49. <nextType>        -> , <type> <nextType>
+50. <type>            -> integer
+51. <type>            -> number
+52. <type>            -> string
+53. 
+54. <idList>          -> [id] <nextId>
+55. <nextId>          -> eps
+56. <nextId>          -> , [id] <nextId>
+57. 
+58. <newIdAssign>     -> eps
+59. <newIdAssign>     -> = <exprList>
 60. 
-61. <idList>          -> [id] <nextId>
-62. <nextId>          -> eps
-63. <nextId>          -> , [id] <nextId>
+61. <exprList>        -> <expr> <nextExpr>
+62. <nextExpr>        -> eps
+63. <nextExpr>        -> , <expr> <nextExpr>
 64. 
-65. <newIdAssign>     -> eps
-66. <newIdAssign>     -> = <exprList>
-67. 
-68. <exprList>        -> <expr> <nextExpr>
-69. <nextExpr>        -> eps
-70. <nextExpr>        -> , <expr> <nextExpr>
-71. 
