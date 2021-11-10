@@ -35,7 +35,8 @@ enum FSMEnum{
   s_tilde,
   s_relOpSimple,
   s_assignment,
-  s_colon,   // :
+  // s_colon,
+  // s_comma,
   // s_arithmOp,
   s_strOp,
   // s_relOp,
@@ -218,10 +219,15 @@ int scanner(Token **token) {
           // state = s_arithmOp;
           return returnToken(token, t_arithmOp, buf);
 
+        // ,
+        }else if(c == ','){
+          // state = s_comma;
+          return returnToken(token, t_comma, buf);
+
         // :
         }else if(c == ':'){
           // state = s_colon;
-          return returnToken(token, t_assignment, buf);
+          return returnToken(token, t_colon, buf);
 
         // /
         }else if(c == '/'){
@@ -254,7 +260,7 @@ int scanner(Token **token) {
 
         // )
         }else if(c == ')'){
-          // state = s_rigcase s_colon:htParen;
+          // state = s_rightParen
           return returnToken(token, t_rightParen, buf);
 
         // space, \n, \t

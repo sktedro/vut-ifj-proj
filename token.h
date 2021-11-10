@@ -7,6 +7,8 @@ enum TokenTypeEnum{
   t_num,
   t_sciNum,
   t_str,
+  t_colon,
+  t_comma,
   t_rightParen,
   t_leftParen,
   t_arithmOp,
