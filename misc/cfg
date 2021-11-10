@@ -1,72 +1,71 @@
-<start>           -> <req> <codeBody>
-<req>             -> require "ifj21"
-<codeBody>        -> eps
-<codeBody>        -> <fn> <codeBody>
-<codeBody>        -> <fnCall> <codeBody>
-
-<fn>              -> function [id] ( <fnArgList> ) <fnRet> <body> <ret> end
-<fn>              -> global [id] : function ( <typeList> ) <fnRet>
-<fnCall>          -> [id] ( <fnCallArgList> )
-<fnRet>           -> eps
-<fnRet>           -> : <type> <nextType>
-
-<fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
-<nextFnCallArg>   -> eps
-<nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
-<fnCallArg>       -> [id]
-<fnCallArg>       -> [literal]
-
-<ret>             -> eps
-<ret>             -> return <retArgList>
-
-<stat>            -> [id] <idOperation>
-<idOperation>     -> <fnCall>
-<idOperation>     -> = <expr>
-<idOperation>     -> <nextAssign> <expr>
-
-<assign>          -> [id] <nextAssign> <expr>
-<nextAssign>      -> , [id] <nextAssign> <expr> ,
-<nextAssign>      -> =
-
-<fnArgList>       -> [id] : <type> <nextFnArg>
-<nextFnArg>       -> eps
-<nextFnArg>       -> , [id] : <type> <nextFnArg>
-
-<retArgList>      -> <retArg> <retNextArg>
-<retNextArg>      -> eps
-<retNextArg>      -> , <retArg> <retNextArg>
-
-<retArg>          -> <fnCall>
-<retArg>          -> <expr>
-<retArg>          -> [id]
-<retArg>          -> [literal]
-
-<typeList>        -> eps
-<typeList>        -> <type> <nextType>
-<nextType>        -> eps
-<nextType>        -> , <type> <nextType>
-
-<body>            -> eps
-<body>            -> <stat> <body>
-
-<stat>            -> <fnCall>
-<stat>            -> <newId>
-<stat>            -> <assign>
-<stat>            -> while <expr> do <body> end
-<stat>            -> if <expr> then <body> else <body> end
-
-<newId>           -> local <idList> : <type> <newId2>
-<newId2>          -> eps
-<newId2>          -> = <exprList>
-
-<idList>          -> [id] <nextId>
-<nextId>          -> eps
-<nextId>          -> , [id] <nextId>
-
-<exprList>        -> <expr> <nextExpr>
-<nextExpr>        -> eps
-<nextExpr>        -> , <expr> <nextExpr>
-
-<type>            -> integer
-<type>            -> number
-<type>            -> string
+01. <start>           -> require <req> <codeBody>
+02. <req>             -> "ifj21"
+03. 
+04. <codeBody>        -> eps
+05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+07. <codeBody>        -> [id] <fnCall> <codeBody>
+08. 
+09. <fnCall>          -> ( <fnCallArgList> )
+10. <fnRet>           -> eps
+11. <fnRet>           -> : <typeList>
+12. <fnCallArgList>   -> eps
+13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+14. <nextFnCallArg>   -> eps
+15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+16. <fnCallArg>       -> [id]
+17. <fnCallArg>       -> [literal]
+18. 
+19. <ret>             -> eps
+20. <ret>             -> return <retArgList>
+21. 
+22. <stat>            -> eps
+23. <stat>            -> [id] <statWithId> <stat>
+24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>      // local
+25. <stat>            -> if <expr> then <body> else <body> end <stat>
+26. <stat>            -> while <expr> do <body> end <stat>
+27. <statWithId>      -> <nextAssign> <expr> // ,
+28. <statWithId>      -> = <expr>            // =
+29. <statWithId>      -> <fnCall>            // (
+30. 
+31. <nextAssign>      -> , [id] <nextAssign> <expr> ,
+32. <nextAssign>      -> =
+33. 
+34. <fnArgList>       -> eps
+35. <fnArgList>       -> [id] : <type> <nextFnArg>
+36. <nextFnArg>       -> eps
+37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+38. 
+39. <retArgList>      -> eps
+40. <retArgList>      -> <expr> <retNextArg>
+41. <retArgList>      -> [literal] <retNextArg>
+42. <retArgList>      -> [id] <retWithId> <retNextArg>
+43. <retNextArg>      -> eps
+44. <retNextArg>      -> , <retArg> <retNextArg>
+45. <retWithId>       -> eps
+46. <retWithId>       -> <fnCall>
+47. <retArg>          -> <expr>
+48. <retArg>          -> [id] <retWithId>
+49. <retArg>          -> [literal]
+50. 
+51. <typeList>        -> eps
+52. <typeList>        -> integer <nextType>
+53. <typeList>        -> number <nextType>
+54. <typeList>        -> string <nextType>
+55. <nextType>        -> eps
+56. <nextType>        -> , <type> <nextType>
+57. <type>            -> integer
+58. <type>            -> number
+59. <type>            -> string
+60. 
+61. <idList>          -> [id] <nextId>
+62. <nextId>          -> eps
+63. <nextId>          -> , [id] <nextId>
+64. 
+65. <newIdAssign>     -> eps
+66. <newIdAssign>     -> = <exprList>
+67. 
+68. <exprList>        -> <expr> <nextExpr>
+69. <nextExpr>        -> eps
+70. <nextExpr>        -> , <expr> <nextExpr>
+71. 
