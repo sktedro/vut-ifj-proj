@@ -7,10 +7,10 @@ enum SStackTypeEnum{
   st
 };
 
-//TODO
+//TODO arithm. operators, relation operators and so on?
 enum SStackSymbolEnum{
-  ss_,
-  ss
+  sym_dollar,
+  sym_nonterminal
 };
 
 // implemented as a linked list
@@ -105,7 +105,7 @@ SStackElem *SStackTopTerminal(SStack *stack){
     return NULL;
   }
   SStackElem *tmp = stack->top;
-  while(tmp /*&& TODO tmp is not terminal*/){
+  while(tmp && tmp->type != sym_nonterminal){
     tmp = tmp->next;
   }
   return tmp;
