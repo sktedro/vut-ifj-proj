@@ -1,29 +1,11 @@
-#include <stdlib.h>
+/*
+ * A stack structure implemented as a linked list
+ */
+
+#ifndef SYMBOL_STACK
+#define SYMBOL_STACK
+
 #include "misc.h"
-
-//TODO
-enum SStackTypeEnum{
-  st_,
-  st
-};
-
-//TODO arithm. operators, relation operators and so on?
-enum SStackSymbolEnum{
-  sym_dollar,
-  sym_nonterminal
-};
-
-// implemented as a linked list
-
-typedef struct SStackElem{
-  int type;
-  int symbol;
-  struct SStackElem *next;
-} SStackElem;
-
-typedef struct{
-  SStackElem *top;
-} SStack;
 
 
 /*
@@ -156,3 +138,5 @@ void SStackDestroy(SStack *stack){
   }
   free(stack);
 }
+
+#endif
