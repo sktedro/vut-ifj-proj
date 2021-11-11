@@ -1,0 +1,17 @@
+Lexical analysis error.
+Returned <0> and token: 	type=<0>	attribute=<require>
+Returned <0> and token: 	type=<4>	attribute=<ifj21>
+Returned <0> and token: 	type=<0>	attribute=<function>
+Returned <0> and token: 	type=<0>	attribute=<whitespaces>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<local>
+Returned <0> and token: 	type=<0>	attribute=<s>
+Returned <0> and token: 	type=<10>	attribute=<:>
+Returned <0> and token: 	type=<0>	attribute=<string>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<4>	attribute=<\x3A0>
+Returned <0> and token: 	type=<0>	attribute=<write>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<0>	attribute=<s>
+Returned <1> and token: 	NULL
