@@ -14,8 +14,8 @@ int main(int argc, char *argv[]){
     printf("Returned <%d> and token: ", ret);
     if(token){
       printf("\ttype=<%d>", token->type);
-      if(token->attrib && token->attrib->data){
-        printf("\tattribute=<%s>\n", token->attrib->data);
+      if(token->data){
+        printf("\tattribute=<%s>\n", token->data);
       }
     }else{
       printf("\tNULL\n");
