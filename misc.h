@@ -101,7 +101,7 @@ enum PrecTabEnum{
   pt_rParen,
   pt_id,
   pt_dollar
-}
+};
 
 //TODO
 // Enumeration of symbol stack type
