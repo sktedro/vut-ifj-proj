@@ -87,6 +87,21 @@ enum TokenTypeEnum{
   t_assignment,
 };
 
+// Enumeration of the precedence table
+enum PrecTabEnum{
+  pt_strlen,
+  pt_mult,
+  pt_div,
+  pt_intDiv,
+  pt_add,
+  pt_sub,
+  pt_concat,
+  pt_relOp,
+  pt_lParen,
+  pt_rParen,
+  pt_id,
+  pt_dollar
+}
 
 //TODO
 // Enumeration of symbol stack type
