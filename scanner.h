@@ -1,54 +1,16 @@
+/*
+ * Scanner
+ */
+
+#ifndef SCANNER
+#define SCANNER
+
 #include "misc.h"
 #include "buffer.h"
 #include "token.h"
 
 // TODO:
 // return what we have when we reach the last input character 
-
-// Enumeration of states of the finite state machine
-// The commented out states are not used, as instead of setting them as the
-// next state, the token is instantly returned
-enum FSMEnum{
-  s_start,
-
-    // Identificator or a keyword
-  s_idOrKeyword,
-
-    // Number literals
-  s_int,
-  s_num,
-  s_scientific,
-  s_needNum,
-  s_sciNum,
-
-    // Comments
-  s_comment,
-  s_unknownComment,
-  s_singleLineComment,
-  s_multiLineComment,
-  s_multiLineCommentPossibleEnd,
-
-    // Operators
-  s_arithmOpDash,
-  s_arithmOpDiv,
-  s_dot,
-  s_tilde,
-  s_relOpSimple,
-  s_assignment,
-  s_colon,   // :
-  // s_arithmOp,
-  s_strOp,
-  // s_relOp,
-
-    // Parentheses
-  // s_leftParen,
-  // s_rightParen,
-
-    // String literals
-  s_strStart,
-  // s_strEnd
-};
-
 
 // A memory keeping the last read character, if it wasn't a part of the last
 // returned token. Upon every scanner called, character from this variable (if
@@ -218,10 +180,15 @@ int scanner(Token **token) {
           // state = s_arithmOp;
           return returnToken(token, t_arithmOp, buf);
 
+        // ,
+        }else if(c == ','){
+          // state = s_comma;
+          return returnToken(token, t_comma, buf);
+
         // :
         }else if(c == ':'){
           // state = s_colon;
-          return returnToken(token, t_assignment, buf);
+          return returnToken(token, t_colon, buf);
 
         // /
         }else if(c == '/'){
@@ -254,7 +221,7 @@ int scanner(Token **token) {
 
         // )
         }else if(c == ')'){
-          // state = s_rigcase s_colon:htParen;
+          // state = s_rightParen
           return returnToken(token, t_rightParen, buf);
 
         // space, \n, \t
@@ -496,3 +463,5 @@ int scanner(Token **token) {
   bufDestroy(buf);
   vypluj 0;
 }
+
+#endif
