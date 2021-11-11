@@ -1,0 +1,71 @@
+Lexical analysis error.
+Returned <0> and token: 	type=<0>	attribute=<--require>
+Returned <0> and token: 	type=<4>	attribute=<ifj21>
+Returned <0> and token: 	type=<0>	attribute=<function>
+Returned <0> and token: 	type=<0>	attribute=<main>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<--local>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<10>	attribute=<:>
+Returned <0> and token: 	type=<0>	attribute=<integer>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<0>	attribute=<nil>
+Returned <0> and token: 	type=<0>	attribute=<local>
+Returned <0> and token: 	type=<0>	attribute=<vysl>
+Returned <0> and token: 	type=<10>	attribute=<:>
+Returned <0> and token: 	type=<0>	attribute=<integer>
+Returned <0> and token: 	type=<0>	attribute=<write>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<4>	attribute=<Zadejte cislo pro vypocet faktorialu\n>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<0>	attribute=<readi>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<if>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<9>	attribute=<==>
+Returned <0> and token: 	type=<0>	attribute=<nil>
+Returned <0> and token: 	type=<0>	attribute=<then>
+Returned <0> and token: 	type=<0>	attribute=<write>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<4>	attribute=<a je nil\n>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<return>
+Returned <0> and token: 	type=<0>	attribute=<else>
+Returned <0> and token: 	type=<0>	attribute=<end>
+Returned <0> and token: 	type=<0>	attribute=<if>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<9>	attribute=<<>
+Returned <0> and token: 	type=<1>	attribute=<0>
+Returned <0> and token: 	type=<0>	attribute=<then>
+Returned <0> and token: 	type=<0>	attribute=<write>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<4>	attribute=<Faktorial nelze spocitat\n>
+Returned <0> and token: 	type=<5>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<else>
+Returned <0> and token: 	type=<0>	attribute=<vysl>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<1>	attribute=<1>
+Returned <0> and token: 	type=<0>	attribute=<while>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<9>	attribute=<>>
+Returned <0> and token: 	type=<1>	attribute=<0>
+Returned <0> and token: 	type=<0>	attribute=<do>
+Returned <0> and token: 	type=<0>	attribute=<vysl>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<0>	attribute=<vysl>
+Returned <0> and token: 	type=<7>	attribute=<*>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<0>	attribute=<a>
+Returned <0> and token: 	type=<7>	attribute=<->
+Returned <0> and token: 	type=<1>	attribute=<1>
+Returned <0> and token: 	type=<0>	attribute=<end>
+Returned <0> and token: 	type=<0>	attribute=<write>
+Returned <0> and token: 	type=<6>	attribute=<(>
+Returned <0> and token: 	type=<4>	attribute=<Vysledek je: >
+Returned <1> and token: 	NULL
