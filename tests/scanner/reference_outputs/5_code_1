@@ -1,4 +1,3 @@
-Lexical analysis error.
 Returned <0> and token: 	type=<0>	attribute=<--require>
 Returned <0> and token: 	type=<4>	attribute=<ifj21>
 Returned <0> and token: 	type=<0>	attribute=<function>
@@ -68,4 +67,5 @@ Returned <0> and token: 	type=<0>	attribute=<end>
 Returned <0> and token: 	type=<0>	attribute=<write>
 Returned <0> and token: 	type=<6>	attribute=<(>
 Returned <0> and token: 	type=<4>	attribute=<Vysledek je: >
+Returned <0> and token: 	type=<4>	attribute=<,>
 Returned <1> and token: 	NULL
