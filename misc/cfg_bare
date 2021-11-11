@@ -1,0 +1,54 @@
+1-> require 2 3.
+2-> "ifj21".
+3-> eps.
+3-> function [id] ( D ) 5 A 9 end 3.
+3-> global [id] : function ( H ) 5 3.
+3-> [id] 4 3.
+4-> ( 6 ).
+5-> eps.
+5-> : H.
+6-> eps.
+6-> 8 7.
+7-> eps.
+7-> , 8 7.
+8-> [id].
+8-> [literal].
+9-> eps.
+9-> return F.
+A-> eps.
+A-> [id] B A.
+A-> local K : J M A.
+A-> if <expr> then A else A end A.
+A-> while <expr> do A end A.
+B-> C <expr>.
+B-> = <expr>.
+B-> 4.
+C-> , [id] C <expr> ,.
+C-> =.
+D-> eps.
+D-> [id] : J E.
+E-> eps.
+E-> , [id] : J E.
+F-> eps.
+F-> <expr> G.
+G-> eps.
+G-> , <expr> G.
+H-> eps.
+H-> integer I.
+H-> number I.
+H-> string I.
+H-> nil I.
+I-> eps.
+I-> , J I.
+J-> integer.
+J-> number.
+J-> string.
+J-> nil.
+K-> [id] L.
+L-> eps.
+L-> , [id] L.
+M-> eps.
+M-> = N.
+N-> <expr> O.
+O-> eps.
+O-> , <expr> O.
