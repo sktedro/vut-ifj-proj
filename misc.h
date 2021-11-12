@@ -22,8 +22,6 @@
  * Macros
  */
 
-#define SymbolTable TreeNode
-#define symbolTable treeNode
 
 
 /*
@@ -174,25 +172,30 @@ typedef struct{
 // Symbol table element
 typedef struct{
   char *name;
-  int type; // var or fn
-  
+  bool isVariable; // var or fn
   int varDataType;
   int varAddress;
-
   bool fnDefined;
-  int *fnParamTypes;
-  int *fnRetTypes;
-
-
+  IntBuffer *fnParamTypesBuf;
+  IntBuffer *fnRetTypesBuf;
 } STElem;
 
-// Node structure for the binary search tree.
-typedef struct node {
-    CharBuffer *key; // id string
-    STElem data; // id value
-    struct node *leftChild;
-    struct node *rightChild;
-} Node;
+
+// Symbol table tree structure for the binary search tree.
+typedef struct symbolTableTreeNode {
+  char *key; // id string
+  STElem *data; // id value
+  struct symbolTableTreeNode *leftChild;
+  struct symbolTableTreeNode *rightChild;
+} STTreeNode;
+
+
+// Symbol table stack
+typedef struct symbolTableStack {
+  STTreeNode *table;
+  int depth;
+  struct symbolTableStack *next;
+} STStack;
 
 
 

@@ -7,9 +7,11 @@
 
 #include "misc.h"
 
-int STInsert(SymbolTable *table, char *key, int frameDepth){
+int STInsertElem(STTreeNode *table, char *key, int frameDepth){
 }
 
+int STDeleteElem(STTreeNode *table, char *key, int frameDepth){
+}
 
 
 #endif
