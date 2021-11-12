@@ -20,7 +20,7 @@ A-> [id] B A.
 A-> local K : J M A.
 A-> if <expr> then A else A end A.
 A-> while <expr> do A end A.
-B-> C <expr>.
+B-> , [id] C <expr> , <expr>.
 B-> = <expr>.
 B-> 4.
 C-> , [id] C <expr> ,.
