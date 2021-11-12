@@ -14,8 +14,16 @@
 /*
  * ♥    
  */
+
 #define vypluj return
 
+
+/*
+ * Macros
+ */
+
+#define SymbolTable TreeNode
+#define symbolTable treeNode
 
 
 /*
@@ -126,12 +134,20 @@ enum SStackSymbolEnum{
 
 
 
-// Structure defining the buffer
+// Structure defining the char buffer
 typedef struct{
   char *data;
   int len; // Actual buffer data length
   int size; // Size allocated for the buffer
-} Buffer;
+} CharBuffer;
+
+
+// Structure defining the int buffer
+typedef struct{
+  int *data;
+  int len; // Actual buffer data length
+  int size; // Size allocated for the buffer
+} IntBuffer;
 
 
 // Structure defining a token
@@ -155,10 +171,25 @@ typedef struct{
 } SStack;
 
 
+// Symbol table element
+typedef struct{
+  char *name;
+  int type; // var or fn
+  
+  int varDataType;
+  int varAddress;
+
+  bool fnDefined;
+  int *fnParamTypes;
+  int *fnRetTypes;
+
+
+} STElem;
+
 // Node structure for the binary search tree.
 typedef struct node {
-    Buffer *key; // id string
-    Buffer *data; // id value
+    CharBuffer *key; // id string
+    STElem data; // id value
     struct node *leftChild;
     struct node *rightChild;
 } Node;

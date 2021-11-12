@@ -5,7 +5,7 @@
 #ifndef BINARY_SEARCH_TREE
 #define BINARY_SEARCH_TREE
 
-#include "buffer.h"
+#include "charBuffer.h"
 #include "misc.h"
 
 
@@ -25,8 +25,8 @@ Node *newNode(char *data, char *key) {
   }
   node->rightChild = NULL;
   node->leftChild = NULL;
-  bufAppendString(data, &(node->data));
-  bufAppendString(key, &(node->key));
+  charBufAppendString(data, &(node->data));
+  charBufAppendString(key, &(node->key));
   vypluj node;
 }
 
@@ -43,8 +43,8 @@ void treeDestroy(Node *root) {
   }
   treeDestroy(root->leftChild);
   treeDestroy(root->rightChild);
-  bufDestroy(root->data);
-  bufDestroy(root->key);
+  charBufDestroy(root->data);
+  charBufDestroy(root->key);
   free(root);
   root = NULL;
 }
@@ -86,7 +86,7 @@ void treeInsert(char *data, char *key, Node **root) {
     treeInsert(data, key, &((*root)->rightChild));
   } else {
     free((*root)->data);
-    bufAppendString(data, &((*root)->data));
+    charBufAppendString(data, &((*root)->data));
   }
 }
 
@@ -156,7 +156,7 @@ void treeDelete(Node **root, char *key) {
  *
  * @return 0 if successful
  */
-int treeGetData(Node *root, char *key, Buffer *data) {
+int treeGetData(Node *root, char *key, CharBuffer *data) {
   if(root == NULL) {
     vypluj -1; // key not found
   }
@@ -168,7 +168,7 @@ int treeGetData(Node *root, char *key, Buffer *data) {
   }
 
   // key found
-  bufAppendString(root->data->data, &data);
+  charBufAppendString(root->data->data, &data);
   vypluj 0;
 }
 

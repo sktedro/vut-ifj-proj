@@ -2,14 +2,14 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef BUFFER
-#define BUFFER
+#ifndef CHARBUFFER
+#define CHARBUFFER
 
 #include "misc.h"
 
 
 // Initial buffer data length (space allocated)
-#define BUFINITLEN 16
+#define CHARBUFINITLEN 16
 
 
 /**
@@ -17,17 +17,17 @@
  *
  * @return new buffer (pointer)
  */
-Buffer *bufInit(){
-  Buffer *buf = (Buffer*)malloc(sizeof(Buffer));
+CharBuffer *charBufInit(){
+  CharBuffer *buf = (CharBuffer*)malloc(sizeof(CharBuffer));
   if(buf == NULL){
     return NULL;
   }
-  buf->data = (char*)malloc(BUFINITLEN * sizeof(char));
+  buf->data = (char*)malloc(CHARBUFINITLEN * sizeof(char));
   if(buf->data == NULL){
     free(buf);
     return NULL;
   }
-  buf->size = BUFINITLEN;
+  buf->size = CHARBUFINITLEN;
   buf->data[0] = '\0';
   return buf;
 }
@@ -40,7 +40,7 @@ Buffer *bufInit(){
  *
  * @return 0 if successful
  */
-int bufAppend(Buffer *buf, char c){
+int charBufAppend(CharBuffer *buf, char c){
   if(buf->len + 1 == buf->size){
     buf->data = (char*)realloc(buf->data, 2 * buf->size * sizeof(char));
     if(buf->data == NULL){
@@ -61,7 +61,7 @@ int bufAppend(Buffer *buf, char c){
  *
  * @param buf: from which the character should be removed
  */
-void bufPop(Buffer *buf){
+void charBufPop(CharBuffer *buf){
   if(buf && buf->len){
     (buf->len)--;
     buf->data[buf->len] = '\0';
@@ -73,7 +73,7 @@ void bufPop(Buffer *buf){
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void bufClear(Buffer *buf){
+void charBufClear(CharBuffer *buf){
   buf->data[0] = '\0';
   buf->len = 0;
 }
@@ -83,7 +83,7 @@ void bufClear(Buffer *buf){
  *
  * @param buf: pointer to a buffer that is to be destroyed
  */
-void bufDestroy(Buffer *buf){
+void charBufDestroy(CharBuffer *buf){
   free(buf->data);
   free(buf);
   buf = NULL;
@@ -94,13 +94,13 @@ void bufDestroy(Buffer *buf){
  * @param orig a string to append
  * @param buffer a pointer to a buffer
  */
-void bufAppendString(char *orig, Buffer **buffer) {
+void charBufAppendString(char *orig, CharBuffer **buffer) {
   if(*buffer == NULL) {
-    *buffer = bufInit();
+    *buffer = charBufInit();
   }
 
   for (unsigned int i = 0; i < strlen(orig); i++) {
-    bufAppend(*buffer,orig[i]);
+    charBufAppend(*buffer, orig[i]);
   }
 }
 
