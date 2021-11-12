@@ -1,7 +1,18 @@
 CC=gcc
 CFLAGS=-g #-Wall -Wextra
 
-LIBS=../binary_search_tree.h ../buffer.h ../misc.h ../scanner.h ../token.h
+LIBS=\
+../charBuffer.h \
+../intBuffer.h \
+../misc.h \
+../precedence_analysis.h \
+../scanner.h \
+../symbol_stack.h \
+../symbol_table_tree.h \
+../symtable.h \
+../symtable_stack.h \
+../token.h \
+
 
 .PHONY: none
 none: 
