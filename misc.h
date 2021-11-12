@@ -190,13 +190,18 @@ typedef struct symbolTableTreeNode {
 } STTreeNode;
 
 
-// Symbol table stack
-typedef struct symbolTableStack {
+// Symbol table stack element
+typedef struct symbolTableStackElem {
   STTreeNode *table;
   int depth;
-  struct symbolTableStack *next;
-} STStack;
+  struct symbolTableStackElem *next;
+} STStackElem;
 
+
+// Symbol table stack
+typedef struct{
+  STStackElem *top;
+} STStack;
 
 
 /*
