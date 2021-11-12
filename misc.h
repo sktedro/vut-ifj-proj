@@ -14,7 +14,13 @@
 /*
  * ♥    
  */
+
 #define vypluj return
+
+
+/*
+ * Macros
+ */
 
 
 
@@ -87,6 +93,21 @@ enum TokenTypeEnum{
   t_assignment,
 };
 
+// Enumeration of the precedence table
+enum PrecTabEnum{
+  pt_strlen,
+  pt_mult,
+  pt_div,
+  pt_intDiv,
+  pt_add,
+  pt_sub,
+  pt_concat,
+  pt_relOp,
+  pt_lParen,
+  pt_rParen,
+  pt_id,
+  pt_dollar
+};
 
 //TODO
 // Enumeration of symbol stack type
@@ -111,12 +132,20 @@ enum SStackSymbolEnum{
 
 
 
-// Structure defining the buffer
+// Structure defining the char buffer
 typedef struct{
   char *data;
   int len; // Actual buffer data length
   int size; // Size allocated for the buffer
-} Buffer;
+} CharBuffer;
+
+
+// Structure defining the int buffer
+typedef struct{
+  int *data;
+  int len; // Actual buffer data length
+  int size; // Size allocated for the buffer
+} IntBuffer;
 
 
 // Structure defining a token
@@ -140,14 +169,39 @@ typedef struct{
 } SStack;
 
 
-// Node structure for the binary search tree.
-typedef struct node {
-    Buffer *key; // id string
-    Buffer *data; // id value
-    struct node *leftChild;
-    struct node *rightChild;
-} Node;
+// Symbol table element
+typedef struct{
+  char *name;
+  bool isVariable; // var or fn
+  int varDataType;
+  int varAddress;
+  bool fnDefined;
+  IntBuffer *fnParamTypesBuf;
+  IntBuffer *fnRetTypesBuf;
+} STElem;
 
+
+// Symbol table tree structure for the binary search tree.
+typedef struct symbolTableTreeNode {
+  char *key; // id string
+  STElem *data; // id value
+  struct symbolTableTreeNode *leftChild;
+  struct symbolTableTreeNode *rightChild;
+} STTreeNode;
+
+
+// Symbol table stack element
+typedef struct symbolTableStackElem {
+  STTreeNode *table;
+  int depth;
+  struct symbolTableStackElem *next;
+} STStackElem;
+
+
+// Symbol table stack
+typedef struct{
+  STStackElem *top;
+} STStack;
 
 
 /*
