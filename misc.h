@@ -141,12 +141,12 @@ typedef struct{
 
 
 // Node structure for the binary search tree.
-typedef struct node {
+typedef struct treeNode {
     Buffer *key; // id string
     Buffer *data; // id value
-    struct node *leftChild;
-    struct node *rightChild;
-} Node;
+    struct treeNode *leftChild;
+    struct treeNode *rightChild;
+} TreeNode;
 
 
 

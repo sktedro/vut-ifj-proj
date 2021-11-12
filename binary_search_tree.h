@@ -17,8 +17,8 @@
  *
  * @return ptr to the created node
  */
-Node *newNode(char *data, char *key) {
-  Node *node = (Node *) malloc(sizeof(Node));
+TreeNode *newNode(char *data, char *key) {
+  TreeNode *node = (TreeNode *) malloc(sizeof(TreeNode));
   if(node == NULL) {
     fprintf(stderr, "Error allocating memory\n");
     exit(1);
@@ -37,7 +37,7 @@ Node *newNode(char *data, char *key) {
  *
  * @param root a pointer to a tree
  */
-void treeDestroy(Node *root) {
+void treeDestroy(TreeNode *root) {
   if(root == NULL) {
     vypluj;
   }
@@ -57,7 +57,7 @@ void treeDestroy(Node *root) {
  *
  * @param root root to the tree to be printed
  */
-void treePrint(Node *root) {
+void treePrint(TreeNode *root) {
   if(root == NULL) {
     fprintf(stderr, "NULL\n");
     vypluj;
@@ -75,7 +75,7 @@ void treePrint(Node *root) {
  * @param key key of the new node
  * @param root an initialised tree
  */
-void treeInsert(char *data, char *key, Node **root) {
+void treeInsert(char *data, char *key, TreeNode **root) {
   if(*root == NULL) {
     *root = newNode(data, key);
     vypluj;
@@ -97,12 +97,12 @@ void treeInsert(char *data, char *key, Node **root) {
  * @param target node to replace
  * @param tree an initialised tree with at least one right child
  */
-void replaceByRightmost(Node *target, Node **tree) {
+void replaceByRightmost(TreeNode *target, TreeNode **tree) {
   if((*tree)->rightChild != NULL) {
     replaceByRightmost(target, &(*tree)->rightChild);
     vypluj;
   }
-  Node *tmp;
+  TreeNode *tmp;
   target->key = (*tree)->key;
   target->data = (*tree)->data;
   tmp = (*tree)->leftChild;
@@ -117,8 +117,8 @@ void replaceByRightmost(Node *target, Node **tree) {
  * @param root an initialised tree
  * @param key this is the key we are looking for
  */
-void treeDelete(Node **root, char *key) {
-  Node *tmp = NULL;
+void treeDelete(TreeNode **root, char *key) {
+  TreeNode *tmp = NULL;
   if(*root == NULL) {
     vypluj; // key not found
   }
@@ -156,7 +156,7 @@ void treeDelete(Node **root, char *key) {
  *
  * @return 0 if successful
  */
-int treeGetData(Node *root, char *key, Buffer *data) {
+int treeGetData(TreeNode *root, char *key, Buffer *data) {
   if(root == NULL) {
     vypluj -1; // key not found
   }
