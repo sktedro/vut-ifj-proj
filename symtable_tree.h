@@ -18,13 +18,18 @@
  */
 STTreeNode *newSTTreeNode(char *name){
   STTreeNode *node = (STTreeNode *) malloc(sizeof(STTreeNode));
-  if(node == NULL){
+  if(!node){
     //TODO memleak
     exit(err(99));
   }
   node->rightChild = NULL;
   node->leftChild = NULL;
-  memcpy(&(node->key), name, strlen(name) + 1);
+  node->key = malloc((strlen(name) + 1) * sizeof(char));
+  if(!node->key){
+    //TODO memleak
+    exit(err(99));
+  }
+  memcpy(&(node->key), name, (strlen(name) + 1) * sizeof(char));
   node->data = malloc(sizeof(STElem));
   if(!node->data){
     //TODO memleak
@@ -49,7 +54,7 @@ STTreeNode *newSTTreeNode(char *name){
  * @param name name (and key) of the new node
  */
 void treeInsert(STTreeNode **root, char *name){
-  if(*root == NULL){
+  if(!(*root)){
     *root = newSTTreeNode(name);
     vypluj;
   }
@@ -79,7 +84,7 @@ void treeElemDestroy(STElem *data){
  * @param root a pointer to a tree
  */
 void treeDestroy(STTreeNode *root){
-  if(root == NULL){
+  if(!root){
     vypluj;
   }
   treeDestroy(root->leftChild);
@@ -100,7 +105,7 @@ void treeDestroy(STTreeNode *root){
  * @param root root to the tree to be printed
  */
 void treePrint(STTreeNode *root){
-  if(root == NULL){
+  if(!root){
     vypluj;
   }
   printf("%s\n", root->key);
@@ -139,7 +144,7 @@ void replaceByRightmost(STTreeNode *target, STTreeNode **tree){
  */
 void treeDelete(STTreeNode **root, char *key){
   STTreeNode *tmp = NULL;
-  if(*root == NULL){
+  if(!(*root)){
     vypluj; // key not found
   }
   if(strcmp(key, (*root)->key) < 0){
@@ -183,7 +188,7 @@ void treeDelete(STTreeNode **root, char *key){
  * @return pointer to symbol table tree element
  */
 STElem *treeGetData(STTreeNode *root, char *key){
-  if(root == NULL){
+  if(!root){
     vypluj NULL; // key not found
   }
   if(strcmp(key, root->key) < 0){
