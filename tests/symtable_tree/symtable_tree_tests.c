@@ -5,7 +5,7 @@
 #include "../../misc.h"
 #include "../../symtable_tree.h"
 
-int testSetFunctions(STElem *tmp){
+int testSetFunctions(STElem *tmp, bool insertParamOrRetTypes){
   if(!tmp){
     printf("Element to be inserted is not found in the tree\n");
     return 1;
@@ -36,56 +36,59 @@ int testSetFunctions(STElem *tmp){
     return 1;
   }
 
-  // Insert one param type
-  treeAppendParamType(tmp, 10);
-  if(tmp->fnParamTypesBuf->len != 1){
-    printf("Inserted one param type but buffer length is not 1\n");
-    return 1;
-  }
-  if(tmp->fnParamTypesBuf->data[0] != 10){
-    printf("Inserted one param type but data is not right\n");
-    return 1;
-  }
+  if(insertParamOrRetTypes){
+    // Insert one param type
+    treeAppendParamType(tmp, 10);
+    if(tmp->fnParamTypesBuf->len != 1){
+      printf("len: %d\n", tmp->fnParamTypesBuf->len);
+      printf("Inserted one param type but buffer length is not 1\n");
+      return 1;
+    }
+    if(tmp->fnParamTypesBuf->data[0] != 10){
+      printf("Inserted one param type but data is not right\n");
+      return 1;
+    }
 
-  // Insert second param type
-  treeAppendParamType(tmp, 12);
-  if(tmp->fnParamTypesBuf->len != 2){
-    printf("Inserted second param type but buffer length is not 2\n");
-    return 1;
-  }
-  if(tmp->fnParamTypesBuf->data[0] != 10){
-    printf("Inserted second param type but data[0] is not right\n");
-    return 1;
-  }
-  if(tmp->fnParamTypesBuf->data[1] != 12){
-    printf("Inserted second param type but data[1] is not right\n");
-    return 1;
-  }
+    // Insert second param type
+    treeAppendParamType(tmp, 12);
+    if(tmp->fnParamTypesBuf->len != 2){
+      printf("Inserted second param type but buffer length is not 2\n");
+      return 1;
+    }
+    if(tmp->fnParamTypesBuf->data[0] != 10){
+      printf("Inserted second param type but data[0] is not right\n");
+      return 1;
+    }
+    if(tmp->fnParamTypesBuf->data[1] != 12){
+      printf("Inserted second param type but data[1] is not right\n");
+      return 1;
+    }
 
-  // Insert one ret type
-  treeAppendRetType(tmp, 20);
-  if(tmp->fnRetTypesBuf->len != 1){
-    printf("Inserted one ret type but buffer length is not 1\n");
-    return 1;
-  }
-  if(tmp->fnRetTypesBuf->data[0] != 20){
-    printf("Inserted one ret type but data[0] is not right\n");
-    return 1;
-  }
+    // Insert one ret type
+    treeAppendRetType(tmp, 20);
+    if(tmp->fnRetTypesBuf->len != 1){
+      printf("Inserted one ret type but buffer length is not 1\n");
+      return 1;
+    }
+    if(tmp->fnRetTypesBuf->data[0] != 20){
+      printf("Inserted one ret type but data[0] is not right\n");
+      return 1;
+    }
 
-  // Insert second ret type
-  treeAppendRetType(tmp, 22);
-  if(tmp->fnRetTypesBuf->len != 2){
-    printf("Inserted second ret type but buffer length is not 2\n");
-    return 1;
-  }
-  if(tmp->fnRetTypesBuf->data[0] != 20){
-    printf("Inserted second ret type but data[0] is not right\n");
-    return 1;
-  }
-  if(tmp->fnRetTypesBuf->data[1] != 22){
-    printf("Inserted second ret type but data[1] is not right\n");
-    return 1;
+    // Insert second ret type
+    treeAppendRetType(tmp, 22);
+    if(tmp->fnRetTypesBuf->len != 2){
+      printf("Inserted second ret type but buffer length is not 2\n");
+      return 1;
+    }
+    if(tmp->fnRetTypesBuf->data[0] != 20){
+      printf("Inserted second ret type but data[0] is not right\n");
+      return 1;
+    }
+    if(tmp->fnRetTypesBuf->data[1] != 22){
+      printf("Inserted second ret type but data[1] is not right\n");
+      return 1;
+    }
   }
 
   // Set fn as defined
@@ -105,98 +108,106 @@ int main() {
 
 
   printf("Inserting the first element (a) and testing:\n");
-
   c[0] = 'a';
   treeInsert(&tree, c);
+
+  c[0] = 'a';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), true)){
+    /** printf("Searching for a after first elem insertion\n"); */
     return 1;
   }
 
   printf("Inserting the second element (c) and testing:\n");
+  c[0] = 'c';
+  treeInsert(&tree, c);
 
   c[0] = 'a';
-  treeInsert(&tree, c);
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
+    /** printf("Searching for a\n"); */
     return 1;
   }
   c[0] = 'c';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), true)){
+    /** printf("Searching for c\n"); */
     return 1;
   }
 
   printf("Inserting a third element (d) and testing:\n");
-
+  c[0] = 'd';
   treeInsert(&tree, c);
+
   c[0] = 'a';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'c';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'd';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), true)){
     return 1;
   }
 
   printf("Inserting a fourth element (b) and testing:\n");
-
+  c[0] = 'b';
   treeInsert(&tree, c);
+
   c[0] = 'a';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'c';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'd';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'b';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), true)){
     return 1;
   }
 
   // '_' < 'a'
   printf("Inserting a fifth element (_) and testing:\n");
-
+  c[0] = '_';
   treeInsert(&tree, c);
+
   c[0] = 'a';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'c';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'd';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = 'b';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), false)){
     return 1;
   }
   c[0] = '_';
   printf("Testing '%s'\n", c);
-  if(testSetFunctions(treeGetData(tree, c))){
+  if(testSetFunctions(treeGetData(tree, c), true)){
     return 1;
   }
 
@@ -305,7 +316,7 @@ int main() {
   treeInsert(&tree, "d");
   treeInsert(&tree, "m");
   // Destroy the tree
-  treeDestroy(tree);
+  treeDestroy(&tree);
   // Check if any element can be found
   for(c[0] = 'a'; c[0] <= 'z'; c[0] += 1){
     if(treeGetData(tree, c)){
@@ -313,5 +324,6 @@ int main() {
       return 1;
     }
   }
+  printf("Test finished and passed if it reached this line\n");
   vypluj 0;
 }

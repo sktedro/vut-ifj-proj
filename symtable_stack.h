@@ -57,7 +57,7 @@ void STStackPop(STStack *stack){
   }
   STStackElem *tmp = stack->top;
   stack->top = tmp->next;
-  treeDestroy(tmp->table);
+  treeDestroy(&(tmp->table));
   free(tmp);
 }
 

@@ -22,20 +22,31 @@ STTreeNode *newSTTreeNode(char *name){
     //TODO memleak
     exit(err(99));
   }
+  // Init children
   node->rightChild = NULL;
   node->leftChild = NULL;
+  // Copy the key
   node->key = malloc((strlen(name) + 1) * sizeof(char));
   if(!node->key){
     //TODO memleak
     exit(err(99));
   }
-  memcpy(&(node->key), name, (strlen(name) + 1) * sizeof(char));
+  memcpy(node->key, name, (strlen(name) + 1) * sizeof(char));
+
+  // Init data
   node->data = malloc(sizeof(STElem));
   if(!node->data){
     //TODO memleak
     exit(err(99));
   }
-  memcpy(&(node->data->name), name, strlen(name) + 1);
+  // Copy name
+  node->data->name = malloc((strlen(name) + 1) * sizeof(char));
+  if(!node->data->name){
+    //TODO memleak
+    exit(err(99));
+  }
+  memcpy(node->data->name, name, (strlen(name) + 1) * sizeof(char));
+  // Init other data
   node->data->isVariable = true;
   node->data->varDataType = -1;
   node->data->varAddress = -1;
@@ -73,9 +84,11 @@ void treeInsert(STTreeNode **root, char *name){
  * @param elem to be freed
  */
 void treeElemDestroy(STElem *data){
-  free(data->name);
-  intBufDestroy(data->fnParamTypesBuf);
-  intBufDestroy(data->fnRetTypesBuf);
+  if(data){
+    free(data->name);
+    intBufDestroy(data->fnParamTypesBuf);
+    intBufDestroy(data->fnRetTypesBuf);
+  }
 }
 
 /**
@@ -83,17 +96,17 @@ void treeElemDestroy(STElem *data){
  *
  * @param root a pointer to a tree
  */
-void treeDestroy(STTreeNode *root){
-  if(!root){
+void treeDestroy(STTreeNode **root){
+  if(!(*root)){
     vypluj;
   }
-  treeDestroy(root->leftChild);
-  treeDestroy(root->rightChild);
-  treeElemDestroy(root->data);
-  free(root->key);
-  free(root->data);
-  free(root);
-  root = NULL;
+  treeDestroy(&((*root)->leftChild));
+  treeDestroy(&((*root)->rightChild));
+  treeElemDestroy((*root)->data);
+  free((*root)->key);
+  free((*root)->data);
+  free((*root));
+  *root = NULL;
 }
 
 

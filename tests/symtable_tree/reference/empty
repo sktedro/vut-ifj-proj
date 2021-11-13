@@ -1,0 +1,25 @@
+Inserting the first element (a) and testing:
+Testing 'a'
+Inserting the second element (c) and testing:
+Testing 'a'
+Testing 'c'
+Inserting a third element (d) and testing:
+Testing 'a'
+Testing 'c'
+Testing 'd'
+Inserting a fourth element (b) and testing:
+Testing 'a'
+Testing 'c'
+Testing 'd'
+Testing 'b'
+Inserting a fifth element (_) and testing:
+Testing 'a'
+Testing 'c'
+Testing 'd'
+Testing 'b'
+Testing '_'
+Deleting 'a' - root
+Deleting 'd' - leaf
+Deleting the rest
+Testing treeDestroy
+Test finished and passed if it reached this line

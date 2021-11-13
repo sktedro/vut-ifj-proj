@@ -28,6 +28,7 @@ IntBuffer *intBufInit(){
     return NULL;
   }
   buf->size = INTBUFINITLEN;
+  buf->len = 0;
   return buf;
 }
 
@@ -80,9 +81,11 @@ void intBufClear(IntBuffer *buf){
  * @param buf: pointer to a buffer that is to be destroyed
  */
 void intBufDestroy(IntBuffer *buf){
-  free(buf->data);
-  free(buf);
-  buf = NULL;
+  if(buf){
+    free(buf->data);
+    free(buf);
+    buf = NULL;
+  }
 }
 
 #endif
