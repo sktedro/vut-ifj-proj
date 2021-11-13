@@ -8,6 +8,9 @@
 #include "misc.h"
 #include "symtable_stack.h"
 
+
+//TODO STDestroy??, taktiez otestovat
+
 /**
  * @brief initialization of stackFrame and binary search tree
  *
@@ -16,7 +19,7 @@
  * @return 0 if successful
  * */
 int STInit(STStack *frameStack) {
-
+  // TODO načo tu alokujeme strom ked tu ešte doň nedávame žiaden prvok?
   STTreeNode *tree = (STTreeNode*) malloc(sizeof(STTreeNode));
   if(tree == NULL) {
     exit(err(MALLOC_ERROR));
@@ -41,14 +44,12 @@ int STInit(STStack *frameStack) {
  *
  * @return 0 if successful
  * */
-int STFrameStackPushFrame(STStack *frameStack) {
+int STPush(STStack *frameStack) {
   STStackElem *top = STStackTop(frameStack);
   int depth = 0;
-
   if(top != NULL) {
     depth = top->depth + 1;
   }
-
   if(frameStack != NULL) {
     STStackPush(frameStack, NULL, depth);
     return 0;
@@ -62,7 +63,7 @@ int STFrameStackPushFrame(STStack *frameStack) {
  *
  * @param frameStack - stack with frames
  */
-void STFrameStackPopFrame(STStack *frameStack) {
+void STPop(STStack *frameStack) {
   STStackPop(frameStack);
 }
 
@@ -104,7 +105,8 @@ STElem *STFind(STStack *stack, char *key) {
 }
 
 /**
- * @brief Set isVariable boolean of a symbol table element (a variable or a function)
+ * @brief Set isVariable boolean of a symbol table element (a variable or a 
+ * function)
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
@@ -288,7 +290,8 @@ bool STGetFnDefined(STStack *stack, char *key){
  * @param key (name) of the symbol table element
  * @param index of the parameter (0 = first parameter, 1 = second parameter...)
  *
- * @return data type of a parameter of a function, -1 if the function doesn't exist
+ * @return data type of a parameter of a function, -1 if the function doesn't 
+ * exist
  */
 int STGetParamType(STStack *stack, char *key, int index){
   STElem *data = STFind(stack, key);
@@ -309,7 +312,8 @@ int STGetParamType(STStack *stack, char *key, int index){
  * @param key (name) of the symbol table element
  * @param index of the return value (0 = first value, 1 = second value...)
  *
- * @return data type of a return value of a function, -1 if the function doesn't exist
+ * @return data type of a return value of a function, -1 if the function 
+ * doesn't exist
  */
 int STGetRetType(STStack *stack, char *key, int index){
   STElem *data = STFind(stack, key);
