@@ -268,6 +268,8 @@ void treeAppendRetType(STElem *data, int paramType){
   }
 }
 
+//TODO functions to get the data somehow? Or not needed?
+
 /* end of file binary_search_tree.h */
 
 #endif
