@@ -6,7 +6,7 @@
 #define SCANNER
 
 #include "misc.h"
-#include "buffer.h"
+#include "charBuffer.h"
 #include "token.h"
 
 // TODO:
@@ -23,9 +23,9 @@ char charMem = '\0';
  *
  * @return true if there was a character in charMem (and was restored)
  */
-bool restoreChar(Buffer *buf, char *c){
+bool restoreChar(CharBuffer *buf, char *c){
   if(charMem != '\0'){
-    if(bufAppend(buf, charMem)){
+    if(charBufAppend(buf, charMem)){
       return err(99);
     }
     *c = charMem;
@@ -96,17 +96,17 @@ bool isWhitespace(char c){
  *
  * @return true if char is a space, newline or tabulator
  */
-int returnToken(Token **token, int type, Buffer *buf){
+int returnToken(Token **token, int type, CharBuffer *buf){
   *token = tokenInit(type);
   if(!(*token)){
-    bufDestroy(buf);
+    charBufDestroy(buf);
     vypluj err(99);
   }
   if(tokenAddAttrib(*token, buf->data)){
-    bufDestroy(buf);
+    charBufDestroy(buf);
     vypluj err(99);
   }
-  bufDestroy(buf);
+  charBufDestroy(buf);
   vypluj 0;
 }
 
@@ -119,7 +119,7 @@ int returnToken(Token **token, int type, Buffer *buf){
  */
 int scanner(Token **token) {
   // Token data (characters composing it) will be written here
-  Buffer *buf = bufInit();
+  CharBuffer *buf = charBufInit();
   if(!buf){
     return err(99);
   }
@@ -142,7 +142,7 @@ int scanner(Token **token) {
     if(!restoreChar(buf, &c)){
       c = fgetc(stdin);
       if(c != EOF){
-        if(bufAppend(buf, c)){
+        if(charBufAppend(buf, c)){
           return err(99);
         }
       }else{
@@ -160,7 +160,7 @@ int scanner(Token **token) {
         // "
         if(c == '"'){
           // We don't need (and want) the starting '"'
-          bufPop(buf);
+          charBufPop(buf);
           state = s_strStart;
 
         // 0-9
@@ -227,7 +227,7 @@ int scanner(Token **token) {
         // space, \n, \t
         }else if(isWhitespace(c)){
           // Ignoring the whitespaces
-          bufPop(buf); 
+          charBufPop(buf); 
 
         // EOF
         }else if(c == EOF){
@@ -248,7 +248,7 @@ int scanner(Token **token) {
           state = s_comment;
         }else{
           charMem = c;
-          bufPop(buf);
+          charBufPop(buf);
           return returnToken(token, t_arithmOp, buf);
         }
         break;
@@ -256,7 +256,7 @@ int scanner(Token **token) {
       // Definitely a comment (got --). Don't yet know if it is a singleline or 
       // a multiline comment
       case s_comment:
-        bufPop(buf);
+        charBufPop(buf);
         if(c == '['){
           state = s_unknownComment;
         }else if(c == '\n'){
@@ -268,7 +268,7 @@ int scanner(Token **token) {
 
       // Got a '[', so it could be a multiline, based on the next character
       case s_unknownComment:
-        bufPop(buf);
+        charBufPop(buf);
         if(c == '['){
           state = s_multiLineComment;
         }else if(c == '\n'){
@@ -280,7 +280,7 @@ int scanner(Token **token) {
 
       // Definitely a singleline comment
       case s_singleLineComment:
-        bufPop(buf);
+        charBufPop(buf);
         if(c == '\n'){
           state = s_start;
         }
@@ -288,7 +288,7 @@ int scanner(Token **token) {
 
       // Definitely a multiline comment
       case s_multiLineComment:
-        bufPop(buf);
+        charBufPop(buf);
         if(c == ']'){
           state = s_multiLineCommentPossibleEnd;
         }
@@ -296,7 +296,7 @@ int scanner(Token **token) {
 
       // Got a ']' in a multiline comment, receiving another ']' ends it
       case s_multiLineCommentPossibleEnd:
-        bufPop(buf);
+        charBufPop(buf);
         if(c == ']'){
           state = s_start;
         }else{
@@ -308,7 +308,7 @@ int scanner(Token **token) {
       case s_strStart:
         // End of string
         if(c == '"'){
-          bufPop(buf);
+          charBufPop(buf);
           // state = s_strEnd
           return returnToken(token, t_str, buf);
         // If there is an escaped character, instantly append it
@@ -317,7 +317,7 @@ int scanner(Token **token) {
           if(c <= 31){ //TODO nepovolene znaky???
             vypluj err(1);
           }
-          if(bufAppend(buf, c)){
+          if(charBufAppend(buf, c)){
             return err(99);
           }
         }else if(c <= 31){ //TODO nepovolene znaky??
@@ -336,7 +336,7 @@ int scanner(Token **token) {
               if (!isWhitespace(c)) {
                   charMem = c;
               }
-              bufPop(buf);
+              charBufPop(buf);
               return returnToken(token, t_int, buf);
           }
         }
@@ -352,7 +352,7 @@ int scanner(Token **token) {
               if (!isWhitespace(c)) {
                   charMem = c;
               }
-            bufPop(buf);
+            charBufPop(buf);
             return returnToken(token, t_num, buf);
           }
         }
@@ -386,7 +386,7 @@ int scanner(Token **token) {
       case s_sciNum:
         if(!isNum(c)){
             charMem = c;
-            bufPop(buf);
+            charBufPop(buf);
             return returnToken(token, t_sciNum, buf);
         }
         break;
@@ -395,7 +395,7 @@ int scanner(Token **token) {
       case s_idOrKeyword:
         if(!(isLetter(c) || isNum(c) || c == '_')){
           charMem = c;
-          bufPop(buf);
+          charBufPop(buf);
           vypluj returnToken(token, t_idOrKeyword, buf);
         }
         break;
@@ -438,7 +438,7 @@ int scanner(Token **token) {
           return returnToken(token, t_relOp, buf);
         }else{
           charMem = c;
-          bufPop(buf);
+          charBufPop(buf);
           return returnToken(token, t_relOp, buf);
         }
         break;
@@ -450,7 +450,7 @@ int scanner(Token **token) {
           return returnToken(token, t_relOp, buf);
         }else{
           charMem = c;
-          bufPop(buf);
+          charBufPop(buf);
           return returnToken(token, t_assignment, buf);
         }
         break;
@@ -460,7 +460,7 @@ int scanner(Token **token) {
   
   // We should never reach these lines, but in case we do...
   // Free the allocated buffer
-  bufDestroy(buf);
+  charBufDestroy(buf);
   vypluj 0;
 }
 

@@ -18,7 +18,7 @@ int main(){
     printf("Relation operator token has a wrong type assigned (or none)!\n");
     return 1;
   }
-  if(intToken->attrib || relOpToken->attrib){
+  if(intToken->data || relOpToken->data){
     printf("A token has an attribute after initialization!\n");
     return 1;
   }
@@ -27,12 +27,12 @@ int main(){
   char str[] = "abcdsa";
   // Add an attribute
   tokenAddAttrib(intToken, str);
-  if(!intToken || !intToken->attrib){
+  if(!intToken || !intToken->data){
     printf("Adding an attribute was unsuccessful!\n");
     return 1;
   }
-  if(strcmp(intToken->attrib->data, str)){
-    printf("An attribute was added but its content is wrong! ('%s' vs '%s')\n", intToken->attrib->data, str);
+  if(strcmp(intToken->data, str)){
+    printf("An attribute was added but its content is wrong! ('%s' vs '%s')\n", intToken->data, str);
     return 1;
   }
   tokenDestroy(intToken);

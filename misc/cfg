@@ -22,9 +22,9 @@
 22. <stat>            -> eps
 23. <stat>            -> [id] <statWithId> <stat>
 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
-25. <stat>            -> if <expr> then <body> else <body> end <stat>
-26. <stat>            -> while <expr> do <body> end <stat>
-27. <statWithId>      -> <nextAssign> <expr>
+25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+26. <stat>            -> while <expr> do <stat> end <stat>
+27. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
 28. <statWithId>      -> = <expr>
 29. <statWithId>      -> <fnCall>
 30. 
