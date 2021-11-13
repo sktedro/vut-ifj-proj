@@ -12,9 +12,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="153fca42-4470-4088-9a64-8e5362bd3719" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vut-ifj-proj.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/token" beforeDir="false" afterPath="$PROJECT_DIR$/tests/token/basic/b1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/int_buffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_stack.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_stack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_tree.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_tree.h" afterDir="false" />
+    </list>
+    <list id="97c928d7-268a-4613-bdcf-80c61ed9c766" name="Changes by jija" comment="">
+      <change beforePath="$PROJECT_DIR$/charBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/char_buffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/int_buffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/precedence_analysis.h" beforeDir="false" afterPath="$PROJECT_DIR$/precedence_analysis.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scanner.h" beforeDir="false" afterPath="$PROJECT_DIR$/scanner.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symbol_stack.h" beforeDir="false" afterPath="$PROJECT_DIR$/symbol_stack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_stack.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_stack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_tree.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_tree.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/token.h" beforeDir="false" afterPath="$PROJECT_DIR$/token.h" afterDir="false" />
+    </list>
+    <list id="e2da7652-4177-4dfd-bcfc-3e4eda911001" name="Changes by tedro" comment="">
+      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_stack.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_stack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symtable_tree.h" beforeDir="false" afterPath="$PROJECT_DIR$/symtable_tree.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +46,13 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -43,6 +73,86 @@
       </UrlAndAccount>
     </option>
   </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/symtable_stack.h">
+      <ranges>
+        <range start1="3" end1="3" start2="3" end2="4" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="10" end1="11" start2="11" end2="12" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="15" end1="19" start2="16" end2="21" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="24" end1="25" start2="26" end2="27" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="35" end1="36" start2="37" end2="38" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="40" end1="41" start2="42" end2="43" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="46" end1="46" start2="48" end2="49" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="48" end1="49" start2="51" end2="52" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="62" end1="62" start2="65" end2="66" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="63" end1="64" start2="67" end2="68" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="77" end1="78" start2="81" end2="82" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="98" end1="99" start2="102" end2="103" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="119" end1="120" start2="123" end2="124" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="136" end1="137" start2="140" end2="141" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/symtable.h">
+      <ranges>
+        <range start1="8" end1="8" start2="8" end2="18" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="9" end1="10" start2="19" end2="57" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="12" end1="13" start2="59" end2="80" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="15" end1="15" start2="82" end2="323" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="17" end1="18" start2="325" end2="326" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/symtable_tree.h">
+      <ranges>
+        <range start1="4" end1="6" start2="4" end2="6" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="7" end1="7" start2="7" end2="8" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="8" end1="9" start2="9" end2="9" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="12" end1="13" start2="12" end2="13" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="14" end1="15" start2="14" end2="15" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="18" end1="19" start2="18" end2="19" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="22" end1="23" start2="22" end2="23" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="24" end1="24" start2="24" end2="25" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="27" end1="27" start2="28" end2="29" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="28" end1="29" start2="30" end2="31" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="31" end1="32" start2="33" end2="34" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="33" end1="34" start2="35" end2="36" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="39" end1="40" start2="41" end2="42" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="41" end1="43" start2="43" end2="46" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="45" end1="46" start2="48" end2="49" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="47" end1="48" start2="50" end2="52" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="66" end1="67" start2="70" end2="71" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="68" end1="69" start2="72" end2="73" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="71" end1="75" start2="75" end2="80" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="76" end1="77" start2="81" end2="84" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="79" end1="79" start2="86" end2="87" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="114" end1="116" start2="122" end2="122" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="146" end1="147" start2="152" end2="153" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="175" end1="176" start2="181" end2="181" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="177" end1="178" start2="182" end2="183" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="181" end1="182" start2="186" end2="186" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="183" end1="184" start2="187" end2="188" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="189" end1="190" start2="193" end2="196" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="216" end1="291" start2="222" end2="222" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="293" end1="293" start2="224" end2="226" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/misc.h">
+      <ranges>
+        <range start1="20" end1="20" start2="20" end2="25" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="31" end1="31" start2="36" end2="37" changelist="e2da7652-4177-4dfd-bcfc-3e4eda911001" />
+        <range start1="166" end1="167" start2="172" end2="173" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="172" end1="173" start2="178" end2="179" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="231" end1="232" start2="237" end2="238" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/int_buffer.h">
+      <ranges>
+        <range start1="22" end1="23" start2="22" end2="23" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="24" end1="24" start2="24" end2="25" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="27" end1="28" start2="28" end2="29" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="91" end1="92" start2="92" end2="93" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+  </component>
   <component name="ProjectId" id="1zSZ7FBdekRY4LBGiizWO0sxDuz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -50,6 +160,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
@@ -57,16 +168,25 @@
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
+    <property name="codeWithMe.voiceChat.enabledByDefault" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="advanced.settings" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tests/token" />
     </key>
   </component>
   <component name="RunManager">
+    <configuration name="Unnamed" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -96,10 +216,18 @@
       <workItem from="1635063935725" duration="15750000" />
       <workItem from="1635089035922" duration="1851000" />
       <workItem from="1635251759645" duration="3706000" />
+      <workItem from="1636710369567" duration="270000" />
+      <workItem from="1636797507744" duration="7097000" />
+      <workItem from="1636810054889" duration="4168000" />
+      <workItem from="1636814258685" duration="92000" />
+      <workItem from="1636817128303" duration="10803000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
 </project>

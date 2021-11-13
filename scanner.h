@@ -465,3 +465,4 @@ int scanner(Token **token) {
 }
 
 #endif
+/* end of file scanner.h */

@@ -20,12 +20,13 @@
 IntBuffer *intBufInit(){
   IntBuffer *buf = (IntBuffer*)malloc(sizeof(IntBuffer));
   if(buf == NULL){
-    return NULL;
+    exit(MALLOC_ERROR);
   }
+
   buf->data = (int*)malloc(INTBUFINITLEN * sizeof(int));
   if(buf->data == NULL){
     free(buf);
-    return NULL;
+    exit(MALLOC_ERROR);
   }
   buf->size = INTBUFINITLEN;
   buf->len = 0;
@@ -89,3 +90,4 @@ void intBufDestroy(IntBuffer *buf){
 }
 
 #endif
+/* end of file int_buffer.h */

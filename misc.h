@@ -19,6 +19,11 @@
 
 
 /*
+ *  Error returns (will be enum?)
+ */
+#define MALLOC_ERROR 99
+
+/*
  * Macros
  */
 
@@ -29,6 +34,7 @@
  */
 
 
+// TODO ERR enum
 
 // Enumeration of states of the finite state machine
 // The commented out states are not used, as instead of setting them as the
@@ -164,13 +170,13 @@ typedef struct SStackElem{
 
 
 // Symbol stack
-typedef struct{
+typedef struct {
   SStackElem *top;
 } SStack;
 
 
 // Symbol table element
-typedef struct{
+typedef struct {
   char *name;
   bool isVariable; // var or fn
   int varDataType;
@@ -229,3 +235,4 @@ int err(int errCode){
 
 
 #endif
+/* end of file misc.h */

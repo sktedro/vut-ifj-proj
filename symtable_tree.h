@@ -2,50 +2,54 @@
  * Binary search tree
  */
 
-#ifndef BINARY_SEARCH_TREE
-#define BINARY_SEARCH_TREE
+#ifndef SYMTABLE_TREE
+#define SYMTABLE_TREE
 
-#include "intBuffer.h"
 #include "misc.h"
+#include "intBuffer.h"
 
 
 /**
- * @brief Creates a new node with the given key and name, allocates memory.
+ * @brief Creates a new node with the given key and key, allocates memory.
  *
- * @param name name (and key) of the new node
+ * @param key key of the new node
  *
  * @return ptr to the created node
  */
-STTreeNode *newSTTreeNode(char *name){
+STTreeNode *newSTTreeNode(char *key){
   STTreeNode *node = (STTreeNode *) malloc(sizeof(STTreeNode));
   if(!node){
     //TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
+
   // Init children
   node->rightChild = NULL;
   node->leftChild = NULL;
+
   // Copy the key
-  node->key = malloc((strlen(name) + 1) * sizeof(char));
+  node->key = malloc((strlen(key) + 1) * sizeof(char));
   if(!node->key){
     //TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
-  memcpy(node->key, name, (strlen(name) + 1) * sizeof(char));
+  memcpy(node->key, key, (strlen(key) + 1) * sizeof(char));
 
   // Init data
   node->data = malloc(sizeof(STElem));
   if(!node->data){
     //TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
-  // Copy name
-  node->data->name = malloc((strlen(name) + 1) * sizeof(char));
+
+  // Copy key
+  node->data->name = malloc((strlen(key) + 1) * sizeof(char));
   if(!node->data->name){
     //TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
-  memcpy(node->data->name, name, (strlen(name) + 1) * sizeof(char));
+  memcpy(node->data->name, key, (strlen(key) + 1) * sizeof(char));
+
   // Init other data
   node->data->isVariable = true;
   node->data->varDataType = -1;
@@ -64,19 +68,23 @@ STTreeNode *newSTTreeNode(char *name){
  * @param root node of the tree
  * @param name name (and key) of the new node
  */
-void treeInsert(STTreeNode **root, char *name){
+void treeInsert(STTreeNode **root, char *key){
   if(!(*root)){
-    *root = newSTTreeNode(name);
+    *root = newSTTreeNode(key);
     vypluj;
   }
-  if(strcmp(name, (*root)->key) < 0){
-    treeInsert(&((*root)->leftChild), name);
-  }else if(strcmp(name, (*root)->key) > 0){
-    treeInsert(&((*root)->rightChild), name);
+  if(strcmp(key, (*root)->key) < 0) {
+    treeInsert(&((*root)->leftChild), key);
   }
-  // No need for 'else' since this function only inserts a bare node with a key
+  else if(strcmp(key, (*root)->key) > 0) {
+    treeInsert(&((*root)->rightChild), key);
+  }
+  else { // found the key
+    fprintf(stderr, "Warning: inserting a key that is already there. Nothing will be changed.\n");
+  }
   // and a name, nothing else
 }
+
 
 /**
  * @brief Frees all memory allocated by a tree node
@@ -112,8 +120,6 @@ void treeDestroy(STTreeNode **root){
 
 /**
  * @brief Prints from tree to leaves, from left to right (preorder?)
- * A very ugly print
- * TODO pretty printing
  *
  * @param root root to the tree to be printed
  */
@@ -144,7 +150,7 @@ void replaceByRightmost(STTreeNode *target, STTreeNode **tree){
   target->key = (*tree)->key;
   target->data = (*tree)->data;
   tmp = (*tree)->leftChild;
-  free(*tree);
+  free(*tree); // free element function????? TODO
   *tree = tmp;
 }
 
@@ -173,21 +179,21 @@ void treeDelete(STTreeNode **root, char *key){
   if((*root)->rightChild == NULL && (*root)->leftChild == NULL){
     free(*root);
     *root = NULL;
-    vypluj;
   }
-  if((*root)->leftChild == NULL){
+  else if((*root)->leftChild == NULL){
     tmp = (*root)->rightChild;
     free(*root);
     *root = tmp;
-    vypluj;
   }
-  if((*root)->rightChild == NULL){
+  else if((*root)->rightChild == NULL){
     tmp = (*root)->leftChild;
     free(*root);
     *root = tmp;
     vypluj;
   }
-  replaceByRightmost(*root, &(*root)->leftChild);
+  else {
+    replaceByRightmost(*root, &(*root)->leftChild);
+  }
 }
 
 
@@ -215,79 +221,6 @@ STElem *treeGetData(STTreeNode *root, char *key){
   return root->data;
 }
 
-
-
-// TODO each line is one function - but do we need all that?
-// set isVariable? This seems to be useless
-// set varDataType, varAddress
-// set fnDefined
-// append to fnParamBuffer
-// append to fnRetBuffer
-
-/*
- * @brief Use for STTreeNodes that represent variables - variable's data
- * type and it's address, also sets boolean 'isVariable' to true
- *
- * @param data - pointer to the data structure of a tree node
- * @param varDataType - data type to be written
- * @param varAddress - address to be written
- */
-// Will this function ever be used? Will we ever find out data type at the same
-// time as the address?
-void treeSetVarData(STElem *data, int varDataType, int varAddress){
-  if(data){
-    data->isVariable = true;
-    data->varDataType = varDataType;
-    data->varAddress = varAddress;
-  }
-}
-
-/*
- * @brief Use for STTreeNodes that represent functions - boolean 'isVariable' 
- * gets set to false and boolean 'fnDefined' is set based on the paramter
- *
- * @param data - pointer to the data structure of a tree node
- * @param fnDefined - boolean value to be written to STElem->fnDefined
- */
-void treeSetFnData(STElem *data, bool fnDefined){
-  if(data){
-    data->isVariable = false;
-    data->fnDefined = fnDefined;
-  }
-}
-
-/*
- * @brief appends a data type of a paramter of a function
- *
- * @param data - pointer to the data structure of a tree node
- * @param paramType - data type of the parameter to be appended
- */
-void treeAppendParamType(STElem *data, int paramType){
-  if(data){
-    if(!data->fnParamTypesBuf){
-      data->fnParamTypesBuf = intBufInit();
-    }
-    intBufAppend(data->fnParamTypesBuf, paramType);
-  }
-}
-
-/*
- * @brief appends a data type of a return value of a function
- *
- * @param data - pointer to the data structure of a tree node
- * @param paramType - data type of the parameter to be appended
- */
-void treeAppendRetType(STElem *data, int paramType){
-  if(data){
-    if(!data->fnRetTypesBuf){
-      data->fnRetTypesBuf = intBufInit();
-    }
-    intBufAppend(data->fnRetTypesBuf, paramType);
-  }
-}
-
-//TODO functions to get the data somehow? Or not needed?
-
-/* end of file binary_search_tree.h */
-
 #endif
+
+/* end of file symtable_tree.h */
