@@ -9,32 +9,24 @@
 #include "symtable_stack.h"
 
 
-//TODO STDestroy??, taktiez otestovat
-
 /**
- * @brief initialization of stackFrame and binary search tree
+ * @brief initialization of symbol table (stack)
  *
  * @param frameStack
  *
  * @return 0 if successful
  * */
-int STInit(STStack *frameStack) {
-  // TODO načo tu alokujeme strom ked tu ešte doň nedávame žiaden prvok?
-  STTreeNode *tree = (STTreeNode*) malloc(sizeof(STTreeNode));
-  if(tree == NULL) {
-    exit(err(MALLOC_ERROR));
-  }
-  frameStack = STStackInit();
+STStack *STInit(){
+  return STStackInit();
+}
 
-  STStackElem *stackElement = (STStackElem*) malloc(sizeof(STStackElem));
-
-  stackElement->next = NULL;
-  stackElement->depth = 0;
-  stackElement->table = tree;
-
-  frameStack->top = stackElement;
-
-  return 0;
+/**
+ * @brief Destroy the symbol table
+ *
+ * @param stack to be destroyed
+ */
+void STDestroy(STStack **stack){
+  STStackDestroy(stack);
 }
 
 /**
@@ -299,7 +291,9 @@ int STGetParamType(STStack *stack, char *key, int index){
     if(!data->fnParamTypesBuf){
       return -1;
     }
-    return data->fnParamTypesBuf->data[index];
+    if(data->fnParamTypesBuf->len > index){
+      return data->fnParamTypesBuf->data[index];
+    }
   }
   return -1;
 }
@@ -321,7 +315,9 @@ int STGetRetType(STStack *stack, char *key, int index){
     if(!data->fnRetTypesBuf){
       return -1;
     }
-    return data->fnRetTypesBuf->data[index];
+    if(data->fnRetTypesBuf->len > index){
+      return data->fnRetTypesBuf->data[index];
+    }
   }
   return -1;
 }

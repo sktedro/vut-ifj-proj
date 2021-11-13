@@ -8,6 +8,7 @@ int checkFrame(STStack *stack, int depth){
     printf("A frame on top of the stack does not have the right depth %d\n", depth);
     return 1;
   }
+  return 0;
 }
 
 // Check if a node exists (search for it)
@@ -16,12 +17,16 @@ int checkNode(STStack *stack, char *key){
     printf("A node with key %s could not be found\n", key);
     return 1;
   }
+  return 0;
 }
 
+
 int main(){
+  printf("Message is an error message only if it is the last one from the output and the return value != 0\n");
+
   // Stack init
-  STStack *stack;
-  if(STInit(stack) || !stack){
+  STStack *stack = STInit();
+  if(!stack){
     printf("Error while initializing\n");
     return 1;
   }
@@ -107,6 +112,7 @@ int main(){
   }
   // Check if the frame with depth 1 is on top
   if(checkFrame(stack, 1)){
+    printf("Top should be a frame with depth 1 but is not\n");
     return 1;
   }
   // Insert two new nodes
@@ -271,9 +277,10 @@ int main(){
     return 1;
   }
 
+
+
   // Done testing basic operations
   printf("Basic operations (init, push, pop, insert, find) working\n");
-    return 1;
 
 
 
@@ -407,8 +414,8 @@ int main(){
   STSetIsVariable(stack, "1", true);
   STSetIsVariable(stack, "2", false);
   STSetVarDataType(stack, "0", 2);
-  STSetVarDataType(stack, "0", 3);
-  STSetVarAddress(stack, "1", 4);
+  STSetVarDataType(stack, "1", 3);
+  STSetVarAddress(stack, "0", 4);
   STSetVarAddress(stack, "1", 5);
   STSetFnDefined(stack, "2", false);
   STAppendParamType(stack, "2", 6);
@@ -420,19 +427,19 @@ int main(){
     printf("Depth of '0/1/2' is wrong\n");
     return 1;
   }
-  if(STGetIsVariable(stack, "var") != true
-    || STGetIsVariable(stack, "var") != true
-    || STGetIsVariable(stack, "var") != false){
+  if(STGetIsVariable(stack, "0") != true
+    || STGetIsVariable(stack, "1") != true
+    || STGetIsVariable(stack, "2") != false){
     printf("IsVariable of 0/1/2 is wrong\n");
     return 1;
   }
   if(STGetVarDataType(stack, "0") != 2
-      || STGetVarDataType(stack, "0") != 3){
+      || STGetVarDataType(stack, "1") != 3){
     printf("Data type of 0/1 is wrong\n");
     return 1;
   }
   if(STGetVarAddress(stack, "0") != 4
-      || STGetVarAddress(stack, "0") != 5){
+      || STGetVarAddress(stack, "1") != 5){
     printf("Address of 0/1 is wrong\n");
     return 1;
   }
@@ -587,6 +594,12 @@ int main(){
   if(stack->top){
     printf("A frame exists but should not\n");
     return 1;
+  }
+
+  // Destroy the symbol table
+  STDestroy(&stack);
+  if(stack){
+    printf("Could not destroy the symbol table\n");
   }
 
   printf("Symtable tests finished\n");
