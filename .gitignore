@@ -4,3 +4,4 @@ logs/
 .idea/
 tests/*/outputs/
 cmake-build-debug/
+CMakeLists.txt
