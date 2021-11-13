@@ -99,94 +99,110 @@ int testSetFunctions(STElem *tmp){
 int main() {
   int ret = 0; // Return value of helper functions in this file
   STTreeNode *tree = NULL; // The tree
-
   STElem *tmp = NULL; // Pointer to a temporary element (node) of a tree
+  char c[2];
+  c[1] = '\0';
 
 
   printf("Inserting the first element (a) and testing:\n");
 
-  treeInsert(&tree, "a");
-  printf("Testing 'a'\n");
-  if(testSetFunctions(treeGetData(tree, "a"))){
+  c[0] = 'a';
+  treeInsert(&tree, c);
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
 
   printf("Inserting the second element (c) and testing:\n");
 
-  treeInsert(&tree, "c");
-  printf("Testing 'a'\n");
-  if(testSetFunctions(treeGetData(tree, "a"))){
+  c[0] = 'a';
+  treeInsert(&tree, c);
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'c'\n");
-  if(testSetFunctions(treeGetData(tree, "c"))){
+  c[0] = 'c';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
 
   printf("Inserting a third element (d) and testing:\n");
 
-  treeInsert(&tree, "d");
-  printf("Testing 'a'\n");
-  if(testSetFunctions(treeGetData(tree, "a"))){
+  treeInsert(&tree, c);
+  c[0] = 'a';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'c'\n");
-  if(testSetFunctions(treeGetData(tree, "c"))){
+  c[0] = 'c';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'd'\n");
-  if(testSetFunctions(treeGetData(tree, "d"))){
+  c[0] = 'd';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
 
   printf("Inserting a fourth element (b) and testing:\n");
 
-  treeInsert(&tree, "b");
-  printf("Testing 'a'\n");
-  if(testSetFunctions(treeGetData(tree, "a"))){
+  treeInsert(&tree, c);
+  c[0] = 'a';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'c'\n");
-  if(testSetFunctions(treeGetData(tree, "c"))){
+  c[0] = 'c';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'd'\n");
-  if(testSetFunctions(treeGetData(tree, "d"))){
+  c[0] = 'd';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'b'\n");
-  if(testSetFunctions(treeGetData(tree, "b"))){
+  c[0] = 'b';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
 
   // '_' < 'a'
   printf("Inserting a fifth element (_) and testing:\n");
 
-  treeInsert(&tree, "_");
-  printf("Testing 'a'\n");
-  if(testSetFunctions(treeGetData(tree, "a"))){
+  treeInsert(&tree, c);
+  c[0] = 'a';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'c'\n");
-  if(testSetFunctions(treeGetData(tree, "c"))){
+  c[0] = 'c';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'd'\n");
-  if(testSetFunctions(treeGetData(tree, "d"))){
+  c[0] = 'd';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing 'b'\n");
-  if(testSetFunctions(treeGetData(tree, "b"))){
+  c[0] = 'b';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
-  printf("Testing '_'\n");
-  if(testSetFunctions(treeGetData(tree, "_"))){
+  c[0] = '_';
+  printf("Testing '%s'\n", c);
+  if(testSetFunctions(treeGetData(tree, c))){
     return 1;
   }
 
   // Probably a redundant search test
   
-  tmp = treeGetData(tree, "a");
+  tmp = treeGetData(tree, c);
   if(tmp->fnRetTypesBuf->len != 2){
     printf("Inserted second ret type but buffer length is not 2\n");
     return 1;
@@ -204,7 +220,7 @@ int main() {
     return 1;
   }
 
-  tmp = treeGetData(tree, "_");
+  tmp = treeGetData(tree, c);
   if(tmp->fnRetTypesBuf->len != 2){
     printf("Inserted second ret type but buffer length is not 2\n");
     return 1;
@@ -227,45 +243,45 @@ int main() {
 
   printf("Deleting 'a' - root\n");
 
-  treeDelete(&tree, "a");
-  if(treeGetData(tree, "a")){
+  treeDelete(&tree, c);
+  if(treeGetData(tree, c)){
     printf("Deleting a failed\n");
     return 1;
   }
 
   printf("Deleting 'd' - leaf\n");
 
-  treeDelete(&tree, "d");
-  if(treeGetData(tree, "d")){
+  treeDelete(&tree, c);
+  if(treeGetData(tree, c)){
     printf("Deleting d failed\n");
     return 1;
   }
 
   printf("Deleting the rest\n");
 
-  treeDelete(&tree, "b");
-  if(treeGetData(tree, "b")){
+  treeDelete(&tree, c);
+  if(treeGetData(tree, c)){
     printf("Deleting b failed\n");
     return 1;
   }
-  treeDelete(&tree, "c");
-  if(treeGetData(tree, "c")){
+  treeDelete(&tree, c);
+  if(treeGetData(tree, c)){
     printf("Deleting c failed\n");
     return 1;
   }
-  treeDelete(&tree, "_");
-  if(treeGetData(tree, "_")){
+  treeDelete(&tree, c);
+  if(treeGetData(tree, c)){
     printf("Deleting _ failed\n");
     return 1;
   }
 
   // The tree should be empty now
 
-  if(treeGetData(tree, "a")
-      || treeGetData(tree, "b")
-      || treeGetData(tree, "c")
-      || treeGetData(tree, "d")
-      || treeGetData(tree, "_")){
+  if(treeGetData(tree, c)
+      || treeGetData(tree, c)
+      || treeGetData(tree, c)
+      || treeGetData(tree, c)
+      || treeGetData(tree, c)){
     printf("That's weird\n");
     return 1;
   }
@@ -276,7 +292,6 @@ int main() {
   printf("Testing treeDestroy\n");
   treeInsert(&tree, "o");
   treeInsert(&tree, "u");
-  treeInsert(&tree, "d");
   treeInsert(&tree, "f");
   treeInsert(&tree, "a");
   treeInsert(&tree, "i");
@@ -292,7 +307,6 @@ int main() {
   // Destroy the tree
   treeDestroy(tree);
   // Check if any element can be found
-  char c[2] = "a";
   for(c[0] = 'a'; c[0] <= 'z'; c[0] += 1){
     if(treeGetData(tree, c)){
       printf("The tree was destroyed but an element could still be found\n");
