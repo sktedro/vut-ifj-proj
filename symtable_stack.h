@@ -56,7 +56,7 @@ void STStackPop(STStack *stack){
     return;
   }
   STStackElem *tmp = stack->top;
-  stack->top = tmp->next;
+  stack->top = stack->top->next;
   treeDestroy(&(tmp->table));
   free(tmp);
 }
@@ -122,14 +122,15 @@ STStackElem *STStackNthElem(STStack *stack, int n){
  *
  * @param stack to be freed
  */
-void STStackDestroy(STStack *stack){
-  if(!stack){
+void STStackDestroy(STStack **stack){
+  if(!stack || !(*stack)){
     return;
   }
-  while(stack->top){
-    STStackPop(stack);
+  while((*stack)->top){
+    STStackPop(*stack);
   }
-  free(stack);
+  free(*stack);
+  *stack = NULL;
 }
 
 #endif

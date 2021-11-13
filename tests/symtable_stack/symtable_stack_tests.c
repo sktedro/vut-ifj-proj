@@ -3,6 +3,10 @@
 
 
 int main(int argc, char *argv[]){
+  // Create three elements of the stack - trees
+  STTreeNode *tree1 = NULL, *tree2 = NULL, *tree3 = NULL;
+
+
   // Initialize the stack
   STStack *stack = STStackInit();
   if(!stack){
@@ -30,17 +34,8 @@ int main(int argc, char *argv[]){
   }
 
 
-  // Create three elements of the stack - trees
-  STTreeNode *tree1 = NULL, *tree2 = NULL, *tree3 = NULL;
-  treeInsert(&tree1, "abc");
-  treeInsert(&tree2, "def");
-  treeInsert(&tree3, "ghi");
-  if(!tree1 || !tree2 || !tree3){
-    printf("Tree could not be initialized\n");
-    return 1;
-  }
-
   // Push one element and test all functions
+  treeInsert(&tree1, "abc");
   STStackPush(stack, tree1, 0);
   if(stack->top->depth != 0 || stack->top->table != tree1){
     printf("Element pushed is not on the stack\n");
@@ -64,10 +59,12 @@ int main(int argc, char *argv[]){
   }
   // Pop the only element in the stack
   STStackPop(stack);
-  if(stack){
+  if(stack->top){
     printf("Stack pop unsuccessful\n");
     return 1;
   }
+  tree1 = NULL;
+
 
   // Push one element and test all functions again
   treeInsert(&tree1, "abc");
@@ -93,15 +90,17 @@ int main(int argc, char *argv[]){
     return 1;
   }
   // Destroy the stack with only one element
-  STStackDestroy(stack);
+  STStackDestroy(&stack);
   if(stack){
     printf("Destroying the stack unsuccessful\n");
     return 1;
   }
+  tree1 = NULL;
 
   // Insert two elements and test all functions
   stack = STStackInit();
   treeInsert(&tree1, "abc");
+  treeInsert(&tree2, "def");
   STStackPush(stack, tree1, 0);
   STStackPush(stack, tree2, 1);
   if(STStackTop(stack)->table != tree2){
@@ -117,14 +116,18 @@ int main(int argc, char *argv[]){
     return 1;
   }
   // Destroy a stack with two elements
-  STStackDestroy(stack);
+  STStackDestroy(&stack);
   if(stack){
     printf("Destroying the stack unsuccessful (stack size was 2)\n");
     return 1;
   }
+  tree1 = tree2 = NULL;
 
   // Insert three elements and test all functions
   stack = STStackInit();
+  treeInsert(&tree1, "abc");
+  treeInsert(&tree2, "def");
+  treeInsert(&tree3, "ghi");
   STStackPush(stack, tree1, 0);
   STStackPush(stack, tree2, 1);
   STStackPush(stack, tree3, 2);
@@ -140,7 +143,7 @@ int main(int argc, char *argv[]){
     printf("Bottom doesn't return the right element (stack size = 3)\n");
     return 1;
   }
-  if(STStackBottom(stack)->depth != 2){
+  if(STStackBottom(stack)->depth != 0){
     printf("Elements depth is wrong (Bottom)\n");
     return 1;
   }

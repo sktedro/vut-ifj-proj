@@ -88,6 +88,7 @@ void treeElemDestroy(STElem *data){
     free(data->name);
     intBufDestroy(data->fnParamTypesBuf);
     intBufDestroy(data->fnRetTypesBuf);
+    free(data);
   }
 }
 
@@ -97,14 +98,13 @@ void treeElemDestroy(STElem *data){
  * @param root a pointer to a tree
  */
 void treeDestroy(STTreeNode **root){
-  if(!(*root)){
+  if(!root || !(*root)){
     vypluj;
   }
   treeDestroy(&((*root)->leftChild));
   treeDestroy(&((*root)->rightChild));
   treeElemDestroy((*root)->data);
   free((*root)->key);
-  free((*root)->data);
   free((*root));
   *root = NULL;
 }
