@@ -3,7 +3,6 @@ CFLAGS=-Wall -Wextra -g
 
 
 MAIN=main.c
-# LIBS=scanner.h token.h charBuffer.h intBuffer.h symbol_stack.h precedence_analysis.h symbol_table_tree.h symtable.h symtable_stack.h
 LIBS=\
 charBuffer.h \
 intBuffer.h \
@@ -11,7 +10,7 @@ misc.h \
 precedence_analysis.h \
 scanner.h \
 symbol_stack.h \
-symbol_table_tree.h \
+symtable_tree.h \
 symtable.h \
 symtable_stack.h \
 token.h \

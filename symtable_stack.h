@@ -6,7 +6,7 @@
 #define SYMTABLE_STACK
 
 #include "misc.h"
-#include "symbol_table_tree.h"
+#include "symtable_tree.h"
 
 /*
  * @brief Allocate a new stack, initialize it and return it
@@ -87,6 +87,9 @@ STStackElem *STStackBottom(STStack *stack){
     return NULL;
   }
   STStackElem *tmp = stack->top;
+  if(!tmp){
+    return NULL;
+  }
   while(tmp->next){
     tmp = tmp->next;
   }
