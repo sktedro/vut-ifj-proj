@@ -20,12 +20,12 @@
 CharBuffer *charBufInit(){
   CharBuffer *buf = (CharBuffer*)malloc(sizeof(CharBuffer));
   if(buf == NULL){
-    return NULL;
+    exit(MALLOC_ERROR);
   }
   buf->data = (char*)malloc(CHARBUFINITLEN * sizeof(char));
   if(buf->data == NULL){
     free(buf);
-    return NULL;
+    exit(MALLOC_ERROR);
   }
   buf->size = CHARBUFINITLEN;
   buf->data[0] = '\0';
@@ -105,3 +105,4 @@ void charBufAppendString(char *orig, CharBuffer **buffer) {
 }
 
 #endif
+/* end of file char_buffer.h */

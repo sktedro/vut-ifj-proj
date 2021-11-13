@@ -6,7 +6,7 @@
 #define SCANNER
 
 #include "misc.h"
-#include "charBuffer.h"
+#include "char_buffer.h"
 #include "token.h"
 
 // TODO:
@@ -465,3 +465,4 @@ int scanner(Token **token) {
 }
 
 #endif
+/* end of file scanner.h */

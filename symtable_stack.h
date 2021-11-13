@@ -2,27 +2,29 @@
  * A stack for the symbol table
  */
 
+
 #ifndef SYMTABLE_STACK
 #define SYMTABLE_STACK
 
 #include "misc.h"
 #include "symtable_tree.h"
 
-/*
+/**
  * @brief Allocate a new stack, initialize it and return it
  *
  * @return a new stack
  */
-STStack *STStackInit(){
-  STStack *stack = (STStack*)malloc(sizeof(STStack));
-  if(!stack){
-    return NULL;
+STStack *STStackInit() {
+  STStack *stack = (STStack*) malloc(sizeof(STStack));
+  if(stack == NULL) {
+    // TODO memleak?
+    exit(MALLOC_ERROR);
   }
   stack->top = NULL;
   return stack;
 }
 
-/*
+/**
  * @brief allocate and push a new element to the top of the stack
  *
  * @param stack
@@ -33,20 +35,21 @@ STStack *STStackInit(){
 int STStackPush(STStack *stack, STTreeNode *table, int depth){
   if(!stack){
     // TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
   STStackElem *newElem = (STStackElem*)malloc(sizeof(STStackElem));
   if(!newElem){
     // TODO memleak
-    exit(err(99));
+    exit(err(MALLOC_ERROR));
   }
   newElem->table = table;
   newElem->depth = depth;
   newElem->next = stack->top;
   stack->top = newElem;
+  return 0;
 }
 
-/*
+/**
  * @brief remove (and free it's allocated memory) the top element
  *
  * @param stack
@@ -61,7 +64,8 @@ void STStackPop(STStack *stack){
   free(tmp);
 }
 
-/*
+
+/**
  * @brief get the element at the top of the stack
  *
  * @param stack
@@ -75,7 +79,7 @@ STStackElem *STStackTop(STStack *stack){
   return stack->top;
 }
 
-/*
+/**
  * @brief get the element at the bottom of the stack
  *
  * @param stack
@@ -96,7 +100,7 @@ STStackElem *STStackBottom(STStack *stack){
   return tmp;
 }
 
-/*
+/**
  * @brief get the element n elements from the top of the stack
  *
  * @param stack
@@ -117,7 +121,7 @@ STStackElem *STStackNthElem(STStack *stack, int n){
   return tmp;
 }
 
-/*
+/**
  * @brief Free all memory allocated by the symbol stack
  *
  * @param stack to be freed
@@ -134,3 +138,4 @@ void STStackDestroy(STStack **stack){
 }
 
 #endif
+/* end of file symtable_stack.h */

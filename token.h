@@ -18,7 +18,7 @@
 Token *tokenInit(int type){
   Token *token = malloc(sizeof(Token));
   if(!token){
-    return NULL;
+    exit(MALLOC_ERROR);
   }
   token->type = type;
   token->data = NULL;
@@ -66,3 +66,4 @@ void tokenDestroy(Token *token){
 }
 
 #endif
+/* end of file token.h */

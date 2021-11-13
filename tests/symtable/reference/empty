@@ -1,0 +1,39 @@
+Message is an error message only if it is the last one from the output and the return value != 0
+A node with key ghi could not be found
+A node with key 1 could not be found
+A node with key 2 could not be found
+A node with key 3 could not be found
+A node with key 4 could not be found
+A node with key 5 could not be found
+A node with key 6 could not be found
+A node with key 7 could not be found
+A node with key a could not be found
+A node with key b could not be found
+A node with key 1 could not be found
+A node with key 2 could not be found
+A node with key 3 could not be found
+A node with key 4 could not be found
+A node with key 5 could not be found
+A node with key 6 could not be found
+A node with key 7 could not be found
+A node with key abc could not be found
+A node with key def could not be found
+A node with key a could not be found
+A node with key b could not be found
+A node with key 1 could not be found
+A node with key 2 could not be found
+A node with key 3 could not be found
+A node with key 4 could not be found
+A node with key 5 could not be found
+A node with key 6 could not be found
+A node with key 7 could not be found
+Basic operations (init, push, pop, insert, find) working
+A node with key a could not be found
+A node with key b could not be found
+A node with key abc could not be found
+A node with key def could not be found
+A node with key 1 could not be found
+A node with key 2 could not be found
+A node with key 3 could not be found
+A node with key  could not be found
+Symtable tests finished

@@ -2,7 +2,7 @@
 #include "../../symtable_stack.h"
 
 
-int main(int argc, char *argv[]){
+int main(){
   // Create three elements of the stack - trees
   STTreeNode *tree1 = NULL, *tree2 = NULL, *tree3 = NULL;
 

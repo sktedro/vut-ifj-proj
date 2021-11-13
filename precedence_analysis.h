@@ -28,3 +28,4 @@ char precTab[12][12] = {
 
 
 #endif
+/* end of file precedence_analysis.h*/
