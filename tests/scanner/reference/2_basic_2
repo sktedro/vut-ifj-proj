@@ -2,6 +2,8 @@ Returned <0> and token: 	type=<0>	attribute=<a>
 Returned <0> and token: 	type=<1>	attribute=<2>
 Returned <0> and token: 	type=<1>	attribute=<3>
 Returned <0> and token: 	type=<0>	attribute=<c>
-Returned <0> and token: 	type=<7>	attribute=<*>
-Returned <0> and token: 	type=<1>	attribute=<>
+Returned <0> and token: 	type=<9>	attribute=<*>
+Returned <0> and token: 	type=<1>	attribute=<3>
+Returned <0> and token: 	type=<9>	attribute=</>
+Returned <0> and token: 	type=<1>	attribute=<1>
 Returned <0> and token: 	NULL
