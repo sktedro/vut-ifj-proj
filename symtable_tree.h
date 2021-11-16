@@ -6,7 +6,7 @@
 #define SYMTABLE_TREE
 
 #include "misc.h"
-#include "intBuffer.h"
+#include "int_buffer.h"
 
 
 /**

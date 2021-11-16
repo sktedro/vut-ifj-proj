@@ -1,9 +1,17 @@
-Lexical analysis error.
 Returned <0> and token: 	type=<0>	attribute=<a>
-Returned <0> and token: 	type=<10>	attribute=<=>
+Returned <0> and token: 	type=<12>	attribute=<=>
 Returned <0> and token: 	type=<1>	attribute=<12>
-Returned <0> and token: 	type=<7>	attribute=<->
+Returned <0> and token: 	type=<9>	attribute=<->
 Returned <0> and token: 	type=<0>	attribute=<b>
-Returned <0> and token: 	type=<7>	attribute=<*>
+Returned <0> and token: 	type=<9>	attribute=<*>
 Returned <0> and token: 	type=<1>	attribute=<8>
+Returned <0> and token: 	type=<9>	attribute=</>
+Returned <0> and token: 	type=<1>	attribute=<l>
+Returned <0> and token: 	type=<9>	attribute=<+>
+Returned <0> and token: 	type=<8>	attribute=<(>
+Returned <0> and token: 	type=<1>	attribute=<2>
+Returned <0> and token: 	type=<9>	attribute=<->
+Returned <0> and token: 	type=<1>	attribute=<3>
+Returned <0> and token: 	type=<7>	attribute=<)>
+Returned <0> and token: 	type=<0>	attribute=<then>
 Returned <1> and token: 	NULL

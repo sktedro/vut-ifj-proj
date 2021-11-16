@@ -1,8 +1,8 @@
-require "ifj21"
+require "ifj21" --Tento program by nemal byť spravny
 
 function program()
 	local y : integer = 20
-	if 1 1 then
+	if 1 1 then -- tu chyba relacny operator, semanticka chyba od parseru
 		y = 10
 		write(y)
 	else

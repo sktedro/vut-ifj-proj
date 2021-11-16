@@ -2,8 +2,8 @@ CC=gcc
 CFLAGS=-g #-Wall -Wextra
 
 LIBS=\
-../charBuffer.h \
-../intBuffer.h \
+../char_buffer.h \
+../int_buffer.h \
 ../misc.h \
 ../precedence_analysis.h \
 ../scanner.h \
