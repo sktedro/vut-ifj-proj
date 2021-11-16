@@ -19,7 +19,7 @@ Returned <0> and token: 	type=<8>	attribute=<(>
 Returned <0> and token: 	type=<4>	attribute=<Zadejte cislo pro vypocet faktorialu\n>
 Returned <0> and token: 	type=<7>	attribute=<)>
 Returned <0> and token: 	type=<0>	attribute=<a>
-Returned <0> and token: 	type=<11>	attribute=<=>
+Returned <0> and token: 	type=<12>	attribute=<=>
 Returned <0> and token: 	type=<0>	attribute=<readi>
 Returned <0> and token: 	type=<8>	attribute=<(>
 Returned <0> and token: 	type=<7>	attribute=<)>
@@ -69,6 +69,7 @@ Returned <0> and token: 	type=<8>	attribute=<(>
 Returned <0> and token: 	type=<4>	attribute=<Vysledek je: >
 Returned <0> and token: 	type=<6>	attribute=<,>
 Returned <0> and token: 	type=<0>	attribute=<vysl>
+Returned <0> and token: 	type=<6>	attribute=<,>
 Returned <0> and token: 	type=<4>	attribute=<\n>
 Returned <0> and token: 	type=<7>	attribute=<)>
 Returned <0> and token: 	type=<0>	attribute=<end>

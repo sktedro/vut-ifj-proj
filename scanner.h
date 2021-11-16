@@ -124,6 +124,7 @@ int scanner(Token **token) {
     return err(99);
   }
 
+
   // Starting state of the finite state machine is s_start
   int state = s_start;
 
@@ -140,11 +141,11 @@ int scanner(Token **token) {
     // Only if there was no character in charMem, read a new one from stdin
     // (otherwise process the character from charMem)
     if(!restoreChar(buf, &c)){
-      c = fgetc(stdin);
+      c = fgetc(stdin); // TODO c should be int?
       if(c != EOF){
         if(charBufAppend(buf, c)){
           return err(99);
-        }
+        }// hello there
       }else{
         lastChar = true;
         /*
@@ -244,11 +245,12 @@ int scanner(Token **token) {
 
       // Got a dash - could be an arithmetic operator (minus) or a comment (--)
       case s_arithmOpDash:
+        charBufPop(buf);
         if(c == '-'){
+          charBufPop(buf);
           state = s_comment;
         }else{
           charMem = c;
-          charBufPop(buf);
           return returnToken(token, t_arithmOp, buf);
         }
         break;
@@ -261,7 +263,7 @@ int scanner(Token **token) {
           state = s_unknownComment;
         }else if(c == '\n'){
           state = s_start;
-        }else{
+        }else if(c != ' '){
           state = s_singleLineComment;
         }
         break;
@@ -409,9 +411,10 @@ int scanner(Token **token) {
               charBufAppend(buf,c);
           return returnToken(token, t_arithmOp, buf);
         }else {
-              printf("TOKEN: c = $c, token = %s\n", c, );
-              return returnToken(token, t_arithmOp, buf);
-            }
+          charMem = c;
+          charBufPop(buf);
+          return returnToken(token, t_arithmOp, buf);
+          }
         break;
 
       // Got one '.', but two are necessary for it to make a token
@@ -448,6 +451,7 @@ int scanner(Token **token) {
 
       // A simple assignment ('=')
       case s_assignment:
+        //printf("C = %c\n",c);
         if(c == '='){
           // state = s_relOp
           return returnToken(token, t_relOp, buf);
