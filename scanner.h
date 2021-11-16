@@ -282,6 +282,7 @@ int scanner(Token **token) {
       case s_singleLineComment:
         charBufPop(buf);
         if(c == '\n'){
+            charBufClear(buf);
           state = s_start;
         }
         break;
@@ -403,12 +404,14 @@ int scanner(Token **token) {
       // Got one '/', but might get another which would make it a different
       // operator ('//')
       case s_arithmOpDiv:
-        if(c == '/'){
+            if(c == '/'){
           // state = s_arithmOp;
+              charBufAppend(buf,c);
           return returnToken(token, t_arithmOp, buf);
-        }else{
-          vypluj err(1);
-        }
+        }else {
+              printf("TOKEN: c = $c, token = %s\n", c, );
+              return returnToken(token, t_arithmOp, buf);
+            }
         break;
 
       // Got one '.', but two are necessary for it to make a token
