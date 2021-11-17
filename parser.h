@@ -16,9 +16,9 @@
  * pCodeBody()          Add creation of new stack, change error codes
  * pFnCall()            Change error codes
  * pFnRet()             Change error codes
- * pFnCallArgList()     NOT IMPLEMENTED YET
+ * pFnCallArgList()     NOT IMPLEMENTED YET -- CFG wrong ???
  * pNextFnCallArg()     NOT IMPLEMENTED YET
- * pFnCallArg()         NOT IMPLEMENTED YET
+ * pFnCallArg()         Add compare if token is literal
  * pRet()               NOT IMPLEMENTED YET
  * pStat()              Waiting for pIdList(), pExpr()
  * pStatWithId()        Waiting for pNextAssign(), pExpr()
@@ -27,11 +27,11 @@
  * pNextFnArg()         Change error codes
  * pRetArgList()        NOT IMPLEMENTED YET
  * pRetNextArg()        NOT IMPLEMENTED YET
- * pTypeList()          NOT IMPLEMENTED YET
- * pNextType()          NOT IMPLEMENTED YET
- * pType()              NOT IMPLEMENTED YET
- * pIdList()            NOT IMPLEMENTED YET
- * pNextId()            NOT IMPLEMENTED YET
+ * pTypeList()          DONE
+ * pNextType()          DONE
+ * pType()              DONE
+ * pIdList()            DONE
+ * pNextId()            DONE
  * pNewIdAssign()       NOT IMPLEMENTED YET
  * pExprList()          NOT IMPLEMENTED YET
  * pNextExpr()          NOT IMPLEMENTED YET
@@ -349,8 +349,12 @@ int pFnRet() {
   vypluj 0;
 }
 
+//TODO NOT SURE HOW TO CODE IT
 int pFnCallArgList() {
-  vypluj 0;
+
+  pFnCallArg();
+
+  return 0;
 }
 
 int pNextFnCallArg() {
@@ -358,6 +362,18 @@ int pNextFnCallArg() {
 }
 
 int pFnCallArg() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  // TODO add compare if token is literal
+  if(STGetIsVariable(symtab, token->data)) {
+    return 0;
+  } else {
+    vypluj err(1);
+  }
+
   vypluj 0;
 }
 
@@ -405,13 +421,13 @@ int pStatWithId() {
   Token *token = NULL;
 
   ret = scanner(&token);
-  condReturn;
+  CondReturn;
 
   if(token->type == t_comma) {
     tokenDestroy(token);
 
     ret = scanner(&token);
-    condReturn;
+    CondReturn;
 
     if(token->type == t_idOrKeyword) {
 
@@ -444,13 +460,13 @@ int pNextAssign() {
   Token *token = NULL;
 
   ret = scanner(&token);
-  condReturn;
+  CondReturn;
 
   if(token->type == t_comma) {
     tokenDestroy(token);
 
     ret = scanner(&token);
-    condReturn;
+    CondReturn;
 
     if(token->type == t_idOrKeyword) {
       if(STGetIsVariable(symtab, token->data)) {
@@ -560,23 +576,85 @@ int pRetNextArg() {
 }
 
 int pTypeList() {
-  vypluj 0;
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  if(token->type == t_idOrKeyword) {
+
+    if( (strcmp(token->data, "nil") == 0) && isDataType(token->data)) {
+      tokenDestroy(token);
+      pNextType();
+      vypluj 0;
+    }
+  }
+
+  vypluj err(1);
 }
 
 int pNextType() {
-  vypluj 0;
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  if(token->type == t_comma) {
+
+    ret = pType();
+
+    if(ret == 0) {
+      pNextType();
+      vypluj 0;
+    }
+  }
+
+  vypluj err(1);
 }
 
 int pType() {
-  vypluj 0;
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn
+
+  if((strcmp(token->data, "nil") == 0) && isDataType(token->data)) {
+    vypluj 0;
+  }
+  vypluj err(1);
 }
 
 int pIdList() {
-  vypluj 0;
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn
+
+  if(token->type == t_idOrKeyword) {
+
+    if(STGetIsVariable(symtab, token->data)) {
+      tokenDestroy(token);
+      pNextId();
+      vypluj 0;
+    }
+  }
+
+  vypluj err(1);
 }
 
 int pNextId() {
-  vypluj 0;
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn
+
+  if(token->type == t_comma) {
+    tokenDestroy(token);
+    pIdList();
+    vypluj err(0);
+  }
+
+  vypluj err(1);
 }
 
 int pNewIdAssign() {
