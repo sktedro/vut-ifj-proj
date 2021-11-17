@@ -2,6 +2,43 @@
  * Parser
  */
 
+/** IMPORTANT !!! READ FIRST, BEFORE EDITING
+ *
+ * 1. code generating not implemented yet, first parser testing
+ * 2. code not tested yet
+ * 3. change error codes
+ *
+ * --------------------------------------------------
+ * Function             State
+ * --------------------------------------------------
+ * pStart()             Change error codes
+ * pReq()               Change error codes
+ * pCodeBody()          Add creation of new stack, change error codes
+ * pFnCall()            Change error codes
+ * pFnRet()             Change error codes
+ * pFnCallArgList()     NOT IMPLEMENTED YET
+ * pNextFnCallArg()     NOT IMPLEMENTED YET
+ * pFnCallArg()         NOT IMPLEMENTED YET
+ * pRet()               NOT IMPLEMENTED YET
+ * pStat()              Waiting for pIdList(), pExpr()
+ * pStatWithId()        Waiting for pNextAssign(), pExpr()
+ * pNextAssign()        Not sure if CFG is right and how to implement it
+ * pFnArgList()         Change error codes, check last 2 todos
+ * pNextFnArg()         Change error codes
+ * pRetArgList()        NOT IMPLEMENTED YET
+ * pRetNextArg()        NOT IMPLEMENTED YET
+ * pTypeList()          NOT IMPLEMENTED YET
+ * pNextType()          NOT IMPLEMENTED YET
+ * pType()              NOT IMPLEMENTED YET
+ * pIdList()            NOT IMPLEMENTED YET
+ * pNextId()            NOT IMPLEMENTED YET
+ * pNewIdAssign()       NOT IMPLEMENTED YET
+ * pExprList()          NOT IMPLEMENTED YET
+ * pNextExpr()          NOT IMPLEMENTED YET
+ * pExpr()              NOT IMPLEMENTED YET -- CALL BOTTOM UP PARSER (NOT DONE YET TOO)
+ * -----------------------------------------------------------------------
+ */
+
 #ifndef PARSER
 #define PARSER
 
@@ -329,14 +366,111 @@ int pRet() {
 }
 
 int pStat() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  if(token->type == t_idOrKeyword) {
+    if(STGetIsVariable(symtab, token->data)) {
+      tokenDestroy(token);
+      pStatWithId();
+      vypluj 0;
+    } else {
+
+      if(strcmp(token->data, "local") == 0) {
+        pIdList();
+        // TODO
+      } else if(strcmp(token->data, "if") == 0) {
+        pExpr();
+        //TODO
+      } else if(strcmp(token->data, "while") == 0) {
+        pExpr();
+        //TODO
+      } else {
+        vypluj err(1);
+      }
+
+    }
+
+
+  } else {
+    vypluj err(1);
+  }
+
   vypluj 0;
 }
 
 int pStatWithId() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  condReturn;
+
+  if(token->type == t_comma) {
+    tokenDestroy(token);
+
+    ret = scanner(&token);
+    condReturn;
+
+    if(token->type == t_idOrKeyword) {
+
+      if(!STGetIsVariable(symtab, token->data)) {
+        vypluj err(1);
+      }
+
+      pNextAssign();
+      //TODO
+
+    } else {
+      vypluj err(1);
+    }
+
+  } else if(strcmp(token->data, "=") == 0) {
+    pExpr();
+    //TODO
+  } else {
+    pFnCall();
+    //TODO CHECK
+  }
+
   vypluj 0;
 }
 
+//TODO not working, not sure if CFG is right
+//  31. <nextAssign>  -> , [id] <nextAssign> <expr> ,
+//  32. <nextAssign>  -> =
 int pNextAssign() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  condReturn;
+
+  if(token->type == t_comma) {
+    tokenDestroy(token);
+
+    ret = scanner(&token);
+    condReturn;
+
+    if(token->type == t_idOrKeyword) {
+      if(STGetIsVariable(symtab, token->data)) {
+        pNextAssign();
+        vypluj 0;
+      } else {
+        vypluj err(1);
+      }
+    } else {
+      vypluj err(1);
+    }
+
+
+  } else if(strcmp(token->data, "=") == 0) {
+    vypluj 0;
+  } else {
+    vypluj err(1);
+  }
+
+
   vypluj 0;
 }
 
