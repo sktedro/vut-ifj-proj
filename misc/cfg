@@ -8,7 +8,7 @@
 08. 
 09. <fnCall>          -> ( <fnCallArgList> )
 10. <fnRet>           -> eps
-11. <fnRet>           -> : <typeList>
+11. <fnRet>           -> : <type> <nextType>
 12. <fnCallArgList>   -> eps
 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
 14. <nextFnCallArg>   -> eps

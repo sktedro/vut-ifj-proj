@@ -27,5 +27,24 @@ char precTab[12][12] = {
 };
 
 
+int precedenceAnalysis(STStack *symtable, Token *token) {
+
+  if(token->type == t_idOrKeyword) {
+    return 1;
+  }
+    
+
+  return 0;
+}
+
+int isExpression(char *data) {
+
+  /*if(strcmp()){
+  }*/
+  
+  return 0;
+}
+
+
 #endif
 /* end of file precedence_analysis.h*/

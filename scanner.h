@@ -17,6 +17,24 @@
 // it is not '\0') should be processed before reading from stdin
 char charMem = '\0';
 
+// A memory where we can stash a token (that should be returned with the next 
+// scanner() call)
+Token *tokenMem = NULL;
+
+/**
+ * @brief Stash a token (to be returned on next scanner() call)
+ * 
+ * @param token to be stashed
+ */
+int stashToken(Token *token){
+  if(tokenMem){
+    fprintf(stderr, "This is bad\n");
+    return err(1); //TODO err code??
+  }
+  tokenMem = token;
+  return 0;
+}
+
 /**
  * @brief Restore last read character that didn't belong to the last returned
  * token
@@ -118,6 +136,12 @@ int returnToken(Token **token, int type, CharBuffer *buf){
  * @return error code
  */
 int scanner(Token **token) {
+  if(tokenMem){
+    *token = tokenMem;
+    tokenMem = NULL;
+    return 0;
+  }
+
   // Token data (characters composing it) will be written here
   CharBuffer *buf = charBufInit();
   if(!buf){
@@ -143,9 +167,7 @@ int scanner(Token **token) {
     if(!restoreChar(buf, &c)){
       c = fgetc(stdin); // TODO c should be int?
       if(c != EOF){
-        if(charBufAppend(buf, c)){
-          return err(99);
-        }// hello there
+        charBufAppend(buf, c);
       }else{
         lastChar = true;
         /*
