@@ -18,7 +18,7 @@
 Token *tokenInit(int type){
   Token *token = malloc(sizeof(Token));
   if(!token){
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   token->type = type;
   token->data = NULL;

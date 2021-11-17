@@ -19,7 +19,7 @@ int STInit(STStack *frameStack) {
 
   STTreeNode *tree = (STTreeNode*) malloc(sizeof(STTreeNode));
   if(tree == NULL) {
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
   frameStack = STStackInit();
 

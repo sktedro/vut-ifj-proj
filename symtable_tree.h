@@ -20,7 +20,7 @@ STTreeNode *newSTTreeNode(char *key){
   STTreeNode *node = (STTreeNode *) malloc(sizeof(STTreeNode));
   if(!node){
     //TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
 
   // Init children
@@ -31,7 +31,7 @@ STTreeNode *newSTTreeNode(char *key){
   node->key = malloc((strlen(key) + 1) * sizeof(char));
   if(!node->key){
     //TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
   memcpy(node->key, key, (strlen(key) + 1) * sizeof(char));
 
@@ -39,14 +39,14 @@ STTreeNode *newSTTreeNode(char *key){
   node->data = malloc(sizeof(STElem));
   if(!node->data){
     //TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
 
   // Copy key
   node->data->name = malloc((strlen(key) + 1) * sizeof(char));
   if(!node->data->name){
     //TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
   memcpy(node->data->name, key, (strlen(key) + 1) * sizeof(char));
 

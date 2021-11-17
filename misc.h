@@ -21,7 +21,17 @@
 /*
  *  Error returns (will be enum?)
  */
-#define MALLOC_ERROR 99
+#define LEX_ERR 1        // lexical analysis error
+#define SYNTAX_ERR 2     // syntax error
+#define ID_DEF_ERR 3     // undefined/redefined function/variable
+#define ASS_ERR 4        // assignment error, types incompatible
+#define PARAM_RET_ERR 5  // wrong type/number of function parameters/returns
+#define TYPE_EXPR_ERR 6  // types incompatible in expression
+#define OTHER_SEM_ERR 7  // other semantic error
+#define NIL_ERR 8        // unexpected nil
+#define DIV_BY_ZERO_ERR  // integer division by zero
+
+#define INTERN_ERR 99    // intern error (memory allocation etc.)
 
 /*
  * Macros

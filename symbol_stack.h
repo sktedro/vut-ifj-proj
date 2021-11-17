@@ -16,7 +16,7 @@
 SStack *SStackInit(){
   SStack *stack = (SStack*)malloc(sizeof(SStack));
   if(!stack) {
-    exit(MALLOC_ERROR);
+    exit((err(INTERN_ERR));
   }
 
   stack->top = NULL;
@@ -38,7 +38,7 @@ int SStackPush(SStack *stack, int symbol, int type){
   }
   SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
   if(!newElem){
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   newElem->symbol = symbol;
   newElem->type = type;
@@ -116,7 +116,7 @@ int SStackPushAfterTopTerminal(SStack *stack, int symbol, int type){
   // Allocate the new element and append it after the highest terminal
   SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
   if(!newElem){
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
 
   newElem->symbol = symbol;
