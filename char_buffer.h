@@ -20,12 +20,12 @@
 CharBuffer *charBufInit(){
   CharBuffer *buf = (CharBuffer*)malloc(sizeof(CharBuffer));
   if(buf == NULL){
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   buf->data = (char*)malloc(CHARBUFINITLEN * sizeof(char));
   if(buf->data == NULL){
     free(buf);
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   buf->size = CHARBUFINITLEN;
   buf->data[0] = '\0';

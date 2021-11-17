@@ -18,7 +18,7 @@ STStack *STStackInit() {
   STStack *stack = (STStack*) malloc(sizeof(STStack));
   if(stack == NULL) {
     // TODO memleak?
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   stack->top = NULL;
   return stack;
@@ -35,12 +35,12 @@ STStack *STStackInit() {
 int STStackPush(STStack *stack, STTreeNode *table, int depth){
   if(!stack){
     // TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
   STStackElem *newElem = (STStackElem*)malloc(sizeof(STStackElem));
   if(!newElem){
     // TODO memleak
-    exit(err(MALLOC_ERROR));
+    exit(err(INTERN_ERR));
   }
   newElem->table = table;
   newElem->depth = depth;

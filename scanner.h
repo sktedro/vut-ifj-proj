@@ -44,7 +44,7 @@ int stashToken(Token *token){
 bool restoreChar(CharBuffer *buf, char *c){
   if(charMem != '\0'){
     if(charBufAppend(buf, charMem)){
-      return err(99);
+      return err(INTERN_ERR);
     }
     *c = charMem;
     charMem = '\0';
@@ -118,11 +118,11 @@ int returnToken(Token **token, int type, CharBuffer *buf){
   *token = tokenInit(type);
   if(!(*token)){
     charBufDestroy(buf);
-    vypluj err(99);
+    vypluj err(INTERN_ERR);
   }
   if(tokenAddAttrib(*token, buf->data)){
     charBufDestroy(buf);
-    vypluj err(99);
+    vypluj err(INTERN_ERR);
   }
   charBufDestroy(buf);
   vypluj 0;
@@ -145,7 +145,7 @@ int scanner(Token **token) {
   // Token data (characters composing it) will be written here
   CharBuffer *buf = charBufInit();
   if(!buf){
-    return err(99);
+    return err(INTERN_ERR);
   }
 
 
@@ -167,7 +167,9 @@ int scanner(Token **token) {
     if(!restoreChar(buf, &c)){
       c = fgetc(stdin); // TODO c should be int?
       if(c != EOF){
-        charBufAppend(buf, c);
+        if(charBufAppend(buf, c)){
+          return err(INTERN_ERR);
+        }
       }else{
         lastChar = true;
         /*
@@ -259,7 +261,7 @@ int scanner(Token **token) {
 
         // ELSE
         }else{
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
 
         break;
@@ -340,13 +342,13 @@ int scanner(Token **token) {
         }else if(c == '\\'){
           c = fgetc(stdin);
           if(c <= 31){ //TODO nepovolene znaky???
-            vypluj err(1);
+            vypluj err(LEX_ERR);
           }
           if(charBufAppend(buf, c)){
-            return err(99);
+            return err(INTERN_ERR);
           }
         }else if(c <= 31){ //TODO nepovolene znaky??
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
         break;
 
@@ -391,7 +393,7 @@ int scanner(Token **token) {
         }else if(isNum(c)){
           state = s_sciNum;
         }else{
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
         break;
 
@@ -402,7 +404,7 @@ int scanner(Token **token) {
         if(isNum(c)){
           state = s_sciNum;
         }else{
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
         break;
 
@@ -445,7 +447,7 @@ int scanner(Token **token) {
           // state = s_strOp
           return returnToken(token, t_strOp, buf);
         }else{
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
         break;
 
@@ -455,7 +457,7 @@ int scanner(Token **token) {
           // state = s_relOp
           return returnToken(token, t_relOp, buf);
         }else{
-          vypluj err(1);
+          vypluj err(LEX_ERR);
         }
         break;
 

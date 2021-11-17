@@ -20,13 +20,13 @@
 IntBuffer *intBufInit(){
   IntBuffer *buf = (IntBuffer*)malloc(sizeof(IntBuffer));
   if(buf == NULL){
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
 
   buf->data = (int*)malloc(INTBUFINITLEN * sizeof(int));
   if(buf->data == NULL){
     free(buf);
-    exit(MALLOC_ERROR);
+    exit(err(INTERN_ERR));
   }
   buf->size = INTBUFINITLEN;
   buf->len = 0;
