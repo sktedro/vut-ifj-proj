@@ -17,27 +17,29 @@
  * pFnCall()            Change error codes
  * pFnRet()             Change error codes
  * pFnCallArgList()     NOT IMPLEMENTED YET -- CFG wrong ???
- * pNextFnCallArg()     NOT IMPLEMENTED YET
- * pFnCallArg()         Add compare if token is literal
- * pRet()               NOT IMPLEMENTED YET
+ * pNextFnCallArg()     Change error codes
+ * pFnCallArg()         Change error codes
+ * pRet()               DONE
  * pStat()              Waiting for pIdList(), pExpr()
  * pStatWithId()        Waiting for pNextAssign(), pExpr()
- * pNextAssign()        Not sure if CFG is right and how to implement it
+ * pNextAssign()        Change error codes
  * pFnArgList()         Change error codes, check last 2 todos
  * pNextFnArg()         Change error codes
- * pRetArgList()        NOT IMPLEMENTED YET
- * pRetNextArg()        NOT IMPLEMENTED YET
+ * pRetArgList()        NOT IMPLEMENTED YET - not gonna be easy
+ * pRetNextArg()        DONE
  * pTypeList()          DONE
  * pNextType()          DONE
  * pType()              DONE
  * pIdList()            DONE
  * pNextId()            DONE
- * pNewIdAssign()       NOT IMPLEMENTED YET
- * pExprList()          NOT IMPLEMENTED YET
- * pNextExpr()          NOT IMPLEMENTED YET
+ * pNewIdAssign()       DONE
+ * pExprList()          DONE
+ * pNextExpr()          DONE
  * pExpr()              NOT IMPLEMENTED YET -- CALL BOTTOM UP PARSER (NOT DONE YET TOO)
  * -----------------------------------------------------------------------
  */
+
+// TODO tokenDestroy(&token) instead of just passing the token?
 
 #ifndef PARSER
 #define PARSER
@@ -73,11 +75,18 @@ int isDataType(char *type) {
   }
 }
 
+
+/*
+ * Rules
+ */
+
+
 /**
  * @brief Rule for require
  *
+ * @return int - 0 if success, else on error
+ *
  * 01. <start>           -> require <req> <codeBody>
- * @vypluj int - 0 if success, else on error
  */
 int pStart() {
   Token *token = NULL;
@@ -99,6 +108,14 @@ int pStart() {
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code 
+ *
+ * 02. <req>             -> "ifj21"
+ */
 int pReq() {
   Token *token = NULL;
 
@@ -114,14 +131,16 @@ int pReq() {
   }
 }
 
+
 /**
  * @brief Rule for <codebody> string
  *
- * 04. <codeBody>  -> eps
- * 05. <codeBody>  -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
- * 06. <codeBody>  -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
- * 07. <codeBody>  -> [id] <fnCall> <codeBody>
- * @vypluj int - 0 if success, else on error
+ * @return int - 0 if success, else on error
+ *
+ * 04. <codeBody>        -> eps
+ * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+ * 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+ * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
 int pCodeBody() {
 
@@ -296,6 +315,14 @@ int pCodeBody() {
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 09. <fnCall>          -> ( <fnCallArgList> )
+ */
 int pFnCall() {
   Token *token = NULL;
 
@@ -325,6 +352,15 @@ int pFnCall() {
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 10. <fnRet>           -> eps
+ * 11. <fnRet>           -> : <type> <nextType>
+ */
 int pFnRet() {
   Token *token = NULL;
 
@@ -349,7 +385,18 @@ int pFnRet() {
   vypluj 0;
 }
 
+
 //TODO NOT SURE HOW TO CODE IT
+//"z pravidla 13 asi budeme musieť urobiť dve - ak je next token [id] tak
+//sa použije jedno, ak to bude literál tak druhé, inak 12"
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 12. <fnCallArgList>   -> eps
+ * 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+ */
 int pFnCallArgList() {
 
   pFnCallArg();
@@ -357,30 +404,116 @@ int pFnCallArgList() {
   return 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 14. <nextFnCallArg>   -> eps
+ * 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+ */
 int pNextFnCallArg() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  // If the next token is not a comma, use rule 14 (else rule 15)
+  // ','
+  if(token->type != t_comma){
+    stashToken(token);
+    vypluj 0;
+  }
+  tokenDestroy(token);
+
+  // <fnCallArg> 
+  ret = pFnCallArg();
+  CondReturn;
+
+  // <nextFnCallArg>
+  ret = pNextFnCallArg();
+  CondReturn;
+
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 16. <fnCallArg>       -> [id]
+ * 17. <fnCallArg>       -> [literal]
+ */
 int pFnCallArg() {
   Token *token = NULL;
 
   ret = scanner(&token);
   CondReturn;
 
-  // TODO add compare if token is literal
-  if(STGetIsVariable(symtab, token->data)) {
-    return 0;
+  int tokenType = token->type;
+
+  // Is a variable?
+  if(STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)){
+    // TODO semantic actions (add to fn arg types or something)
+    vypluj 0;
+  // Is a literal?
+  } else if(tokenType == t_int 
+      || tokenType == t_num 
+      || tokenType == t_sciNum
+      || tokenType == t_str){
+    // TODO semantic actions
+    vypluj 0;
   } else {
-    vypluj err(1);
+    vypluj err(1); // TODO errcode
   }
 
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 19. <ret>             -> eps
+ * 20. <ret>             -> return <retArgList>
+ */
 int pRet() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  // If the next token is 'return', apply rule 20
+  if(token->type == t_idOrKeyword && strcmp(token->data, "return") == 0){
+    tokenDestroy(token);
+
+    // <retArgList>
+    ret = pRetArgList();
+    CondReturn;
+
+    vypluj 0;
+  }
+  // Else apply rule 19
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 22. <stat>            -> eps
+ * 23. <stat>            -> [id] <statWithId> <stat>
+ * 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+ * 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+ * 26. <stat>            -> while <expr> do <stat> end <stat>
+ */
 int pStat() {
   Token *token = NULL;
 
@@ -404,19 +537,29 @@ int pStat() {
         pExpr();
         //TODO
       } else {
-        vypluj err(1);
+        vypluj err(1); // TODO errcode
       }
 
     }
 
 
   } else {
-    vypluj err(1);
+    vypluj err(1); // TODO errcode
   }
 
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 27. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+ * 28. <statWithId>      -> = <expr>
+ * 29. <statWithId>      -> <fnCall>
+ */
 int pStatWithId() {
   Token *token = NULL;
 
@@ -453,43 +596,72 @@ int pStatWithId() {
   vypluj 0;
 }
 
+
 //TODO not working, not sure if CFG is right
-//  31. <nextAssign>  -> , [id] <nextAssign> <expr> ,
-//  32. <nextAssign>  -> =
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 31. <nextAssign>  -> , [id] <nextAssign> <expr> ,
+ * 32. <nextAssign>  -> =
+ */
 int pNextAssign() {
   Token *token = NULL;
 
   ret = scanner(&token);
   CondReturn;
 
+  // ','
   if(token->type == t_comma) {
     tokenDestroy(token);
 
+
+    // [id]
+    // TODO semantic actions???
     ret = scanner(&token);
     CondReturn;
-
-    if(token->type == t_idOrKeyword) {
-      if(STGetIsVariable(symtab, token->data)) {
-        pNextAssign();
-        vypluj 0;
-      } else {
-        vypluj err(1);
-      }
+    if(token->type == t_idOrKeyword 
+        && STFind(symtab, token->data) 
+        && STGetIsVariable(symtab, token->data)) {
+      ret = pNextAssign();
+      CondReturn;
     } else {
-      vypluj err(1);
+      vypluj err(1); // TODO errcode
     }
 
+    // <expr>
+    // TODO semantic actions
+    ret = pExpr();
+    CondReturn;
+    
+    // ','
+    ret = scanner(&token);
+    CondReturn;
+    if(token->type == t_comma){
+      tokenDestroy(token);
+      vypluj 0;
+    }
 
-  } else if(strcmp(token->data, "=") == 0) {
+  // '='
+  } else if(token->type == t_assignment) {
     vypluj 0;
   } else {
-    vypluj err(1);
+    vypluj err(1); // TODO errcode
   }
-
 
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 34. <fnArgList>       -> eps
+ * 35. <fnArgList>       -> [id] : <type> <nextFnArg>
+ */
 int pFnArgList() {
   Token *token = NULL;
 
@@ -548,6 +720,15 @@ int pFnArgList() {
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 36. <nextFnArg>       -> eps
+ * 37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+ */
 int pNextFnArg() {
   Token *token = NULL;
 
@@ -564,17 +745,71 @@ int pNextFnArg() {
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 39. <retArgList>      -> eps
+ * 40. <retArgList>      -> <expr> <retNextArg>
+ */
 int pRetArgList() {
-
-  ret = pExpr();
+  // oh fuck, no idea
+  // TODO
 
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 41. <retNextArg>      -> eps
+ * 42. <retNextArg>      -> , <expr> <retNextArg>
+ */
 int pRetNextArg() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  // If the next token is not a comma, use rule 41 (else rule 42)
+  // ','
+  if(token->type != t_comma){
+    stashToken(token);
+    vypluj 0;
+  }
+
+  // ','
+  tokenDestroy(token);
+
+  // <expr>
+  // TODO semantic actions
+  ret = pExpr();
+  CondReturn;
+  
+  // <retNextArg>
+  ret = pRetNextArg();
+  CondReturn;
+
   vypluj 0;
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 44. <typeList>        -> eps
+ * 45. <typeList>        -> integer <nextType>
+ * 46. <typeList>        -> number <nextType>
+ * 47. <typeList>        -> string <nextType>
+ * 48. <typeList>        -> nil <nextType>
+ */
 int pTypeList() {
   Token *token = NULL;
 
@@ -593,6 +828,15 @@ int pTypeList() {
   vypluj err(1);
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 50. <nextType>        -> eps
+ * 51. <nextType>        -> , <type> <nextType>
+ */
 int pNextType() {
   Token *token = NULL;
 
@@ -612,6 +856,17 @@ int pNextType() {
   vypluj err(1);
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 53. <type>            -> integer
+ * 54. <type>            -> number
+ * 55. <type>            -> string
+ * 56. <type>            -> nil
+ */
 int pType() {
   Token *token = NULL;
 
@@ -624,6 +879,14 @@ int pType() {
   vypluj err(1);
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 58. <idList>          -> [id] <nextId>
+ */
 int pIdList() {
   Token *token = NULL;
 
@@ -642,6 +905,15 @@ int pIdList() {
   vypluj err(1);
 }
 
+
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 59. <nextId>          -> eps
+ * 60. <nextId>          -> , [id] <nextId>
+ */
 int pNextId() {
   Token *token = NULL;
 
@@ -657,113 +929,110 @@ int pNextId() {
   vypluj err(1);
 }
 
-int pNewIdAssign() {
-  vypluj 0;
-}
-
-int pExprList() {
-  vypluj 0;
-}
-
-int pNextExpr() {
-  vypluj 0;
-}
-
-//-----------------------------------
-int pExpr() {
-
-  //TODO BOTTOM UP PARSER call
-
-  vypluj 0;
-}
-
-// int rule06() {
-// Token *token = NULL;
-// STElem *stelement = NULL;
-
-// ret = scanner(&token);
-// CondReturn;
-
-// if (token->type == t_idOrKeyword) {
-// stelement = STFind(symtab, token->data);
-
-// if (stelement) {
-// vypluj err(1); // TODO RETURN ERROR
-// } else {
-// }
-// // TODO NECO S ID
-// } else {
-// vypluj err(1); //TODO ERROR
-// }
-// }
 
 /**
- * @brief Rule for <fnCallArgList>
+ * @brief
  *
- * <fnCall>    -> ( <fnCallArgList> )
- * @vypluj int - 0 if success, else on error
+ * @return error code
+ *
+ * 62. <newIdAssign>     -> eps
+ * 63. <newIdAssign>     -> = <exprList>
  */
-// int rule07(Token *token) {
+int pNewIdAssign() {
+  Token *token = NULL;
 
-// Token *leftParen = NULL;
-// Token *rightParen = NULL;
-// Token *fnArgList = NULL;
-// }
+  ret = scanner(&token);
+  CondReturn;
 
-// int rule09() {
-// //vedro
-// Token *token = NULL;
+  // If the next token is not a ==, use rule 62 (else rule 63)
+  if(token->type != t_assignment){
+    stashToken(token);
+    vypluj 0;
+  }
 
-// ret = scanner(&token);
-// CondReturn;
+  // '='
+  tokenDestroy(token);
 
-// if (token->type != t_leftParen) {
-// tokenDestroy(token);
-// vypluj err(1); // TODO what code
-// }
+  // <exprList>
+  ret = pExprList();
+  CondReturn;
 
-// ret = scanner(&token);
-// CondReturn;
+  vypluj 0;
+}
 
-// if (token->type == t_rightParen) {
-// // TODO call nejakej funkcie
-// vypluj 0;
-// } else {
-// // TODO call nejakej funkcie
-// }
 
-// ret = scanner(&token);
-// CondReturn;
-// if (token->type == t_rightParen) {
-// vypluj 0;
-// } else {
-// vypluj err(1); //TODO code
-// }
-// }
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 65. <exprList>        -> <expr> <nextExpr>
+ */
+int pExprList() {
+  // <expr>
+  // TODO semantic actions
+  ret = pExpr();
+  CondReturn;
 
-// int rule11() {
-// //mine
-// // typelist
+  // <nextExpr>
+  ret = pNextExpr();
+  CondReturn;
 
-// // <type>
+  vypluj 0;
+}
 
-// Token *token = NULL;
-// ret = scanner(&token);
-// CondReturn;
 
-// // token integer
-// if (token->type == t_idOrKeyword && strcmp(token->data, "integer") == 0) {
-// // TODO call nejakej funkcie
-// } else if (token->type == t_idOrKeyword && strcmp(token->data, "number") == 0) {
-// // TODO call nejakej funkcie
-// } else if (token->type == t_idOrKeyword && strcmp(token->data, "string") == 0) {
-// // TODO call nejakej funkcie
-// } else if (token->type == t_idOrKeyword && strcmp(token->data, "nil") == 0) {
-// // TODO call nejakej funkcie
-// } else {
-// // TODO
-// }
-// }
+/**
+ * @brief
+ *
+ * @return error code
+ *
+ * 66. <nextExpr>        -> eps
+ * 67. <nextExpr>        -> , <expr> <nextExpr>
+ */
+int pNextExpr() {
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn;
+
+  // If the next token is not a comma, use rule 66 (else rule 67)
+  if(token->type != t_comma){
+    stashToken(token);
+    vypluj 0;
+  }
+
+  // ','
+  tokenDestroy(token);
+
+  // <expr>
+  // TODO semantic actions
+  ret = pExpr();
+  CondReturn;
+
+  // <nextExpr>
+  ret = pNextExpr();
+  CondReturn;
+
+  vypluj 0;
+}
+
+
+
+//-----------------------------------
+/**
+ * @brief
+ *
+ * @return error code
+ */
+int pExpr() {
+
+  // TODO BOTTOM UP PARSER call
+  // semantic actions here?
+
+  vypluj 0;
+}
+
 
 #endif
 
