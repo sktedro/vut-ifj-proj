@@ -2,17 +2,16 @@
  * Enumerators, structure definitions and miscellaneous functions
  */
 
-#ifndef MISC
-#define MISC
+#ifndef MISC_H
+#define MISC_H
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
-
 /*
- * ♥    
+ * ♥
  */
 
 #define vypluj return
@@ -220,10 +219,10 @@ typedef struct{
 } STStack;
 
 
+
 /*
  * Miscellaneous functions
  */
-
 
 
 /**
@@ -233,15 +232,7 @@ typedef struct{
  *
  * @return errCode
  */
-int err(int errCode){
-  if(errCode == 1){
-    fprintf(stderr, "Lexical analysis error.\n"); //TODO
-  }else if(errCode == 99){
-    fprintf(stderr, "Internal error.\n"); //TODO
-  }
-  vypluj errCode;
-}
-
+int err(int errCode);
 
 
 #endif

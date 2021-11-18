@@ -2,8 +2,8 @@
  * Operations with a token structure
  */
 
-#ifndef TOKEN
-#define TOKEN
+#ifndef TOKEN_H
+#define TOKEN_H
 
 #include "misc.h"
 
@@ -15,16 +15,7 @@
  *
  * @return token (pointer)
  */
-Token *tokenInit(int type){
-  Token *token = malloc(sizeof(Token));
-  if(!token){
-    exit(err(INTERN_ERR));
-  }
-  token->type = type;
-  token->data = NULL;
-  return token;
-}
-
+Token *tokenInit(int type);
 
 /**
  * @brief add a new attribute to the token (allocate and write the data)
@@ -34,36 +25,15 @@ Token *tokenInit(int type){
  *
  * @return 0 if successful
  */
-int tokenAddAttrib(Token *token, char *data){
-  if(!token){
-    return 1;
-  }
-
-  // Allocate space for data
-  token->data = malloc(strlen(data) + 1);
-  if(!token->data){
-    return 1;
-  }
-
-  // .. and write the data to the allocated space
-  memcpy(token->data, data, strlen(data) + 1);
-
-  return 0;
-}
+int tokenAddAttrib(Token *token, char *data);
 
 /**
  * @brief Free all memory allocated for the token
  *
  * @param token to destroy
  */
-void tokenDestroy(Token *token){
-  if(token){
-    if(token->data){
-      free(token->data);
-    }
-    free(token);
-  }
-}
+void tokenDestroy(Token *token);
+
 
 #endif
 /* end of file token.h */

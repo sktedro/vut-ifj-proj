@@ -4,16 +4,16 @@ CFLAGS=-Wall -Wextra -g
 
 MAIN=main.c
 LIBS=\
-char_buffer.h \
-int_buffer.h \
-misc.h \
-precedence_analysis.h \
-scanner.h \
-symbol_stack.h \
-symtable_tree.h \
-symtable.h \
-symtable_stack.h \
-token.h \
+char_buffer.c \
+int_buffer.c \
+misc.c \
+precedence_analysis.c \
+scanner.c \
+symbol_stack.c \
+symtable_tree.c \
+symtable.c \
+symtable_stack.c \
+token.c \
 
 TESTSCRIPT=./test.sh
 

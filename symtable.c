@@ -2,11 +2,10 @@
  * Symbol table
  */
 
-#ifndef SYMTABLE_H
-#define SYMTABLE_H
+#ifndef SYMTABLE_C
+#define SYMTABLE_C
 
-#include "misc.h"
-#include "symtable_stack.h"
+#include "symtable.h"
 
 
 /**
@@ -15,15 +14,19 @@
  * @param frameStack
  *
  * @return 0 if successful
- */
-STStack *STInit();
+ * */
+STStack *STInit(){
+  return STStackInit();
+}
 
 /**
  * @brief Destroy the symbol table
  *
  * @param stack to be destroyed
  */
-void STDestroy(STStack **stack);
+void STDestroy(STStack **stack){
+  STStackDestroy(stack);
+}
 
 /**
  * @brief Push new frame on top of the stack
@@ -31,15 +34,29 @@ void STDestroy(STStack **stack);
  * @param stack - stack with frames
  *
  * @return 0 if successful
- */
-int STPush(STStack *frameStack) ;
+ * */
+int STPush(STStack *frameStack) {
+  STStackElem *top = STStackTop(frameStack);
+  int depth = 0;
+  if(top != NULL) {
+    depth = top->depth + 1;
+  }
+  if(frameStack != NULL) {
+    STStackPush(frameStack, NULL, depth);
+    return 0;
+
+  }
+  return 1;
+}
 
 /**
  * @brief Pops a frame from the symbol table
  *
  * @param frameStack - stack with frames
  */
-void STPop(STStack *frameStack) ;
+void STPop(STStack *frameStack) {
+  STStackPop(frameStack);
+}
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
@@ -49,7 +66,11 @@ void STPop(STStack *frameStack) ;
  *
  * @return 0 if successful
  */
-int STInsert(STStack *frameStack, char *key) ;
+int STInsert(STStack *frameStack, char *key) {
+  STStackElem *frame = STStackTop(frameStack);
+  treeInsert(&(frame->table), key);
+  return 0;
+}
 
 /**
  * @brief Finds element in tree by key and return its data as a pointer
@@ -59,7 +80,20 @@ int STInsert(STStack *frameStack, char *key) ;
  *
  * @return STElem if it finds it, else NULL
  */
-STElem *STFind(STStack *stack, char *key) ;
+STElem *STFind(STStack *stack, char *key) {
+  int i = 0;
+  STStackElem *tmp = STStackNthElem(stack, i);
+  STElem *data = NULL;
+  while(tmp){
+    data = treeGetData(tmp->table, key);
+    if(data) {
+      return data;
+    }
+    i++;
+    tmp = STStackNthElem(stack, i);
+  }
+  return NULL;
+}
 
 /**
  * @brief Set isVariable boolean of a symbol table element (a variable or a 
@@ -69,7 +103,12 @@ STElem *STFind(STStack *stack, char *key) ;
  * @param key (name) of the symbol table element
  * @param val boolean - true if it is a variable, false if it is a function
  */
-void STSetIsVariable(STStack *stack, char *key, bool val);
+void STSetIsVariable(STStack *stack, char *key, bool val){
+  STElem *data = STFind(stack, key);
+  if(data){
+    data->isVariable = val;
+  }
+}
 
 /**
  * @brief Set data type of a variable in a symbol table
@@ -78,7 +117,12 @@ void STSetIsVariable(STStack *stack, char *key, bool val);
  * @param key (name) of the symbol table element
  * @param type - data type the element represents
  */
-void STSetVarDataType(STStack *stack, char *key, int type);
+void STSetVarDataType(STStack *stack, char *key, int type){
+  STElem *data = STFind(stack, key);
+  if(data){
+    data->varDataType = type;
+  }
+}
 
 /**
  * @brief Set address of a variable in a symbol table
@@ -87,7 +131,12 @@ void STSetVarDataType(STStack *stack, char *key, int type);
  * @param key (name) of the symbol table element
  * @param address - new address of the element
  */
-void STSetVarAddress(STStack *stack, char *key, int address);
+void STSetVarAddress(STStack *stack, char *key, int address){
+  STElem *data = STFind(stack, key);
+  if(data){
+    data->varAddress = address;
+  }
+}
 
 /**
  * @brief Use to mark a function as defined or not
@@ -96,7 +145,12 @@ void STSetVarAddress(STStack *stack, char *key, int address);
  * @param key (name) of the symbol table element
  * @param fnDefined - boolean value to be written to STElem->fnDefined
  */
-void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
+void STSetFnDefined(STStack *stack, char *key, bool fnDefined){
+  STElem *data = STFind(stack, key);
+  if(data){
+    data->fnDefined = fnDefined;
+  }
+}
 
 /**
  * @brief Appends a data type of a paramter of a function
@@ -105,7 +159,15 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
  * @param key (name) of the symbol table element
  * @param paramType - data type of the parameter to be appended
  */
-void STAppendParamType(STStack *stack, char *key, int paramType);
+void STAppendParamType(STStack *stack, char *key, int paramType){
+  STElem *data = STFind(stack, key);
+  if(data){
+    if(!data->fnParamTypesBuf){
+      data->fnParamTypesBuf = intBufInit();
+    }
+    intBufAppend(data->fnParamTypesBuf, paramType);
+  }
+}
 
 /**
  * @brief Appends a data type of a return value of a function
@@ -114,7 +176,15 @@ void STAppendParamType(STStack *stack, char *key, int paramType);
  * @param key (name) of the symbol table element
  * @param retType - data type of the return value to be appended
  */
-void STAppendRetType(STStack *stack, char *key, int retType);
+void STAppendRetType(STStack *stack, char *key, int retType){
+  STElem *data = STFind(stack, key);
+  if(data){
+    if(!data->fnRetTypesBuf){
+      data->fnRetTypesBuf = intBufInit();
+    }
+    intBufAppend(data->fnRetTypesBuf, retType);
+  }
+}
 
 /**
  * @brief Returns depth of a symbol table element (if it occurs at various
@@ -125,7 +195,18 @@ void STAppendRetType(STStack *stack, char *key, int retType);
  *
  * @return -1 if an element doesn't exist, depth otherwise
  */
-int STGetDepth(STStack *stack, char *key) ;
+int STGetDepth(STStack *stack, char *key) {
+  int i = 0;
+  STStackElem *tmp = STStackNthElem(stack, i);
+  while(tmp){
+    if(treeGetData(tmp->table, key)) {
+      return tmp->depth;
+    }
+    i++;
+    tmp = STStackNthElem(stack, i);
+  }
+  return -1;
+}
 
 /**
  * @brief Returns true if an element with name 'key' is a variable
@@ -135,7 +216,14 @@ int STGetDepth(STStack *stack, char *key) ;
  *
  * @return true if the element is a variable
  */
-bool STGetIsVariable(STStack *stack, char *key);
+bool STGetIsVariable(STStack *stack, char *key){
+  STElem *data = STFind(stack, key);
+  if(data){
+    return data->isVariable;
+  }
+  fprintf(stderr, "This is awkward\n");
+  return false; // false?? nie lepsie vracat int a -1 namisto toho?
+}
 
 /**
  * @brief Returns the data type of a variable in a symbol table
@@ -145,7 +233,13 @@ bool STGetIsVariable(STStack *stack, char *key);
  *
  * @return data type of the variable
  */
-int STGetVarDataType(STStack *stack, char *key);
+int STGetVarDataType(STStack *stack, char *key){
+  STElem *data = STFind(stack, key);
+  if(data){
+    return data->varDataType;
+  }
+  return -1;
+}
 
 /**
  * @brief Returns an address of a variable in a symbol table
@@ -155,7 +249,13 @@ int STGetVarDataType(STStack *stack, char *key);
  *
  * @return address of the variable
  */
-int STGetVarAddress(STStack *stack, char *key);
+int STGetVarAddress(STStack *stack, char *key){
+  STElem *data = STFind(stack, key);
+  if(data){
+    return data->varAddress;
+  }
+  return -1;
+}
 
 /**
  * @brief Returns true if a function with name 'key' was already defined
@@ -165,7 +265,14 @@ int STGetVarAddress(STStack *stack, char *key);
  *
  * @return true if the function was already defined
  */
-bool STGetFnDefined(STStack *stack, char *key);
+bool STGetFnDefined(STStack *stack, char *key){
+  STElem *data = STFind(stack, key);
+  if(data){
+    return data->fnDefined;
+  }
+  return false; // false? neni lepsie vracat int a -1?
+  fprintf(stderr, "This is awkward\n");
+}
 
 /**
  * @brief returns a data type of a parameter of a function at index 'index'
@@ -177,7 +284,19 @@ bool STGetFnDefined(STStack *stack, char *key);
  * @return data type of a parameter of a function, -1 if the function doesn't 
  * exist
  */
-int STGetParamType(STStack *stack, char *key, int index);
+int STGetParamType(STStack *stack, char *key, int index){
+  STElem *data = STFind(stack, key);
+  if(data){
+    if(!data->fnParamTypesBuf){
+      return -1;
+    }
+    if(data->fnParamTypesBuf->len > index){
+      return data->fnParamTypesBuf->data[index];
+    }
+  }
+  return -1;
+}
+
 
 /**
  * @brief returns a data type of a return value of a function at index 'index'
@@ -189,8 +308,19 @@ int STGetParamType(STStack *stack, char *key, int index);
  * @return data type of a return value of a function, -1 if the function 
  * doesn't exist
  */
-int STGetRetType(STStack *stack, char *key, int index);
+int STGetRetType(STStack *stack, char *key, int index){
+  STElem *data = STFind(stack, key);
+  if(data){
+    if(!data->fnRetTypesBuf){
+      return -1;
+    }
+    if(data->fnRetTypesBuf->len > index){
+      return data->fnRetTypesBuf->data[index];
+    }
+  }
+  return -1;
+}
 
 
 #endif
-/* end of file symtable.h */
+/* end of file symtable.c */

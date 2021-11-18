@@ -2,8 +2,8 @@
  * A stack structure implemented as a linked list
  */
 
-#ifndef SYMBOL_STACK
-#define SYMBOL_STACK
+#ifndef SYMBOL_STACK_H
+#define SYMBOL_STACK_H
 
 #include "misc.h"
 
@@ -13,15 +13,7 @@
  *
  * @return a new stack
  */
-SStack *SStackInit(){
-  SStack *stack = (SStack*)malloc(sizeof(SStack));
-  if(!stack) {
-    exit((err(INTERN_ERR));
-  }
-
-  stack->top = NULL;
-  return stack;
-}
+SStack *SStackInit();
 
 /*
  * @brief allocate and push a new element to the top of the stack
@@ -32,34 +24,14 @@ SStack *SStackInit(){
  *
  * @return 0 if successful
  */
-int SStackPush(SStack *stack, int symbol, int type){
-  if(!stack){
-    return 1;
-  }
-  SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
-  if(!newElem){
-    exit(err(INTERN_ERR));
-  }
-  newElem->symbol = symbol;
-  newElem->type = type;
-  newElem->next = stack->top;
-  stack->top = newElem;
-  return 0;
-}
+int SStackPush(SStack *stack, int symbol, int type);
 
 /*
  * @brief remove (and free it's allocated memory) the top element
  *
  * @param stack
  */
-void SStackPop(SStack *stack){
-  if(!stack || !stack->top){
-    return;
-  }
-  SStackElem *tmp = stack->top;
-  stack->top = tmp->next;
-  free(tmp);
-}
+void SStackPop(SStack *stack);
 
 /*
  * @brief get the element at the top of the stack
@@ -68,12 +40,7 @@ void SStackPop(SStack *stack){
  *
  * @return top element
  */
-SStackElem *SStackTop(SStack *stack){
-  if(!stack){
-    return NULL;
-  }
-  return stack->top;
-}
+SStackElem *SStackTop(SStack *stack);
 
 /*
  * @brief get an element of type terminal that is closest to the top of the
@@ -83,16 +50,7 @@ SStackElem *SStackTop(SStack *stack){
  *
  * @return top terminal element
  */
-SStackElem *SStackTopTerminal(SStack *stack){
-  if(!stack){
-    return NULL;
-  }
-  SStackElem *tmp = stack->top;
-  while(tmp && tmp->type != sym_nonterminal){
-    tmp = tmp->next;
-  }
-  return tmp;
-}
+SStackElem *SStackTopTerminal(SStack *stack);
 
 /*
  * @brief finds an element of type terminal that is closest to the top of the
@@ -104,42 +62,15 @@ SStackElem *SStackTopTerminal(SStack *stack){
  *
  * @return 0 if successful
  */
-int SStackPushAfterTopTerminal(SStack *stack, int symbol, int type){
-  if(!stack){
-    return 1;
-  }
-  SStackElem *prev = SStackTopTerminal(stack);
-  // No terminal found on stack - can't continue
-  if(!prev){
-    return 1;
-  }
-  // Allocate the new element and append it after the highest terminal
-  SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
-  if(!newElem){
-    exit(err(INTERN_ERR));
-  }
-
-  newElem->symbol = symbol;
-  newElem->type = type;
-  newElem->next = prev->next;
-  prev->next = newElem;
-  return 0;
-}
+int SStackPushAfterTopTerminal(SStack *stack, int symbol, int type);
 
 /*
  * @brief Free all memory allocated by the symbol stack
  *
  * @param stack to be freed
  */
-void SStackDestroy(SStack *stack){
-  if(!stack){
-    return;
-  }
-  while(stack->top){
-    SStackPop(stack);
-  }
-  free(stack);
-}
+void SStackDestroy(SStack *stack);
+
 
 #endif
 /* end of file symbol_stack.h */

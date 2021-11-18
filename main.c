@@ -1,8 +1,5 @@
-#include "misc.h"
-#include "parser.h"
-
-
-
+/** #include "misc.c" */
+#include "parser.c"
 
 int main(int argc, char *argv[]){
   // INIT - symtab
