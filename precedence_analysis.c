@@ -34,6 +34,7 @@ char precTab[12][12] = {
  * This is called from the parser
  */
 int parseExpression(STStack *symtable, Token *token){
+  precedenceAnalysis(symtable, token);
   return 0;
 }
 
@@ -41,48 +42,75 @@ int parseExpression(STStack *symtable, Token *token){
  * The precedence analysis algorithm
  */
 int precedenceAnalysis(STStack *symtable, Token *token) {
-  Token *token = NULL;
   SStack *symstack = SStackInit();
   SStackPush(pt_dollar);
 
-  bool input_empty = false;
+  bool exprEnd = false;
   int input_index;
   int stack_index;
 
   while (1){
     // get a new token
-    if(!input_empty) {
-      ret = scanner(&token);
-      condVypluj;
+    if(!exprEnd) {
+
+      // TODO par dalsich podmienok asi. Ocheckovat keywordy a take
+      if(token->type == t_colon 
+          || token->type == t_comma 
+          || token->type == t_assignment){
+        stashToken(token);
+        exprEnd = true;
+        token = NULL;
+      }
     }
 
-    if(/*expression end*/) {
-      // stash token
-      input_empty = true;
-      token = NULL;
-    }
+    SStackElem *top = SStackTopTerminal(symstack);
+    // TODO namapovať každý token (t_..) na symbol (st/sym?_..) - nejaká funkcia
+    // alebo niečo - aby sme získali symbol
+    // tl;dr treba funkciu ktorá z tokenu spraví symbol
+    // SStackElem *inputSymbol = ...?
+    //
+    // Taktiez TODO v misc.h - asi treba dorobit enum na symbol stack type a
+    // symbol stack symbol
 
     input_index = ...;
     stack_index = ...;
     precTab[input_index][stack_index]; // nebo naopak
 
+    if(precTab[top->/*type alebo symbol?*/][] == /*= enum*/){
+      // TODO SStackPush prerobit aby bral element, nie type a symbol
+      SStackPush(symstack, inputSymbol);
+
+      ret = scanner(&token);
+      condVypluj;
+
+    }else if( == /* < enum*/){
+      SStackPushAfterTopTerminal(/* < enum*/);
+      SStackPush(symstack, inputSymbol);
+
+      ret = scanner(&token);
+      condVypluj;
+
+    }else if( == /* > enum*/){
+
+    }else{
+      //err
+    }
 
   }
-  if(token->type == t_idOrKeyword) {
-    vypluj 1;
 
 
-    vypluj 0;
-  }
+  vypluj 0;
+}
 
-  int isExpression(char *data) {
 
-    /*if(strcmp()){
-      }*/
+int isExpression(char *data) {
 
-    vypluj 0;
-  }
+  /*if(strcmp()){
+    }*/
+
+  vypluj 0;
+}
 
 
 #endif
-  /* end of file precedence_analysis.h*/
+/* end of file precedence_analysis.h*/
