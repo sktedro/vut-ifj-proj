@@ -4,6 +4,12 @@
 
 /** IMPORTANT !!! READ FIRST, BEFORE EDITING
  *
+ * --------------------------------------------------
+ * TOP PRIORITY
+ * WE NEED MORE STATES FOR BUILD IN FUNCTIONS
+ * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
+ * --------------------------------------------------
+ *
  * 1. code generating not implemented yet, first parser testing
  * 2. code in testing
  * 3. change error codes
@@ -60,16 +66,107 @@ int ret = 0;
  * 
  * @return if type is data type retrun 0, else 1
  */
-int isDataType(char *type) {
-  if (strcmp(type, "string") == 0) {
-    return 0;
-  } else if (strcmp(type, "integer") == 0) {
-    return 0;
-  } else if (strcmp(type, "number") == 0) {
-    return 0;
+bool isDataType(char *data) {
+  if (strcmp(data, "string") == 0) {
+    return true;
+  } else if (strcmp(data, "integer") == 0) {
+    return true;
+  } else if (strcmp(data, "number") == 0) {
+    return true;
   } else {
-    return 1;
+    return false;
   }
+}
+
+/**
+ * @brief Check if token is build in function
+ *
+ * @return if token is build in function return true, else false
+ */
+bool isBuildInFunction(Token *token) {
+
+  if(token->type == t_idOrKeyword) {
+
+    if(strcmp(token->data, "reads") == 0) {
+      return true;
+    } else if(strcmp(token->data, "readi") == 0) {
+      return true;
+    } else if(strcmp(token->data, "readn") == 0) {
+      return true;
+    } else if(strcmp(token->data, "write") == 0) {
+      return true;
+    } else if(strcmp(token->data, "tointeger") == 0) {
+      return true;
+    } else if(strcmp(token->data, "substr") == 0) {
+      return true;
+    } else if(strcmp(token->data, "ord") == 0) {
+      return true;
+    } else if(strcmp(token->data, "chr") == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @brief Check if token is keyword
+ *
+ * @return if token is keyword return true, else false
+ */
+bool isKeyword(Token *token) {
+
+  if(token->type == t_idOrKeyword) {
+
+    if(strcmp(token->data, "do") == 0) {
+      return true;
+    } else if(strcmp(token->data, "else") == 0) {
+      return true;
+    } else if(strcmp(token->data, "end") == 0) {
+      return true;
+    } else if(strcmp(token->data, "function") == 0) {
+      return true;
+    } else if(strcmp(token->data, "global") == 0) {
+      return true;
+    } else if(strcmp(token->data, "if") == 0) {
+      return true;
+    } else if(strcmp(token->data, "integer") == 0) {
+      return true;
+    } else if(strcmp(token->data, "local") == 0) {
+      return true;
+    } else if(strcmp(token->data, "nil") == 0) {
+      return true;
+    } else if(strcmp(token->data, "number") == 0) {
+      return true;
+    } else if(strcmp(token->data, "require") == 0) {
+      return true;
+    } else if(strcmp(token->data, "return") == 0) {
+      return true;
+    } else if(strcmp(token->data, "string") == 0) {
+      return true;
+    } else if(strcmp(token->data, "then") == 0) {
+      return true;
+    } else if(strcmp(token->data, "while") == 0) {
+      return true;
+    } else if(strcmp(token->data, "reads") == 0) {
+      return true;
+    } else if(strcmp(token->data, "readi") == 0) {
+      return true;
+    } else if(strcmp(token->data, "readn") == 0) {
+      return true;
+    } else if(strcmp(token->data, "write") == 0) {
+      return true;
+    } else if(strcmp(token->data, "tointeger") == 0) {
+      return true;
+    } else if(strcmp(token->data, "substr") == 0) {
+      return true;
+    } else if(strcmp(token->data, "ord") == 0) {
+      return true;
+    } else if(strcmp(token->data, "chr") == 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -239,7 +336,9 @@ int pCodeBody() {
 
       // (
       ret = scanner(&token);
-      CondReturn;
+      CondReturn
+
+      printToken(token);
 
       if (token->type != t_leftParen) {
         //tokenDestroy(token);
@@ -255,7 +354,9 @@ int pCodeBody() {
 
       // )
       ret = scanner(&token);
-      CondReturn;
+      CondReturn
+
+      printToken(token);
 
       if (token->type != t_rightParen) {
         //tokenDestroy(token);
@@ -265,20 +366,20 @@ int pCodeBody() {
 
       // <fnRet>
       ret = pFnRet();
-      CondReturn;
+      CondReturn
 
       // <stat>
       // TODO new stack frame (symbol table)
-      ret = pStart();
-      CondReturn;
+      ret = pStat();
+      CondReturn
 
       // <ret>
       ret = pRet();
-      CondReturn;
+      CondReturn
 
       // end
       ret = scanner(&token);
-      CondReturn;
+      CondReturn
 
       if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
         STDestroy(&symtab);
@@ -290,7 +391,7 @@ int pCodeBody() {
 
       // <codeBody>
       ret = pCodeBody();
-      CondReturn;
+      CondReturn
 
       //-> global [id] : function ( <typeList> ) <fnRet> <codeBody>
     } else if (strcmp(token->data, "global") == 0) {
@@ -450,6 +551,7 @@ int pFnRet() {
   printToken(token);
 
   if(token->type != t_colon){
+    printf("STASH TOKEN FNRET\n");
     stashToken(token);
     return 0;
   }else{
@@ -645,10 +747,13 @@ int pStat() {
   if(token->type == t_idOrKeyword) {
     if(STGetIsVariable(symtab, token->data)) {
       //tokenDestroy(token);
-      pStatWithId();
+      ret = pStatWithId();
+      CondReturn
+      ret = pStat();
+      CondReturn
       vypluj 0;
     } else {
-
+      printf("NOT A VARIABLE\n");
       if(strcmp(token->data, "local") == 0) {
         ret = pIdList();
         CondReturn
@@ -747,6 +852,15 @@ int pStat() {
       } else if(strcmp(token->data, "end") == 0) {
         //tokenDestroy(token);
         pStat();
+      } else if(isBuildInFunction(token)) {
+        stashToken(token);
+        ret = pBuildInFunctions();
+        printf("BRBRBR\n");
+        CondReturn
+        printf("BRBRBR\n");
+        ret = pStat();
+        CondReturn
+        return 0;
       } else {
         vypluj err(1); // TODO errcode
       }
@@ -760,7 +874,7 @@ int pStat() {
   } else {
     vypluj err(1); // TODO errcode
   }
-
+  printf("EEEEEEEEEEEEEEEEEEEND\n");
   vypluj 0;
 }
 
@@ -821,11 +935,11 @@ int pStatWithId() {
     }
 
   } else if(strcmp(token->data, "=") == 0) {
-    pExpr();
-    //TODO
+    ret = pExpr();
+    CondReturn
   } else {
-    pFnCall();
-    //TODO CHECK
+    ret = pFnCall();
+    CondReturn
   }
 
   vypluj 0;
@@ -894,6 +1008,76 @@ int pNextAssign() {
     vypluj err(1); // TODO errcode
   }
 
+  vypluj 0;
+}
+
+/**
+ * @brief Function for build in functions
+ *
+ * @return error code
+ *  TODO ADD MORE CFG RULES FOR ALL FUNCTIONS
+ * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
+ */
+int pBuildInFunctions() {
+  printf("-----------------------------------------------------------\n");
+  printf("BUILD IN FUNCTIONS\n");
+  Token *token = NULL;
+
+  ret = scanner(&token);
+  CondReturn
+
+  printToken(token);
+
+  if(strcmp(token->data, "reads") == 0) {
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+    return 0;
+  } else if(strcmp(token->data, "readi") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  } else if(strcmp(token->data, "readn") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  } else if(strcmp(token->data, "write") == 0) {
+    //TODO
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  } else if(strcmp(token->data, "substr") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  } else if(strcmp(token->data, "ord") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  } else if(strcmp(token->data, "chr") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn
+    }
+  }
+  printf("BUUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
   vypluj 0;
 }
 
@@ -1191,7 +1375,8 @@ int pType() {
 
   printToken(token);
 
-  if((strcmp(token->data, "nil") == 0) && isDataType(token->data)) {
+  if((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
+    printf("IS DATA TYPE\n");
     vypluj 0;
   }
   vypluj err(1);
@@ -1216,12 +1401,16 @@ int pIdList() {
   printToken(token);
 
   if(token->type == t_idOrKeyword) {
-
-    if(STGetIsVariable(symtab, token->data)) {
-      //tokenDestroy(token);
-      ret = pNextId();
-      CondReturn
-      vypluj 0;
+    if(isKeyword(token) == false) {
+      if(STGetIsVariable(symtab, token->data)) {
+        //tokenDestroy(token);
+        ret = pNextId();
+        CondReturn
+        vypluj 0;
+      } else {
+        STInsert(symtab, token->data);
+        vypluj 0;
+      }
     }
   }
 
@@ -1369,11 +1558,37 @@ int pExpr() {
 
   while(true) {
     ret = scanner(&token);
-    CondReturn;
+    CondReturn
 
     printToken(token);
 
-    if(isExpressionParser(*token) == false) {
+
+    if(strcmp(token->data, "readi") == 0 ||
+            strcmp(token->data, "readn") == 0 ||
+            strcmp(token->data, "reads") == 0) {
+
+      ret = scanner(&token);
+      CondReturn
+
+      printToken(token);
+
+      if(token->type == t_leftParen) {
+        ret = scanner(&token);
+        CondReturn
+
+        printToken(token);
+
+        if(token->type == t_rightParen) {
+          return 0;
+        } else {
+          return err(1);
+        }
+
+      } else {
+        return err(1);
+      }
+
+    } else if(isExpressionParser(*token) == false) {
       stashToken(token);
       //tokenDestroy(token);
       return 0;
