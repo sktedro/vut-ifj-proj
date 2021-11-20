@@ -30,48 +30,59 @@ char precTab[12][12] = {
 // todo zomriet
 //TODO pravidlá, pushovanie na stack, čítanie zo stacku
 
+/**
+ * This is called from the parser
+ */
+int parseExpression(STStack *symtable, Token *token){
+  return 0;
+}
+
+/**
+ * The precedence analysis algorithm
+ */
 int precedenceAnalysis(STStack *symtable, Token *token) {
-    Token *token = NULL;
+  Token *token = NULL;
+  SStack *symstack = SStackInit();
+  SStackPush(pt_dollar);
 
-    bool input_empty = false;
-    int input_index;
-    int stack_index;
+  bool input_empty = false;
+  int input_index;
+  int stack_index;
 
-    while (1){
-        // get a new token
-        if(!input_empty) {
-            ret = scanner(&token);
-            condVypluj;
-        }
-
-        if(/*expression end*/) {
-          // stash token
-          input_empty = true;
-          token = NULL;
-        }
-
-        input_index = ...;
-        stack_index = ...;
-        precTab[input_index][stack_index]; // nebo naopak
-
-
+  while (1){
+    // get a new token
+    if(!input_empty) {
+      ret = scanner(&token);
+      condVypluj;
     }
+
+    if(/*expression end*/) {
+      // stash token
+      input_empty = true;
+      token = NULL;
+    }
+
+    input_index = ...;
+    stack_index = ...;
+    precTab[input_index][stack_index]; // nebo naopak
+
+
+  }
   if(token->type == t_idOrKeyword) {
     vypluj 1;
+
+
+    vypluj 0;
   }
-    
 
-  vypluj 0;
-}
+  int isExpression(char *data) {
 
-int isExpression(char *data) {
+    /*if(strcmp()){
+      }*/
 
-  /*if(strcmp()){
-  }*/
-  
-  vypluj 0;
-}
+    vypluj 0;
+  }
 
 
 #endif
-/* end of file precedence_analysis.h*/
+  /* end of file precedence_analysis.h*/
