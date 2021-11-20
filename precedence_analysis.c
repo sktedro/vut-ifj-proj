@@ -7,6 +7,8 @@
 
 #include "precedence_analysis.h"
 
+int ret = 0;
+
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
@@ -25,15 +27,41 @@ char precTab[12][12] = {
   {'<','<','<','<','<','<','<','<','<','_','<','_'}  // pt_dollar
 };
 
+// todo zomriet
+//TODO pravidlá, pushovanie na stack, čítanie zo stacku
 
 int precedenceAnalysis(STStack *symtable, Token *token) {
+    Token *token = NULL;
 
+    bool input_empty = false;
+    int input_index;
+    int stack_index;
+
+    while (1){
+        // get a new token
+        if(!input_empty) {
+            ret = scanner(&token);
+            condVypluj;
+        }
+
+        if(/*expression end*/) {
+          // stash token
+          input_empty = true;
+          token = NULL;
+        }
+
+        input_index = ...;
+        stack_index = ...;
+        precTab[input_index][stack_index]; // nebo naopak
+
+
+    }
   if(token->type == t_idOrKeyword) {
-    return 1;
+    vypluj 1;
   }
     
 
-  return 0;
+  vypluj 0;
 }
 
 int isExpression(char *data) {
@@ -41,7 +69,7 @@ int isExpression(char *data) {
   /*if(strcmp()){
   }*/
   
-  return 0;
+  vypluj 0;
 }
 
 

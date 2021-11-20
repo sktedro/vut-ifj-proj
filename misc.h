@@ -32,18 +32,19 @@
 
 #define INTERN_ERR 99    // intern error (memory allocation etc.)
 
+
 /*
  * Macros
  */
-
-
+#define CondReturn \
+  if (ret)         \
+    vypluj err(ret);
+#define condVypluj CondReturn
 
 /*
  * Enumerations
  */
 
-
-// TODO ERR enum
 
 // Enumeration of states of the finite state machine
 // The commented out states are not used, as instead of setting them as the
@@ -171,7 +172,7 @@ typedef struct{
 
 
 // Symbol stack element
-typedef struct SStackElem{
+typedef struct SStackElem {
   int type;
   int symbol;
   struct SStackElem *next;

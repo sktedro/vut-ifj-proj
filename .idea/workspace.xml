@@ -13,8 +13,16 @@
   <component name="ChangeListManager">
     <list default="true" id="153fca42-4470-4088-9a64-8e5362bd3719" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser.c" beforeDir="false" afterPath="$PROJECT_DIR$/parser.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/precedence_analysis.c" beforeDir="false" afterPath="$PROJECT_DIR$/precedence_analysis.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/precedence_analysis.h" beforeDir="false" afterPath="$PROJECT_DIR$/precedence_analysis.h" afterDir="false" />
     </list>
-    <list id="97c928d7-268a-4613-bdcf-80c61ed9c766" name="Changes by jija" comment="" />
+    <list id="97c928d7-268a-4613-bdcf-80c61ed9c766" name="Changes by jija" comment="">
+      <change beforePath="$PROJECT_DIR$/misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser.c" beforeDir="false" afterPath="$PROJECT_DIR$/parser.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/precedence_analysis.c" beforeDir="false" afterPath="$PROJECT_DIR$/precedence_analysis.c" afterDir="false" />
+    </list>
     <list id="e2da7652-4177-4dfd-bcfc-3e4eda911001" name="Changes by tedro" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +57,65 @@
         <option name="url" value="https://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@github.com/sktedro/vut-ifj-proj" />
       </UrlAndAccount>
     </option>
+  </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/parser.c">
+      <ranges>
+        <range start1="54" end1="55" start2="54" end2="55" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="56" end1="57" start2="56" end2="57" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="70" end1="71" start2="70" end2="71" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="72" end1="73" start2="72" end2="73" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="74" end1="75" start2="74" end2="75" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="76" end1="77" start2="76" end2="77" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="90" end1="91" start2="90" end2="91" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="92" end1="93" start2="92" end2="93" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="94" end1="95" start2="94" end2="95" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="96" end1="97" start2="96" end2="97" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="98" end1="99" start2="98" end2="99" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="100" end1="101" start2="100" end2="101" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="102" end1="103" start2="102" end2="103" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="104" end1="105" start2="104" end2="105" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="108" end1="109" start2="108" end2="109" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="555" end1="556" start2="555" end2="556" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="596" end1="597" start2="596" end2="597" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="601" end1="602" start2="601" end2="602" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="862" end1="863" start2="862" end2="863" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1036" end1="1037" start2="1036" end2="1037" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1219" end1="1220" start2="1219" end2="1220" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1221" end1="1222" start2="1221" end2="1222" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1224" end1="1225" start2="1224" end2="1225" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1227" end1="1228" start2="1227" end2="1228" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1229" end1="1230" start2="1229" end2="1230" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1231" end1="1232" start2="1231" end2="1232" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1235" end1="1236" start2="1235" end2="1236" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1237" end1="1238" start2="1237" end2="1238" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1242" end1="1243" start2="1242" end2="1243" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1581" end1="1582" start2="1581" end2="1582" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1583" end1="1584" start2="1583" end2="1584" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1587" end1="1588" start2="1587" end2="1588" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="1593" end1="1594" start2="1593" end2="1594" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/misc.h">
+      <ranges>
+        <range start1="33" end1="33" start2="33" end2="34" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="37" end1="39" start2="38" end2="42" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="44" end1="46" start2="47" end2="47" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="173" end1="174" start2="174" end2="175" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/precedence_analysis.c">
+      <ranges>
+        <range start1="8" end1="8" start2="8" end2="10" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="26" end1="26" start2="28" end2="31" changelist="153fca42-4470-4088-9a64-8e5362bd3719" />
+        <range start1="27" end1="28" start2="32" end2="32" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="29" end1="29" start2="33" end2="38" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="30" end1="30" start2="39" end2="58" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="31" end1="32" start2="59" end2="60" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="35" end1="36" start2="63" end2="64" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+        <range start1="43" end1="44" start2="71" end2="72" changelist="97c928d7-268a-4613-bdcf-80c61ed9c766" />
+      </ranges>
+    </file>
   </component>
   <component name="ProjectId" id="1zSZ7FBdekRY4LBGiizWO0sxDuz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -119,7 +186,9 @@
       <workItem from="1636814258685" duration="92000" />
       <workItem from="1636817128303" duration="10803000" />
       <workItem from="1637341703678" duration="1000" />
-      <workItem from="1637341939258" duration="1755000" />
+      <workItem from="1637341939258" duration="6133000" />
+      <workItem from="1637435786879" duration="1000" />
+      <workItem from="1637436097378" duration="6404000" />
     </task>
     <servers />
   </component>

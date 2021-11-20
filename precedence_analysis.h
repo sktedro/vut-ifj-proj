@@ -7,7 +7,8 @@
 
 #include "misc.h"
 #include "symbol_stack.h"
-
+#include "scanner.h"
+#include "char_buffer.h"
 
 
 #endif

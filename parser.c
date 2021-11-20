@@ -52,9 +52,9 @@
 
 #include "parser.h"
 
-#define CondReturn \
+/*#define CondReturn \
   if (ret)         \
-    vypluj err(ret);
+    vypluj err(ret);*/ //presun do misc.h
 
 STStack *symtab;
 
@@ -68,13 +68,13 @@ int ret = 0;
  */
 bool isDataType(char *data) {
   if (strcmp(data, "string") == 0) {
-    return true;
+    vypluj true;
   } else if (strcmp(data, "integer") == 0) {
-    return true;
+    vypluj true;
   } else if (strcmp(data, "number") == 0) {
-    return true;
+    vypluj true;
   } else {
-    return false;
+    vypluj false;
   }
 }
 
@@ -88,25 +88,25 @@ bool isBuildInFunction(Token *token) {
   if(token->type == t_idOrKeyword) {
 
     if(strcmp(token->data, "reads") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "readi") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "readn") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "write") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "tointeger") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "substr") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "ord") == 0) {
-      return true;
+      vypluj true;
     } else if(strcmp(token->data, "chr") == 0) {
-      return true;
+      vypluj true;
     }
   }
 
-  return false;
+  vypluj false;
 }
 
 /**
@@ -553,7 +553,7 @@ int pFnRet() {
   if(token->type != t_colon){
     printf("STASH TOKEN FNRET\n");
     stashToken(token);
-    return 0;
+    vypluj 0;
   }else{
     // : processed by the previous if
     //tokenDestroy(token);
@@ -594,12 +594,12 @@ int pFnCallArgList() {
   if(token->type == t_rightParen) {
     stashToken(token);
     //tokenDestroy(token);
-    return 0;
+    vypluj 0;
   } else {
     //tokenDestroy(token);
     if(pFnCallArg() == 0) {
       if(pNextFnCallArg() == 0) {
-        return 0;
+        vypluj 0;
       }
     }
   }
@@ -860,7 +860,7 @@ int pStat() {
         printf("BRBRBR\n");
         ret = pStat();
         CondReturn
-        return 0;
+        vypluj 0;
       } else {
         vypluj err(1); // TODO errcode
       }
@@ -1034,7 +1034,7 @@ int pBuildInFunctions() {
       ret = scanner(&token);
       CondReturn
     }
-    return 0;
+    vypluj 0;
   } else if(strcmp(token->data, "readi") == 0) {
     //TODO
 
@@ -1217,30 +1217,30 @@ bool isExpressionParser(Token token) {
   printf("is %s expression ?\n", token.data);
 
   if(token.type == t_leftParen) {
-    return true;
+    vypluj true;
   } else if(token.type == t_str) {
-    return true;
+    vypluj true;
   } else if(token.type == t_arithmOp) {
     if(strcmp(token.data, "+") == 0 || strcmp(token.data, "-") == 0) {
-      return true;
+      vypluj true;
     }
   } else if(token.type == t_int) {
-    return true;
+    vypluj true;
   } else if(token.type == t_sciNum) {
-    return true;
+    vypluj true;
   } else if(token.type == t_num) {
-    return true;
+    vypluj true;
   } else if(token.type == t_idOrKeyword) {
 
     if(strcmp(token.data, "nil") == 0) {
-      return true;
+      vypluj true;
     } else if(STGetIsVariable(symtab, token.data)) {
-      return true;
+      vypluj true;
     }
 
   }
 
-  return false;
+  vypluj false;
 }
 
 
@@ -1579,19 +1579,19 @@ int pExpr() {
         printToken(token);
 
         if(token->type == t_rightParen) {
-          return 0;
+          vypluj 0;
         } else {
-          return err(1);
+          vypluj err(1);
         }
 
       } else {
-        return err(1);
+        vypluj err(1);
       }
 
     } else if(isExpressionParser(*token) == false) {
       stashToken(token);
       //tokenDestroy(token);
-      return 0;
+      vypluj 0;
     }
   }
 
