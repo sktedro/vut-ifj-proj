@@ -6,7 +6,7 @@
  *
  * --------------------------------------------------
  * TOP PRIORITY
- * WE NEED MORE STATES FOR BUILD IN FUNCTIONS
+ * WE NEED MORE STATES FOR BUILT IN FUNCTIONS
  * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
  * --------------------------------------------------
  *
@@ -79,11 +79,11 @@ bool isDataType(char *data) {
 }
 
 /**
- * @brief Check if token is build in function
+ * @brief Check if token is built in function
  *
- * @return if token is build in function return true, else false
+ * @return if token is built in function return true, else false
  */
-bool isBuildInFunction(Token *token) {
+bool isBuiltInFunction(Token *token) {
 
   if(token->type == t_idOrKeyword) {
 
@@ -481,6 +481,19 @@ int pCodeBody() {
       ret = pCodeBody();
       CondReturn;
 
+    } else if(isBuiltInFunction(token)) {
+
+      if(strcmp(token->data, "write") == 0) {
+
+        ret = pFnCall();
+        CondReturn
+
+        ret = pCodeBody();
+        CondReturn
+
+        vypluj 0;
+      }
+
     } else {
       vypluj err(1); // TODO errcode
     }
@@ -597,11 +610,13 @@ int pFnCallArgList() {
     vypluj 0;
   } else {
     //tokenDestroy(token);
-    if(pFnCallArg() == 0) {
-      if(pNextFnCallArg() == 0) {
-        vypluj 0;
-      }
-    }
+    ret = pFnCallArg();
+    CondReturn
+
+    ret = pNextFnCallArg();
+    CondReturn
+
+    vypluj 0;
   }
   vypluj err(1);
 }
@@ -627,21 +642,24 @@ int pNextFnCallArg() {
 
   // If the next token is not a comma, use rule 14 (else rule 15)
   // ','
-  if(token->type != t_comma){
+  if(token->type == t_comma){
+    // <fnCallArg>
+    ret = pFnCallArg();
+    CondReturn
+
+    // <nextFnCallArg>
+    ret = pNextFnCallArg();
+    CondReturn;
+
+    vypluj 0;
+  } else if(token->type == t_rightParen) {
     stashToken(token);
-    vypluj err(1);
+    vypluj 0;
   }
   //tokenDestroy(token);
+  stashToken(token);
+  vypluj err(1);
 
-  // <fnCallArg> 
-  ret = pFnCallArg();
-  CondReturn
-
-  // <nextFnCallArg>
-  ret = pNextFnCallArg();
-  CondReturn;
-
-  vypluj 0;
 }
 
 
@@ -680,6 +698,10 @@ int pFnCallArg() {
       || tokenType == t_str){
     printf("JE TO LITERÁL\n");
     // TODO semantic actions
+    vypluj 0;
+  } else if(token->type == t_rightParen) {
+    stashToken(token);
+
     vypluj 0;
   } else {
     printf("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -794,10 +816,10 @@ int pStat() {
           //tokenDestroy(token);
 
           STPush(symtab); //TODO CHECK
-
+          printf("PRED ELSE \n");
           ret = pStat();
           CondReturn
-
+          printf("ZA ELSE \n");
           STPop(symtab);
 
           ret = scanner(&token);
@@ -852,14 +874,24 @@ int pStat() {
       } else if(strcmp(token->data, "end") == 0) {
         //tokenDestroy(token);
         pStat();
-      } else if(isBuildInFunction(token)) {
-        stashToken(token);
-        ret = pBuildInFunctions();
-        printf("BRBRBR\n");
-        CondReturn
-        printf("BRBRBR\n");
-        ret = pStat();
-        CondReturn
+      } else if(isBuiltInFunction(token)) {
+
+        if(strcmp(token->data, "write") == 0) {
+
+          ret = pFnCall();
+          CondReturn
+
+          ret = pStat();
+          CondReturn
+
+          vypluj 0;
+
+        }
+
+      } else if(strcmp(token->data, "return") == 0) {
+        /*ret = pStat();
+        CondReturn*/  //TODO add checking return arguments
+
         vypluj 0;
       } else {
         vypluj err(1); // TODO errcode
@@ -1012,15 +1044,17 @@ int pNextAssign() {
 }
 
 /**
- * @brief Function for build in functions
+ * NOT USED
+ *
+ * @brief Function for built in functions
  *
  * @return error code
  *  TODO ADD MORE CFG RULES FOR ALL FUNCTIONS
  * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
  */
-int pBuildInFunctions() {
+int pBuiltInFunctions() {
   printf("-----------------------------------------------------------\n");
-  printf("BUILD IN FUNCTIONS\n");
+  printf("BUILt IN FUNCTIONS\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1149,7 +1183,9 @@ int pFnArgList() {
 
     //tokenDestroy(token);
 
-    pNextFnArg();
+    ret = pNextFnArg();
+    CondReturn
+
     vypluj 0;
 
   } else {
@@ -1238,6 +1274,8 @@ bool isExpressionParser(Token token) {
       vypluj true;
     }
 
+  } else if(token.type == t_relOp) {
+    vypluj true;
   }
 
   vypluj false;

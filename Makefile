@@ -1,13 +1,13 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
 
+#precedence_analysis.c \#
 
 MAIN=main.c
 LIBS=\
 char_buffer.c \
 int_buffer.c \
 misc.c \
-precedence_analysis.c \
 scanner.c \
 symbol_stack.c \
 symtable_tree.c \
