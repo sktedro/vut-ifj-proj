@@ -526,6 +526,7 @@ int pFnCall() {
   CondReturn;
 
   // )
+  printf("back in fn call \n");
   ret = scanner(&token);
   CondReturn;
 
@@ -606,6 +607,7 @@ int pFnCallArgList() {
     vypluj 0;
   } else {
     //tokenDestroy(token);
+
     ret = pFnCallArg();
     CondReturn
 
@@ -867,9 +869,13 @@ int pStat() {
         }
 
 
+      } else if(strcmp(token->data, "else") == 0) {
+        stashToken(token);
+        vypluj 0;
       } else if(strcmp(token->data, "end") == 0) {
         //tokenDestroy(token);
-        pStat();
+        ret = pStat();
+        CondReturn
       } else if(isBuiltInFunction(token)) {
 
         if(strcmp(token->data, "write") == 0) {
@@ -1253,7 +1259,9 @@ bool isExpressionParser(Token token) {
   } else if(token.type == t_str) {
     vypluj true;
   } else if(token.type == t_arithmOp) {
-    if(strcmp(token.data, "+") == 0 || strcmp(token.data, "-") == 0) {
+    if(strcmp(token.data, "+") == 0 || strcmp(token.data, "-") == 0
+    || strcmp(token.data, "*") == 0 || strcmp(token.data, "/") == 0
+    || strcmp(token.data,"//") == 0) {
       vypluj true;
     }
   } else if(token.type == t_int) {
@@ -1626,6 +1634,17 @@ int pExpr() {
       stashToken(token);
       //tokenDestroy(token);
       vypluj 0;
+    } else if(isExpressionParser(*token) && token->type == t_idOrKeyword) {
+
+      ret = scanner(&token);
+      CondReturn
+
+      if(token->type == t_arithmOp && isExpressionParser(*token)) {
+
+      } else {
+        vypluj 0;
+      }
+
     }
   }
 

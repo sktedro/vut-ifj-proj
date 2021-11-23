@@ -2,6 +2,7 @@
 build/
 logs/
 .idea/
+tests/test
 tests/*/outputs/
 cmake-build-debug/
 CMakeLists.txt
