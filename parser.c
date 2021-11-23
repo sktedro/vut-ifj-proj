@@ -1,6 +1,7 @@
 /*
  * Parser
  */
+// TODO error returns (defined in misc.h)
 
 /** IMPORTANT !!! READ FIRST, BEFORE EDITING
  *
@@ -223,67 +224,86 @@ void printToken(Token *token) {
 
 
 /**
- * @brief Rule for require
+ * @brief Starting rule for require
  *
  * @return int - 0 if success, else on error
  *
  * 01. <start>           -> require <req> <codeBody>
  */
 int pStart() {
-  printf("-----------------------------------------------------------\n");
-  printf("PARSER START\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(sttderr, "PARSER START\n");
   Token *token = NULL;
 
   ret = scanner(&token);
   CondReturn
 
-  printToken(token);
+  printToken(token); // TODO delete
 
   if (token->type == t_idOrKeyword && strcmp(token->data, "require") == 0) {
     //tokenDestroy(token);
     ret = pReq();
-    CondReturn;
-    printf("PARSER START -> ifj21 is \n");
+    CondReturn
+    fprintf(stderr, "PARSER START -> ifj21 is \n");
 
-    ret = pCodeBody();
-    CondReturn;
-    vypluj 0;
+    vypluj pCodeBody();
   } else {
     //tokenDestroy(token);
-    vypluj err(1); // TODO aky kod?
+    vypluj err(SYNTAX_ERR);
   }
   vypluj 0;
 }
 
 
 /**
- * @brief
+ * @brief Rule for <req>
  *
  * @return error code 
  *
  * 02. <req>             -> "ifj21"
  */
 int pReq() {
-  printf("-----------------------------------------------------------\n");
-  printf("PARSER REQUIRE\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER REQUIRE\n");
   Token *token = NULL;
 
   ret = scanner(&token);
   CondReturn
 
-  printToken(token);
+  printToken(token); // TODO delete
 
   if (token->type == t_str && strcmp(token->data, "ifj21") == 0) {
     //tokenDestroy(token);
     vypluj 0;
   } else {
     //tokenDestroy(token);
-    vypluj err(1); // TODO aky kod?
+    vypluj err(SYNTAX_ERR);
   }
 }
 
+ /**
+ * @brief Check if token is ID
+ *
+ * @return true if token is ID, otherwise false
+ *
+ */
+ bool pFunID(Token *token) {
+   if (token->type == t_idOrKeyword) {
+     if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
+       fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
+       vypluj err(ID_DEF_ERR);
+     } else {
+       fprintf(stderr, "CREATING NEW STACK\n");
+       STInsert(symtab, token->data);
+     }
+   } else {
+     fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
+     vypluj err(SYNTAX_ERR);
+   }
+   vypluj 0;
+}
 
-/**
+ /**
  * @brief Rule for <codebody> string
  *
  * @return int - 0 if success, else on error
@@ -294,55 +314,39 @@ int pReq() {
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
 int pCodeBody() {
-  printf("-----------------------------------------------------------\n");
-  printf("PARSER CODE BODY\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER CODE BODY\n");
+
   Token *token = NULL;
   ret = scanner(&token);
-  CondReturn;
+  CondReturn
 
-  printToken(token);
+  printToken(token); // TODO delete
 
   // -> eps
-  if (token == NULL) {
+  if (token == NULL) { // EOF
     vypluj 0;
   } else if (token->type == t_idOrKeyword) {
-
     //-> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
     if (strcmp(token->data, "function") == 0) {
-
       //tokenDestroy(token);
       ret = scanner(&token);
       CondReturn;
 
-      printToken(token);
-
       // [id] - function name
-      if (token->type == t_idOrKeyword) {
-        if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
-          printf("FUNCTION ALREADY EXISTS -> ERROR\n");
-          vypluj err(1); // TODO RETURN ERROR
-        } else {
-          printf("CREATING NEW STACK\n");
-          STInsert(symtab, token->data);
-        }
-      } else {
-        printf("NOT A ID OR KEYWORD -> ERROR\n");
-        vypluj err(1); //TODO ERROR
-      }
+      ret - pFunID(token);
+      CondReturn
 
       // (
       ret = scanner(&token);
       CondReturn
-
-      printToken(token);
+      printToken(token); // TODO delete
 
       if (token->type != t_leftParen) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
-      } else {
-        //tokenDestroy(token);
+        vypluj err(SYNTAX_ERR);
       }
-
+      //tokenDestroy(token);
 
       // <fnArgList>
       ret = pFnArgList();
@@ -351,12 +355,11 @@ int pCodeBody() {
       // )
       ret = scanner(&token);
       CondReturn
-
-      printToken(token);
+      printToken(token); // TODO delete
 
       if (token->type != t_rightParen) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       //tokenDestroy(token);
 
@@ -380,7 +383,7 @@ int pCodeBody() {
       if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
         STDestroy(&symtab);
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       STPop(symtab);
       //tokenDestroy(token);
@@ -389,18 +392,11 @@ int pCodeBody() {
       ret = pCodeBody();
       CondReturn
 
-      //-> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+    //-> global [id] : function ( <typeList> ) <fnRet> <codeBody>
     } else if (strcmp(token->data, "global") == 0) {
       // [id]
-      if (token->type == t_idOrKeyword) {
-        if (STFind(symtab, token->data)) {
-          vypluj err(1); // TODO RETURN ERROR
-        } else {
-          STInsert(symtab, token->data);
-        }
-      } else {
-        vypluj err(1); //TODO ERROR
-      }
+      ret = pFunID(token);
+      CondReturn;
       //tokenDestroy(token);
 
       // :
@@ -409,17 +405,17 @@ int pCodeBody() {
 
       if (token->type != t_colon) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       //tokenDestroy(token);
 
       // function
       ret = scanner(&token);
-      CondReturn;
+      CondReturn
 
       if (!(token->type == t_idOrKeyword && strcmp(token->data, "function") == 0)) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       //tokenDestroy(token);
 
@@ -429,7 +425,7 @@ int pCodeBody() {
 
       if (token->type != t_leftParen) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       //tokenDestroy(token);
 
@@ -443,7 +439,7 @@ int pCodeBody() {
 
       if (token->type != t_rightParen) {
         //tokenDestroy(token);
-        vypluj err(1); // TODO what code
+        vypluj err(SYNTAX_ERR);
       }
       //tokenDestroy(token);
 
@@ -455,17 +451,18 @@ int pCodeBody() {
       ret = pCodeBody();
       CondReturn;
 
-      //-> [id] <fnCall> <codeBody>
+// --------------------------------- ENDED HERE ------------------------------------------------------------
+    //-> [id] <fnCall> <codeBody>
     } else if (STFind(symtab, token->data) != NULL) { // [ID]
       // [id]
       // If the id is a variable or is not defined yet, we can't call it as a
       // function...
-      if (STGetIsVariable(symtab, token->data) != false || !STGetFnDefined(symtab, token->data)) {
-        printf("FN NENI DEFINOVANÁ\n");
+      if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
+        fprintf(stderr, "FN NENI DEFINOVANÁ\n");
         vypluj err(1); // TODO RETURN ERROR
       }
 
-      printf("FN JE DEFINOVANÁ\n");
+      fprintf(stderr, "FN JE DEFINOVANÁ\n");
 
       // <fnCall>
       ret = pFnCall();
@@ -1175,12 +1172,12 @@ int pFnArgList() {
 
     if (token->type != t_idOrKeyword) {
       //TODO NENI TO KEYWORD
-      vypluj err(1);
+      vypluj err(SYNTAX_ERR);
     }
 
     if (isDataType(token->data) == 1) {
       //TODO NENI TO datatype
-      vypluj err(1);
+      vypluj err(SYNTAX_ERR);
     }
 
     //tokenDestroy(token);
@@ -1191,8 +1188,8 @@ int pFnArgList() {
     vypluj 0;
 
   } else {
-    printf("ELSE\n");
-    vypluj err(1);
+    fprintf(stderr, "ELSE\n");
+    vypluj err(SYNTAX_ERR);
     //RETURN ERROR
   }
 
@@ -1209,8 +1206,8 @@ int pFnArgList() {
  * 37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
  */
 int pNextFnArg() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT FN ARG\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT FN ARG\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1219,8 +1216,7 @@ int pNextFnArg() {
   printToken(token);
 
   if(token->type != t_comma) {
-    //TODO ERROR
-    vypluj err(1);
+    vypluj err(SYNTAX_ERR);
   }
 
   //tokenDestroy(token);
@@ -1357,11 +1353,10 @@ int pTypeList() {
 
       vypluj 0;
     }
+  } else {
+    vypluj err(SYNTAX_ERR);
   }
-
-  vypluj err(1);
 }
-
 
 /**
  * @brief
@@ -1391,11 +1386,10 @@ int pNextType() {
 
       vypluj 0;
     }
+  } else {
+    vypluj err(SYNTAX_ERR);
   }
-
-  vypluj err(1);
 }
-
 
 /**
  * @brief
@@ -1420,8 +1414,9 @@ int pType() {
   if((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
     printf("IS DATA TYPE\n");
     vypluj 0;
+  } else {
+    vypluj err(SYNTAX_ERR);
   }
-  vypluj err(1);
 }
 
 
@@ -1456,7 +1451,7 @@ int pIdList() {
     }
   }
 
-  vypluj err(1);
+  vypluj err(SYNTAX_ERR);
 }
 
 
@@ -1485,7 +1480,7 @@ int pNextId() {
     vypluj 0;
   }
 
-  vypluj err(1);
+  vypluj err(SYNTAX_ERR);
 }
 
 
@@ -1594,8 +1589,8 @@ int pNextExpr() {
  * @return error code
  */
 int pExpr() {
-  printf("-----------------------------------------------------------\n");
-  printf("EXPR\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "EXPR\n");
   Token *token = NULL;
 
   while(true) {
@@ -1604,10 +1599,9 @@ int pExpr() {
 
     printToken(token);
 
-
     if(strcmp(token->data, "readi") == 0 ||
-            strcmp(token->data, "readn") == 0 ||
-            strcmp(token->data, "reads") == 0) {
+       strcmp(token->data, "readn") == 0 ||
+       strcmp(token->data, "reads") == 0) {
 
       ret = scanner(&token);
       CondReturn
@@ -1623,11 +1617,11 @@ int pExpr() {
         if(token->type == t_rightParen) {
           vypluj 0;
         } else {
-          vypluj err(1);
+          vypluj err(SYNTAX_ERR);
         }
 
       } else {
-        vypluj err(1);
+        vypluj err(SYNTAX_ERR);
       }
 
     } else if(isExpressionParser(*token) == false) {
