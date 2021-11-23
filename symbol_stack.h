@@ -24,7 +24,7 @@ SStack *SStackInit();
  *
  * @return 0 if successful
  */
-int SStackPush(SStack *stack, int symbol, int type);
+int SStackPush(SStack *stack, SStackElem *newElem);
 
 /*
  * @brief remove (and free it's allocated memory) the top element
@@ -62,7 +62,7 @@ SStackElem *SStackTopTerminal(SStack *stack);
  *
  * @return 0 if successful
  */
-int SStackPushAfterTopTerminal(SStack *stack, int symbol, int type);
+int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem);
 
 /*
  * @brief Free all memory allocated by the symbol stack

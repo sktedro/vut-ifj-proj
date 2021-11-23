@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+
 /*
  * ♥
  */
@@ -20,17 +21,17 @@
 /*
  *  Error returns (will be enum?)
  */
-#define LEX_ERR 1        // lexical analysis error
-#define SYNTAX_ERR 2     // syntax error
-#define ID_DEF_ERR 3     // undefined/redefined function/variable
-#define ASS_ERR 4        // assignment error, types incompatible
-#define PARAM_RET_ERR 5  // wrong type/number of function parameters/returns
-#define TYPE_EXPR_ERR 6  // types incompatible in expression
-#define OTHER_SEM_ERR 7  // other semantic error
-#define NIL_ERR 8        // unexpected nil
-#define DIV_BY_ZERO_ERR  // integer division by zero
+#define LEX_ERR 1          // lexical analysis error
+#define SYNTAX_ERR 2       // syntax error
+#define ID_DEF_ERR 3       // undefined/redefined function/variable
+#define ASS_ERR 4          // assignment error, types incompatible
+#define PARAM_RET_ERR 5    // wrong type/number of function parameters/returns
+#define TYPE_EXPR_ERR 6    // types incompatible in expression
+#define OTHER_SEM_ERR 7    // other semantic error
+#define NIL_ERR 8          // unexpected nil
+#define DIV_BY_ZERO_ERR 9  // integer division by zero
 
-#define INTERN_ERR 99    // intern error (memory allocation etc.)
+#define INTERN_ERR 99      // intern error (memory allocation etc.)
 
 
 /*
@@ -128,18 +129,15 @@ enum PrecTabEnum{
 //TODO
 // Enumeration of symbol stack type
 enum SStackTypeEnum{
-  st_,
-  st
+  st_push, // <
+  st_reduce, // > (reduce untill <)
+  st_nop, // =
+  st_invalid, // _
+  st_idOrLiteral,
+  st_op,
+  st_expr,
+  st_dollar
 };
-
-
-//TODO arithm. operators, relation operators and so on?
-// Enumeration of symbol stack symbol
-enum SStackSymbolEnum{
-  sym_dollar,
-  sym_nonterminal
-};
-
 
 
 /*
@@ -173,8 +171,10 @@ typedef struct{
 
 // Symbol stack element
 typedef struct SStackElem {
-  int type;
-  int symbol;
+  int type; // Symbol stack type enum (st)_
+  int op; // Precedence table enum (pt_)
+  bool isId; // So we know if there's an ID or a literal in *data
+  char *data; // ID, literal,...
   struct SStackElem *next;
 } SStackElem;
 

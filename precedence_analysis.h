@@ -11,4 +11,15 @@
 #include "char_buffer.h"
 
 
+/**
+ * @brief Receives a token and return a new element of the symbol stack
+ * 
+ * @param token to be converted to SStackElem
+ * @return SStackElem* converted from token
+ */
+SStackElem *parseToken(Token *token);
+
+int precedenceAnalysis(STStack *symtable, Token *token);
+
+
 #endif

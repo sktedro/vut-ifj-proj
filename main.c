@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
 
   STPush(symtab);
 
-  int ret = pStart();
+  ret = pStart();
   CondReturn;
 
   return 0;

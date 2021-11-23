@@ -52,13 +52,9 @@
 
 #include "parser.h"
 
-/*#define CondReturn \
-  if (ret)         \
-    vypluj err(ret);*/ //presun do misc.h
+int ret = 0;
 
 STStack *symtab;
-
-int ret = 0;
 
 
 /**
@@ -1241,7 +1237,7 @@ int pNextFnArg() {
 int pRetArgList() {
   printf("-----------------------------------------------------------\n");
   printf("RET ARG LIST\n");
-  Token *token = NULL;
+  //Token *token = NULL;
 
   ret = pExpr();
   CondReturn
@@ -1528,7 +1524,7 @@ int pNewIdAssign() {
  * 65. <exprList>        -> <expr> <nextExpr>
  */
 int pExprList() {
-  printToken("EXPR LIST \n");
+  printf("EXPR LIST \n");
   // <expr>
   // TODO semantic actions
   ret = pExpr();

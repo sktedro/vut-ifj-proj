@@ -24,24 +24,20 @@ SStack *SStackInit(){
 }
 
 /*
- * @brief allocate and push a new element to the top of the stack
+ * @brief Push a new element to the top of the stack
  *
  * @param stack
- * @param new element's symbol
- * @param new element's type
+ * @param newElem to be pushed
  *
  * @return 0 if successful
  */
-int SStackPush(SStack *stack, int symbol, int type){
+int SStackPush(SStack *stack, SStackElem *newElem){
   if(!stack){
-    return 1;
+    return 1; // TODO errcode
   }
-  SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
   if(!newElem){
     exit(err(INTERN_ERR));
   }
-  newElem->symbol = symbol;
-  newElem->type = type;
   newElem->next = stack->top;
   stack->top = newElem;
   return 0;
@@ -85,13 +81,16 @@ SStackElem *SStackTop(SStack *stack){
  */
 SStackElem *SStackTopTerminal(SStack *stack){
   if(!stack){
-    return NULL;
+    vypluj NULL;
   }
   SStackElem *tmp = stack->top;
-  while(tmp && tmp->type != sym_nonterminal){
+  while(tmp){
+    if(tmp->type != st_expr){
+      vypluj tmp;
+    }
     tmp = tmp->next;
   }
-  return tmp;
+  vypluj NULL;
 }
 
 /*
@@ -99,30 +98,29 @@ SStackElem *SStackTopTerminal(SStack *stack){
  * stack and appends a new element after it
  *
  * @param stack
- * @param symbol of the new element
- * @param type of the new element
+ * @param newElem to be pushed
  *
  * @return 0 if successful
  */
-int SStackPushAfterTopTerminal(SStack *stack, int symbol, int type){
+int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem){
   if(!stack){
-    return 1;
+    vypluj 1; // TODO errcode
   }
-  SStackElem *prev = SStackTopTerminal(stack);
-  // No terminal found on stack - can't continue
-  if(!prev){
-    return 1;
-  }
-  // Allocate the new element and append it after the highest terminal
-  SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
   if(!newElem){
     exit(err(INTERN_ERR));
   }
 
-  newElem->symbol = symbol;
-  newElem->type = type;
+  // Get the top terminal
+  SStackElem *prev = SStackTopTerminal(stack);
+  // No terminal found on stack - can't continue
+  if(!prev){
+    vypluj 1; // TODO errcode
+  }
+
+  // Append the new element after the highest terminal
   newElem->next = prev->next;
   prev->next = newElem;
+
   return 0;
 }
 

@@ -1,7 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
 
-#precedence_analysis.c \#
 
 MAIN=main.c
 LIBS=\
@@ -10,6 +9,7 @@ int_buffer.c \
 misc.c \
 scanner.c \
 symbol_stack.c \
+precedence_analysis.c \
 symtable_tree.c \
 symtable.c \
 symtable_stack.c \
