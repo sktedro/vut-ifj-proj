@@ -14,7 +14,6 @@
 /*
  * ♥
  */
-
 #define vypluj return
 
 

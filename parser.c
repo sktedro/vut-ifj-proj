@@ -57,11 +57,10 @@ int ret = 0;
 
 STStack *symtab;
 
-
 /**
  * @brief Check if string is a data type
  * 
- * @return if type is data type retrun 0, else 1
+ * @return if type is data type return 0, else 1
  */
 bool isDataType(char *data) {
   if (strcmp(data, "string") == 0) {
@@ -251,6 +250,7 @@ int pStart() {
     //tokenDestroy(token);
     vypluj err(SYNTAX_ERR);
   }
+  // TODO generate .ifjcode21
   vypluj 0;
 }
 
@@ -458,7 +458,7 @@ int pCodeBody() {
       // If the id is a variable or is not defined yet, we can't call it as a
       // function...
       if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
-        fprintf(stderr, "FN NENI DEFINOVANÁ\n");
+        fprintf(stderr, "FUN NENI DEFINOVANÁ\n");
         vypluj err(1); // TODO RETURN ERROR
       }
 
