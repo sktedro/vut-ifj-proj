@@ -356,13 +356,13 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
       newOp->data = genBinaryOperationMul(op1, op3);
     }else if(op2->op == pt_div){
       // Convert both to floats
-      if(op1->dataType != dt_float){
+      if(op1->dataType != dt_number){
         op1->data = genConvertIntToFloat(op1);
-        op1->dataType = dt_float;
+        op1->dataType = dt_number;
       }
-      if(op2->dataType != dt_float){
+      if(op2->dataType != dt_number){
         op2->data = genConvertIntToFloat(op2);
-        op2->dataType = dt_float;
+        op2->dataType = dt_number;
       }
       newOp->data = genBinaryOperationDiv(op1, op3);
       newOp->dataType = dt_number;
@@ -474,6 +474,8 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
       // newElem->data = gen...
     }
 
+    // Push the new element to the symstack (E)
+    SStackPush(symstack, newElem);
 
   }else{
     // No rule
@@ -485,8 +487,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
   destroySymbol(&op2);
   destroySymbol(&op3);
 
-  // Push the new element to the symstack (E)
-  SStackPush(symstack, newOp);
 
   vypluj 0;
 }
