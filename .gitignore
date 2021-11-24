@@ -1,5 +1,6 @@
 *.swp
 build/
+btree
 logs/
 .idea/
 tests/test

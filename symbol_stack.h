@@ -7,7 +7,6 @@
 
 #include "misc.h"
 
-
 /*
  * @brief Allocate a new stack, initialize it and return it
  *
@@ -70,7 +69,6 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem);
  * @param stack to be freed
  */
 void SStackDestroy(SStack *stack);
-
 
 #endif
 /* end of file symbol_stack.h */

@@ -12,33 +12,35 @@ extern int ret;
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
-  //#   *   /   //  +   -   .. rel  (   )   i   $
-  {'_','>','>','>','>','>','>','>','<','>','<','>'}, // pt_strlen
-  {'<','>','>','>','>','>','>','>','<','>','<','>'}, // pt_mult
-  {'<','>','>','>','>','>','>','>','<','>','<','>'}, // pt_div
-  {'<','>','>','>','>','>','>','>','<','>','<','>'}, // pt_intDiv
-  {'<','<','<','<','>','>','>','>','<','>','<','>'}, // pt_add
-  {'<','<','<','<','>','>','>','>','<','>','<','>'}, // pt_sub
-  {'<','<','<','<','<','<','<','>','<','>','<','>'}, // pt_concat
-  {'<','<','<','<','<','<','<','>','<','>','<','>'}, // pt_relOp
-  {'<','<','<','<','<','<','<','<','<','=','<','_'}, // pt_lParen
-  {'>','>','>','>','>','>','>','>','_','>','_','>'}, // pt_rParen
-  {'>','>','>','>','>','>','>','>','_','>','_','>'}, // pt_id
-  {'<','<','<','<','<','<','<','<','<','_','<','_'}  // pt_dollar
+    //#   *   /   //  +   -   .. rel  (   )   i   $
+    {'_', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_strlen
+    {'<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_mult
+    {'<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_div
+    {'<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_intDiv
+    {'<', '<', '<', '<', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_add
+    {'<', '<', '<', '<', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_sub
+    {'<', '<', '<', '<', '<', '<', '<', '>', '<', '>', '<', '>'}, // pt_concat
+    {'<', '<', '<', '<', '<', '<', '<', '>', '<', '>', '<', '>'}, // pt_relOp
+    {'<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', '_'}, // pt_lParen
+    {'>', '>', '>', '>', '>', '>', '>', '>', '_', '>', '_', '>'}, // pt_rParen
+    {'>', '>', '>', '>', '>', '>', '>', '>', '_', '>', '_', '>'}, // pt_id
+    {'<', '<', '<', '<', '<', '<', '<', '<', '<', '_', '<', '_'}  // pt_dollar
 };
 
-//Rules
+/*
+* Rule functions
+*/
 
-//TO DO voláme funkcie za radom, ak neakceptujem pravidlo dám vedieť že ho nemám 
+//TO DO voláme funkcie za radom, ak neakceptujem pravidlo dám vedieť že ho nemám
 
-int strLenRule(SStack *stack, STStack *tableStack){ // #
+int strLenRule(SStack *stack, STStack *tableStack) { // #
 
   // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
 
   vypluj 0;
 }
 
-int aritmeticOperatorsRule(SStack *stack, STStack *tableStack){ // + - * / //
+int aritmeticOperatorsRule(SStack *stack, STStack *tableStack) { // + - * / //
 
   // TODO dalenie nulou - error DIV_BY_ZERO_ERR
   // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
@@ -46,37 +48,35 @@ int aritmeticOperatorsRule(SStack *stack, STStack *tableStack){ // + - * / //
   vypluj 0;
 }
 
-int concatenanceRule(SStack *stack, STStack *tableStack){ // ..
+int concatenanceRule(SStack *stack, STStack *tableStack) { // ..
 
   // TODO zistiť či pracujeme len so stringami, inak nemôžeme robiť operáciu
   // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
-int relationalOperatorsRule(SStack *stack, STStack *tableStack){ // relačné operátory (vynímky)
-  
+int relationalOperatorsRule(SStack *stack, STStack *tableStack) { // relačné operátory (vynímky)
+
   // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
-int iRule(SStack *stack, STStack *tableStack){ // i
-  
+int iRule(SStack *stack, STStack *tableStack) { // i
+
   // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
-int bracketsRule(SStack *stack, STStack *tableStack){ // ()
+int bracketsRule(SStack *stack, STStack *tableStack) { // ()
 
-  
   //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
-
 /**
  * This is called from the parser
  */
-int parseExpression(STStack *symtable, Token *token){
+int parseExpression(STStack *symtable, Token *token) {
   precedenceAnalysis(symtable, token);
   return 0;
 }
@@ -89,8 +89,8 @@ int parseExpression(STStack *symtable, Token *token){
  */
 SStackElem *parseToken(Token *token) {
   // Allocate and initialize new symbol stack element
-  SStackElem *newElem = (SStackElem*) malloc(sizeof(SStackElem));
-  if(newElem == NULL) {
+  SStackElem *newElem = (SStackElem *)malloc(sizeof(SStackElem));
+  if (newElem == NULL) {
     exit(err(INTERN_ERR));
   }
   newElem->type = newElem->op = -1;
@@ -98,72 +98,71 @@ SStackElem *parseToken(Token *token) {
   newElem->data = NULL;
   newElem->next = NULL;
 
-
-  switch (token->type){
-    case t_idOrKeyword:
-      newElem->type = st_idOrLiteral;
-      newElem->isId = true;
-      newElem->op = pt_id;
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
-      break;
-    case t_int:
-    case t_num:
-    case t_sciNum:
-    case t_str:
-      newElem->type = st_idOrLiteral;
-      newElem->op = pt_id;
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
-      break;
-    case t_colon:
-    case t_comma:
-    case t_assignment:
-      // TODO stash token?
-      free(newElem);
-      return NULL;
-      break;
-    case t_rightParen:
-      newElem->type = st_op;
-      newElem->op = pt_rParen;
-      break;
-    case t_leftParen:
-      newElem->type = st_op;
-      newElem->op = pt_lParen;
-      break;
-    case t_arithmOp:
-    case t_strOp:
-      newElem->type = st_op;
-      if(strcmp(token->data, "+") == 0){
-        newElem->op = pt_add;
-      }else if(strcmp(token->data, "-") == 0){
-        newElem->op = pt_sub;
-      }else if(strcmp(token->data, "#") == 0){
-        newElem->op = pt_strlen;
-      }else if(strcmp(token->data, "*") == 0){
-        newElem->op = pt_mult;
-      }else if(strcmp(token->data, "/") == 0){
-        newElem->op = pt_div;
-      }else if(strcmp(token->data, "//") == 0){
-        newElem->op = pt_intDiv;
-      }else if(strcmp(token->data, "..") == 0){
-        newElem->op = pt_concat;
-      }
-      break;
-    case t_relOp:
-      newElem->type = st_op;
-      newElem->op = pt_relOp;
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
-      break;
+  switch (token->type) {
+  case t_idOrKeyword:
+    newElem->type = st_idOrLiteral;
+    newElem->isId = true;
+    newElem->op = pt_id;
+    newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    memcpy(newElem->data, token->data, strlen(token->data) + 1);
+    break;
+  case t_int:
+  case t_num:
+  case t_sciNum:
+  case t_str:
+    newElem->type = st_idOrLiteral;
+    newElem->op = pt_id;
+    newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    memcpy(newElem->data, token->data, strlen(token->data) + 1);
+    break;
+  case t_colon:
+  case t_comma:
+  case t_assignment:
+    // TODO stash token?
+    free(newElem);
+    return NULL;
+    break;
+  case t_rightParen:
+    newElem->type = st_op;
+    newElem->op = pt_rParen;
+    break;
+  case t_leftParen:
+    newElem->type = st_op;
+    newElem->op = pt_lParen;
+    break;
+  case t_arithmOp:
+  case t_strOp:
+    newElem->type = st_op;
+    if (strcmp(token->data, "+") == 0) {
+      newElem->op = pt_add;
+    } else if (strcmp(token->data, "-") == 0) {
+      newElem->op = pt_sub;
+    } else if (strcmp(token->data, "#") == 0) {
+      newElem->op = pt_strlen;
+    } else if (strcmp(token->data, "*") == 0) {
+      newElem->op = pt_mult;
+    } else if (strcmp(token->data, "/") == 0) {
+      newElem->op = pt_div;
+    } else if (strcmp(token->data, "//") == 0) {
+      newElem->op = pt_intDiv;
+    } else if (strcmp(token->data, "..") == 0) {
+      newElem->op = pt_concat;
+    }
+    break;
+  case t_relOp:
+    newElem->type = st_op;
+    newElem->op = pt_relOp;
+    newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    memcpy(newElem->data, token->data, strlen(token->data) + 1);
+    break;
   }
 
   return newElem;
 }
 
-SStackElem *allocateSymbol(int st_symbol){
+SStackElem *allocateSymbol(int st_symbol) {
   SStackElem *newElem = malloc(sizeof(SStackElem));
-  if(!newElem){
+  if (!newElem) {
     vypluj NULL;
   }
   newElem->type = st_symbol;
@@ -180,7 +179,6 @@ SStackElem *allocateSymbol(int st_symbol){
 int precedenceAnalysis(STStack *symtable, Token *token) {
   SStack *symstack = SStackInit();
 
-
   // Push a $ to the stack
   ret = SStackPush(symstack, allocateSymbol(st_dollar));
   CondReturn;
@@ -190,9 +188,9 @@ int precedenceAnalysis(STStack *symtable, Token *token) {
   while (1) {
 
     // Check if the next token is a part of the expression
-    if(!exprEnd) {
+    if (!exprEnd) {
       // TODO par dalsich podmienok asi. Ocheckovat keywordy a take
-      if(token->type == t_colon 
+      if (token->type == t_colon 
           || token->type == t_comma 
           || token->type == t_assignment) {
         stashToken(token);
@@ -204,46 +202,42 @@ int precedenceAnalysis(STStack *symtable, Token *token) {
     SStackElem *topSymbol = SStackTopTerminal(symstack);
     SStackElem *inputSymbol = parseToken(token);
 
-    if(precTab[topSymbol->op][inputSymbol->op] == st_nop) {
+    if (precTab[topSymbol->op][inputSymbol->op] == st_nop) {
       // Push the input symbol to the stack
       SStackPush(symstack, inputSymbol);
       // Destroy the old token
-      tokenDestroy(token);
+      tokenDestroy(&token);
       // Get a new token
       ret = scanner(&token);
       condVypluj
 
-    } else if(precTab[topSymbol->op][inputSymbol->op] == st_push) {
+    } else if (precTab[topSymbol->op][inputSymbol->op] == st_push) {
       // Allocate a new symbol ('<') and push it after the top terminal
       SStackPushAfterTopTerminal(symstack, allocateSymbol(st_push));
       // Push the input symbol
       SStackPush(symstack, inputSymbol);
       // Destroy the old token
-      tokenDestroy(token);
+      tokenDestroy(&token);
       // Get a new token
       ret = scanner(&token);
       condVypluj
 
-    } else if(precTab[topSymbol->op][inputSymbol->op] == st_reduce){
+    } else if (precTab[topSymbol->op][inputSymbol->op] == st_reduce) {
       // TODO toto asi ne: // Check if '<' 'y' is on top of the stack
 
-      // Call rule functions - if one of them has a rule that reduces the 
+      // Call rule functions - if one of them has a rule that reduces the
       // expression, it returns 0 and we're done reducing for now
 
       // None of the rule functions returned 0 - there's no rule able to reduce
       // this expression, which means that there is an error
 
-
     } else {
       vypluj err(SYNTAX_ERR);
     }
-
   }
-
 
   vypluj 0;
 }
-
 
 #endif
 /* end of file precedence_analysis.h*/

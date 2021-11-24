@@ -1,7 +1,7 @@
 /** #include "misc.c" */
 #include "parser.c"
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
   // INIT - symtab
   symtab = STInit();
 

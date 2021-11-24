@@ -5,8 +5,8 @@
 #ifndef SYMTABLE_TREE
 #define SYMTABLE_TREE
 
-#include "misc.h"
 #include "int_buffer.h"
+#include "misc.h"
 
 /**
  * @brief Creates a new node with the given key and key, allocates memory.
@@ -74,7 +74,6 @@ void treeDelete(STTreeNode **root, char *key);
  * @return pointer to symbol table tree element
  */
 STElem *treeGetData(STTreeNode *root, char *key);
-
 
 #endif
 /* end of file symtable_tree.h */

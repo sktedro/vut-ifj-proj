@@ -7,7 +7,6 @@
 
 #include "misc.h"
 
-
 /**
  * @brief Allocate a new buffer
  *
@@ -45,7 +44,6 @@ void intBufClear(IntBuffer *buf);
  * @param buf: pointer to a buffer that is to be destroyed
  */
 void intBufDestroy(IntBuffer *buf);
-
 
 #endif
 /* end of file int_buffer.h */

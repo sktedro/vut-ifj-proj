@@ -7,7 +7,6 @@
 
 #include "misc.h"
 
-
 /**
  * @brief allocates memory for a new token and assigns it a type
  *
@@ -32,8 +31,7 @@ int tokenAddAttrib(Token *token, char *data);
  *
  * @param token to destroy
  */
-void tokenDestroy(Token *token);
-
+void tokenDestroy(Token **token);
 
 #endif
 /* end of file token.h */

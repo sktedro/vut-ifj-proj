@@ -5,11 +5,10 @@
 #ifndef PRECEDENCE_ANALYSIS_H
 #define PRECEDENCE_ANALYSIS_H
 
-#include "misc.h"
-#include "symbol_stack.h"
-#include "scanner.h"
 #include "char_buffer.h"
-
+#include "misc.h"
+#include "scanner.h"
+#include "symbol_stack.h"
 
 /**
  * @brief Receives a token and return a new element of the symbol stack
@@ -20,6 +19,5 @@
 SStackElem *parseToken(Token *token);
 
 int precedenceAnalysis(STStack *symtable, Token *token);
-
 
 #endif

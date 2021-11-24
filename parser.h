@@ -10,7 +10,6 @@
 #include "scanner.h"
 #include "symtable.h"
 
-
 /**
  * @brief Check if string is a data type
  * 
@@ -39,11 +38,9 @@ bool isKeyword(Token *token);
  */
 void printToken(Token *token);
 
-
 /*
  * Rules
  */
-
 
 /**
  * @brief Rule for require
@@ -208,8 +205,6 @@ int pNextFnArg();
  * 40. <retArgList>      -> <expr> <retNextArg>
  */
 int pRetArgList();
-
-
 
 bool isExpressionParser(Token token);
 

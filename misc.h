@@ -5,33 +5,30 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
 
 /*
  * ♥
  */
 #define vypluj return
 
-
 /*
  *  Error returns (will be enum?)
  */
-#define LEX_ERR 1          // lexical analysis error
-#define SYNTAX_ERR 2       // syntax error
-#define ID_DEF_ERR 3       // undefined/redefined function/variable
-#define ASS_ERR 4          // assignment error, types incompatible
-#define PARAM_RET_ERR 5    // wrong type/number of function parameters/returns
-#define TYPE_EXPR_ERR 6    // types incompatible in expression
-#define OTHER_SEM_ERR 7    // other semantic error
-#define NIL_ERR 8          // unexpected nil
-#define DIV_BY_ZERO_ERR 9  // integer division by zero
+#define LEX_ERR 1         // lexical analysis error
+#define SYNTAX_ERR 2      // syntax error
+#define ID_DEF_ERR 3      // undefined/redefined function/variable
+#define ASS_ERR 4         // assignment error, types incompatible
+#define PARAM_RET_ERR 5   // wrong type/number of function parameters/returns
+#define TYPE_EXPR_ERR 6   // types incompatible in expression
+#define OTHER_SEM_ERR 7   // other semantic error
+#define NIL_ERR 8         // unexpected nil
+#define DIV_BY_ZERO_ERR 9 // integer division by zero
 
-#define INTERN_ERR 99      // intern error (memory allocation etc.)
-
+#define INTERN_ERR 99 // intern error (memory allocation etc.)
 
 /*
  * Macros
@@ -45,31 +42,30 @@
  * Enumerations
  */
 
-
 // Enumeration of states of the finite state machine
 // The commented out states are not used, as instead of setting them as the
 // next state, the token is instantly returned
-enum FSMEnum{
+enum FSMEnum {
   s_start,
 
-    // Identificator or a keyword
+  // Identificator or a keyword
   s_idOrKeyword,
 
-    // Number literals
+  // Number literals
   s_int,
   s_num,
   s_scientific,
   s_needNum,
   s_sciNum,
 
-    // Comments
+  // Comments
   s_comment,
   s_unknownComment,
   s_singleLineComment,
   s_multiLineComment,
   s_multiLineCommentPossibleEnd,
 
-    // Operators
+  // Operators
   s_arithmOpDash,
   s_arithmOpDiv,
   s_dot,
@@ -82,18 +78,17 @@ enum FSMEnum{
   s_strOp,
   // s_relOp,
 
-    // Parentheses
+  // Parentheses
   // s_leftParen,
   // s_rightParen,
 
-    // String literals
+  // String literals
   s_strStart,
   // s_strEnd
 };
 
-
 // Enumeration of the token types
-enum TokenTypeEnum{
+enum TokenTypeEnum {
   t_idOrKeyword, // one token for both identificator and a keyword??
   t_int,
   t_num,
@@ -110,7 +105,7 @@ enum TokenTypeEnum{
 };
 
 // Enumeration of the precedence table
-enum PrecTabEnum{
+enum PrecTabEnum {
   pt_strlen,
   pt_mult,
   pt_div,
@@ -127,10 +122,10 @@ enum PrecTabEnum{
 
 //TODO
 // Enumeration of symbol stack type
-enum SStackTypeEnum{
-  st_push, // <
-  st_reduce, // > (reduce untill <)
-  st_nop, // =
+enum SStackTypeEnum {
+  st_push,    // <
+  st_reduce,  // > (reduce untill <)
+  st_nop,     // =
   st_invalid, // _
   st_idOrLiteral,
   st_op,
@@ -138,51 +133,43 @@ enum SStackTypeEnum{
   st_dollar
 };
 
-
 /*
  * Structures
  */
 
-
-
 // Structure defining the char buffer
-typedef struct{
+typedef struct {
   char *data;
-  int len; // Actual buffer data length
+  int len;  // Actual buffer data length
   int size; // Size allocated for the buffer
 } CharBuffer;
 
-
 // Structure defining the int buffer
-typedef struct{
+typedef struct {
   int *data;
-  int len; // Actual buffer data length
+  int len;  // Actual buffer data length
   int size; // Size allocated for the buffer
 } IntBuffer;
 
-
 // Structure defining a token
-typedef struct{
+typedef struct {
   int type;
   char *data;
 } Token;
 
-
 // Symbol stack element
 typedef struct SStackElem {
-  int type; // Symbol stack type enum (st)_
-  int op; // Precedence table enum (pt_)
-  bool isId; // So we know if there's an ID or a literal in *data
+  int type;   // Symbol stack type enum (st)_
+  int op;     // Precedence table enum (pt_)
+  bool isId;  // So we know if there's an ID or a literal in *data
   char *data; // ID, literal,...
   struct SStackElem *next;
 } SStackElem;
-
 
 // Symbol stack
 typedef struct {
   SStackElem *top;
 } SStack;
-
 
 // Symbol table element
 typedef struct {
@@ -195,15 +182,13 @@ typedef struct {
   IntBuffer *fnRetTypesBuf;
 } STElem;
 
-
 // Symbol table tree structure for the binary search tree.
 typedef struct symbolTableTreeNode {
-  char *key; // id string
+  char *key;    // id string
   STElem *data; // id value
   struct symbolTableTreeNode *leftChild;
   struct symbolTableTreeNode *rightChild;
 } STTreeNode;
-
 
 // Symbol table stack element
 typedef struct symbolTableStackElem {
@@ -212,18 +197,14 @@ typedef struct symbolTableStackElem {
   struct symbolTableStackElem *next;
 } STStackElem;
 
-
 // Symbol table stack
-typedef struct{
+typedef struct {
   STStackElem *top;
 } STStack;
-
-
 
 /*
  * Miscellaneous functions
  */
-
 
 /**
  * @brief Writes an error message to stdout and returns back the error code
@@ -233,7 +214,6 @@ typedef struct{
  * @return errCode
  */
 int err(int errCode);
-
 
 #endif
 /* end of file misc.h */

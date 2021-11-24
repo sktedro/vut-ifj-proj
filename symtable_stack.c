@@ -2,12 +2,10 @@
  * A stack for the symbol table
  */
 
-
 #ifndef SYMTABLE_STACK_C
 #define SYMTABLE_STACK_C
 
 #include "symtable_stack.h"
-
 
 /**
  * @brief Allocate a new stack, initialize it and return it
@@ -15,8 +13,8 @@
  * @return a new stack
  */
 STStack *STStackInit() {
-  STStack *stack = (STStack*) malloc(sizeof(STStack));
-  if(stack == NULL) {
+  STStack *stack = (STStack *)malloc(sizeof(STStack));
+  if (stack == NULL) {
     // TODO memleak?
     exit(err(INTERN_ERR));
   }
@@ -32,13 +30,13 @@ STStack *STStackInit() {
  *
  * @return 0 if successful
  */
-int STStackPush(STStack *stack, STTreeNode *table, int depth){
-  if(!stack){
+int STStackPush(STStack *stack, STTreeNode *table, int depth) {
+  if (!stack) {
     // TODO memleak
     exit(err(INTERN_ERR));
   }
-  STStackElem *newElem = (STStackElem*)malloc(sizeof(STStackElem));
-  if(!newElem){
+  STStackElem *newElem = (STStackElem *)malloc(sizeof(STStackElem));
+  if (!newElem) {
     // TODO memleak
     exit(err(INTERN_ERR));
   }
@@ -54,8 +52,8 @@ int STStackPush(STStack *stack, STTreeNode *table, int depth){
  *
  * @param stack
  */
-void STStackPop(STStack *stack){
-  if(!stack || !stack->top){
+void STStackPop(STStack *stack) {
+  if (!stack || !stack->top) {
     return;
   }
   STStackElem *tmp = stack->top;
@@ -64,7 +62,6 @@ void STStackPop(STStack *stack){
   free(tmp);
 }
 
-
 /**
  * @brief get the element at the top of the stack
  *
@@ -72,8 +69,8 @@ void STStackPop(STStack *stack){
  *
  * @return top element
  */
-STStackElem *STStackTop(STStack *stack){
-  if(!stack){
+STStackElem *STStackTop(STStack *stack) {
+  if (!stack) {
     return NULL;
   }
   return stack->top;
@@ -86,15 +83,15 @@ STStackElem *STStackTop(STStack *stack){
  *
  * @return bottom element
  */
-STStackElem *STStackBottom(STStack *stack){
-  if(!stack){
+STStackElem *STStackBottom(STStack *stack) {
+  if (!stack) {
     return NULL;
   }
   STStackElem *tmp = stack->top;
-  if(!tmp){
+  if (!tmp) {
     return NULL;
   }
-  while(tmp->next){
+  while (tmp->next) {
     tmp = tmp->next;
   }
   return tmp;
@@ -107,13 +104,13 @@ STStackElem *STStackBottom(STStack *stack){
  *
  * @return n-th element (if n = 0, returns stack top)
  */
-STStackElem *STStackNthElem(STStack *stack, int n){
-  if(!stack){
+STStackElem *STStackNthElem(STStack *stack, int n) {
+  if (!stack) {
     return NULL;
   }
   STStackElem *tmp = stack->top;
-  for(int i = 0; i < n; i++){
-    if(!tmp){
+  for (int i = 0; i < n; i++) {
+    if (!tmp) {
       return NULL;
     }
     tmp = tmp->next;
@@ -126,17 +123,16 @@ STStackElem *STStackNthElem(STStack *stack, int n){
  *
  * @param stack to be freed
  */
-void STStackDestroy(STStack **stack){
-  if(!stack || !(*stack)){
+void STStackDestroy(STStack **stack) {
+  if (!stack || !(*stack)) {
     return;
   }
-  while((*stack)->top){
+  while ((*stack)->top) {
     STStackPop(*stack);
   }
   free(*stack);
   *stack = NULL;
 }
-
 
 #endif
 /* end of file symtable_stack.c */

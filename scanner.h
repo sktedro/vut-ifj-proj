@@ -6,9 +6,8 @@
 #define SCANNER_H
 
 #include "char_buffer.h"
-#include "token.h"
 #include "misc.h"
-
+#include "token.h"
 
 /**
  * @brief Stash a token (to be returned on next scanner() call)
@@ -78,7 +77,6 @@ int returnToken(Token **token, int type, CharBuffer *buf);
  * @return error code
  */
 int scanner(Token **token);
-
 
 #endif
 /* end of file scanner.h */
