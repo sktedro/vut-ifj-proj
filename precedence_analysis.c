@@ -30,6 +30,20 @@ char precTab[12][12] = {
 };
 
 
+
+
+/*
+ * TODO
+ * we'll need to return (receive it returned by code gen??) a variable name (in
+ * ifjcode) where the expression result is stored by the precedence analysis
+ * TODO
+ *
+ * Pro chybné kombinace datových typů ve výrazech vracejte chybu 6.
+ */
+
+
+
+
 /**
  * @brief Allocates a new symbol (to be inserted to the symbol stack)
  *
@@ -52,6 +66,11 @@ SStackElem *allocateSymbol(int symbol) {
   return newElem;
 }
 
+/**
+ * @brief Destroys (frees data allocated by) a symbol of the symbol stack
+ *
+ * @param elem - symbol to be destroyed
+ */
 void destroySymbol(SStackElem **elem){
   free((*elem)->data);
   free(*elem);
@@ -68,17 +87,6 @@ void destroySymbol(SStackElem **elem){
  * Call rule functions based on how many symbols we are reducing
  */
 int checkRules(STStack *symtab, SStack *symstack, int opSymbols){
-  /**
-    * // rulesRet = -1 if no rule was found, 0 if everything went great,
-    * // error otherwise
-    * if(rulesRet == -1){
-    *   // NO RULE FOUND -> error
-    * }else if(rulesRet != 0){
-    *   // Error occured - rulesRet holds the error code
-    * }else{
-    *   // all good
-    * }
-    */
   int rulesRet = -1; // Will be changed to 0 if a rule was found and applied or
   // to > 0 if an error occured
         
@@ -152,6 +160,7 @@ int iRule(STStack *symtab, SStack *symstack, SStackElem *op) {
 }
 
 
+// #i or #E
 int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *op2){
   // Rule of # i/E (string length)
   if(op1->type == st_operator && op1->op == pt_strlen){
@@ -162,7 +171,7 @@ int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *o
         // Check if the data type is a string
         if(op2->dataType == dt_string){
 
-          // TODO generate code calling STRLEN
+          // TODO code gen: STRLEN
           
         }else{
           // Calling strlen on a non string data type
@@ -173,7 +182,7 @@ int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *o
       }else {
         if(op2->dataType == dt_string){
 
-          // TODO generate code calling STRLEN
+          // TODO code gen: STRLEN
 
         }else{
           // Calling strlen on a non string data type
@@ -185,15 +194,16 @@ int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *o
     }else if(op2->type == st_expr){
       if(op2->dataType == dt_string){
 
-        // TODO generate code calling STRLEN
+        // TODO code gen: STRLEN
 
       }else{
         // Calling strlen on a non string data type
         vypluj err(1); // TODO errcode
       }
 
+    // We received a '#' operator but no literal, ID or expression following it
     }else{
-      // TODO err??
+      return err(1); // TODO errcode
     }
 
     // Push a new element to symstack (E)
@@ -250,17 +260,29 @@ int bracketsRule(STStack *symtab, SStack *symstack, SStackElem *op1,
 int aritmeticOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
 
-  // TODO dalenie nulou - error DIV_BY_ZERO_ERR
-  // TODO ak nevhodné pravidlo -> vypluj -1; (nie je err len prejdeme na ďalšiu funkciu)
+  // op2 needs to be st_operator and op == pt_relOp
+  // op1 and op3 both need to be i or E
+  if(op2->type == st_operator 
+      && (op2->op == pt_mult || op2->op == pt_div || op2->op == pt_intDiv
+        || op2->op == pt_add || op2->op == pt_sub || op2->op == pt_concat)
+      && (op1->type == st_idOrLiteral || op1->type == st_expr)
+      && (op3->type == st_idOrLiteral || op3->type == st_expr)){
 
-  // Rule of i/E .. (string concatenation)
-  /**
-    * if(op2->type == st_operator && op2->op == pt_concat){
-    *   if(op1->type == st_idOrLiteral){
-    *   }else if(op1->type == st_expr){
-    *   }
-    * }
-    */
+    // TODO dalenie nulou - error DIV_BY_ZERO_ERR
+    
+    // Rule of i/E .. (string concatenation)
+    /**
+      * if(op2->type == st_operator && op2->op == pt_concat){
+      *   if(op1->type == st_idOrLiteral){
+      *   }else if(op1->type == st_expr){
+      *   }
+      * }
+      */
+  }else{
+    // No rule
+    return -1;
+  }
+
   vypluj 0;
 }
 
@@ -269,14 +291,79 @@ int aritmeticOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1,
 int relationalOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
 
-  // TODO ak nevhodné pravidlo -> vypluj -1; (nie je err len prejdeme na ďalšiu funkciu)
+  
+  // op2 needs to be st_operator and op == pt_relOp
+  // op1 and op3 both need to be i or E
+  if(op2->type == st_operator && op2->op == pt_relOp
+      && (op1->type == st_idOrLiteral || op1->type == st_expr)
+      && (op3->type == st_idOrLiteral || op3->type == st_expr)){
+
+
+    // If all or one of the operands is a nil
+    if(op1->dataType == dt_nil || op3->dataType == dt_nil){
+      // If the op2 is not "==" and neither "~=" we throw an error, since nil
+      // can only be compared by these two operators
+      if(strcmp(op2->data, "==") && strcmp(op2->data, "~=")){
+        return err(NIL_ERR);
+      }
+    // If none of the operands are a nil
+    }else{
+      // If the data types of op1 and op3 don't match
+      if(op1->dataType != op3->dataType){
+
+        // If we have an integer and a number -> convert the int to num
+        if(op1->dataType == dt_integer && op3->dataType == dt_number){
+          // TODO code gen op1 to num
+
+        }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
+          // TODO code gen op3 to num
+
+        // Else, throw an error
+        else{
+          return err(TYPE_EXPR_ERR);
+        }
+      }
+
+    }
+
+    }
+
+    // TODO code gen push operands to stack
+    
+    if(!strcmp(op2->data, "<") || !strcmp(op2->data, ">=")){
+      // TODO code gen LT
+      
+    }else if(!strcmp(op2->data, ">") || !strcmp(op2->data, "<=")){
+      // TODO code gen GT
+      
+    }else if(!strcmp(op2->data, "==") || !strcmp(op2->data, "~=")){
+      // TODO code gen EQ
+      
+    }else{
+      fprintf(stderr, "This is awkward. The operator should be relational.\n");
+      return err(1); // todo? This should not be possible
+    }
+
+    // Generate code for NOT - to negate the result of the expression
+    // eg. if we have '~=', we'll generate code for '==' but need to negate it,
+    // for '<=', we'll generate '>',...
+    if(!strcmp(op2->data, "<=") || !strcmp(op2->data, ">=") || !strcmp(op2->data, "~=")){
+      // TODO code gen NOTS
+    }
+
+
+  }else{
+    // No rule
+    return -1;
+  }
+
   vypluj 0;
 }
 
 
 
 /**
- * This is called from the parser
+ * This is called from the parser TODO
  */
 int parseExpression(STStack *symtab, Token *token) {
   precedenceAnalysis(symtab, token);
