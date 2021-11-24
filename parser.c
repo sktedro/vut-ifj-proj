@@ -230,7 +230,7 @@ int pStart() {
   Token *token = NULL;
 
   ret = scanner(&token);
-  CondReturn
+  CondReturn;
 
       printToken(token); // TODO delete
 

@@ -23,6 +23,8 @@ int err(int errCode) {
     fprintf(stderr, "Lexical analysis error.\n"); //TODO
   } else if (errCode == 99) {
     fprintf(stderr, "Internal error.\n"); //TODO
+  }else{
+    fprintf(stderr, "Other unknown error.\n");
   }
   vypluj errCode;
 }

@@ -6,15 +6,13 @@
 #define PRECEDENCE_ANALYSIS_C
 
 #include "precedence_analysis.h"
-#include "symtable.h"
-#include "parser.h"
 
 extern int ret;
 
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
-  //#   *   /   //  +   -   .. rel  (   )   i   $
+  //#    *    /    //   +    -    ..   rel  (    )    i    $
   {'_', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_strlen
   {'<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_mult
   {'<', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // pt_div
@@ -171,7 +169,7 @@ int iRule(SStackElem *op) {
     vypluj -1;
   }
 
-  // TODO code gen - just push the value to the stack
+  // TODO code gen? What here?
   
   // Just 'convert' the i to E and push it back to the stack. Nothing else
   // changes
@@ -297,10 +295,12 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
 
       // If we have an integer and a number -> convert the int to num
       if(op1->dataType == dt_integer && op3->dataType == dt_number){
-        // TODO code gen op1 to num
+        op1->data = genConvertIntToFloat(op1);
+        op1->dataType = dt_number;
 
       }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
-        // TODO code gen op3 to num
+        op3->data = genConvertIntToFloat(op3);
+        op3->dataType = dt_number;
 
       // Else, throw an error
       }else{
@@ -338,34 +338,48 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     }
 
 
-    // TODO code gen - push op1 and op3 to the stack
-
     // A note to creating a result op (E that will be pushed to the symstack):
     // Since the op1 and op3 should have the same types, we can take either of
     // them and make it our result. Let us pick op1
 
     SStackElem *newOp = allocateSymbol(st_expr);
     newOp->op = pt_id; 
-    // TODO newOp->isId = ??
+    newOp->isId = true;
     newOp->dataType = op1->dataType; // Initially, take the DT from op1
-    // TODO newOp->data = ??
 
     // Generate the operator code:
     if(op2->op == pt_add){
-      // TODO code gen
+      newOp->data = genBinaryOperationAdd(op1, op3);
     }else if(op2->op == pt_sub){
-      // TODO code gen
+      newOp->data = genBinaryOperationSub(op1, op3);
     }else if(op2->op == pt_mult){
-      // TODO code gen
+      newOp->data = genBinaryOperationMul(op1, op3);
     }else if(op2->op == pt_div){
-      // TODO code gen
-      // TODO newOp->dataType = ??? integer or number?
+      // Convert both to floats
+      if(op1->dataType != dt_float){
+        op1->data = genConvertIntToFloat(op1);
+        op1->dataType = dt_float;
+      }
+      if(op2->dataType != dt_float){
+        op2->data = genConvertIntToFloat(op2);
+        op2->dataType = dt_float;
+      }
+      newOp->data = genBinaryOperationDiv(op1, op3);
+      newOp->dataType = dt_number;
     }else if(op2->op == pt_intDiv){
-      // TODO code gen
-      // TODO code gen - convert to integer ??
+      // Convert both to integers 
+      if(op1->dataType != dt_integer){
+        op1->data = genConvertFloatToInt(op1);
+        op1->dataType = dt_integer;
+      }
+      if(op2->dataType != dt_integer){
+        op2->data = genConvertFloatToInt(op2);
+        op2->dataType = dt_integer;
+      }
+      newOp->data = genBinaryOperationIdiv(op1, op3);
       newOp->dataType = dt_integer;
     }else if(op2->op == pt_concat){
-      // TODO code gen
+      newOp->data = genBinaryOperationConcat(op1, op3);
     }else{
       //err ??
     }
@@ -375,7 +389,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op2);
     destroySymbol(&op3);
 
-    // Push a new element to symstack (E)
+    // Push the new element to symstack (E)
     SStackPush(symstack, newOp);
 
   }else{
@@ -411,10 +425,15 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
         // If we have an integer and a number -> convert the int to num
         if(op1->dataType == dt_integer && op3->dataType == dt_number){
-          // TODO code gen op1 to num
+          // Convert op1 from int to number 
+          op1->data = genConvertIntToFloat(op1);
+          op1->dataType = dt_number;
+
 
         }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
-          // TODO code gen op3 to num
+          // Convert op3 from int to number 
+          op3->data = genConvertIntToFloat(op3);
+          op3->dataType = dt_number;
 
         // Else, throw an error
         }else{
@@ -423,16 +442,22 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
       }
     }
 
-    // TODO code gen push operands to stack
-    
+    SStackElem *newElem = allocateSymbol(st_expr);
+    newElem->op = pt_id;
+    newElem->isId = true;
+    newElem->dataType = -1; // It's gonna be a boolean.. So.. What now?
+
     if(!strcmp(op2->data, "<") || !strcmp(op2->data, ">=")){
       // TODO code gen LT
+      // newElem->data = gen...
       
     }else if(!strcmp(op2->data, ">") || !strcmp(op2->data, "<=")){
       // TODO code gen GT
+      // newElem->data = gen...
       
     }else if(!strcmp(op2->data, "==") || !strcmp(op2->data, "~=")){
       // TODO code gen EQ
+      // newElem->data = gen...
       
     }else{
       fprintf(stderr, "This is awkward. The operator should be relational.\n");
@@ -446,6 +471,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
         || !strcmp(op2->data, ">=") 
         || !strcmp(op2->data, "~=")){
       // TODO code gen NOTS
+      // newElem->data = gen...
     }
 
 
@@ -459,15 +485,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
   destroySymbol(&op2);
   destroySymbol(&op3);
 
-  // Create a new element and push it to the symstack (E)
-  SStackElem *newOp = allocateSymbol(st_expr);
-  newOp->op = pt_id;
-  /** 
-    * newOp->isId = ; TODO is it?
-    * newOp->dataType = ; TODO well it should be bool, lol
-    * newOp->data = ; TODO null?
-    */
-
+  // Push the new element to the symstack (E)
   SStackPush(symstack, newOp);
 
   vypluj 0;
@@ -602,7 +620,7 @@ int precedenceAnalysis(STStack *symtab, Token *token) {
 
     // Check if the next token is a part of the expression
     if (!exprEnd) {
-      // TODO par dalsich podmienok asi. Ocheckovat keywordy a take
+      // TODO par dalsich podmienok asi? Ocheckovat keywordy a take
       if (token->type == t_colon
           || token->type == t_comma
           || token->type == t_assignment) {
