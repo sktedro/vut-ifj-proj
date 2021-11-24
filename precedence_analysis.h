@@ -16,8 +16,11 @@
  * @param token to be converted to SStackElem
  * @return SStackElem* converted from token
  */
-SStackElem *parseToken(Token *token);
+SStackElem *parseToken(STStack *symtable, Token *token);
 
 int precedenceAnalysis(STStack *symtable, Token *token);
+int unaryOpRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *op2);
+
+int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *op2);
 
 #endif
