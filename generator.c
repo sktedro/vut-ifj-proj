@@ -58,8 +58,11 @@ char *stringConvert(char *string) {
 
         newString[k] = string[i];
     } else {
-        char *arr1[5] ='\0';
-        char *arr2[5] ='\0';
+        char arr1[5];
+        char arr2[5];
+
+        arr1[0] = '\0';
+        arr2[0] = '\0';
         asciiValue = (int) string[i];
         digitsTmp = digits(asciiValue);
         
@@ -67,8 +70,8 @@ char *stringConvert(char *string) {
         if(digitsTmp == 2) {
           arr1[1] = 0;
         }
-        
-        itoa(asciiValue, arr2, 10);
+
+        sprintf(arr2, "%d", asciiValue);
         strcat(arr1, arr2);
         strcat(newString, arr1);
         k +=4;
@@ -86,7 +89,7 @@ char *stringConvert(char *string) {
  */
 char *genTmpVar() {
   char *ret = malloc(sizeof(char) * 10);
-  sprintf(ret, "%s%d", "\%tmp", tmpCounter);
+  sprintf(ret, "%s%d", "%tmp", tmpCounter);
   tmpCounter++;
 
   printf("DEFVAR TF@%s\n", ret);
@@ -95,7 +98,7 @@ char *genTmpVar() {
 
 char *genLabelName() {
   char *ret = malloc(sizeof(char) * 10);
-  sprintf(ret, "%s%d", "\%label", labelCounter);
+  sprintf(ret, "%s%d", "%label", labelCounter);
   labelCounter++;
   
   return ret;
@@ -294,7 +297,7 @@ char *genJumpIfEq(char *tmp) {
   return label;
 }
 
-void genLabel(char *labelName){
+void genLabel(char *labelName) {
   printf("LABEL %s\n", labelName);
 }
 

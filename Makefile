@@ -9,6 +9,7 @@ misc.c \
 precedence_analysis.c \
 scanner.c \
 symbol_stack.c \
+generator.c \
 symtable.c \
 symtable_stack.c \
 symtable_tree.c \

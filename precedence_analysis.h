@@ -11,6 +11,7 @@
 #include "symbol_stack.h"
 #include "symtable.h"
 #include "parser.h"
+#include "generator.h"
 
 /**
  * @brief Receives a token and return a new element of the symbol stack

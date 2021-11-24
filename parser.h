@@ -9,6 +9,7 @@
 #include "precedence_analysis.h"
 #include "scanner.h"
 #include "symtable.h"
+#include "generator.h"
 
 /**
  * @brief Check if string is a data type

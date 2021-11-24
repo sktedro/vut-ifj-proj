@@ -376,7 +376,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
         op2->data = genConvertFloatToInt(op2);
         op2->dataType = dt_integer;
       }
-      newOp->data = genBinaryOperationIdiv(op1, op3);
+      newOp->data = genBinaryOperationIDiv(op1, op3);
       newOp->dataType = dt_integer;
     }else if(op2->op == pt_concat){
       newOp->data = genBinaryOperationConcat(op1, op3);

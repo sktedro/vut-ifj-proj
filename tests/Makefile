@@ -11,6 +11,7 @@ LIBS=\
 ../scanner.c \
 ../symbol_stack.c \
 ../symtable.c \
+../generator.c \
 ../symtable_stack.c \
 ../symtable_tree.c \
 ../token.c
