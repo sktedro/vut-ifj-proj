@@ -280,7 +280,7 @@ int pReq() {
  * @return true if token is ID, otherwise false
  *
  */
-bool pFunID(Token *token) {
+bool pNewFunId(Token *token) {
   if (token->type == t_idOrKeyword) {
     if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
       fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
@@ -314,7 +314,7 @@ int pCodeBody() {
   ret = scanner(&token);
   CondReturn
 
-      printToken(token); // TODO delete
+  printToken(token); // TODO delete
 
   // -> eps
   if (token == NULL) { // EOF
@@ -327,13 +327,13 @@ int pCodeBody() {
       CondReturn;
 
       // [id] - function name
-      ret = pFunID(token);
+      ret = pNewFunId(token);
       CondReturn
 
-          // (
-          ret = scanner(&token);
+      // (
+      ret = scanner(&token);
       CondReturn
-          printToken(token); // TODO delete
+      printToken(token); // TODO delete
 
       if (token->type != t_leftParen) {
         tokenDestroy(&token);
@@ -352,7 +352,6 @@ int pCodeBody() {
       CondReturn
 
       printToken(token); // TODO delete
-      fprintf(stderr, "printed type after stash:  %d\n", token->type);
       if (token->type != t_rightParen) {
         tokenDestroy(&token);
         vypluj err(SYNTAX_ERR);
@@ -363,20 +362,20 @@ int pCodeBody() {
       ret = pFnRet();
       CondReturn
 
-          // <stat>
-          // TODO new stack frame (symbol table)
-          ret = pStat();
+      // <stat>
+      // TODO new stack frame (symbol table)
+      ret = pStat();
       CondReturn
 
-          // <ret>
-          ret = pRet();
+      // <ret>
+      ret = pRet();
       CondReturn
 
-          // end
-          ret = scanner(&token);
+      // end
+      ret = scanner(&token);
       CondReturn
 
-          if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
+      if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
         STDestroy(&symtab);
         tokenDestroy(&token);
         vypluj err(SYNTAX_ERR);
@@ -391,7 +390,7 @@ int pCodeBody() {
       //-> global [id] : function ( <typeList> ) <fnRet> <codeBody>
     } else if (strcmp(token->data, "global") == 0) {
       // [id]
-      ret = pFunID(token);
+      ret = pNewFunId(token);
       CondReturn;
       tokenDestroy(&token);
 
@@ -409,7 +408,7 @@ int pCodeBody() {
       ret = scanner(&token);
       CondReturn
 
-          if (!(token->type == t_idOrKeyword && strcmp(token->data, "function") == 0)) {
+      if (!(token->type == t_idOrKeyword && strcmp(token->data, "function") == 0)) {
         tokenDestroy(&token);
         vypluj err(SYNTAX_ERR);
       }
@@ -446,42 +445,40 @@ int pCodeBody() {
       // <codeBody>
       ret = pCodeBody();
       CondReturn;
+    }
 
-      // --------------------------------- ENDED HERE ------------------------------------------------------------
-      //-> [id] <fnCall> <codeBody>
-    } else if (STFind(symtab, token->data) != NULL) { // [ID]
-      // [id]
-      // If the id is a variable or is not defined yet, we can't call it as a
-      // function...
-      if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
-        fprintf(stderr, "FN NENI DEFINOVANÁ\n");
-        vypluj err(1); // TODO RETURN ERROR
-      }
-
-      fprintf(stderr, "FN JE DEFINOVANÁ\n");
-
-      // <fnCall>
-      ret = pFnCall();
-      CondReturn;
-
-      // TODO generate code?
-
-      // <codeBody>
-      ret = pCodeBody();
-      CondReturn;
-
-    } else if (isBuiltInFunction(token)) {
-
+    //-> [id] <fnCall> <codeBody> - calling a build in function
+    else if (isBuiltInFunction(token)) {
       if (strcmp(token->data, "write") == 0) {
 
         ret = pFnCall();
         CondReturn
 
-            ret = pCodeBody();
+        ret = pCodeBody();
         CondReturn
 
-            vypluj 0;
+        vypluj 0;
       }
+
+    //-> [id] <fnCall> <codeBody> - calling a user function
+    } else if (STFind(symtab, token->data) != NULL) {
+      // [id]
+      // If the id is a variable or is not defined yet, we can't call it as a function...
+      if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
+        fprintf(stderr, "FN NENI DEFINOVANÁ\n");
+        vypluj err(ID_DEF_ERR);
+      }
+      fprintf(stderr, "FN JE DEFINOVANÁ\n");
+
+      // <fnCall>
+      ret = pFnCall();
+      CondReturn
+
+      // TODO generate code?
+
+      // <codeBody>
+      ret = pCodeBody();
+      CondReturn
 
     } else {
       vypluj err(1); // TODO errcode
@@ -1109,7 +1106,6 @@ int pFnArgList() {
 
   if (token->type == t_rightParen) { // )
     printf("PRAVA ZATVORKA\n");
-    fprintf(stderr, "printed type before stash:  %d\n", token->type);
     stashToken(token);
     // can't destroy
     token = NULL;
