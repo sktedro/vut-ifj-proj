@@ -462,6 +462,7 @@ int pCodeBody() {
 
     //-> [id] <fnCall> <codeBody> - calling a user function
     } else if (STFind(symtab, token->data) != NULL) {
+      fprintf(stderr, "user function call\n");
       // [id]
       // If the id is a variable or is not defined yet, we can't call it as a function...
       if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
@@ -481,7 +482,7 @@ int pCodeBody() {
       CondReturn
 
     } else {
-      vypluj err(1); // TODO errcode
+      vypluj err(ID_DEF_ERR); // TODO errcode asi good?
     }
   }
   vypluj 0;
@@ -495,40 +496,43 @@ int pCodeBody() {
  * 09. <fnCall>          -> ( <fnCallArgList> )
  */
 int pFnCall() {
-  printf("-----------------------------------------------------------\n");
-  printf("PARSER FNCALL\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER FNCALL\n");
   Token *token = NULL;
 
   // (
   ret = scanner(&token);
   CondReturn
 
-      printToken(token);
+  printToken(token);
 
   if (token->type != t_leftParen) {
     tokenDestroy(&token);
-    vypluj err(1); // TODO what code
+    vypluj err(SYNTAX_ERR);
   }
   tokenDestroy(&token);
 
+  // <fnCallArgList>
   ret = pFnCallArgList();
   CondReturn;
 
   // )
-  printf("back in fn call \n");
+  fprintf(stderr, "back in fn call \n");
   ret = scanner(&token);
   CondReturn;
 
-  printToken(token);
+  printToken(token); // TODO delete
 
   if (token->type != t_rightParen) {
     tokenDestroy(&token);
-    vypluj err(1); // TODO what code
+    vypluj err(SYNTAX_ERR);
   }
   tokenDestroy(&token);
 
   vypluj 0;
 }
+
+// ------------------------------------------------jija ended here
 
 /**
  * @brief
@@ -545,8 +549,7 @@ int pFnRet() {
 
   ret = scanner(&token);
   CondReturn
-
-      printToken(token);
+  printToken(token);
 
   if (token->type != t_colon) {
     printf("STASH TOKEN FNRET\n");
