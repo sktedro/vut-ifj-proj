@@ -67,7 +67,21 @@ void destroySymbol(SStackElem **elem){
 /**
  * Call rule functions based on how many symbols we are reducing
  */
-int checkRules(STStack *symtab, SStack *symstack, int opSymbols, int *rulesRet){
+int checkRules(STStack *symtab, SStack *symstack, int opSymbols){
+  /**
+    * // rulesRet = -1 if no rule was found, 0 if everything went great,
+    * // error otherwise
+    * if(rulesRet == -1){
+    *   // NO RULE FOUND -> error
+    * }else if(rulesRet != 0){
+    *   // Error occured - rulesRet holds the error code
+    * }else{
+    *   // all good
+    * }
+    */
+  int rulesRet = -1; // Will be changed to 0 if a rule was found and applied or
+  // to > 0 if an error occured
+        
   // Get the first symbol from the stack and pop it
   SStackElem *op1 = SStackTop(symstack);
   SStackPop(symstack);
@@ -77,10 +91,11 @@ int checkRules(STStack *symtab, SStack *symstack, int opSymbols, int *rulesRet){
   if(opSymbols == 1) {
     // Pop the '<'
     SStackPop(symstack);
-
-    // TODO check if the symbol is a literal or a variable
-    // TODO Generate code
-
+    // i rule
+    rulesRet = iRule(symtab, symstack, op1);
+    if(rulesRet != -1){
+      return rulesRet;
+    }
   // We have a unary or a binary operator:
   } else {
     // Get the second symbol and pop it
@@ -93,9 +108,9 @@ int checkRules(STStack *symtab, SStack *symstack, int opSymbols, int *rulesRet){
       SStackPop(symstack);
 
       // Call rule functions of unary operators
-      *rulesRet = strLenRule(symtab, symstack, op1, op2);
-      if(*rulesRet){
-        return 0;
+      rulesRet = strLenRule(symtab, symstack, op1, op2);
+      if(rulesRet != -1){
+        return rulesRet;
       }
 
     // Binary operator
@@ -105,6 +120,20 @@ int checkRules(STStack *symtab, SStack *symstack, int opSymbols, int *rulesRet){
       SStackPop(symstack);
       SStackPop(symstack);
 
+      // (i) or (E)
+      rulesRet = bracketsRule(symtab, symstack, op1, op2, op3);
+      if(rulesRet != -1){
+        return rulesRet;
+      }
+      rulesRet = aritmeticOperatorsRule(symtab, symstack, op1, op2, op3);
+      if(rulesRet != -1){
+        return rulesRet;
+      }
+      rulesRet = relationalOperatorsRule(symtab, symstack, op1, op2, op3);
+      if(rulesRet != -1){
+        return rulesRet;
+      }
+
       // TODO Call rule functions of binary operators
 
     }
@@ -112,9 +141,13 @@ int checkRules(STStack *symtab, SStack *symstack, int opSymbols, int *rulesRet){
   return 0;
 }
 
-int iRule(SStack *stack, STStack *symtab) { // i
+// i
+int iRule(STStack *symtab, SStack *symstack, SStackElem *op) {
 
-  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO ak nevhodné pravidlo -> vypluj -1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO check if the symbol is a literal or a variable
+  // TODO Generate code
+
   vypluj 0;
 }
 
@@ -165,15 +198,16 @@ int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *o
 
     // Push a new element to symstack (E)
     SStackElem *newElem = allocateSymbol(st_expr);
-    // TODO newElem->op = ? netreba??
-    // TODO newElem->isId = ?? je to ID alebo nie? Asi jo
+    newElem->op = pt_id;
+    newElem->isId = true;
     newElem->dataType = dt_integer;
     // TODO newElem->data = new variable name (where the strlen result is
-    // stored in ifjcode
+    // stored in ifjcode) - guess we should get this from the code generator
     SStackPush(symstack, newElem);
 
   }else{
-    // no rule
+    // No rule
+    return -1;
   }
 
   destroySymbol(&op1);
@@ -182,26 +216,42 @@ int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *o
 }
 
 // (E) or (i)?
-int bracketsRule(SStack *stack, STStack *symtab) {
+int bracketsRule(STStack *symtab, SStack *symstack, SStackElem *op1, 
+    SStackElem *op2, SStackElem *op3) {
+  if(op1->type == st_operator && op3->type == st_operator
+      && op1->op == pt_lParen && op3->op == pt_rParen){
 
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+    // If it was (E), just push it back
+    if(op2->type == st_idOrLiteral){
+      SStackPush(symstack, op2);
+    // If it was (i), change i to E and push it
+    }else if(op2->type == st_expr){
+      op2->type = st_expr;
+      SStackPush(symstack, op2);
+    }else{
+      // No rule
+      return -1;
+    }
+    // Destroy the parentheses
+    destroySymbol(&op1);
+    destroySymbol(&op3);
+
+  }else{
+    // No rule
+    return -1;
+  }
+
   vypluj 0;
 }
 
 
 // i OPERATOR i or E OPERATOR E ?
-// "+ - * / //"
-int aritmeticOperatorsRule(SStack *stack, STStack *symtab) {
+// "+ - * / // .."
+int aritmeticOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1, 
+    SStackElem *op2, SStackElem *op3) {
 
   // TODO dalenie nulou - error DIV_BY_ZERO_ERR
-  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
-
-  vypluj 0;
-}
-
-
-// ".."
-int concatenanceRule(SStack *stack, STStack *symtab) {
+  // TODO ak nevhodné pravidlo -> vypluj -1; (nie je err len prejdeme na ďalšiu funkciu)
 
   // Rule of i/E .. (string concatenation)
   /**
@@ -211,17 +261,18 @@ int concatenanceRule(SStack *stack, STStack *symtab) {
     *   }
     * }
     */
-  // TODO zistiť či pracujeme len so stringami, inak nemôžeme robiť operáciu
-  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
+
 
 // i RELOP i or E RELOP E ?
-int relationalOperatorsRule(SStack *stack, STStack *symtab) {
+int relationalOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1, 
+    SStackElem *op2, SStackElem *op3) {
 
-  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO ak nevhodné pravidlo -> vypluj -1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
+
 
 
 /**
@@ -410,8 +461,8 @@ int precedenceAnalysis(STStack *symtab, Token *token) {
       if(opSymbols < 0 || opSymbols == 0 || opSymbols > 3){
         vypluj err(1); // TODO errcode
       }else{
-        int rulesRet;
-        ret = checkRules(symtab, symstack, opSymbols, &rulesRet);
+        ret = checkRules(symtab, symstack, opSymbols);
+
       }
 
 
