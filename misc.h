@@ -103,6 +103,7 @@ enum TokenTypeEnum {
   t_strOp,
   t_relOp,
   t_assignment,
+  // t_nil ???? Wasn't there, but probably should be
 };
 
 // Enumeration of the precedence table
@@ -121,7 +122,6 @@ enum PrecTabEnum {
   pt_dollar
 };
 
-//TODO
 // Enumeration of symbol stack type
 enum SStackTypeEnum {
   st_push,    // <
@@ -129,9 +129,17 @@ enum SStackTypeEnum {
   st_nop,     // =
   st_invalid, // _
   st_idOrLiteral,
-  st_op,
+  st_operator,
   st_expr,
   st_dollar
+};
+
+// Enumeration of IFJ21 language data types
+enum IFJ21DataTypes {
+  dt_integer,
+  dt_number,
+  dt_string,
+  dt_nil
 };
 
 /*
@@ -160,10 +168,11 @@ typedef struct {
 
 // Symbol stack element
 typedef struct SStackElem {
-  int type;   // Symbol stack type enum (st)_
-  int op;     // Precedence table enum (pt_)
-  bool isId;  // So we know if there's an ID or a literal in *data
-  char *data; // ID, literal,...
+  int type;                // Symbol stack type enum (st_)
+  int op;                  // Precedence table enum (pt_)
+  bool isId;               // So we know if there's an ID or a literal in *data
+  int dataType;            // If it is an ID or a literal, we need the datatype
+  char *data;              // ID, literal,...
   struct SStackElem *next;
 } SStackElem;
 
