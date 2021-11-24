@@ -33,35 +33,35 @@ char precTab[12][12] = {
 
 int strLenRule(SStack *stack, STStack *tableStack){ // #
 
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
 
   vypluj 0;
 }
 
 int aritmeticOperatorsRule(SStack *stack, STStack *tableStack){ // + - * / //
 
-  // TODO dalenie nulou - error 9
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO dalenie nulou - error DIV_BY_ZERO_ERR
+  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
 
   vypluj 0;
 }
 
 int concatenanceRule(SStack *stack, STStack *tableStack){ // ..
 
-  //TODO zistiť či pracujeme len so stringami, inak nemôžeme robiť operáciu
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO zistiť či pracujeme len so stringami, inak nemôžeme robiť operáciu
+  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
 int relationalOperatorsRule(SStack *stack, STStack *tableStack){ // relačné operátory (vynímky)
   
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
 int iRule(SStack *stack, STStack *tableStack){ // i
   
-  //TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
+  // TODO ak nevhodné pravidlo -> vypluj 1; (nie je err len prejdeme na ďalšiu funkciu)
   vypluj 0;
 }
 
@@ -89,11 +89,15 @@ int parseExpression(STStack *symtable, Token *token){
  */
 SStackElem *parseToken(Token *token) {
   // Allocate and initialize new symbol stack element
-  SStackElem *newElem = (SStackElem*)malloc(sizeof(SStackElem));
+  SStackElem *newElem = (SStackElem*) malloc(sizeof(SStackElem));
+  if(newElem == NULL) {
+    exit(err(INTERN_ERR));
+  }
   newElem->type = newElem->op = -1;
   newElem->isId = false;
   newElem->data = NULL;
   newElem->next = NULL;
+
 
   switch (token->type){
     case t_idOrKeyword:
@@ -176,20 +180,21 @@ SStackElem *allocateSymbol(int st_symbol){
 int precedenceAnalysis(STStack *symtable, Token *token) {
   SStack *symstack = SStackInit();
 
+
   // Push a $ to the stack
   ret = SStackPush(symstack, allocateSymbol(st_dollar));
   CondReturn;
 
   bool exprEnd = false;
 
-  while (1){
+  while (1) {
 
     // Check if the next token is a part of the expression
     if(!exprEnd) {
       // TODO par dalsich podmienok asi. Ocheckovat keywordy a take
       if(token->type == t_colon 
           || token->type == t_comma 
-          || token->type == t_assignment){
+          || token->type == t_assignment) {
         stashToken(token);
         exprEnd = true;
         token = NULL;
@@ -199,16 +204,16 @@ int precedenceAnalysis(STStack *symtable, Token *token) {
     SStackElem *topSymbol = SStackTopTerminal(symstack);
     SStackElem *inputSymbol = parseToken(token);
 
-    if(precTab[topSymbol->op][inputSymbol->op] == st_nop){
+    if(precTab[topSymbol->op][inputSymbol->op] == st_nop) {
       // Push the input symbol to the stack
       SStackPush(symstack, inputSymbol);
       // Destroy the old token
       tokenDestroy(token);
       // Get a new token
       ret = scanner(&token);
-      condVypluj;
+      condVypluj
 
-    }else if(precTab[topSymbol->op][inputSymbol->op] == st_push){
+    } else if(precTab[topSymbol->op][inputSymbol->op] == st_push) {
       // Allocate a new symbol ('<') and push it after the top terminal
       SStackPushAfterTopTerminal(symstack, allocateSymbol(st_push));
       // Push the input symbol
@@ -217,9 +222,9 @@ int precedenceAnalysis(STStack *symtable, Token *token) {
       tokenDestroy(token);
       // Get a new token
       ret = scanner(&token);
-      condVypluj;
+      condVypluj
 
-    }else if(precTab[topSymbol->op][inputSymbol->op] == st_reduce){
+    } else if(precTab[topSymbol->op][inputSymbol->op] == st_reduce){
       // TODO toto asi ne: // Check if '<' 'y' is on top of the stack
 
       // Call rule functions - if one of them has a rule that reduces the 
@@ -229,8 +234,8 @@ int precedenceAnalysis(STStack *symtable, Token *token) {
       // this expression, which means that there is an error
 
 
-    }else{
-      vypluj err(1); // TODO errcode
+    } else {
+      vypluj err(SYNTAX_ERR);
     }
 
   }
