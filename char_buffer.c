@@ -7,23 +7,21 @@
 
 #include "char_buffer.h"
 
-
 // Initial buffer data length (space allocated)
 #define CHARBUFINITLEN 16
-
 
 /**
  * @brief Allocate a new buffer
  *
  * @return new buffer (pointer)
  */
-CharBuffer *charBufInit(){
-  CharBuffer *buf = (CharBuffer*)malloc(sizeof(CharBuffer));
-  if(buf == NULL){
+CharBuffer *charBufInit() {
+  CharBuffer *buf = (CharBuffer *)malloc(sizeof(CharBuffer));
+  if (buf == NULL) {
     exit(err(INTERN_ERR));
   }
-  buf->data = (char*)malloc(CHARBUFINITLEN * sizeof(char));
-  if(buf->data == NULL){
+  buf->data = (char *)malloc(CHARBUFINITLEN * sizeof(char));
+  if (buf->data == NULL) {
     free(buf);
     exit(err(INTERN_ERR));
   }
@@ -40,10 +38,10 @@ CharBuffer *charBufInit(){
  *
  * @return 0 if successful
  */
-int charBufAppend(CharBuffer *buf, char c){
-  if(buf->len + 1 == buf->size){
-    buf->data = (char*)realloc(buf->data, 2 * buf->size * sizeof(char));
-    if(buf->data == NULL){
+int charBufAppend(CharBuffer *buf, char c) {
+  if (buf->len + 1 == buf->size) {
+    buf->data = (char *)realloc(buf->data, 2 * buf->size * sizeof(char));
+    if (buf->data == NULL) {
       free(buf);
       buf = NULL;
       return 1;
@@ -61,8 +59,8 @@ int charBufAppend(CharBuffer *buf, char c){
  *
  * @param buf: from which the character should be removed
  */
-void charBufPop(CharBuffer *buf){
-  if(buf && buf->len){
+void charBufPop(CharBuffer *buf) {
+  if (buf && buf->len) {
     (buf->len)--;
     buf->data[buf->len] = '\0';
   }
@@ -73,7 +71,7 @@ void charBufPop(CharBuffer *buf){
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void charBufClear(CharBuffer *buf){
+void charBufClear(CharBuffer *buf) {
   buf->data[0] = '\0';
   buf->len = 0;
 }
@@ -83,19 +81,21 @@ void charBufClear(CharBuffer *buf){
  *
  * @param buf: pointer to a buffer that is to be destroyed
  */
-void charBufDestroy(CharBuffer *buf){
+void charBufDestroy(CharBuffer *buf) {
   free(buf->data);
   free(buf);
   buf = NULL;
 }
 
 /**
- * Appends a string to an existing buffer or initialises a new buffer if the given pointer is null.
+ * @brief Appends a string to an existing buffer or initialises a new buffer if the 
+ * given pointer is null.
+ * 
  * @param orig a string to append
  * @param buffer a pointer to a buffer
  */
 void charBufAppendString(char *orig, CharBuffer **buffer) {
-  if(*buffer == NULL) {
+  if (*buffer == NULL) {
     *buffer = charBufInit();
   }
 
@@ -103,7 +103,6 @@ void charBufAppendString(char *orig, CharBuffer **buffer) {
     charBufAppend(*buffer, orig[i]);
   }
 }
-
 
 #endif
 /* end of file char_buffer.c */

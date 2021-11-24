@@ -7,15 +7,14 @@
 
 #include "symbol_stack.h"
 
-
 /*
  * @brief Allocate a new stack, initialize it and return it
  *
  * @return a new stack
  */
-SStack *SStackInit(){
-  SStack *stack = (SStack*)malloc(sizeof(SStack));
-  if(!stack) {
+SStack *SStackInit() {
+  SStack *stack = (SStack *)malloc(sizeof(SStack));
+  if (!stack) {
     exit(err(INTERN_ERR));
   }
 
@@ -31,11 +30,11 @@ SStack *SStackInit(){
  *
  * @return 0 if successful
  */
-int SStackPush(SStack *stack, SStackElem *newElem){
-  if(!stack){
+int SStackPush(SStack *stack, SStackElem *newElem) {
+  if (!stack) {
     return 1; // TODO errcode
   }
-  if(!newElem){
+  if (!newElem) {
     exit(err(INTERN_ERR));
   }
   newElem->next = stack->top;
@@ -48,8 +47,8 @@ int SStackPush(SStack *stack, SStackElem *newElem){
  *
  * @param stack
  */
-void SStackPop(SStack *stack){
-  if(!stack || !stack->top){
+void SStackPop(SStack *stack) {
+  if (!stack || !stack->top) {
     return;
   }
   SStackElem *tmp = stack->top;
@@ -64,8 +63,8 @@ void SStackPop(SStack *stack){
  *
  * @return top element
  */
-SStackElem *SStackTop(SStack *stack){
-  if(!stack){
+SStackElem *SStackTop(SStack *stack) {
+  if (!stack) {
     return NULL;
   }
   return stack->top;
@@ -79,13 +78,13 @@ SStackElem *SStackTop(SStack *stack){
  *
  * @return top terminal element
  */
-SStackElem *SStackTopTerminal(SStack *stack){
-  if(!stack){
+SStackElem *SStackTopTerminal(SStack *stack) {
+  if (!stack) {
     vypluj NULL;
   }
   SStackElem *tmp = stack->top;
-  while(tmp){
-    if(tmp->type != st_expr){
+  while (tmp) {
+    if (tmp->type != st_expr) {
       vypluj tmp;
     }
     tmp = tmp->next;
@@ -102,18 +101,18 @@ SStackElem *SStackTopTerminal(SStack *stack){
  *
  * @return 0 if successful
  */
-int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem){
-  if(!stack){
+int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
+  if (!stack) {
     vypluj 1; // TODO errcode
   }
-  if(!newElem){
+  if (!newElem) {
     exit(err(INTERN_ERR));
   }
 
   // Get the top terminal
   SStackElem *prev = SStackTopTerminal(stack);
   // No terminal found on stack - can't continue
-  if(!prev){
+  if (!prev) {
     vypluj 1; // TODO errcode
   }
 
@@ -129,16 +128,15 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem){
  *
  * @param stack to be freed
  */
-void SStackDestroy(SStack *stack){
-  if(!stack){
+void SStackDestroy(SStack *stack) {
+  if (!stack) {
     return;
   }
-  while(stack->top){
+  while (stack->top) {
     SStackPop(stack);
   }
   free(stack);
 }
-
 
 #endif
 /* end of file symbol_stack.c */

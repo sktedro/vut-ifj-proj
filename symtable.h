@@ -8,7 +8,6 @@
 #include "misc.h"
 #include "symtable_stack.h"
 
-
 /**
  * @brief initialization of symbol table (stack)
  *
@@ -32,14 +31,14 @@ void STDestroy(STStack **stack);
  *
  * @return 0 if successful
  */
-int STPush(STStack *frameStack) ;
+int STPush(STStack *frameStack);
 
 /**
  * @brief Pops a frame from the symbol table
  *
  * @param frameStack - stack with frames
  */
-void STPop(STStack *frameStack) ;
+void STPop(STStack *frameStack);
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
@@ -49,7 +48,7 @@ void STPop(STStack *frameStack) ;
  *
  * @return 0 if successful
  */
-int STInsert(STStack *frameStack, char *key) ;
+int STInsert(STStack *frameStack, char *key);
 
 /**
  * @brief Finds element in tree by key and return its data as a pointer
@@ -59,7 +58,7 @@ int STInsert(STStack *frameStack, char *key) ;
  *
  * @return STElem if it finds it, else NULL
  */
-STElem *STFind(STStack *stack, char *key) ;
+STElem *STFind(STStack *stack, char *key);
 
 /**
  * @brief Set isVariable boolean of a symbol table element (a variable or a 
@@ -125,7 +124,7 @@ void STAppendRetType(STStack *stack, char *key, int retType);
  *
  * @return -1 if an element doesn't exist, depth otherwise
  */
-int STGetDepth(STStack *stack, char *key) ;
+int STGetDepth(STStack *stack, char *key);
 
 /**
  * @brief Returns true if an element with name 'key' is a variable
@@ -190,7 +189,6 @@ int STGetParamType(STStack *stack, char *key, int index);
  * doesn't exist
  */
 int STGetRetType(STStack *stack, char *key, int index);
-
 
 #endif
 /* end of file symtable.h */

@@ -7,7 +7,6 @@
 
 #include "token.h"
 
-
 /**
  * @brief allocates memory for a new token and assigns it a type
  *
@@ -15,16 +14,15 @@
  *
  * @return token (pointer)
  */
-Token *tokenInit(int type){
+Token *tokenInit(int type) {
   Token *token = malloc(sizeof(Token));
-  if(!token){
+  if (!token) {
     exit(err(INTERN_ERR));
   }
   token->type = type;
   token->data = NULL;
   return token;
 }
-
 
 /**
  * @brief add a new attribute to the token (allocate and write the data)
@@ -34,14 +32,14 @@ Token *tokenInit(int type){
  *
  * @return 0 if successful
  */
-int tokenAddAttrib(Token *token, char *data){
-  if(!token){
+int tokenAddAttrib(Token *token, char *data) {
+  if (!token) {
     return 1;
   }
 
   // Allocate space for data
   token->data = malloc(strlen(data) + 1);
-  if(!token->data){
+  if (!token->data) {
     return 1;
   }
 
@@ -56,15 +54,17 @@ int tokenAddAttrib(Token *token, char *data){
  *
  * @param token to destroy
  */
-void tokenDestroy(Token *token){
-  if(token){
-    if(token->data){
-      free(token->data);
+void tokenDestroy(Token **token) {
+  if (token) {
+    if (*token) {
+      if ((*token)->data) {
+        free((*token)->data);
+      }
+      free(*token);
     }
-    free(token);
+    *token = NULL;
   }
 }
-
 
 #endif
 /* end of file token.c */

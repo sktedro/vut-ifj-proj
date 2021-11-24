@@ -7,7 +7,6 @@
 
 #include "misc.h"
 
-
 /**
  * @brief Allocate a new buffer
  *
@@ -52,7 +51,6 @@ void charBufDestroy(CharBuffer *buf);
  * @param buffer a pointer to a buffer
  */
 void charBufAppendString(char *orig, CharBuffer **buffer);
-
 
 #endif
 /* end of file char_buffer.h */

@@ -2,13 +2,11 @@
  * A stack for the symbol table
  */
 
-
 #ifndef SYMTABLE_STACK_H
 #define SYMTABLE_STACK_H
 
 #include "misc.h"
 #include "symtable_tree.h"
-
 
 /**
  * @brief Allocate a new stack, initialize it and return it
@@ -67,7 +65,6 @@ STStackElem *STStackNthElem(STStack *stack, int n);
  * @param stack to be freed
  */
 void STStackDestroy(STStack **stack);
-
 
 #endif
 /* end of file symtable_stack.h */

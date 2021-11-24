@@ -7,24 +7,22 @@
 
 #include "int_buffer.h"
 
-
 // Initial buffer data length (space allocated)
 #define INTBUFINITLEN 16
-
 
 /**
  * @brief Allocate a new buffer
  *
  * @return new buffer (pointer)
  */
-IntBuffer *intBufInit(){
-  IntBuffer *buf = (IntBuffer*)malloc(sizeof(IntBuffer));
-  if(buf == NULL){
+IntBuffer *intBufInit() {
+  IntBuffer *buf = (IntBuffer *)malloc(sizeof(IntBuffer));
+  if (buf == NULL) {
     exit(err(INTERN_ERR));
   }
 
-  buf->data = (int*)malloc(INTBUFINITLEN * sizeof(int));
-  if(buf->data == NULL){
+  buf->data = (int *)malloc(INTBUFINITLEN * sizeof(int));
+  if (buf->data == NULL) {
     free(buf);
     exit(err(INTERN_ERR));
   }
@@ -41,10 +39,10 @@ IntBuffer *intBufInit(){
  *
  * @return 0 if successful
  */
-int intBufAppend(IntBuffer *buf, int i){
-  if(buf->len + 1 == buf->size){
-    buf->data = (int*)realloc(buf->data, 2 * buf->size * sizeof(int));
-    if(buf->data == NULL){
+int intBufAppend(IntBuffer *buf, int i) {
+  if (buf->len + 1 == buf->size) {
+    buf->data = (int *)realloc(buf->data, 2 * buf->size * sizeof(int));
+    if (buf->data == NULL) {
       free(buf);
       buf = NULL;
       return 1;
@@ -61,8 +59,8 @@ int intBufAppend(IntBuffer *buf, int i){
  *
  * @param buf: from which the int should be removed
  */
-void intBufPop(IntBuffer *buf){
-  if(buf && buf->len){
+void intBufPop(IntBuffer *buf) {
+  if (buf && buf->len) {
     (buf->len)--;
   }
 }
@@ -72,7 +70,7 @@ void intBufPop(IntBuffer *buf){
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void intBufClear(IntBuffer *buf){
+void intBufClear(IntBuffer *buf) {
   buf->len = 0;
 }
 
@@ -81,14 +79,13 @@ void intBufClear(IntBuffer *buf){
  *
  * @param buf: pointer to a buffer that is to be destroyed
  */
-void intBufDestroy(IntBuffer *buf){
-  if(buf){
+void intBufDestroy(IntBuffer *buf) {
+  if (buf) {
     free(buf->data);
     free(buf);
     buf = NULL;
   }
 }
-
 
 #endif
 /* end of file int_buffer.c */
