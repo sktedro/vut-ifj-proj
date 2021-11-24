@@ -43,6 +43,30 @@ char *genName(char *name, int frame) {
   return newName;
 }
 
+char *stringConvert(char *string) {
+  char *newString = malloc(sizeof(char) * (strlen(string)*3));
+  int k = 0;
+  int asciiValue = 0;
+  int digits = 0;
+  
+  for(int i=0; i<strlen(string); i++) {
+
+    if((*string >= 'a' && *string <= 'z') || (*string >= 'A' && *string <= 'Z') || (*string >= '0' && *string <= '9')) {
+
+        newString[k] = string[i];
+    } else {
+        asciiValue = (int) string[i];
+        digits = digits(asciiValue);
+
+        
+
+    }
+
+
+  }
+
+}
+
 /*
  * identifikátor, frame number
  * a = 1
@@ -57,8 +81,30 @@ void genVarDef(char *id, int frameNumber) {
  * identifikátor, frame number, priradzovaná hodnota
  * TODO na konstantu pouzit %a
  */
-void genVarAssign() {
+int genVarAssign(char *id, int frameNumber, char *assignValue, tokenTypeEnum tokenType) {
 
+  if(tokenType == t_int) {
+    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_num) {
+    printf("ADD TF@%s float@0 float@%s\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_sciNum) {
+    printf("ADD TF@%s float@0 float@%s\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_str) {
+    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
+    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
+    printf("READ  TF@%s int\n", genName(id, frameNumber));
+  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
+    printf("READ TF@%s float\n", genName(id, frameNumber), assignValue);
+  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
+    printf("READ TF@%s string\n", genName(id, frameNumber), assignValue);
+  } else {
+    // TODO add error code
+    return 1;
+  }
+
+  return 0;
 }
 
 /*
