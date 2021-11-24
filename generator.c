@@ -4,15 +4,8 @@
 
 #include "generator.h"
 
-/*
-name | frame | type | value |
-a1   |  0    | int  |   4   |
-a2   |  1    | int  |   ?   |
-
-nazovPrem-> a -> prem0
-nazovPrem-> b -> prem1
-nazovPrem-> add -> prem3
-*/
+int tmpCounter = 0;
+int labelCounter = 0;
 
 int digits(int value) {
 
@@ -28,26 +21,36 @@ int digits(int value) {
   return result;
 }
 
-/*
- * Generate a unique name for ifj21code
+/**
+ * @brief Generates unique name for variables in ifj21code
  *
  *
  *
  * */
 char *genName(char *name, int frame) {
-  char *frameNum = malloc(sizeof(char) * (digits(frame) + 1));
-  sprintf(frameNum, "%d", frame);
-  char *newName = malloc(sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
-  memcpy(newName, name, strlen(name));
-  memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
-  return newName;
+  if(name[0] != '%') {
+    char *frameNum = malloc(sizeof(char) * (digits(frame) + 1));
+    sprintf(frameNum, "%d", frame);
+    char *newName = malloc(sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
+    memcpy(newName, name, strlen(name));
+    memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
+    return newName;
+  }
+
+  return name;
 }
 
+/**
+ * @brief Converts ifj21 string to ifj21code string
+ * 
+ * @param ifj21 string 
+ * @return ifj21code string
+ */
 char *stringConvert(char *string) {
   char *newString = malloc(sizeof(char) * (strlen(string)*3));
-  int k = 0;
   int asciiValue = 0;
-  int digits = 0;
+  int digitsTmp = 0;
+  int k = 0;
   
   for(int i=0; i<strlen(string); i++) {
 
@@ -55,50 +58,89 @@ char *stringConvert(char *string) {
 
         newString[k] = string[i];
     } else {
+        char *arr1[5] ='\0';
+        char *arr2[5] ='\0';
         asciiValue = (int) string[i];
-        digits = digits(asciiValue);
-
+        digitsTmp = digits(asciiValue);
         
-
+        arr1[0] = '\\';
+        if(digitsTmp == 2) {
+          arr1[1] = 0;
+        }
+        
+        itoa(asciiValue, arr2, 10);
+        strcat(arr1, arr2);
+        strcat(newString, arr1);
+        k +=4;
     }
-
-
   }
 
+  return newString;
 }
 
-/*
+
+/**
+ * @brief Generates temporary variable for expression
+ * 
+ * @return generated temporary variable 
+ */
+char *genTmpVar() {
+  char *ret = malloc(sizeof(char) * 10);
+  sprintf(ret, "%s%d", "\%tmp", tmpCounter);
+  tmpCounter++;
+
+  printf("DEFVAR TF@%s\n", ret);
+  return ret;
+}
+
+char *genLabelName() {
+  char *ret = malloc(sizeof(char) * 10);
+  sprintf(ret, "%s%d", "\%label", labelCounter);
+  labelCounter++;
+  
+  return ret;
+}
+
+/**
  * identifikátor, frame number
  * a = 1
  * a je v globále
  * v ifjcode bude názov a0
  */
-void genVarDef(char *id, int frameNumber) {
-  printf("DEFVAR LF@%s\n", genName(id, frameNumber));
+void genVarDef(SStackElem *element, int frame) {
+  printf("DEFVAR LF@%s\n", genName(element->data, frame));
 }
 
-/*
+/**
  * identifikátor, frame number, priradzovaná hodnota
  * TODO na konstantu pouzit %a
  */
-int genVarAssign(char *id, int frameNumber, char *assignValue, tokenTypeEnum tokenType) {
+int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
 
-  if(tokenType == t_int) {
-    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_num) {
-    printf("ADD TF@%s float@0 float@%s\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_sciNum) {
-    printf("ADD TF@%s float@0 float@%s\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_str) {
-    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
-    printf("ADD TF@%s int@0 int@%s\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
-    printf("READ  TF@%s int\n", genName(id, frameNumber));
-  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
-    printf("READ TF@%s float\n", genName(id, frameNumber), assignValue);
-  } else if(tokenType == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
-    printf("READ TF@%s string\n", genName(id, frameNumber), assignValue);
+  if(element->type == t_int) {
+    printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
+  
+  } else if(element->type == t_num) {
+    printf("MOVE TF@%s float@%s\n", genName(element->data, frameNumber), assignValue);
+  
+  } else if(element->type == t_sciNum) {
+    printf("MOVE TF@%s float@%a\n", genName(element->data, frameNumber), assignValue);
+  
+  } else if(element->type == t_str) {
+    printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
+  
+  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
+    printf("MOVE TF@%s nil@nil\n", genName(element->data, frameNumber));
+  
+  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
+    printf("READ TF@%s int\n", genName(element->data, frameNumber));
+  
+  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
+    printf("READ TF@%s float\n", genName(element->data, frameNumber));
+  
+  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
+    printf("READ TF@%s string\n", genName(element->data, frameNumber));
+  
   } else {
     // TODO add error code
     return 1;
@@ -107,37 +149,160 @@ int genVarAssign(char *id, int frameNumber, char *assignValue, tokenTypeEnum tok
   return 0;
 }
 
-/*
+
+
+/**
  * volane bude z precedenčnej analýzy (iba)
  * potrebujeme asi tri symbol stack elementy - ľavý op, pravý op a operátor
  */
-void genBinaryOperation() {
+char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
+
+  char *dest = genTmpVar();
+  printf("ADD %s %s %s", dest, src1->data, src2->data);
+  return dest;
 
 }
 
-/*
- * podobné ako binaryOp, ale dva elementy - "#VAR" alebo "VAR.."
- */
-void genUnaryOperation() {
+
+char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
+
+  char *dest = genTmpVar();
+  printf("SUB %s %s %s", dest, src1->data, src2->data);
+  return dest;
 
 }
 
-void genFnCall() {
-  // push TF to LF
+char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2) {
+
+  char *dest = genTmpVar();
+  printf("MUL %s %s %s", dest, src1->data, src2->data);
+  return dest;
+
+}
+
+char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
+
+  char *dest = genTmpVar();
+  printf("DIV %s %s %s", dest, src1->data, src2->data);
+  return dest;
+
+}
+
+char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
+  char *dest = genTmpVar();
+  printf("DIV %s %s %s", dest, src1->data, src2->data);
+  return dest;
+}
+
+char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
+  char *dest = genTmpVar();
+  printf("CONCAT %s %s", src1->data, src2->data);
+  return dest;
+}
+
+char *genConvertFloatToInt(SStackElem *src) {
+  char *dest = genTmpVar();
+  printf("FLOAT2INT %s %s", dest, src->data);
+  return dest;
+}
+
+char *genConvertIntToFloat(SStackElem *src) {
+  char *dest = genTmpVar();
+  printf("INT2FLOAT %s %s", dest, src->data);
+  return dest;
+}
+
+char *genUnaryOperation(SStackElem *src) {
+  char *dest = genTmpVar();
+  printf("STRLEN %s %s", dest, src->data);
+  return dest;
+
+}
+
+void genFnCall(SStackElem *element) {
+  printf("CALL %s0\n",element->data);
+}
+
+void genFnDef(SStackElem *element) {
+  printf("LABEL %s0\n", element->data);
   printf("PUSHFRAME\n");
-
-  // use TF in function
-
-
-  // create name
-  // if return MOVE that variable to local stack
-  // return
 }
 
+void genFnDefRet() {
+  printf("POPFRAME\n");
+  printf("RETURN\n");
+}
+
+
+void genWrite(SStackElem *element, int frame) {
+  if(frame == 0) {
+    printf("WRITE GF@%s", genName(element->data, frame));
+  } else {
+    printf("WRITE TF@%s", genName(element->data, frame));
+  }
+}
+
+
+void genLowerThan(SStackElem *element1, SStackElem *element2) {
+  printf("\n");
+
+}
+
+void genHigherThan(SStackElem *element1, SStackElem *element2) {
+  
+
+}
+
+char *genLower(SStackElem *element1, SStackElem *element2) {
+  char *tmp = genTmpVar();
+  
+  printf("LT %s %s %s\n", tmp, element1->data, element2->data);
+
+  return tmp;
+}
+
+char *genHigher(SStackElem *element1, SStackElem *element2) {
+  char *tmp = genTmpVar();
+  
+  printf("HT %s %s %s\n", tmp, element1->data, element2->data);
+
+  return tmp;
+}
+
+char *genEqual(SStackElem *element1, SStackElem *element2) {
+  char *tmp = genTmpVar();
+  
+  printf("EQ %s %s %s\n", tmp, element1->data, element2->data);
+
+  return tmp;
+
+}
+
+void genJumpIfNeq(char *tmp) {
+  char *label = genLabelName();
+
+  printf("JUMPIFNEQ label%d %s bool@true\n", label ,tmp);
+
+  return label;
+}
+
+char *genJumpIfEq(char *tmp) {
+  char *label = genLabelName();
+
+  printf("JUMPIFEQ label%d %s bool@true\n", label ,tmp);
+
+  return label;
+}
+
+void genLabel(char *labelName){
+  printf("LABEL %s\n", labelName);
+}
 
 void genStart() {
   printf(".IFJcode21\n\n");
 }
+
+
 
 /*
  * MOV
@@ -152,14 +317,11 @@ void genStart() {
  * POPS
  * CLEARS
  *
- * ADD
- * SUB
- * IDIV
- * ADDS
- * SUBS
- * MULS
- * DIVS
- * IDIVS
+ * ADD y
+ * SUB y
+ * MUL y
+ * DIV y
+ * IDIV y
  * LET
  * GT
  * EQ
@@ -176,15 +338,11 @@ void genStart() {
  * FLOAT2INT
  * INT2CHAR
  * STR2INT
- * INT2FLOATS
- * FLOAT2INTS
- * INT2CHARS
- * STRI2INTS
  *
  * READ
  * WRITE
  *
- * CONCAT
+ * CONCAT y
  * STRLEN
  * GETCHAR
  * SETCHAR
