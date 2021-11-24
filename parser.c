@@ -343,13 +343,16 @@ int pCodeBody() {
 
       // <fnArgList>
       ret = pFnArgList();
+
       CondReturn;
 
       // )
       ret = scanner(&token);
-      CondReturn
-          printToken(token); // TODO delete
 
+      CondReturn
+
+      printToken(token); // TODO delete
+      fprintf(stderr, "printed type after stash:  %d\n", token->type);
       if (token->type != t_rightParen) {
         tokenDestroy(&token);
         vypluj err(SYNTAX_ERR);
@@ -1104,11 +1107,12 @@ int pFnArgList() {
 
       printToken(token);
 
-  if (token->type == t_rightParen) {
+  if (token->type == t_rightParen) { // )
     printf("PRAVA ZATVORKA\n");
-
+    fprintf(stderr, "printed type before stash:  %d\n", token->type);
     stashToken(token);
-    tokenDestroy(&token);
+    // can't destroy
+    token = NULL;
     vypluj 0; //TODO
   } else if (token->type == t_idOrKeyword) {
     printf("ID OR KEYWORD\n");

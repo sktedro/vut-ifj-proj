@@ -220,7 +220,7 @@ bool STGetIsVariable(STStack *stack, char *key) {
     return data->isVariable;
   }
   fprintf(stderr, "This is awkward\n");
-  return false; // false?? nie lepsie vracat int a -1 namisto toho?
+  return false; // false?? nie lepsie vracat int a -1 namisto toho? - asi ne tohle je good
 }
 
 /**

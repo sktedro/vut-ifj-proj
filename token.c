@@ -61,8 +61,14 @@ void tokenDestroy(Token **token) {
         free((*token)->data);
       }
       free(*token);
+      *token = NULL;
+      fprintf(stderr, "free token\n");
+    } else {
+      fprintf(stderr, "Warning: you called token destroy and gave me *token = NULL.\n");
     }
-    *token = NULL;
+
+  } else {
+    fprintf(stderr, "Warning: you called token destroy and gave me token = NULL.\n");
   }
 }
 

@@ -26,8 +26,8 @@ Token *tokenMem = NULL;
  */
 int stashToken(Token *token) {
   if (tokenMem) {
-    fprintf(stderr, "This is bad\n");
-    return err(1); //TODO err code??
+    fprintf(stderr, "This is bad, can't stash another token\n");
+    return err(INTERN_ERR); //TODO different err code??
   }
   tokenMem = token;
   return 0;
