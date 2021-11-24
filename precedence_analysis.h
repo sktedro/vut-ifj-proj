@@ -20,13 +20,13 @@ SStackElem *parseToken(STStack *symtable, Token *token);
 
 int precedenceAnalysis(STStack *symtable, Token *token);
 
-int iRule(STStack *symtab, SStack *symstack, SStackElem *op);
-int strLenRule(STStack *symtab, SStack *symstack, SStackElem *op1, SStackElem *op2);
-int bracketsRule(STStack *symtab, SStack *symstack, SStackElem *op1,
+int iRule(SStackElem *op);
+int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2);
+int bracketsRule(SStack *symstack, SStackElem *op1,
     SStackElem *op2, SStackElem *op3);
-int aritmeticOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1,
+int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     SStackElem *op2, SStackElem *op3);
-int relationalOperatorsRule(STStack *symtab, SStack *symstack, SStackElem *op1,
+int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     SStackElem *op2, SStackElem *op3);
 
 
