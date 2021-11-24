@@ -1,7 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
 
-
 MAIN=main.c
 LIBS=\
 char_buffer.c \
@@ -13,7 +12,7 @@ precedence_analysis.c \
 symtable_tree.c \
 symtable.c \
 symtable_stack.c \
-token.c \
+token.c
 
 TESTSCRIPT=./test.sh
 

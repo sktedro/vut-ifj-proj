@@ -1,17 +1,18 @@
 CC=gcc
 CFLAGS=-g #-Wall -Wextra
 
+
 LIBS=\
 ../char_buffer.c \
 ../int_buffer.c \
 ../misc.c \
-../precedence_analysis.c \
 ../scanner.c \
 ../symbol_stack.c \
+../precedence_analysis.c \
 ../symtable_tree.c \
 ../symtable.c \
 ../symtable_stack.c \
-../token.c \
+../token.c
 
 
 .PHONY: none
