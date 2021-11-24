@@ -13,7 +13,6 @@
 /*
  * ♥
  */
-
 #define vypluj return
 
 /*

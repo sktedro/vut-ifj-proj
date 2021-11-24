@@ -58,7 +58,7 @@ STStack *symtab;
 /**
  * @brief Check if string is a data type
  * 
- * @return if type is data type retrun 0, else 1
+ * @return if type is data type return 0, else 1
  */
 bool isDataType(char *data) {
   if (strcmp(data, "string") == 0) {
@@ -245,6 +245,7 @@ int pStart() {
     tokenDestroy(&token);
     vypluj err(SYNTAX_ERR);
   }
+  // TODO generate .ifjcode21
   vypluj 0;
 }
 
