@@ -9,6 +9,8 @@
 #include "misc.h"
 #include "scanner.h"
 #include "symbol_stack.h"
+#include "symtable.h"
+#include "parser.h"
 
 /**
  * @brief Receives a token and return a new element of the symbol stack
@@ -19,6 +21,8 @@
 SStackElem *parseToken(STStack *symtable, Token *token);
 
 int precedenceAnalysis(STStack *symtable, Token *token);
+int parseExpression(STStack *symtab, Token *token);
+
 
 int iRule(SStackElem *op);
 int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2);
