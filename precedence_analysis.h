@@ -21,11 +21,10 @@
  */
 SStackElem *parseToken(STStack *symtable, Token *token);
 
-int precedenceAnalysis(STStack *symtable, Token *token);
-int parseExpression(STStack *symtab, Token *token);
+int parseExpression(STStack *symtab, Token *token, char **returnVarName);
 
 
-int iRule(SStackElem *op);
+int iRule(SStack *symstack, SStackElem *op);
 int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2);
 int bracketsRule(SStack *symstack, SStackElem *op1,
     SStackElem *op2, SStackElem *op3);

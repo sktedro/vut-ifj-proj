@@ -28,20 +28,11 @@ char precTab[12][12] = {
 };
 
 
+void debugPrint(SStack *stack) {
+  SStackElem *element;
+  
 
-
-/*
- * TODO
- * we'll need to return (receive it returned by code gen??) a variable name (in
- * ifjcode) where the expression result is stored by the precedence analysis
- * -- probably not if we work with stack instructions
- * TODO
- *
- * Pro chybné kombinace datových typů ve výrazech vracejte chybu 6.
- */
-
-
-
+}
 
 /**
  * @brief Allocates a new symbol (to be inserted to the symbol stack)
@@ -82,6 +73,10 @@ void destroySymbol(SStackElem **elem){
 
 
 // Guess this should be tested
+/**
+ * @brief Check if a number is zero, checking for future division
+ *
+ */
 bool isZero(char *str){
   char *todptr = NULL;
   double res = strtod(str, &todptr);
@@ -92,6 +87,7 @@ bool isZero(char *str){
   }
   return false;
 }
+
 
 /*
  * Rule functions
@@ -115,7 +111,7 @@ int checkRules(SStack *symstack, int opSymbols){
     // Pop the '<'
     SStackPop(symstack);
     // i rule
-    rulesRet = iRule(op1);
+    rulesRet = iRule(symstack, op1);
     if(rulesRet != -1){
       return rulesRet;
     }
@@ -127,11 +123,24 @@ int checkRules(SStack *symstack, int opSymbols){
 
     // Unary operator
     if (opSymbols == 2) {
+      if(symstack->top){
+        printf("typ: %d\n", symstack->top->type);
+        printf("Tu je\n");
+      }else{
+        printf("Tu neni\n");
+      }
       // Pop the '<'
       SStackPop(symstack);
+      if(symstack->top){
+        printf("typ: %d\n", symstack->top->type);
+        printf("Tu stale je\n");
+      }else{
+        printf("Tu už neni\n");
+      }
 
       // Call rule functions of unary operators
       rulesRet = strLenRule(symstack, op1, op2);
+
       if(rulesRet != -1){
         return rulesRet;
       }
@@ -159,11 +168,12 @@ int checkRules(SStack *symstack, int opSymbols){
 
     }
   }
-  vypluj 0;
+
+  vypluj rulesRet;
 }
 
 // i
-int iRule(SStackElem *op) {
+int iRule(SStack *symstack, SStackElem *op) {
   // If the symbol is not a literal, a variable nor an expr, return -1
   if(op->type != st_idOrLiteral && op->type != st_expr){
     vypluj -1;
@@ -174,6 +184,8 @@ int iRule(SStackElem *op) {
   // Just 'convert' the i to E and push it back to the stack. Nothing else
   // changes
   op->type = st_expr;
+  SStackPush(symstack, op);
+
   vypluj 0;
 }
 
@@ -182,57 +194,53 @@ int iRule(SStackElem *op) {
 int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
   // Rule of # i/E (string length)
   if(op1->type == st_operator && op1->op == pt_strlen){
+
+    // Create a new sym stack element (E)
+    SStackElem *newElem = allocateSymbol(st_expr);
+    newElem->op = pt_id;
+    newElem->isId = true;
+    newElem->dataType = dt_integer;
+    // newElem->data = temporary variable name (where the result is stored in 
+    // ifjcode)
+
     // If the op2 is a variable or a literal
     if(op2->type == st_idOrLiteral){
       // If it is a variable
       if(op2->isId == true){
         // Check if the data type is a string
         if(op2->dataType == dt_string){
-
-          // TODO code gen: STRLEN
-          
+          newElem->data = genUnaryOperation(op1);
         }else{
           // Calling strlen on a non string data type
-          vypluj err(1); // TODO errcode
+          vypluj err(TYPE_EXPR_ERR);
         }
 
       // If it is a literal
       }else {
         if(op2->dataType == dt_string){
-
-          // TODO code gen: STRLEN
-
+          newElem->data = genUnaryOperation(op1);
         }else{
           // Calling strlen on a non string data type
-          vypluj err(1); // TODO errcode
+          vypluj err(TYPE_EXPR_ERR);
         }
         
       }
     // If the op2 is an expression
     }else if(op2->type == st_expr){
       if(op2->dataType == dt_string){
-
-        // TODO code gen: STRLEN
-
+        newElem->data = genUnaryOperation(op1);
       }else{
         // Calling strlen on a non string data type
-        vypluj err(1); // TODO errcode
+        vypluj TYPE_EXPR_ERR;
       }
 
     // We received a '#' operator but no literal, ID or expression following it
     }else{
-      return err(1); // TODO errcode
+      return err(SYNTAX_ERR); // TODO errcode
     }
 
-    // Create a new element and push it to the symstack (E)
-    SStackElem *newElem = allocateSymbol(st_expr);
-    newElem->op = pt_id;
-    newElem->isId = true;
-    newElem->dataType = dt_integer;
-    // TODO newElem->data = new variable name (where the strlen result is
-    // stored in ifjcode) - guess we should get this from the code generator
+    // Push the new element to the stack
     SStackPush(symstack, newElem);
-
   }else{
     // No rule
     return -1;
@@ -311,17 +319,17 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     // pt_concat needs two strings
     if(op2->op == pt_concat){
       if(op1->dataType != dt_string || op3->dataType != dt_string){
-        return err(1); // TODO errcode
+        return err(TYPE_EXPR_ERR); // TODO errcode
       }
     // For other operators: 
     // Data types of both operands should be equal now (if they were an int and 
     // a num, we've converted int to num)
     }else{
       if(op1->dataType != op3->dataType){
-        return err(1); // TODO errcode
+        return err(TYPE_EXPR_ERR); // TODO errcode
       }else{
         if(op1->dataType != dt_integer || op1->dataType != dt_number){
-          return err(1); // TODO errcode
+          return err(TYPE_EXPR_ERR); // TODO errcode
         }
       }
     }
@@ -448,20 +456,14 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     newElem->dataType = -1; // It's gonna be a boolean.. So.. What now?
 
     if(!strcmp(op2->data, "<") || !strcmp(op2->data, ">=")){
-      // TODO code gen LT
-      // newElem->data = gen...
-      
+      newElem->data = genLower(op1, op3);
     }else if(!strcmp(op2->data, ">") || !strcmp(op2->data, "<=")){
-      // TODO code gen GT
-      // newElem->data = gen...
-      
+      newElem->data = genGreater(op1, op3);
     }else if(!strcmp(op2->data, "==") || !strcmp(op2->data, "~=")){
-      // TODO code gen EQ
-      // newElem->data = gen...
-      
+      newElem->data = genEqual(op1, op3);
     }else{
       fprintf(stderr, "This is awkward. The operator should be relational.\n");
-      return err(1); // todo? This should not be possible
+      return err(-1); // todo? This should not be possible
     }
 
     // Generate code for NOT - to negate the result of the expression
@@ -470,8 +472,9 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     if(!strcmp(op2->data, "<=") 
         || !strcmp(op2->data, ">=") 
         || !strcmp(op2->data, "~=")){
-      // TODO code gen NOTS
+      newElem->data = genUnaryOperation(op1);
       // newElem->data = gen...
+      newElem->data = genNot(op1, op3);
     }
 
     // Push the new element to the symstack (E)
@@ -494,14 +497,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
 
 /**
- * This is called from the parser TODO
- */
-int parseExpression(STStack *symtab, Token *token) {
-  precedenceAnalysis(symtab, token);
-  return 0;
-}
-
-/**
  * @brief Receives a token and return a new element of the symbol stack
  *
  * @param token to be converted to SStackElem
@@ -513,27 +508,39 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
 
   switch (token->type) {
     case t_idOrKeyword:
-      // Check if it is a keyword - if it is, that's bad
-      // If the token is not a nil literal, check if it is a keyword
-      // (it can be a nil (value), but nil is also a keyword)
-      if(strcmp(token->data, "nil")){
-        if(isKeyword(token)){
-          // The token is a keyword (not a nil)
-          exit(err(1)); // TODO errcode
-          return NULL;
-        }
-      }
+      /* Toto asi netreba kedze keyword checkujeme uz pred volanim tejto funkcie
+            // Check if it is a keyword - if it is, that's bad
+            // If the token is not a nil literal, check if it is a keyword
+            // (it can be a nil (value), but nil is also a keyword)
+            if(strcmp(token->data, "nil")){
+              if(isKeyword(token)){
+                // The token is a keyword (not a nil)
+                exit(err(1)); // TODO errcode
+                return NULL;
+              }
+            }
+      */
+
+      // Check if it is a nil (cause it might be)
+      if(!strcmp(token->data, "nil")){
+        newElem->isId = false;
+        newElem->dataType = dt_nil;
+
       // Check it the ID exists (we now know it is an ID)
-      if(!STFind(symtab, token->data)){
+      }else if(!STFind(symtab, token->data)){
+        fprintf(stderr, "This ID does not exist in the symbol table: %s\n", token->data);
         // THE ID DOES NOT EXIST
-        exit(err(1)); // TODO errcode
+        exit(ID_DEF_ERR);
         return NULL;
+      // It is an ID (and not a nil)
+      }else{
+        newElem->isId = true;
+        // Read the data type from the symbol table
+        newElem->dataType = STGetVarDataType(symtab, token->data);
+
       }
       newElem->type = st_idOrLiteral;
-      newElem->isId = true;
       newElem->op = pt_id;
-      // Read the data type from the symbol table
-      newElem->dataType = STGetVarDataType(symtab, token->data);
       newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
       memcpy(newElem->data, token->data, strlen(token->data) + 1);
       break;
@@ -558,7 +565,8 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
     case t_colon:
     case t_comma:
     case t_assignment:
-      // TODO stash token?
+      // We're not calling this function if we encounter one of these types
+      printf("This is awkward. How did we get this in parse token function?\n");
       free(newElem);
       return NULL;
       break;
@@ -607,42 +615,97 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
 /**
  * The precedence analysis algorithm
  */
-int precedenceAnalysis(STStack *symtab, Token *token) {
+int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   SStack *symstack = SStackInit();
 
+  // Get a new token if it was not provided by the parser
+  if(!token){
+    ret = scanner(&token);
+    condVypluj;
+  }
+
+  // If the next token is a function
+  if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
+    stashToken(token);
+    return -1;
+  }
+
   // Push a $ to the stack
-  ret = SStackPush(symstack, allocateSymbol(st_dollar));
+  SStackElem *initialSymbol = allocateSymbol(st_dollar);
+  initialSymbol->type = st_dollar;
+  initialSymbol->op = pt_dollar;
+  ret = SStackPush(symstack, initialSymbol);
   CondReturn;
 
-  bool exprEnd = false;
+  // Will be checked every cycle of the 'while' - if true, new token is fetched
+  // We already have one to process (param)
+  bool getNewToken = false; 
+
+  // Will be true if the next token we fetch might not be a part of the expression
+  // If this is false and we receive a token which cannot be a part of an 
+  // expression, we have encountered an error
+  bool exprCanEnd = false;
+  
+  SStackElem *topSymbol = NULL;
+  SStackElem *inputSymbol = parseToken(symtab, token);
 
   while (1) {
+    printf("Hey\n");
 
-    // Check if the next token is a part of the expression
-    if (!exprEnd) {
-      // TODO par dalsich podmienok asi? Ocheckovat keywordy a take
-      if (token->type == t_colon
+    if(getNewToken){
+      // Get a new token
+      ret = scanner(&token);
+      condVypluj;
+
+
+      // Check if the next token is a part of the expression
+
+      // If it is a ',', ':' or '=', it means the end of the expression
+      // If it is a keyword, this is the end of the expr (unless it's a nil)
+      if(token->type == t_colon
           || token->type == t_comma
-          || token->type == t_assignment) {
+          || token->type == t_assignment
+          || (strcmp(token->data, "nil") && isKeyword(token))){
         stashToken(token);
-        exprEnd = true;
-        token = NULL;
+        break;
       }
+      // If the last token was not an operator, but an ID or a literal and the 
+      // next token is an ID or a literal, it is not a part of the expression
+      if(exprCanEnd){
+        if (token->type == t_idOrKeyword 
+            || token->type == t_int 
+            || token->type == t_num 
+            || token->type == t_sciNum){
+          stashToken(token);
+          break;
+        }
+      }
+
+      // Parse the new token into a symbol
+      inputSymbol = parseToken(symtab, token);
+
+      // If the symbol is not an operator, the expr can end by the next token
+      // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
+      if(inputSymbol->type == st_operator){
+        exprCanEnd = false;
+      }else{
+        exprCanEnd = true;
+      }
+
     }
 
-    SStackElem *topSymbol = SStackTopTerminal(symstack);
-    SStackElem *inputSymbol = parseToken(symtab, token);
+    // Update the top symbol since it might have changed
+    topSymbol = SStackTopTerminal(symstack);
 
-    if (precTab[topSymbol->op][inputSymbol->op] == st_nop) {
+    if (precTab[topSymbol->op][inputSymbol->op] == '=') {
       // Push the input symbol to the stack
       SStackPush(symstack, inputSymbol);
       // Destroy the old token
       tokenDestroy(&token);
       // Get a new token
-      ret = scanner(&token);
-      condVypluj
+      getNewToken = true;
 
-    } else if (precTab[topSymbol->op][inputSymbol->op] == st_push) {
+    } else if (precTab[topSymbol->op][inputSymbol->op] == '<') {
       // Allocate a new symbol ('<') and push it after the top terminal
       SStackPushAfterTopTerminal(symstack, allocateSymbol(st_push));
       // Push the input symbol
@@ -650,10 +713,10 @@ int precedenceAnalysis(STStack *symtab, Token *token) {
       // Destroy the old token
       tokenDestroy(&token);
       // Get a new token
-      ret = scanner(&token);
-      condVypluj
+      getNewToken = true;
 
-    } else if (precTab[topSymbol->op][inputSymbol->op] == st_reduce) {
+    // Reduce ('Convert') top terminals to an expression
+    } else if (precTab[topSymbol->op][inputSymbol->op] == '>') {
 
       // Call rule functions - if one of them has a rule that reduces the
       // expression, it returns 0 and we're done reducing for now
@@ -665,31 +728,62 @@ int precedenceAnalysis(STStack *symtab, Token *token) {
         // '<' found
         if(tmp->type == st_push){
           // Set opSymbols to a positive value
-          opSymbols = - opSymbols;
+          // TODO change#321:
+          // opSymbols = - opSymbols;
           break;
         }
         // Keep opSymbols negative and invert the value when '<' is found
-        opSymbols--;
+        // TODO change#321:
+        // opSymbols--;
+        opSymbols++;
         tmp = tmp->next;
       }
 
       // In case opSymbols is negative / there is no op symbol / there are more
       // than three op symbols -> error
       if(opSymbols < 0 || opSymbols == 0 || opSymbols > 3){
-        vypluj err(1); // TODO errcode
+        printf("KOK\n");
+        vypluj err(SYNTAX_ERR); // TODO errcode
       }else{
+        printf("stack top is type %d\n", symstack->top->type);
+        printf("stack top->next type is %d\n", symstack->top->next->type);
         ret = checkRules(symstack, opSymbols);
-
+        if(ret == -1){
+          if(symstack && symstack->top){
+            printf("== is type %d\n", symstack->top->type);
+          }else{
+            printf("BUTSDA\n");
+          }
+          // A rule function returned -1 <=> there's no rule able to reduce
+          // this expression, which means that there is an error
+          printf("TODO errcode\n");
+          ret = 15; // TODO errcode if no rule was found!
+        }
+        CondReturn;
       }
 
-
-      // None of the rule functions returned 0 - there's no rule able to reduce
-      // this expression, which means that there is an error
+      getNewToken = false;
 
     } else {
       vypluj err(SYNTAX_ERR);
     }
+
+    // First, make sure that there is at least one symbol in the stack
+    if(symstack && symstack->top){
+      // If there is only "$E" at the top of the stack, we're done here
+      if(symstack->top->type == st_expr && symstack->top->next->type == st_expr){
+        break;
+      }
+    }else{
+      vypluj err(15); // TODO errcode
+    }
+
   }
+
+  // Return the name of the variable where the result of the expression is stored
+  *returnVarName = symstack->top->data;
+
+  // TODO anything else here to finish up??
 
   vypluj 0;
 }

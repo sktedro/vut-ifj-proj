@@ -218,9 +218,10 @@ bool STGetIsVariable(STStack *stack, char *key) {
   STElem *data = STFind(stack, key);
   if (data) {
     return data->isVariable;
+  }else{
+    fprintf(stderr, "This is awkward, you want to know if an element is"
+                    " a variable but it doesn't exist at all.\n");
   }
-  fprintf(stderr, "This is awkward, you want to know if an element is"
-                  " a variable but it doesn't exist at all.\n");
   return false; // false?? nie lepsie vracat int a -1 namisto toho?
                 // - asi ne tohle je good
 }

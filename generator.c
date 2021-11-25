@@ -160,36 +160,28 @@ int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
  * potrebujeme asi tri symbol stack elementy - ľavý op, pravý op a operátor
  */
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
-
   char *dest = genTmpVar();
   printf("ADD %s %s %s", dest, src1->data, src2->data);
   return dest;
-
 }
 
 
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
-
   char *dest = genTmpVar();
   printf("SUB %s %s %s", dest, src1->data, src2->data);
   return dest;
-
 }
 
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2) {
-
   char *dest = genTmpVar();
   printf("MUL %s %s %s", dest, src1->data, src2->data);
   return dest;
-
 }
 
 char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
-
   char *dest = genTmpVar();
   printf("DIV %s %s %s", dest, src1->data, src2->data);
   return dest;
-
 }
 
 char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
@@ -220,7 +212,6 @@ char *genUnaryOperation(SStackElem *src) {
   char *dest = genTmpVar();
   printf("STRLEN %s %s", dest, src->data);
   return dest;
-
 }
 
 void genFnCall(SStackElem *element) {
@@ -248,41 +239,37 @@ void genWrite(SStackElem *element, int frame) {
 
 char *genLower(SStackElem *element1, SStackElem *element2) {
   char *tmp = genTmpVar();
-  
   printf("LT %s %s %s\n", tmp, element1->data, element2->data);
-
   return tmp;
 }
 
 char *genGreater(SStackElem *element1, SStackElem *element2) {
   char *tmp = genTmpVar();
-  
   printf("GT %s %s %s\n", tmp, element1->data, element2->data);
-
   return tmp;
 }
 
 char *genEqual(SStackElem *element1, SStackElem *element2) {
   char *tmp = genTmpVar();
-  
   printf("EQ %s %s %s\n", tmp, element1->data, element2->data);
-
   return tmp;
+}
 
+char *genNot(SStackElem *element1, SStackElem *element2) {
+  char *tmp = genTmpVar();
+  printf("NOT %s %s %s\n", tmp, element1->data, element2->data);
+  return tmp;
 }
 
 char *genJumpIfNeq(char *tmp) {
   char *label = genLabelName();
-
   printf("JUMPIFNEQ label%s %s bool@true\n", label ,tmp);
-
   return label;
 }
 
 char *genJumpIfEq(char *tmp) {
   char *label = genLabelName();
   printf("JUMPIFEQ label%s %s bool@true\n", label ,tmp);
-
   return label;
 }
 
@@ -324,10 +311,10 @@ void genStart() {
  * ANDS
  * ORS
  * NOTS
- * INT2FLOAT
- * FLOAT2INT
- * INT2CHAR
- * STR2INT
+ * INT2FLOAT y
+ * FLOAT2INT y
+ * INT2CHAR y
+ * STR2INT y
  *
  * READ
  * WRITE
@@ -341,10 +328,10 @@ void genStart() {
  *
  * LABEL
  * JUMP
- * JUMIFEQ
- * JUMPIFNEQ
- * JUMPIFEQS
- * JUMPIFNEQS
+ * JUMIFEQ y
+ * JUMPIFNEQ y
+ * JUMPIFEQS y
+ * JUMPIFNEQS y
  * EXIT
  *
  * BREAK x

@@ -19,8 +19,25 @@
  * @return errCode
  */
 int err(int errCode) {
+  fprintf(stderr, "ERROR: ");
   if (errCode == 1) {
     fprintf(stderr, "Lexical analysis error.\n"); //TODO
+  } else if (errCode == 2) {
+    fprintf(stderr, "Syntax error.\n"); //TODO
+  } else if (errCode == 3) {
+    fprintf(stderr, "Function/variable definition error.\n"); //TODO
+  } else if (errCode == 4) {
+    fprintf(stderr, "Assignment error (types might be uncompatible).\n"); //TODO
+  } else if (errCode == 5) {
+    fprintf(stderr, "Function parameters or return values error. Check types.\n"); //TODO
+  } else if (errCode == 6) {
+    fprintf(stderr, "Types of an expression operands are not compatible.\n"); //TODO
+  } else if (errCode == 7) {
+    fprintf(stderr, "Semantic error.\n"); //TODO
+  } else if (errCode == 8) {
+    fprintf(stderr, "Unexpected nil.\n"); //TODO
+  } else if (errCode == 9) {
+    fprintf(stderr, "Division by zero.\n"); //TODO
   } else if (errCode == 99) {
     fprintf(stderr, "Internal error.\n"); //TODO
   }else{
