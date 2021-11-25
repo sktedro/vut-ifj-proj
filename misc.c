@@ -43,7 +43,10 @@ int err(int errCode) {
   }else{
     fprintf(stderr, "Other unknown error.\n");
   }
-  vypluj errCode;
+
+  // TODO:
+  exit(errCode);
+  //vypluj errCode;
 }
 
 #endif

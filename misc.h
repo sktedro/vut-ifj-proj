@@ -105,32 +105,32 @@ enum TokenTypeEnum {
   // t_nil ???? Wasn't there, but probably should be
 };
 
-// Enumeration of the precedence table
+// Enumeration of the precedence table (SStackElem->op)
 enum PrecTabEnum {
-  pt_strlen,
-  pt_mult,
-  pt_div,
-  pt_intDiv,
-  pt_add,
-  pt_sub,
-  pt_concat,
-  pt_relOp,
-  pt_lParen,
-  pt_rParen,
-  pt_id,
-  pt_dollar
+  pt_strlen,     /*0*/          
+  pt_mult,       /*1*/   
+  pt_div,        /*2*/
+  pt_intDiv,     /*3*/          
+  pt_add,        /*4*/       
+  pt_sub,        /*5*/       
+  pt_concat,     /*6*/                         
+  pt_relOp,      /*7*/         
+  pt_lParen,     /*8*/                        
+  pt_rParen,     /*9*/                        
+  pt_id,         /*10*/     
+  pt_dollar      /*11*/        
 };
 
 // Enumeration of symbol stack type
 enum SStackTypeEnum {
-  st_push,    // <
-  st_reduce,  // > (reduce untill <)
-  st_nop,     // =
-  st_invalid, // _
-  st_idOrLiteral,
-  st_operator,
-  st_expr,
-  st_dollar
+  st_push,         /*0*/     // <
+  st_reduce,       /*1*/     // > (reduce untill <)
+  st_nop,          /*2*/     // =
+  st_invalid,      /*3*/     // _
+  st_idOrLiteral,  /*4*/  
+  st_operator,     /*5*/
+  st_expr,         /*6*/
+  st_dollar        /*7*/ 
 };
 
 // Enumeration of IFJ21 language data types

@@ -114,6 +114,7 @@ char *genLabelName() {
  */
 void genVarDef(SStackElem *element, int frame) {
   printf("DEFVAR LF@%s\n", genName(element->data, frame));
+  printf("MOVE LF@%s nil@nil\n", genName(element->data, frame));
 }
 
 /**
@@ -122,7 +123,7 @@ void genVarDef(SStackElem *element, int frame) {
  */
 int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
 
-  if(element->type == t_int) {
+  if(element->dataType == t_int) {
     printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
   
   } else if(element->type == t_num) {

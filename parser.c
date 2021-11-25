@@ -55,6 +55,32 @@ int ret = 0;
 
 STStack *symtab;
 
+//----------------------------------
+// SStackElem stuff, just ignore
+
+SStackElem *element;
+
+void initElement() {
+  element = malloc(sizeof(SStackElem));
+
+  SStackElem *tmp = malloc(sizeof(SStackElem));
+  
+  element->next = tmp;
+}
+
+void cleanElement() {
+  element->next = NULL;
+  element = NULL;
+}
+
+void destroyElement() {
+  free(element->next);
+  free(element);
+  cleanElement();
+}
+
+//------------------------------------------------------------
+ 
 /**
  * @brief Check if string is a data type
  * 
@@ -232,6 +258,7 @@ int pStart() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   fprintf(stderr, "PARSER START\n");
   Token *token = NULL;
+  initElement();
 
   ret = scanner(&token);
   CondReturn;
@@ -249,7 +276,7 @@ int pStart() {
     tokenDestroy(&token);
     vypluj err(SYNTAX_ERR);
   }
-  // TODO generate .ifjcode21
+  // asi už done a nie todo idk zomrieme TODO generate .ifjcode21
   genStart();
   vypluj 0;
 }
@@ -332,26 +359,28 @@ int pCodeBody() {
       ret = scanner(&token);
       CondReturn;
 
+      
       // [id] - function name
       ret = pNewFunId(token);
       CondReturn;
       STSetFnDefined(symtab, token->data, true);
 
-      // TODO delete this
-      STElem *element = STFind(symtab, token->data);
-      fprintf(stderr, "ELEMENT %s\n",element->name);
+      element->data = token->data;
 
+      genFnDef(element);
+      cleanElement();
       // (
       ret = scanner(&token);
       CondReturn;
       printToken(token); // TODO delete
 
       if (token->type != t_leftParen) {
+        destroyElement();
         tokenDestroy(&token);
         vypluj err(SYNTAX_ERR);
       }
       tokenDestroy(&token);
-
+      //TODO TU POKRAČUJ
       // <fnArgList>
       ret = pFnArgList();
 
@@ -957,7 +986,7 @@ int pStatWithId() {
     if (token->type == t_idOrKeyword) {
 
       if (!STGetIsVariable(symtab, token->data)) {
-        vypluj err(1);
+        vypluj err(SYNTAX_ERR);
       }
 
       ret = pNextAssign();
@@ -1022,7 +1051,7 @@ int pNextAssign() {
       ret = pNextAssign();
       CondReturn;
     } else {
-      vypluj err(1); // TODO errcode
+      vypluj err(SYNTAX_ERR); // TODO errcode
     }
 
     // <expr>
@@ -1044,7 +1073,7 @@ int pNextAssign() {
   } else if (token->type == t_assignment) {
     vypluj 0;
   } else {
-    vypluj err(1); // TODO errcode
+    vypluj err(ASS_ERR); // TODO errcode
   }
 
   vypluj 0;
@@ -1136,25 +1165,39 @@ int pFnArgList() {
 
   ret = scanner(&token);
   CondReturn;
-      printToken(token);
+  
+  printToken(token);
+  printf("DSDADSADADADADASq\n");
 
   if (token->type == t_rightParen) { // )
     printf("PRAVA ZATVORKA\n");
     stashToken(token);
-    // can't destroy
     token = NULL;
     vypluj 0; //TODO
   } else if (token->type == t_idOrKeyword) {
+    
     printf("ID OR KEYWORD\n");
+    printToken(token);
+    
+    if(isKeyword(token) == false) {
+        element->data = token->data;
+        genVarDef(element, symtab->top->depth);
+        cleanElement();
+    } else {
+      vypluj err(OTHER_SEM_ERR); 
+    }
+    
+    printf("DSDSADSAD\n");
+      
     tokenDestroy(&token);
 
     ret = scanner(&token);
     CondReturn;
         printToken(token);
 
-    if (STGetIsVariable(symtab, token->data) != false || !STGetFnDefined(symtab, token->data)) {
-      vypluj err(1); // TODO RETURN ERROR
-    }
+    /*if (STGetIsVariable(symtab, token->data) != false || !STGetFnDefined(symtab, token->data)) {
+      vypluj err(ID_DEF_ERR); // TODO RETURN ERROR
+    }*/
 
     tokenDestroy(&token);
 
@@ -1164,7 +1207,7 @@ int pFnArgList() {
         printToken(token);
 
     if (token->type != t_colon) {
-      vypluj err(1);
+      vypluj err(PARAM_RET_ERR);
     }
 
     tokenDestroy(&token);
@@ -1172,7 +1215,7 @@ int pFnArgList() {
     ret = scanner(&token);
     CondReturn;
 
-        printToken(token);
+    printToken(token);
 
     if (token->type != t_idOrKeyword) {
       //TODO NENI TO KEYWORD
@@ -1410,11 +1453,10 @@ int pType() {
 
   ret = scanner(&token);
   CondReturn;
-
-      printToken(token);
+  printToken(token);
 
   if ((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
-    printf("IS DATA TYPE\n");
+    fprintf(stderr, "IS DATA TYPE\n");
     vypluj 0;
   } else {
     vypluj err(SYNTAX_ERR);
@@ -1437,20 +1479,15 @@ int pIdList() {
   CondReturn;
   printToken(token);
 
-  if (token->type == t_idOrKeyword) {
-    if (isKeyword(token) == false) {
-      if (STGetIsVariable(symtab, token->data)) {
-        tokenDestroy(&token);
-        ret = pNextId();
-        CondReturn;
-            vypluj 0;
-      } else {
-        STInsert(symtab, token->data);
-        STSetIsVariable(symtab, token->data, true);
-        STSetFnDefined(symtab, token->data, false);
-        vypluj 0;
-      }
+  if (token->type == t_idOrKeyword && !isKeyword(token)) {
+    if (STGetIsVariable(symtab, token->data)) {
+      tokenDestroy(&token);
+      vypluj pNextId();
     }
+    STInsert(symtab, token->data);
+    STSetIsVariable(symtab, token->data, true);
+    STSetFnDefined(symtab, token->data, false);
+    vypluj 0;
   }
 
   vypluj err(SYNTAX_ERR);
@@ -1462,7 +1499,7 @@ int pIdList() {
  * @return error code
  *
  * 59. <nextId>          -> eps
- * 60. <nextId>          -> , [id] <nextId>
+ * 60. <nextId>          -> , [id] <nextId> // TODO change code or change grammer to -> , <idList>
  */
 int pNextId() {
   printf("-----------------------------------------------------------\n");
@@ -1471,15 +1508,20 @@ int pNextId() {
 
   ret = scanner(&token);
   CondReturn;
+  printToken(token);
 
-      printToken(token);
-
-  if (token->type == t_comma) {
-    tokenDestroy(&token);
-    ret = pIdList();
-    CondReturn;
-        vypluj 0;
+  // -> eps
+  if (token->type != t_comma) {
+    stashToken(token);
+    vypluj 0;
   }
+
+  tokenDestroy(&token);
+  // -> , [id] <nextId>
+  ret = pIdList(); // TODO does not look nice
+  CondReturn;
+  vypluj 0;
+  
 
   vypluj err(SYNTAX_ERR);
 }
@@ -1502,20 +1544,18 @@ int pNewIdAssign() {
 
       printToken(token);
 
-  // If the next token is not a ==, use rule 62 (else rule 63)
-  if (token->type != t_assignment) {
+  // -> eps
+  if (!(token->type == t_assignment && token->data == "=")) {
     stashToken(token);
     vypluj 0;
   }
 
+  // -> = <exprList>
   // '='
   tokenDestroy(&token);
 
   // <exprList>
-  ret = pExprList();
-  CondReturn;
-
-      vypluj 0;
+  vypluj pExprList();
 }
 
 /**
@@ -1540,7 +1580,7 @@ int pExprList() {
 }
 
 /**
- * @brief
+ * @brief parsing <nextExpr> (rule 66, 67)
  *
  * @return error code
  *
@@ -1557,12 +1597,13 @@ int pNextExpr() {
 
       printToken(token);
 
-  // If the next token is not a comma, use rule 66 (else rule 67)
+  // -> eps
   if (token->type != t_comma) {
     stashToken(token);
     vypluj 0;
   }
 
+  // -> , <expr> <nextExpr>
   // ','
   tokenDestroy(&token);
 
@@ -1614,14 +1655,15 @@ int pExpr() {
         CondReturn;
 
         if(token->type == t_rightParen) {
-          tokenDestroy(&token);
-          // TODO GENERATE INTEGER READ
           
+          //genVarAssign(element, symtab->top->depth, "readi");
+  
+          tokenDestroy(&token);
           vypluj 0;
         }
       }
       
-      vypluj err(1); // TODO ADD ERROR CODE
+      vypluj err(SYNTAX_ERR); // TODO ADD ERROR CODE
     } else if(strcmp(token->data, "reads") == 0) {
       tokenDestroy(&token);
 
@@ -1636,13 +1678,14 @@ int pExpr() {
 
         if(token->type == t_rightParen) {
           tokenDestroy(&token);
-          // TODO GENERATE STRING READ
+          // asi už nie TODO GENERATE STRING READ
+           //genVarAssign(element, symtab->top->depth, "reads");
           
           vypluj 0;
         }
       }
       
-      vypluj err(1); // TODO ADD ERROR CODE
+      vypluj err(SYNTAX_ERR); // TODO ADD ERROR CODE
       
       
     } else if(strcmp(token->data, "readn") == 0) {
@@ -1659,13 +1702,14 @@ int pExpr() {
 
         if(token->type == t_rightParen) {
           tokenDestroy(&token);
-          // TODO GENERATE NUMBER READ
+          // asi už nie TODO GENERATE NUMBER READ
+           //genVarAssign(element, symtab->top->depth, "readn");
           
           vypluj 0;
         }
       }
       
-      vypluj err(1); // TODO ADD ERROR CODE
+      vypluj err(SYNTAX_ERR); // TODO ADD ERROR CODE
     } else if(strcmp(token->data, "substr") == 0) {
       // TODO GENERATE INTEGER READ
     } else if(strcmp(token->data, "ord") == 0) {
@@ -1673,7 +1717,7 @@ int pExpr() {
     } else if(strcmp(token->data, "chr") == 0) {
       // TODO GENERATE INTEGER READ
     } else {
-      vypluj err(1); // TODO ERR CODE
+      vypluj err(PARAM_RET_ERR); // TODO ERR CODE
     }
 
   } else {

@@ -102,24 +102,39 @@ SStackElem *SStackTopTerminal(SStack *stack) {
  * @return 0 if successful
  */
 int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
+  // POVODNE PUSHOVALO POD TERMINAL, PREROBENE ABY DAVALO NAD
+  // SHOULD BE RENAMED TO BEFORETOPTERMINAL? 
   if (!stack) {
     vypluj 1; // TODO errcode
+  }
+  if(!stack->top){
+    printf(stderr, "NO SYMBOL ON THE STACK!!!\n");
   }
   if (!newElem) {
     exit(err(INTERN_ERR));
   }
 
-  // Get the top terminal
-  SStackElem *prev = SStackTopTerminal(stack);
-  // No terminal found on stack - can't continue
-  if (!prev) {
-    vypluj 1; // TODO errcode
+  SStackElem *tmp = stack->top;
+
+  // Append the new element before the highest terminal:
+
+  if(tmp->type != st_expr){
+    // top terminal je na vrcholu stacku
+    SStackPush(stack, newElem);
+    return 0;
+  }
+  while(tmp->next){
+    // tmp->next je top terminal
+    if(tmp->next->type != st_expr){
+      // put < after the tmp
+      newElem->next = tmp->next;
+      tmp->next = newElem;
+      return 0;
+    }
+    tmp = tmp->next;
   }
 
-  // Append the new element after the highest terminal
-  newElem->next = prev->next;
-  prev->next = newElem;
-
+  printf("divne\n");
   return 0;
 }
 
