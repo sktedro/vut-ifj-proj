@@ -31,7 +31,7 @@ void genHigherThan(SStackElem *element1, SStackElem *element2);
 char *genLower(SStackElem *element1, SStackElem *element2);
 char *genHigher(SStackElem *element1, SStackElem *element2);
 char *genEqual(SStackElem *element1, SStackElem *element2);
-void genJumpIfNeq(char *tmp);
+char *genJumpIfNeq(char *tmp);
 char *genJumpIfEq(char *tmp);
 void genLabel(char *labelName);
 void genStart();

@@ -246,6 +246,7 @@ int pStart() {
     vypluj err(SYNTAX_ERR);
   }
   // TODO generate .ifjcode21
+  genStart();
   vypluj 0;
 }
 
@@ -883,6 +884,12 @@ int pStat() {
     fprintf(stderr, "NOT A VARIABLE\n");
     // error or -> eps?
   }
+
+  //TODO RETURN
+
+  //TODO ELSE
+
+  //TODO END
 
 //--------------------------------------------------------------------------------------------------------------------------------
   // whaat is this??

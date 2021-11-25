@@ -28,12 +28,14 @@ int digits(int value) {
  *
  * */
 char *genName(char *name, int frame) {
+
   if(name[0] != '%') {
     char *frameNum = malloc(sizeof(char) * (digits(frame) + 1));
     sprintf(frameNum, "%d", frame);
     char *newName = malloc(sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
     memcpy(newName, name, strlen(name));
     memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
+
     return newName;
   }
 
@@ -52,7 +54,7 @@ char *stringConvert(char *string) {
   int digitsTmp = 0;
   int k = 0;
   
-  for(int i=0; i<strlen(string); i++) {
+  for(int i=0; i<(int) strlen(string); i++) {
 
     if((*string >= 'a' && *string <= 'z') || (*string >= 'A' && *string <= 'Z') || (*string >= '0' && *string <= '9')) {
 
@@ -127,7 +129,7 @@ int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
     printf("MOVE TF@%s float@%s\n", genName(element->data, frameNumber), assignValue);
   
   } else if(element->type == t_sciNum) {
-    printf("MOVE TF@%s float@%a\n", genName(element->data, frameNumber), assignValue);
+    printf("MOVE TF@%s float@%a\n", genName(element->data, frameNumber), atof(assignValue));
   
   } else if(element->type == t_str) {
     printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
@@ -151,7 +153,6 @@ int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
 
   return 0;
 }
-
 
 
 /**
@@ -245,17 +246,6 @@ void genWrite(SStackElem *element, int frame) {
   }
 }
 
-
-void genLowerThan(SStackElem *element1, SStackElem *element2) {
-  printf("\n");
-
-}
-
-void genHigherThan(SStackElem *element1, SStackElem *element2) {
-  
-
-}
-
 char *genLower(SStackElem *element1, SStackElem *element2) {
   char *tmp = genTmpVar();
   
@@ -264,10 +254,10 @@ char *genLower(SStackElem *element1, SStackElem *element2) {
   return tmp;
 }
 
-char *genHigher(SStackElem *element1, SStackElem *element2) {
+char *genGreater(SStackElem *element1, SStackElem *element2) {
   char *tmp = genTmpVar();
   
-  printf("HT %s %s %s\n", tmp, element1->data, element2->data);
+  printf("GT %s %s %s\n", tmp, element1->data, element2->data);
 
   return tmp;
 }
@@ -281,18 +271,17 @@ char *genEqual(SStackElem *element1, SStackElem *element2) {
 
 }
 
-void genJumpIfNeq(char *tmp) {
+char *genJumpIfNeq(char *tmp) {
   char *label = genLabelName();
 
-  printf("JUMPIFNEQ label%d %s bool@true\n", label ,tmp);
+  printf("JUMPIFNEQ label%s %s bool@true\n", label ,tmp);
 
   return label;
 }
 
 char *genJumpIfEq(char *tmp) {
   char *label = genLabelName();
-
-  printf("JUMPIFEQ label%d %s bool@true\n", label ,tmp);
+  printf("JUMPIFEQ label%s %s bool@true\n", label ,tmp);
 
   return label;
 }
@@ -304,8 +293,6 @@ void genLabel(char *labelName) {
 void genStart() {
   printf(".IFJcode21\n\n");
 }
-
-
 
 /*
  * MOV
@@ -325,12 +312,12 @@ void genStart() {
  * MUL y
  * DIV y
  * IDIV y
- * LET
- * GT
- * EQ
- * LTS
- * GTS
- * EQS
+ * LT y
+ * GT y
+ * EQ y
+ * LTS x
+ * GTS x
+ * EQS x
  * AND
  * OR
  * NOT
@@ -360,6 +347,6 @@ void genStart() {
  * JUMPIFNEQS
  * EXIT
  *
- * BREAK
+ * BREAK x
  * DPRINT
  */
