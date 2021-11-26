@@ -5,6 +5,12 @@
 #ifndef PRECEDENCE_ANALYSIS_C
 #define PRECEDENCE_ANALYSIS_C
 
+#define TRYRULE(FN, ...)                  \
+    rulesRet = FN(symstack, __VA_ARGS__); \
+    if(rulesRet != -1){                   \
+      return rulesRet;                    \
+    }                                     \
+
 #include "precedence_analysis.h"
 
 extern int ret;
@@ -129,67 +135,69 @@ bool isZero(char *str){
 
 
 /**
- * Call rule functions based on how many symbols we are reducing
+ * @brief Pop 'amount' of symbols from the stack and pass it down by
+ * parameters. Also pop the '<' beneath them
+ *
+ * TODO
  */
-int checkRules(SStack *symstack, int opSymbols){
-  /** printf("Rules are going to be checked: \n"); */
-  int rulesRet = -1; // Will be changed to 0 if a rule was found and applied or
-  // to > 0 if an error occured
-        
+void popSymbolsForReduction(SStack *symstack, SStackElem **op1, 
+    SStackElem **op2, SStackElem **op3, int amount){
   // Get the first symbol from the stack and pop it
-  SStackElem *op1 = SStackTop(symstack);
+  *op1 = SStackTop(symstack);
   SStackPop(symstack);
 
-  // If we only have one symbol, no rule function needed as this expression
-  // should just be a constant or a variable (without any operator)
-  if(opSymbols == 1) {
+  if(amount == 1) {
     // Pop the '<'
     SStackPop(symstack);
-    // i rule
-    rulesRet = iRule(symstack, op1);
-    if(rulesRet != -1){
-      return rulesRet;
-    }
-  // We have a unary or a binary operator:
-  } else {
+
+  } else if(amount == 2){
     // Get the second symbol and pop it
-    SStackElem *op2 = SStackTop(symstack);
+    *op2 = SStackTop(symstack);
+    SStackPop(symstack);
+    // Pop the '<'
     SStackPop(symstack);
 
-    // Unary operator
-    if (opSymbols == 2) {
-      // Pop the '<'
-      SStackPop(symstack);
+  }else if(amount == 3){
+    // Get the second symbol and pop it
+    *op2 = SStackTop(symstack);
+    SStackPop(symstack);
+    // Get the third symbol and pop it
+    *op3 = SStackTop(symstack);
+    SStackPop(symstack);
+    // Pop the '<'
+    SStackPop(symstack);
+  }
+}
 
-      // Call rule functions of unary operators
-      rulesRet = strLenRule(symstack, op2, op1);
+int checkRules(SStack *symstack, int opSymbols){
+  // Will be 0 if a rule was found and applied, -1 if not, error code otherwise
+  int rulesRet = -1; 
+        
+  // Get the symbols that are to be reduced
+  SStackElem *op1 = NULL, *op2 = NULL, *op3 = NULL;
+  popSymbolsForReduction(symstack, &op1, &op2, &op3, opSymbols);
 
-      if(rulesRet != -1){
-        return rulesRet;
-      }
+  // If we only have one symbol, call iRule (which reduces i to E)
+  if(opSymbols == 1) {
+    TRYRULE(iRule, op1);
 
-    // Binary operator
-    } else if (opSymbols == 3) {
-      // Get the third symbol and pop the '<'
-      SStackElem *op3 = SStackTop(symstack);
-      SStackPop(symstack);
-      SStackPop(symstack);
+  // Unary operator
+  } else if(opSymbols == 2) {
+    // Call rule functions of unary operators
+    TRYRULE(strLenRule, op2, op1);
 
-      // (i) or (E)
-      rulesRet = bracketsRule(symstack, op3, op2, op1);
-      if(rulesRet != -1){
-        return rulesRet;
-      }
-      rulesRet = arithmeticOperatorsRule(symstack, op3, op2, op1);
-      if(rulesRet != -1){
-        return rulesRet;
-      }
-      rulesRet = relationalOperatorsRule(symstack, op3, op2, op1);
-      if(rulesRet != -1){
-        return rulesRet;
-      }
+  // Binary operator
+  } else if (opSymbols == 3) {
+    // (i) or (E)
+    TRYRULE(bracketsRule, op3, op2, op1);
+    TRYRULE(arithmeticOperatorsRule, op3, op2, op1);
+    TRYRULE(relationalOperatorsRule, op3, op2, op1);
 
-    }
+  // Error
+  }else{
+    // In case there is no op symbol or there are too many. Shouldn't happen
+    fprintf(stderr, "This is odd. Wrong amount of symbols to reduce.\n");
+    vypluj err(SYNTAX_ERR); // TODO errcode
   }
 
   vypluj rulesRet;
@@ -813,35 +821,22 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       // Call rule functions - if one of them has a rule that reduces the
       // expression, it returns 0 and we're done reducing for now
 
-      // Count symbols that are after '<' on the stack
+      // Count symbols that are to be reduced (eg. 2 for "#str")
       int opSymbols = 0;
       SStackElem *tmp = SStackTop(symstack);
-      while(tmp && tmp->next){
-        // '<' found
-        if(tmp->type == st_push){
-          // Set opSymbols to a positive value
-          opSymbols = - opSymbols;
-          break;
-        }
-        // Keep opSymbols negative and invert the value when '<' is found
-        opSymbols--;
+      while(tmp && tmp->next && tmp->type != st_push){
+        opSymbols++;
         tmp = tmp->next;
       }
 
-      // In case opSymbols is negative / there is no op symbol / there are more
-      // than three op symbols -> error
-      if(opSymbols < 0 || opSymbols == 0 || opSymbols > 3){
-        vypluj err(SYNTAX_ERR); // TODO errcode
-      }else{
-        /** debugPrint(symstack); */
-        ret = checkRules(symstack, opSymbols);
-        if(ret == -1){
-          // A rule function returned -1 <=> there's no rule able to reduce
-          // this expression, which means that there is an error
-          ret = 15; // TODO errcode if no rule was found!
-        }
-        CondReturn;
+      ret = checkRules(symstack, opSymbols);
+
+      // A rule function returned -1 <=> there's no rule able to reduce
+      // this expression, which means that there is an error
+      if(ret == -1){
+        ret = 15; // TODO errcode if no rule was found!
       }
+      CondReturn;
 
       getNewToken = false;
 
