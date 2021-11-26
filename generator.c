@@ -21,6 +21,9 @@ int digits(int value) {
   return result;
 }
 
+// TODO %s ain't enough to reference a variable. Don't we need '?F@'
+// everywhere?
+
 /**
  * @brief Generates unique name for variables in ifj21code
  *
@@ -193,7 +196,16 @@ char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
 
 char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("CONCAT %s %s\n", src1->data, src2->data);
+  char *op1 = src1->data, *op2 = src2->data;
+
+  // If it is not an ID, put parantheses around it
+  if(!src1->isId){
+    // TODO put parentheses around the src1->data and put it into op1
+  }
+  if(!src2->isId){
+    // TODO same
+  }
+  printf("CONCAT %s %s %s\n", dest, op1, op2);
   return dest;
 }
 

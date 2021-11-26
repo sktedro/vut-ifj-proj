@@ -200,8 +200,6 @@ int iRule(SStack *symstack, SStackElem *op) {
     vypluj -1;
   }
 
-  // TODO code gen? What here?
-  
   // Just 'convert' the i to E and push it back to the stack. Nothing else
   // changes
   op->type = st_expr;
@@ -230,7 +228,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
       if(op2->isId == true){
         // Check if the data type is a string
         if(op2->dataType == dt_string){
-          newElem->data = genUnaryOperation(op1);
+          newElem->data = genUnaryOperation(op2);
         }else{
           // Calling strlen on a non string data type
           vypluj err(TYPE_EXPR_ERR);
@@ -239,7 +237,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
       // If it is a literal
       }else {
         if(op2->dataType == dt_string){
-          newElem->data = genUnaryOperation(op1);
+          newElem->data = genUnaryOperation(op2);
         }else{
           // Calling strlen on a non string data type
           vypluj err(TYPE_EXPR_ERR);
@@ -249,7 +247,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
     // If the op2 is an expression
     }else if(op2->type == st_expr){
       if(op2->dataType == dt_string){
-        newElem->data = genUnaryOperation(op1);
+        newElem->data = genUnaryOperation(op2);
       }else{
         // Calling strlen on a non string data type
         vypluj TYPE_EXPR_ERR;
@@ -302,6 +300,59 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
 }
 
 
+// TODO simplify
+int checkDataTypes(SStackElem *op1, SStackElem *op2, SStackElem *op3){
+  // Check if the types match
+  if(op1->dataType != op3->dataType){
+
+    // If we have an integer and a number -> convert the int to num
+    // Unless the operator is an intDiv (both need to be integers)
+    if(op2->op != pt_intDiv){
+      if(op1->dataType == dt_integer && op3->dataType == dt_number){
+        op1->data = genConvertIntToFloat(op1);
+        op1->dataType = dt_number;
+
+      }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
+        op3->data = genConvertIntToFloat(op3);
+        op3->dataType = dt_number;
+
+      // Else, throw an error
+      }else{
+        return err(TYPE_EXPR_ERR);
+      }
+    }
+  }
+
+  // pt_concat needs two strings
+  if(op2->op == pt_concat){
+    if(op1->dataType != dt_string || op3->dataType != dt_string){
+      return err(TYPE_EXPR_ERR); // TODO errcode
+    }
+  // For other operators: 
+  // Data types of both operands should be equal now (if they were an int and 
+  // a num, we've converted int to num)
+  }else{
+    if(op1->dataType != op3->dataType && op2->op != pt_intDiv){
+      return err(TYPE_EXPR_ERR); // TODO errcode
+    }else{
+      if(op1->dataType != dt_integer && op1->dataType != dt_number){
+        return err(TYPE_EXPR_ERR); // TODO errcode
+      }
+    }
+  }
+  return 0;
+}
+
+bool isOperand(SStackElem *op){
+  return true;
+}
+bool isBinaryOperator(SStackElem *op){
+  return true;
+}
+bool isUnaryOperator(SStackElem *op){
+  return true;
+}
+
 // i OPERATOR i or E OPERATOR E ?
 // "+ - * / // .."
 //
@@ -319,41 +370,8 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
       && (op1->type == st_idOrLiteral || op1->type == st_expr)
       && (op3->type == st_idOrLiteral || op3->type == st_expr)){
 
-    // Check if the types match
-    if(op1->dataType != op3->dataType){
-
-      // If we have an integer and a number -> convert the int to num
-      if(op1->dataType == dt_integer && op3->dataType == dt_number){
-        op1->data = genConvertIntToFloat(op1);
-        op1->dataType = dt_number;
-
-      }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
-        op3->data = genConvertIntToFloat(op3);
-        op3->dataType = dt_number;
-
-      // Else, throw an error
-      }else{
-        return err(TYPE_EXPR_ERR);
-      }
-    }
-
-    // pt_concat needs two strings
-    if(op2->op == pt_concat){
-      if(op1->dataType != dt_string || op3->dataType != dt_string){
-        return err(TYPE_EXPR_ERR); // TODO errcode
-      }
-    // For other operators: 
-    // Data types of both operands should be equal now (if they were an int and 
-    // a num, we've converted int to num)
-    }else{
-      if(op1->dataType != op3->dataType){
-        return err(TYPE_EXPR_ERR); // TODO errcode
-      }else{
-        if(op1->dataType != dt_integer && op1->dataType != dt_number){
-          return err(TYPE_EXPR_ERR); // TODO errcode
-        }
-      }
-    }
+    ret = checkDataTypes(op1, op2, op3);
+    CondReturn;
 
     // Division by zero check
     if(op2->op == pt_div || op2->op == pt_intDiv){
@@ -389,9 +407,9 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
         op1->data = genConvertIntToFloat(op1);
         op1->dataType = dt_number;
       }
-      if(op2->dataType != dt_number){
-        op2->data = genConvertIntToFloat(op2);
-        op2->dataType = dt_number;
+      if(op3->dataType != dt_number){
+        op3->data = genConvertIntToFloat(op2);
+        op3->dataType = dt_number;
       }
       newOp->data = genBinaryOperationDiv(op1, op3);
       newOp->dataType = dt_number;
@@ -401,9 +419,9 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
         op1->data = genConvertFloatToInt(op1);
         op1->dataType = dt_integer;
       }
-      if(op2->dataType != dt_integer){
-        op2->data = genConvertFloatToInt(op2);
-        op2->dataType = dt_integer;
+      if(op3->dataType != dt_integer){
+        op3->data = genConvertFloatToInt(op2);
+        op3->dataType = dt_integer;
       }
       newOp->data = genBinaryOperationIDiv(op1, op3);
       newOp->dataType = dt_integer;
