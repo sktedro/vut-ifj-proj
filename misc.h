@@ -35,7 +35,7 @@
  */
 #define CondReturn \
   if (ret)         \
-    vypluj err(ret)
+  vypluj err(ret)
 #define condVypluj CondReturn
 
 /*
@@ -89,56 +89,56 @@ enum FSMEnum {
 
 // Enumeration of the token types
 enum TokenTypeEnum {
-  t_idOrKeyword, // one token for both identificator and a keyword??
-  t_int,
-  t_num,
-  t_sciNum,
-  t_str,
-  t_colon,
-  t_comma,
-  t_rightParen,
-  t_leftParen,
-  t_arithmOp,
-  t_strOp,
-  t_relOp,
-  t_assignment,
+  /*00*/ t_idOrKeyword, // one token for both identificator and a keyword??
+  /*01*/ t_int,
+  /*02*/ t_num,
+  /*03*/ t_sciNum,
+  /*04*/ t_str,
+  /*05*/ t_colon,
+  /*06*/ t_comma,
+  /*07*/ t_rightParen,
+  /*08*/ t_leftParen,
+  /*09*/ t_arithmOp,
+  /*10*/ t_strOp,
+  /*11*/ t_relOp,
+  /*12*/ t_assignment,
   // t_nil ???? Wasn't there, but probably should be
 };
 
 // Enumeration of the precedence table (SStackElem->op)
 enum PrecTabEnum {
-  pt_strlen,     /*0*/          
-  pt_mult,       /*1*/   
-  pt_div,        /*2*/
-  pt_intDiv,     /*3*/          
-  pt_add,        /*4*/       
-  pt_sub,        /*5*/       
-  pt_concat,     /*6*/                         
-  pt_relOp,      /*7*/         
-  pt_lParen,     /*8*/                        
-  pt_rParen,     /*9*/                        
-  pt_id,         /*10*/     
-  pt_dollar      /*11*/        
+  /*00*/ pt_strlen,
+  /*01*/ pt_mult,
+  /*02*/ pt_div,
+  /*03*/ pt_intDiv,
+  /*04*/ pt_add,
+  /*05*/ pt_sub,
+  /*06*/ pt_concat,
+  /*07*/ pt_relOp,
+  /*08*/ pt_lParen,
+  /*09*/ pt_rParen,
+  /*10*/ pt_id,
+  /*11*/ pt_dollar,
 };
 
 // Enumeration of symbol stack type
 enum SStackTypeEnum {
-  st_push,         /*0*/     // <
-  st_reduce,       /*1*/     // > (reduce untill <)
-  st_nop,          /*2*/     // =
-  st_invalid,      /*3*/     // _
-  st_idOrLiteral,  /*4*/  
-  st_operator,     /*5*/
-  st_expr,         /*6*/
-  st_dollar        /*7*/ 
+  /*00*/ st_push,          // <
+  /*01*/ st_reduce,        // > (reduce untill <)
+  /*02*/ st_nop,           // =
+  /*03*/ st_invalid,       // _
+  /*04*/ st_idOrLiteral,
+  /*05*/ st_operator,
+  /*06*/ st_expr,
+  /*07*/ st_dollar,
 };
 
 // Enumeration of IFJ21 language data types
 enum IFJ21DataTypes {
-  dt_integer,
-  dt_number,
-  dt_string,
-  dt_nil
+  /*00*/ dt_integer,
+  /*01*/ dt_number,
+  /*02*/ dt_string,
+  /*03*/ dt_nil,
 };
 
 /*
