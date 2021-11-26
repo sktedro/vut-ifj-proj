@@ -1,4 +1,5 @@
 vgcore*
+automake
 *.swp
 build/
 btree

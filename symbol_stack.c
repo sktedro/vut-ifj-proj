@@ -43,7 +43,7 @@ int SStackPush(SStack *stack, SStackElem *newElem) {
 }
 
 /*
- * @brief remove (and free it's allocated memory) the top element
+ * @brief remove (and <edited not to> free it's allocated memory) the top element
  *
  * @param stack
  */
@@ -53,7 +53,7 @@ void SStackPop(SStack *stack) {
   }
   SStackElem *tmp = stack->top;
   stack->top = tmp->next;
-  free(tmp);
+  /** free(tmp); */
 }
 
 /*

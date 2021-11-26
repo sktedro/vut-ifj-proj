@@ -51,6 +51,7 @@ void debugPrint(SStack *stack) {
     if(element->next == NULL) {
       fprintf(stderr,"Next element is NULL\n");
       fprintf(stderr,"Total length is: %d\n",len + 1);
+      fprintf(stderr, "-------------------------\n");
       return;
     } else {
       element = element->next;
@@ -142,9 +143,7 @@ int checkRules(SStack *symstack, int opSymbols){
     // i rule
     // TODO pop the '<'?
     rulesRet = iRule(symstack, op1);
-    printf("irule returned %d\n", rulesRet);
     if(rulesRet != -1){
-      printf("HM\n");
       return rulesRet;
     }else{
     }
@@ -156,23 +155,8 @@ int checkRules(SStack *symstack, int opSymbols){
 
     // Unary operator
     if (opSymbols == 2) {
-      if(symstack->top){
-        fprintf(stderr, "typ: %d\n", symstack->top->type);
-        fprintf(stderr, "Tu je\n");
-      }else{
-        fprintf(stderr, "Tu neni\n");
-      }
-      debugPrint(symstack);
-
       // Pop the '<'
       SStackPop(symstack);
-
-      if(symstack->top){
-        fprintf(stderr, "typ: %d\n", symstack->top->type);
-        fprintf(stderr, "Tu stale je\n");
-      }else{
-        fprintf(stderr, "Tu už neni\n");
-      }
 
       // Call rule functions of unary operators
       rulesRet = strLenRule(symstack, op1, op2);
@@ -211,15 +195,11 @@ int checkRules(SStack *symstack, int opSymbols){
 // i
 int iRule(SStack *symstack, SStackElem *op) {
   // If the symbol is not a literal, a variable nor an expr, return -1
-  printf("typ top %d\n", op->type);
-  printf("data top %s\n", op->data);
   if(op->type != st_idOrLiteral && op->type != st_expr){
     vypluj -1;
   }
 
   // TODO code gen? What here?
-  // Pop the '<'
-  SStackPop(symstack);
   
   // Just 'convert' the i to E and push it back to the stack. Nothing else
   // changes
@@ -279,9 +259,6 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
       return err(SYNTAX_ERR); // TODO errcode
     }
 
-    // Pop the '<'
-    SStackPop(symstack);
-
     // Push the new element to the stack
     SStackPush(symstack, newElem);
   }else{
@@ -302,15 +279,9 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
 
     // If it was (E), just push it back
     if(op2->type == st_idOrLiteral){
-      // Pop the '<'
-      SStackPop(symstack);
-
       SStackPush(symstack, op2);
     // If it was (i), change i to E and push it
     }else if(op2->type == st_expr){
-      // Pop the '<'
-      SStackPop(symstack);
-
       op2->type = st_expr;
       SStackPush(symstack, op2);
     }else{
@@ -377,7 +348,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
       if(op1->dataType != op3->dataType){
         return err(TYPE_EXPR_ERR); // TODO errcode
       }else{
-        if(op1->dataType != dt_integer || op1->dataType != dt_number){
+        if(op1->dataType != dt_integer && op1->dataType != dt_number){
           return err(TYPE_EXPR_ERR); // TODO errcode
         }
       }
@@ -445,9 +416,6 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op1);
     destroySymbol(&op2);
     destroySymbol(&op3);
-
-    // Pop the '<'
-    SStackPop(symstack);
 
     // Push the new element to symstack (E)
     SStackPush(symstack, newOp);
@@ -529,9 +497,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
       newElem->data = genNot(op1, op3);
     }
 
-    // Pop the '<'
-    SStackPop(symstack);
-
     // Push the new element to the symstack (E)
     SStackPush(symstack, newElem);
 
@@ -592,6 +557,9 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
         newElem->isId = true;
         // Read the data type from the symbol table
         newElem->dataType = STGetVarDataType(symtab, token->data);
+        /** printf("setting the data type of %s to: %d\n", token->data, STGetVarDataType(symtab, token->data)); */
+        // TODO this 0 is hardcoded and should not be
+        /** newElem->dataType = 0; */
 
       }
       newElem->type = st_idOrLiteral;
@@ -681,6 +649,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
   // If the next token is a function
   if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
+    fprintf(stderr, "Next token is a functino\n");
     stashToken(token);
     return -1;
   }
@@ -699,13 +668,16 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // Will be true if the next token we fetch might not be a part of the expression
   // If this is false and we receive a token which cannot be a part of an 
   // expression, we have encountered an error
-  bool exprCanEnd = false;
+  bool exprCanEnd = true;
+
+  bool exprEnd = false;
   
   SStackElem *topSymbol = NULL;
   SStackElem *inputSymbol = parseToken(symtab, token);
 
   while (1) {
-    fprintf(stderr, "Hey\n");
+    fprintf(stderr, "Next cycle. Symstack: \n");
+    debugPrint(symstack);
 
     if(getNewToken){
       // Get a new token
@@ -715,29 +687,48 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
       // Check if the next token is a part of the expression
 
+      if(exprEnd){
+        inputSymbol = allocateSymbol(st_reduce);
+        inputSymbol->op = pt_dollar;
+
       // If it is a ',', ':' or '=', it means the end of the expression
       // If it is a keyword, this is the end of the expr (unless it's a nil)
-      if(token->type == t_colon
+        }else if(token->type == t_colon
           || token->type == t_comma
           || token->type == t_assignment
           || (strcmp(token->data, "nil") && isKeyword(token))){
+        printf("<%s>\n", token->data);
+        fprintf(stderr, "received a ,/:/= or a keyword\n");
         stashToken(token);
-        break;
-      }
+        token = NULL;
+        printf("Setting exprend to true\n");
+        exprEnd = true;
+        inputSymbol = allocateSymbol(st_reduce);
+        inputSymbol->op = pt_dollar;
+      
+
       // If the last token was not an operator, but an ID or a literal and the 
       // next token is an ID or a literal, it is not a part of the expression
-      if(exprCanEnd){
-        if (token->type == t_idOrKeyword 
-            || token->type == t_int 
-            || token->type == t_num 
-            || token->type == t_sciNum){
-          stashToken(token);
-          break;
-        }
+      }else if(exprCanEnd && (
+          token->type == t_idOrKeyword 
+          || token->type == t_int 
+          || token->type == t_num 
+          || token->type == t_sciNum)){
+        fprintf(stderr, "received an id or a literal after exprCanEnd\n");
+        stashToken(token);
+        token = NULL;
+        exprEnd = true;
+        inputSymbol = allocateSymbol(st_reduce);
+        inputSymbol->op = pt_dollar;
       }
 
+
       // Parse the new token into a symbol
-      inputSymbol = parseToken(symtab, token);
+      // If exprEnd is true, it means that the token was stashed and does not
+      // exist any more
+      if(!exprEnd){
+        inputSymbol = parseToken(symtab, token);
+      }
 
       // If the symbol is not an operator, the expr can end by the next token
       // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
@@ -749,19 +740,25 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     }
 
+    /**
+      * if(exprEnd){
+      *   printf("expr end!\n");
+      *   break;
+      * }else{
+      *   printf("no expr end!\n");
+      * }
+      */
+
     // Update the top symbol since it might have changed
     topSymbol = SStackTopTerminal(symstack);
     if(!topSymbol){
       fprintf(stderr, "top symbol is NULL\n");
       return -1;
     }
-    fprintf(stderr, "top: %d\n", topSymbol->op);
-    fprintf(stderr, "input: %d\n", inputSymbol->op);
     char precTableSymbol = precTab[topSymbol->op][inputSymbol->op];
-    fprintf(stderr, "The stack symbol: %c\n", precTableSymbol);
+    fprintf(stderr, "The precedence table symbol: %c\n", precTableSymbol);
 
     if (precTableSymbol == '=') {
-      printf("Hmm1\n");
       // Push the input symbol to the stack
       SStackPush(symstack, inputSymbol);
       // Destroy the old token
@@ -770,12 +767,11 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       getNewToken = true;
 
     } else if (precTableSymbol == '<') {
-      printf("Hmm2\n");
       // Allocate a new symbol ('<') and push it after the top terminal
-      debugPrint(symstack);
+      /** debugPrint(symstack); */
       ret = SStackPushAfterTopTerminal(symstack, allocateSymbol(st_push));
-      printf("Pushing affter top terminal\n");
-      debugPrint(symstack);
+      printf("Pushing after top terminal\n");
+      /** debugPrint(symstack); */
       if(ret == -1){
         printf("no terminal on stack. Hmm\n");
         // no terminal on the stack
@@ -790,8 +786,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     // Reduce ('Convert') top terminals to an expression
     } else if (precTableSymbol == '>') {
-      debugPrint(symstack);
-      printf("Hmm3\n");
+      /** debugPrint(symstack); */
 
       // Call rule functions - if one of them has a rule that reduces the
       // expression, it returns 0 and we're done reducing for now
@@ -821,15 +816,11 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         fprintf(stderr, "jebal by to pes\n");
         vypluj err(SYNTAX_ERR); // TODO errcode
       }else{
-        debugPrint(symstack);
+        /** printf("Before checking the rules:\n"); */
+        /** debugPrint(symstack); */
         ret = checkRules(symstack, opSymbols);
         fprintf(stderr, "checkrules returned %d\n", ret);
         if(ret == -1){
-          if(symstack && symstack->top){
-            fprintf(stderr, "== is type %d\n", symstack->top->type);
-          }else{
-            fprintf(stderr, "no to co\n");
-          }
           // A rule function returned -1 <=> there's no rule able to reduce
           // this expression, which means that there is an error
           fprintf(stderr, "TODO errcode\n");
@@ -844,18 +835,29 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       vypluj err(SYNTAX_ERR);
     }
 
-    // First, make sure that there is at least one symbol in the stack
-    if(symstack && symstack->top){
-      // If there is only "$E" at the top of the stack, we're done here
-      if(symstack->top->type == st_expr && symstack->top->next->type == st_expr){
-        break;
-      }
+    if(exprEnd
+      && symstack && symstack->top && symstack->top->next
+      && symstack->top->type == st_expr
+      && symstack->top->next->type == st_dollar){
+      printf("expr end!\n");
+      break;
     }else{
-      vypluj err(15); // TODO errcode
+      printf("no expr end!\n");
     }
 
   }
 
+  // If there is only "$E" at the top of the stack, we're done here
+  // TODO but we need to be done reading tokens, too
+  if(symstack && symstack->top && symstack->top->next
+      && symstack->top->type == st_expr
+      && symstack->top->next->type == st_dollar){
+    fprintf(stderr, "Done with precedence analysis\n");
+  }else{
+    debugPrint(symstack);
+    fprintf(stderr, "PA while broke but we're not done\n");
+    return 15; // TODO errcode
+  }
   // Return the name of the variable where the result of the expression is stored
   *returnVarName = symstack->top->data;
 
