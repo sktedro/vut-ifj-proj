@@ -557,7 +557,7 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
         newElem->isId = true;
         // Read the data type from the symbol table
         newElem->dataType = STGetVarDataType(symtab, token->data);
-        /** printf("setting the data type of %s to: %d\n", token->data, STGetVarDataType(symtab, token->data)); */
+        printf("setting the data type of %s to: %d\n", token->data, STGetVarDataType(symtab, token->data));
         // TODO this 0 is hardcoded and should not be
         /** newElem->dataType = 0; */
 
@@ -649,7 +649,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
   // If the next token is a function
   if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
-    fprintf(stderr, "Next token is a functino\n");
+    fprintf(stderr, "Next token (%s) is a functino\n", token->data);
     stashToken(token);
     return -1;
   }

@@ -365,10 +365,7 @@ int pCodeBody() {
       CondReturn;
       STSetFnDefined(symtab, token->data, true);
 
-      element->data = token->data;
-
-      genFnDef(element);
-      cleanElement();
+      genFnDef(token->data);
       // (
       ret = scanner(&token);
       CondReturn;
@@ -793,6 +790,7 @@ int pStat() {
   // -> local <idList> : <type> <newIdAssign> <stat>
   if (strcmp(token->data, "local") == 0) {
     // <idList>
+    
     ret = pIdList();
     CondReturn;
     tokenDestroy(&token);
@@ -808,6 +806,7 @@ int pStat() {
     tokenDestroy(&token);
 
     // <type>
+    
     ret = pType();
     CondReturn;
     // <newIdAssign>
@@ -990,6 +989,7 @@ int pStatWithId() {
       vypluj err(SYNTAX_ERR);
     }
 
+    genVarDef(token->data,symtab->top->depth);
     // <nextAssign>
     ret = pNextAssign();
     CondReturn;
@@ -1037,47 +1037,49 @@ int pNextAssign() {
 
   ret = scanner(&token);
   CondReturn;
-      printToken(token);
+  printToken(token);
 
-  // ','
-  if (token->type == t_comma) {
-    tokenDestroy(&token);
 
-    // [id]
-    // TODO semantic actions???
-    ret = scanner(&token);
-    CondReturn;
-        printToken(token);
-
-    if (token->type == t_idOrKeyword && STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
-      ret = pNextAssign();
-      CondReturn;
-    } else {
-      vypluj err(SYNTAX_ERR); 
-    }
-
-    // <expr>
-    // TODO semantic actions
-    ret = pExpr();
-    CondReturn;
-
-    // ','
-    ret = scanner(&token);
-    CondReturn;
-    printToken(token);
-
-    if (token->type == t_comma) {
-      tokenDestroy(&token);
-      vypluj 0;
-    }
-
-    // '='
-  } else if (token->type == t_assignment) {
+  if (token->type == t_assignment) {
     vypluj 0;
-  } else {
+  }
+  
+  // -> , [id] <nextAssign> <expr> ,
+  if(token->type != t_comma) {
     vypluj err(ASS_ERR); 
   }
 
+  tokenDestroy(&token);
+  // [id]
+  // TODO semantic actions???
+  ret = scanner(&token);
+  CondReturn;
+   printToken(token);
+
+  if (!(token->type == t_idOrKeyword && STFind(symtab, token->data) && STGetIsVariable(symtab, token->data))) {
+    vypluj err(SYNTAX_ERR); 
+  }  
+
+  genVarDef(token->data, symtab->top->depth);
+  
+  // <nextAssign>
+  ret = pNextAssign();
+  CondReturn;
+  
+  // <expr>
+  // TODO semantic actions
+  ret = pExpr();
+  CondReturn;
+
+  // ','
+  ret = scanner(&token);
+  CondReturn;
+  printToken(token);
+
+  if (token->type != t_comma) {
+    tokenDestroy(&token);
+    vypluj err(SYNTAX_ERR); // TODO maybe ass_err my brain can't compreheend errors right now
+  }
   vypluj 0;
 }
 
@@ -1148,7 +1150,7 @@ int pBuiltInFunctions() {
       CondReturn;
     }
   }
-  printf("BUUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
+  fprintf(stderr, "BUUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
   vypluj 0;
 }
 
@@ -1169,74 +1171,72 @@ int pFnArgList() {
   CondReturn;
   
   printToken(token);
-  fprintf(stderr, "DSDADSADADADADASq\n");
 
-  if (token->type == t_rightParen) { // )
+  // -> eps
+  if(!(token->type == t_idOrKeyword && token->type != t_idOrKeyword)) {
+    stashToken(token);
+    vypluj 0;
+  }
+
+  // -> [id] : <type> <nextFnArg>
+  // [id]
+  genVarDef(token->data, symtab->top->depth);
+  STInsert(symtab, token->data);
+  tokenDestroy(&token);
+
+  // :
+  ret = scanner(&token);
+  CondReturn;
+  printToken(token);
+
+  if(token->type != t_colon) { 
+    tokenDestroy(&token); 
+    vypluj err(SYNTAX_ERR);
+  }
+  tokenDestroy(&token);
+
+  // <type>
+  ret = pType();
+  CondReturn;
+
+  // <nextFnArg>
+  vypluj pNextFnArg();
+  
+
+// OLD CODE, DELETE IF THE NEW CODE WORKS
+/*
+  if (token->type == t_rightParen) { // ) // tady nemáš co hledat závorku jeď podle gramatiky
     fprintf(stderr, "PRAVA ZATVORKA\n");
     stashToken(token);
     token = NULL;
     vypluj 0; //TODO
   } else if (token->type == t_idOrKeyword) {
     
-    fprintf(stderr, "ID OR KEYWORD\n");
-    printToken(token);
-    
     if(isKeyword(token) == false) {
-      // element je null?
-        element->data = token->data;
-        printf("IF\n");
-        genVarDef(element, symtab->top->depth);
-        cleanElement();
-    } else {
-      vypluj err(OTHER_SEM_ERR); 
+      genVarDef(token->data, symtab->top->depth);
+      STInsert(symtab, token->data);
+      tokenDestroy(&token);
+    } else{
+      vypluj err(-1); // TODO ADD ERR
     }
     
-    fprintf(stderr, "DSDSADSAD\n");
-      
-    tokenDestroy(&token);
-
-    ret = scanner(&token);
-    CondReturn;
-        printToken(token);
-
-    /*if (STGetIsVariable(symtab, token->data) != false || !STGetFnDefined(symtab, token->data)) {
-      vypluj err(ID_DEF_ERR);
-    }*/
-
-    tokenDestroy(&token);
-
-    ret = scanner(&token);
-    CondReturn;
-
-        printToken(token);
-
-    if (token->type != t_colon) {
-      vypluj err(PARAM_RET_ERR);
-    }
-
-    tokenDestroy(&token);
-
     ret = scanner(&token);
     CondReturn;
 
     printToken(token);
 
-    if (token->type != t_idOrKeyword) {
-      //TODO NENI TO KEYWORD
-      vypluj err(SYNTAX_ERR);
+    if(token->type != t_colon) { // proč je celá tahle funkce totálně divná
+      tokenDestroy(&token); 
+      vypluj err(-1); // TODO ADD ERR CODE
     }
 
-    if (isDataType(token->data) == 1) {
-      //TODO NENI TO datatype
-      vypluj err(SYNTAX_ERR);
-    }
-
-    tokenDestroy(&token);
+    ret = pType();
+    CondReturn;
 
     ret = pNextFnArg();
     CondReturn;
 
-        vypluj 0;
+    vypluj 0;
 
   } else {
     fprintf(stderr, "ELSE\n");
@@ -1244,7 +1244,8 @@ int pFnArgList() {
     //RETURN ERROR
   }
 
-  vypluj 0;
+  vypluj 0;*/
+
 }
 
 /**
@@ -1264,16 +1265,42 @@ int pNextFnArg() {
   CondReturn;
   printToken(token);
 
+  // -> eps
   if (token->type != t_comma) {
-    vypluj err(SYNTAX_ERR);
+    tokenDestroy(&token);
+    stashToken(token);
+    vypluj 0;
   }
-
   tokenDestroy(&token);
 
-  ret = pFnArgList();
+  // -> , [id] : <type> <nextFnArg>
+  // [id]
+  ret = scanner(&token);
   CondReturn;
+  printToken(token);
+  // TODO
+  tokenDestroy(&token);
 
-      vypluj 0;
+  // :
+  ret = scanner(&token);
+  CondReturn;
+  printToken(token);
+
+  if(token->type != t_colon) {
+    tokenDestroy(&token);
+    vypluj err(SYNTAX_ERR); 
+  }
+  tokenDestroy(&token);
+
+  // <type>
+  ret = pType(&token);
+  CondReturn;
+  printToken(token);
+
+  // <nextFnArg>
+  vypluj pNextFnArg(&token);
+ 
+  //vypluj pFnArgList(); // WHAT??
 }
 
 /**
@@ -1289,10 +1316,14 @@ int pRetArgList() {
   printf("RET ARG LIST\n");
   //Token *token = NULL;
 
+  // -> eps
+  //TODO
+
+  // -> <expr> <retNextArg>
   ret = pExpr();
   CondReturn;
 
-      vypluj 0;
+  vypluj pRetNextArg();
 }
 
 bool isExpressionParser(Token token) {
@@ -1345,16 +1376,15 @@ int pRetNextArg() {
 
       printToken(token);
 
-  // If the next token is not a comma, use rule 41 (else rule 42)
+  // -> eps
   // ','
   if (token->type != t_comma) {
     stashToken(token);
     vypluj 0;
   }
-
-  // ','
   tokenDestroy(&token);
 
+  // -> , <expr> <retNextArg>
   // <expr>
   // TODO semantic actions
   ret = pExpr();
@@ -1367,7 +1397,7 @@ int pRetNextArg() {
   vypluj 0;
 }
 
-/**
+/** // TODO this makes me want to vomit as well as most functions below (retraktor comming soon)
  * @brief
  *
  * @return error code
@@ -1459,6 +1489,29 @@ int pType() {
   printToken(token);
 
   if ((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
+    printf("IF\n");
+    if(strcmp(token->data, "integer") == 0) {
+      STSetVarDataType(symtab, element->data,dt_integer);
+    } else if(strcmp(token->data, "number") == 0) {
+      STSetVarDataType(symtab, element->data,dt_number);
+    } else if(strcmp(token->data, "string") == 0) {
+      STSetVarDataType(symtab, element->data,dt_string);
+    } else if(strcmp(token->data, "nil") == 0) {
+      STSetVarDataType(symtab, element->data,dt_nil);
+    } else {
+      vypluj err(0);
+    }
+
+    STElem *e = malloc(sizeof(STElem));
+    e = STFind(symtab, element->data);
+    if(!e){
+      printf("is null since it does not exist in the symbol table (yet)\n");
+    }
+
+    printf("DATA : %s\n", e->name);
+    printf("TYPE : %d\n", e->varDataType);
+    free(e);
+    cleanElement();
     fprintf(stderr, "IS DATA TYPE\n");
     vypluj 0;
   } else {
@@ -1471,7 +1524,7 @@ int pType() {
  *
  * @return error code
  *
- * 58. <idList>          -> [id] <nextId>
+ * 58. <idList>          -> [id] <nextId> (variable declaration)
  */
 int pIdList() {
   printf("-----------------------------------------------------------\n");
@@ -1482,18 +1535,37 @@ int pIdList() {
   CondReturn;
   printToken(token);
 
-  if (token->type == t_idOrKeyword && !isKeyword(token)) {
-    if (STGetIsVariable(symtab, token->data)) {
-      tokenDestroy(&token);
-      vypluj pNextId();
-    }
-    STInsert(symtab, token->data);
-    STSetIsVariable(symtab, token->data, true);
-    STSetFnDefined(symtab, token->data, false);
-    vypluj 0;
+  if (!(token->type == t_idOrKeyword && !isKeyword(token))) {
+    vypluj err(SYNTAX_ERR);
   }
 
-  vypluj err(SYNTAX_ERR);
+  if (STFind(symtab, token->data)) {
+    printf("ISDSD\n");
+    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
+      fprintf(stderr, "warning: declaring a variable again\n");
+      element->data = token->data;
+      genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
+      tokenDestroy(&token);
+    } else { // can't function call here
+      vypluj err(SYNTAX_ERR);
+    }
+  }
+  // declaring a new variable
+  STInsert(symtab, token->data);
+  STSetIsVariable(symtab, token->data, true);
+  STSetFnDefined(symtab, token->data, false);
+  element->data = token->data;
+
+  STElem *e = malloc(sizeof(STElem));
+  e = STFind(symtab, token->data);
+
+  if(!e) {
+    printf("DOESNT EXIST\n");
+  } else {
+    printf("NAME : %s\n", e->name);
+  }
+
+  vypluj pNextId();
 }
 
 /**
@@ -1502,7 +1574,7 @@ int pIdList() {
  * @return error code
  *
  * 59. <nextId>          -> eps
- * 60. <nextId>          -> , [id] <nextId> // TODO change code or change grammer to -> , <idList>
+ * 60. <nextId>          -> , [id] <nextId> 
  */
 int pNextId() {
   printf("-----------------------------------------------------------\n");
@@ -1518,15 +1590,33 @@ int pNextId() {
     stashToken(token);
     vypluj 0;
   }
-
   tokenDestroy(&token);
-  // -> , [id] <nextId>
-  ret = pIdList(); // TODO does not look nice
-  CondReturn;
-  vypluj 0;
-  
 
-  vypluj err(SYNTAX_ERR);
+  // -> , [id] <nextId>
+  ret = scanner(&token);
+  CondReturn;
+  printToken(token);
+  
+  // [id]
+  if (STFind(symtab, token->data)) {
+    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
+      fprintf(stderr, "warning: declaring a variable again\n");
+      genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
+      tokenDestroy(&token);
+    } else { // -> eps
+      stashToken(token);
+      vypluj 0;
+    }
+  }
+  
+  // declaring a new variable
+  STInsert(symtab, token->data);
+  STSetIsVariable(symtab, token->data, true);
+  STSetFnDefined(symtab, token->data, false);
+  
+  // <nextId>
+  tokenDestroy(&token);
+  vypluj pNextId();  
 }
 
 /**
@@ -1636,13 +1726,17 @@ int pExpr() {
 
   ret = scanner(&token);
   CondReturn;
+  printToken(token);
 
   ret = parseExpression(symtab, token, &varName);
-  
+  printf("RET = %d\n", ret);
+  printf("%s\n", varName);
   if(ret == -1) {
-    
+    printf("IDDDFFDF\n");
     ret = scanner(&token);
     CondReturn;
+
+    printToken(token);
 
     // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
     if(strcmp(token->data, "readi") == 0) {
@@ -1720,6 +1814,7 @@ int pExpr() {
     } else if(strcmp(token->data, "chr") == 0) {
       // TODO GENERATE INTEGER READ
     } else {
+      printf("KOKI\n");
       vypluj err(PARAM_RET_ERR); 
     }
 
