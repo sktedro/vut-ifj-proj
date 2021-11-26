@@ -197,8 +197,6 @@ bool isKeyword(Token *token) {
  * @param token
  */
 void printToken(Token *token) {
-  // TODO UNCOMMENT
-  return;
 
   switch (token->type) {
   case t_idOrKeyword:
@@ -259,8 +257,8 @@ void printToken(Token *token) {
  * 01. <start>           -> require <req> <codeBody>
  */
 int pStart() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "PARSER START\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER START\n");
   Token *token = NULL;
   initElement();
 
@@ -272,7 +270,7 @@ int pStart() {
     tokenDestroy(&token);
     ret = pReq();
     CondReturn;
-    // fprintf(stderr, "PARSER START -> ifj21 is \n");
+    fprintf(stderr, "PARSER START -> ifj21 is \n");
 
     vypluj pCodeBody();
   } else {
@@ -292,8 +290,8 @@ int pStart() {
  * 02. <req>             -> "ifj21"
  */
 int pReq() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "PARSER REQUIRE\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER REQUIRE\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -318,16 +316,16 @@ int pReq() {
 int pNewFunId(Token *token) {
   if (token->type == t_idOrKeyword) {
     if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
-      // fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
+      fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
       vypluj err(ID_DEF_ERR);
     } else {
-      // fprintf(stderr, "CREATING NEW STACK\n");
+      fprintf(stderr, "CREATING NEW STACK\n");
       STInsert(symtab, token->data);
 
       STSetIsVariable(symtab, token->data, false);
     }
   } else {
-    // fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
+    fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
     vypluj err(SYNTAX_ERR);
   }
   vypluj 0;
@@ -344,8 +342,8 @@ int pNewFunId(Token *token) {
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
 int pCodeBody() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "PARSER CODE BODY\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER CODE BODY\n");
 
   Token *token = NULL;
   ret = scanner(&token);
@@ -502,25 +500,25 @@ int pCodeBody() {
 
     //-> [id] <fnCall> <codeBody> - calling a user function
     } else if (STFind(symtab, token->data) != NULL) {
-      // fprintf(stderr, "user function call\n");
+      fprintf(stderr, "user function call\n");
       // [id]
       // If the id is a variable or is not defined yet, we can't call it as a function...
       
       STElem *element = STFind(symtab, token->data);
-      // fprintf(stderr, "ELEMENT %s\n",element->name);
+      fprintf(stderr, "ELEMENT %s\n",element->name);
 
       if(element->fnDefined) {
-        // fprintf(stderr, "TRUE\n");
+        fprintf(stderr, "TRUE\n");
       } else {
-        // fprintf(stderr, "FALSE\n");
+        fprintf(stderr, "FALSE\n");
       }
       
 
       if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
-        // fprintf(stderr, "FN NENI DEFINOVANÁ\n");
+        fprintf(stderr, "FN NENI DEFINOVANÁ\n");
         vypluj err(ID_DEF_ERR);
       }
-      // fprintf(stderr, "FN JE DEFINOVANÁ\n");
+      fprintf(stderr, "FN JE DEFINOVANÁ\n");
 
       // <fnCall>
       ret = pFnCall();
@@ -545,8 +543,8 @@ int pCodeBody() {
  * 09. <fnCall>          -> ( <fnCallArgList> )
  */
 int pFnCall() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "PARSER FNCALL\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "PARSER FNCALL\n");
   Token *token = NULL;
 
   // (
@@ -565,7 +563,7 @@ int pFnCall() {
   CondReturn;
 
   // )
-  // fprintf(stderr, "back in fn call \n");
+  fprintf(stderr, "back in fn call \n");
   ret = scanner(&token);
   CondReturn;
 
@@ -576,7 +574,7 @@ int pFnCall() {
     vypluj err(SYNTAX_ERR);
   }
   tokenDestroy(&token);
-  // printf("FN CALL RET\n");
+  printf("FN CALL RET\n");
   vypluj 0;
 }
 
@@ -589,8 +587,8 @@ int pFnCall() {
  * 11. <fnRet>           -> : <type> <nextType>
  */
 int pFnRet() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("FNRET\n");
+  printf("-----------------------------------------------------------\n");
+  printf("FNRET\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -599,7 +597,7 @@ int pFnRet() {
 
   // <fnRet>           -> eps
   if (token->type != t_colon) { // :
-    // printf("STASH TOKEN FNRET\n");
+    printf("STASH TOKEN FNRET\n");
     stashToken(token);
     vypluj 0;
 
@@ -630,8 +628,8 @@ int pFnRet() {
  * 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
  */
 int pFnCallArgList() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("FN CALL ARG LIST\n");
+  printf("-----------------------------------------------------------\n");
+  printf("FN CALL ARG LIST\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -661,8 +659,8 @@ int pFnCallArgList() {
  * 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
  */
 int pNextFnCallArg() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEXT FN CALL ARG\n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEXT FN CALL ARG\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -695,8 +693,8 @@ int pNextFnCallArg() {
  * 17. <fnCallArg>       -> [literal]
  */
 int pFnCallArg() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("FN CALL ARG\n");
+  printf("-----------------------------------------------------------\n");
+  printf("FN CALL ARG\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -707,7 +705,7 @@ int pFnCallArg() {
 
   // -> [id] (must be a variable)
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
-    // fprintf(stderr, "JE TO PREMENNÁ\n");
+    fprintf(stderr, "JE TO PREMENNÁ\n");
     STPush(symtab);
     STInsert(symtab, token->data);
 
@@ -717,12 +715,12 @@ int pFnCallArg() {
     // -> [literal]
   } else if (tokenType == t_int || tokenType == t_num ||
           tokenType == t_sciNum || tokenType == t_str) {
-    // fprintf(stderr, "JE TO LITERÁL\n");
+    fprintf(stderr, "JE TO LITERÁL\n");
     // TODO semantic actions
     vypluj 0;
 
   } else {
-    // fprintf(stderr, "NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
+    fprintf(stderr, "NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
     if(tokenType == t_idOrKeyword) {
       vypluj err(ID_DEF_ERR);
     }
@@ -741,8 +739,8 @@ int pFnCallArg() {
  * 20. <ret>             -> return <retArgList>
  */
 int pRet() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("RET\n");
+  printf("-----------------------------------------------------------\n");
+  printf("RET\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -774,8 +772,8 @@ int pRet() {
  * 26. <stat>            -> while <expr> do <stat> end <stat>
  */
 int pStat() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("STAT\n");
+  printf("-----------------------------------------------------------\n");
+  printf("STAT\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -832,7 +830,7 @@ int pStat() {
     ret = scanner(&token);
     CondReturn;
     printToken(token);
-    // printf("TU\n");
+    printf("TU\n");
 
     if (!(token->type == t_idOrKeyword && strcmp(token->data, "then") == 0)) {
       tokenDestroy(&token);
@@ -862,7 +860,7 @@ int pStat() {
     // <stat>
     ret = pStat();
     CondReturn;
-    // fprintf(stderr, "WE ARE BACK \n");
+    fprintf(stderr, "WE ARE BACK \n");
 
     ret = scanner(&token);
     CondReturn;
@@ -872,9 +870,9 @@ int pStat() {
       tokenDestroy(&token);
       vypluj err(SYNTAX_ERR);
     }
-    // fprintf(stderr, "DSDSDADASDASD\n");
+    fprintf(stderr, "DSDSDADASDASD\n");
     tokenDestroy(&token);
-    // fprintf(stderr, "sDSDSDADAS\n");
+    fprintf(stderr, "sDSDSDADAS\n");
     STPop(symtab);
 
     // <stat>
@@ -919,7 +917,7 @@ int pStat() {
     vypluj 0;
   } else if(strcmp(token->data, "end") == 0) {
     printToken(token);
-    // fprintf(stderr, "SME V ENDE\n");
+    fprintf(stderr, "SME V ENDE\n");
   
     stashToken(token);
     vypluj 0;
@@ -929,7 +927,7 @@ int pStat() {
   if (STFind(symtab, token->data)) {
     // TODO generate something
     tokenDestroy(&token);
-    // fprintf(stderr, "NOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
+    fprintf(stderr, "NOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
     // <statWithId>
     ret = pStatWithId();
     CondReturn;
@@ -941,7 +939,7 @@ int pStat() {
   } else if (strcmp(token->data, "write") == 0) {
     ret = pFnCall();
     CondReturn;
-    // fprintf(stderr, "BACK IN STAT\n");
+    fprintf(stderr, "BACK IN STAT\n");
     ret = pStat();
     CondReturn;
     vypluj 0;
@@ -967,8 +965,8 @@ int pStat() {
  * 29. <statWithId>      -> <fnCall>
  */
 int pStatWithId() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("STAT WITH ID\n");
+  printf("-----------------------------------------------------------\n");
+  printf("STAT WITH ID\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1033,8 +1031,8 @@ int pStatWithId() {
  * 32. <nextAssign>  -> =
  */
 int pNextAssign() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEXT ASSIGN\n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEXT ASSIGN\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1095,8 +1093,8 @@ int pNextAssign() {
  * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
  */
 int pBuiltInFunctions() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("BUILt IN FUNCTIONS\n");
+  printf("-----------------------------------------------------------\n");
+  printf("BUILt IN FUNCTIONS\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1152,7 +1150,7 @@ int pBuiltInFunctions() {
       CondReturn;
     }
   }
-  // fprintf(stderr, "BUUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
+  fprintf(stderr, "BUUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
   vypluj 0;
 }
 
@@ -1165,8 +1163,8 @@ int pBuiltInFunctions() {
  * 35. <fnArgList>       -> [id] : <type> <nextFnArg>
  */
 int pFnArgList() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("FN ARG LIST\n");
+  printf("-----------------------------------------------------------\n");
+  printf("FN ARG LIST\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1259,8 +1257,8 @@ int pFnArgList() {
  * 37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
  */
 int pNextFnArg() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "NEXT FN ARG\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT FN ARG\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1314,8 +1312,8 @@ int pNextFnArg() {
  * 40. <retArgList>      -> <expr> <retNextArg>
  */
 int pRetArgList() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("RET ARG LIST\n");
+  printf("-----------------------------------------------------------\n");
+  printf("RET ARG LIST\n");
   //Token *token = NULL;
 
   // -> eps
@@ -1329,7 +1327,7 @@ int pRetArgList() {
 }
 
 bool isExpressionParser(Token token) {
-  // printf("is %s expression ?\n", token.data);
+  printf("is %s expression ?\n", token.data);
 
   if (token.type == t_leftParen) {
     vypluj true;
@@ -1369,8 +1367,8 @@ bool isExpressionParser(Token token) {
  * 42. <retNextArg>      -> , <expr> <retNextArg>
  */
 int pRetNextArg() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("REG NEXT ARG\n");
+  printf("-----------------------------------------------------------\n");
+  printf("REG NEXT ARG\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1411,8 +1409,8 @@ int pRetNextArg() {
  * 48. <typeList>        -> nil <nextType>
  */
 int pTypeList() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("TYPE LIST\n");
+  printf("-----------------------------------------------------------\n");
+  printf("TYPE LIST\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1448,8 +1446,8 @@ int pTypeList() {
  * 51. <nextType>        -> , <type> <nextType>
  */
 int pNextType() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEXT TYPE\n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEXT TYPE\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1482,8 +1480,8 @@ int pNextType() {
  * 56. <type>            -> nil
  */
 int pType() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("TYPE\n");
+  printf("-----------------------------------------------------------\n");
+  printf("TYPE\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1491,7 +1489,7 @@ int pType() {
   printToken(token);
 
   if ((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
-    // printf("IF\n");
+    printf("IF\n");
     if(strcmp(token->data, "integer") == 0) {
       STSetVarDataType(symtab, element->data,dt_integer);
     } else if(strcmp(token->data, "number") == 0) {
@@ -1507,14 +1505,14 @@ int pType() {
     STElem *e = malloc(sizeof(STElem));
     e = STFind(symtab, element->data);
     if(!e){
-      // printf("is null since it does not exist in the symbol table (yet)\n");
+      printf("is null since it does not exist in the symbol table (yet)\n");
     }
 
-    // printf("DATA : %s\n", e->name);
-    // printf("TYPE : %d\n", e->varDataType);
+    printf("DATA : %s\n", e->name);
+    printf("TYPE : %d\n", e->varDataType);
     free(e);
     cleanElement();
-    // fprintf(stderr, "IS DATA TYPE\n");
+    fprintf(stderr, "IS DATA TYPE\n");
     vypluj 0;
   } else {
     vypluj err(SYNTAX_ERR);
@@ -1529,8 +1527,8 @@ int pType() {
  * 58. <idList>          -> [id] <nextId> (variable declaration)
  */
 int pIdList() {
-  // printf("-----------------------------------------------------------\n");
-  // printf(" ID LIST\n");
+  printf("-----------------------------------------------------------\n");
+  printf(" ID LIST\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1542,9 +1540,9 @@ int pIdList() {
   }
 
   if (STFind(symtab, token->data)) {
-    // printf("ISDSD\n");
+    printf("ISDSD\n");
     if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
-      // fprintf(stderr, "warning: declaring a variable again\n");
+      fprintf(stderr, "warning: declaring a variable again\n");
       element->data = token->data;
       genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
       tokenDestroy(&token);
@@ -1562,9 +1560,9 @@ int pIdList() {
   e = STFind(symtab, token->data);
 
   if(!e) {
-    // printf("DOESNT EXIST\n");
+    printf("DOESNT EXIST\n");
   } else {
-    // printf("NAME : %s\n", e->name);
+    printf("NAME : %s\n", e->name);
   }
 
   vypluj pNextId();
@@ -1579,8 +1577,8 @@ int pIdList() {
  * 60. <nextId>          -> , [id] <nextId> 
  */
 int pNextId() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEXT ID \n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEXT ID \n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1602,7 +1600,7 @@ int pNextId() {
   // [id]
   if (STFind(symtab, token->data)) {
     if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
-      // fprintf(stderr, "warning: declaring a variable again\n");
+      fprintf(stderr, "warning: declaring a variable again\n");
       genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
       tokenDestroy(&token);
     } else { // -> eps
@@ -1630,8 +1628,8 @@ int pNextId() {
  * 63. <newIdAssign>     -> = <exprList>
  */
 int pNewIdAssign() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEW ID ASSIGN\n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEW ID ASSIGN\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1661,7 +1659,7 @@ int pNewIdAssign() {
  * 65. <exprList>        -> <expr> <nextExpr>
  */
 int pExprList() {
-  // printf("EXPR LIST \n");
+  printf("EXPR LIST \n");
   // <expr>
   // TODO semantic actions
   ret = pExpr();
@@ -1683,8 +1681,8 @@ int pExprList() {
  * 67. <nextExpr>        -> , <expr> <nextExpr>
  */
 int pNextExpr() {
-  // printf("-----------------------------------------------------------\n");
-  // printf("NEXT EXPR\n");
+  printf("-----------------------------------------------------------\n");
+  printf("NEXT EXPR\n");
   Token *token = NULL;
 
   ret = scanner(&token);
@@ -1721,8 +1719,8 @@ int pNextExpr() {
  * @return error code
  */
 int pExpr() {
-  // fprintf(stderr, "-----------------------------------------------------------\n");
-  // fprintf(stderr, "EXPR\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "EXPR\n");
   Token *token = NULL;
   char *varName;
 
@@ -1731,7 +1729,10 @@ int pExpr() {
   printToken(token);
 
   ret = parseExpression(symtab, token, &varName);
+  printf("RET = %d\n", ret);
+  printf("%s\n", varName);
   if(ret == -1) {
+    printf("IDDDFFDF\n");
     ret = scanner(&token);
     CondReturn;
 
@@ -1813,6 +1814,7 @@ int pExpr() {
     } else if(strcmp(token->data, "chr") == 0) {
       // TODO GENERATE INTEGER READ
     } else {
+      printf("KOKI\n");
       vypluj err(PARAM_RET_ERR); 
     }
 
