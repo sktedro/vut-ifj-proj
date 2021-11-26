@@ -23,5 +23,5 @@ none:
 
 %:
 	@echo Compiling token $@:
-	@mkdir -p ../build/tests/$@
+	@mkdir -p ../build/tests/$@_tests
 	$(CC) $@_tests/$@_tests.c $(LIBS) -o ../build/tests/$@_tests/$@_tests $(CFLAGS)

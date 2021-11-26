@@ -52,7 +52,7 @@ runTests() {
 
   # Compile the tests
   make "$testTarget"
-  testFile=../build/tests/"$testTarget"/"$testTarget"_tests
+  testFile=../build/tests/"$testTarget"/"$testTarget"
 
 
   echo ${BLUE}========================================${NC}
@@ -137,7 +137,7 @@ while [ "$#" -gt 0 ]; do
 
     *)
       # Convert to lowercase
-      testTarget=$(echo "$1" | tr A-Z a-z)
+      testTarget=$(echo "$1""_tests" | tr A-Z a-z)
 
       # If there is no directory containing tests for that target
       if [ ! -d ./"$testTarget" ]; then

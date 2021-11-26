@@ -693,18 +693,18 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
       // If it is a ',', ':' or '=', it means the end of the expression
       // If it is a keyword, this is the end of the expr (unless it's a nil)
-        }else if(token->type == t_colon
-          || token->type == t_comma
-          || token->type == t_assignment
-          || (strcmp(token->data, "nil") && isKeyword(token))){
-        printf("<%s>\n", token->data);
-        fprintf(stderr, "received a ,/:/= or a keyword\n");
-        stashToken(token);
-        token = NULL;
-        printf("Setting exprend to true\n");
-        exprEnd = true;
-        inputSymbol = allocateSymbol(st_reduce);
-        inputSymbol->op = pt_dollar;
+      }else if(token->type == t_colon
+        || token->type == t_comma
+        || token->type == t_assignment
+        || (strcmp(token->data, "nil") && isKeyword(token))){
+      printf("<%s>\n", token->data);
+      fprintf(stderr, "received a ,/:/= or a keyword\n");
+      stashToken(token);
+      token = NULL;
+      printf("Setting exprend to true\n");
+      exprEnd = true;
+      inputSymbol = allocateSymbol(st_reduce);
+      inputSymbol->op = pt_dollar;
       
 
       // If the last token was not an operator, but an ID or a literal and the 

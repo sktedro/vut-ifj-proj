@@ -1,0 +1,25 @@
+fn()
+
+varInt1
+
+1
+
+"abc"
+
+1 + 1
+
+varInt1 + varInt2
+
+varInt1 + 1
+varInt1 - 1
+
+varInt1 * 2.0
+varInt1 / 2.0
+1.1E2 // varInt1
+
+varStr1 .. "abc"
+
+#"abc"
+#varStr1
+
+todo
