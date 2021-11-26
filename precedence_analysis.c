@@ -29,6 +29,7 @@ char precTab[12][12] = {
 
 
 void debugPrint(SStack *stack) {
+  return;
   SStackElem *element;
   int len = 0;
 
@@ -127,7 +128,7 @@ bool isZero(char *str){
  * Call rule functions based on how many symbols we are reducing
  */
 int checkRules(SStack *symstack, int opSymbols){
-  printf("Rules are going to be checked: \n");
+  /** printf("Rules are going to be checked: \n"); */
   int rulesRet = -1; // Will be changed to 0 if a rule was found and applied or
   // to > 0 if an error occured
         
@@ -159,7 +160,7 @@ int checkRules(SStack *symstack, int opSymbols){
       SStackPop(symstack);
 
       // Call rule functions of unary operators
-      rulesRet = strLenRule(symstack, op1, op2);
+      rulesRet = strLenRule(symstack, op2, op1);
 
       if(rulesRet != -1){
         return rulesRet;
@@ -173,15 +174,15 @@ int checkRules(SStack *symstack, int opSymbols){
       SStackPop(symstack);
 
       // (i) or (E)
-      rulesRet = bracketsRule(symstack, op1, op2, op3);
+      rulesRet = bracketsRule(symstack, op3, op2, op1);
       if(rulesRet != -1){
         return rulesRet;
       }
-      rulesRet = arithmeticOperatorsRule(symstack, op1, op2, op3);
+      rulesRet = arithmeticOperatorsRule(symstack, op3, op2, op1);
       if(rulesRet != -1){
         return rulesRet;
       }
-      rulesRet = relationalOperatorsRule(symstack, op1, op2, op3);
+      rulesRet = relationalOperatorsRule(symstack, op3, op2, op1);
       if(rulesRet != -1){
         return rulesRet;
       }
@@ -557,9 +558,6 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
         newElem->isId = true;
         // Read the data type from the symbol table
         newElem->dataType = STGetVarDataType(symtab, token->data);
-        printf("setting the data type of %s to: %d\n", token->data, STGetVarDataType(symtab, token->data));
-        // TODO this 0 is hardcoded and should not be
-        /** newElem->dataType = 0; */
 
       }
       newElem->type = st_idOrLiteral;
@@ -646,10 +644,17 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     ret = scanner(&token);
     condVypluj;
   }
+  /**
+    * if(token->data){
+    *   fprintf(stderr, "Next token type is %d and data %s\n", token->type, token->data);
+    * }else{
+    *   fprintf(stderr, "Next token type is %d and data NULL\n", token->type);
+    * }
+    */
 
   // If the next token is a function
   if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
-    fprintf(stderr, "Next token (%s) is a functino\n", token->data);
+    /** fprintf(stderr, "Next token (%s) is a functino\n", token->data); */
     stashToken(token);
     return -1;
   }
@@ -676,13 +681,27 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   SStackElem *inputSymbol = parseToken(symtab, token);
 
   while (1) {
-    fprintf(stderr, "Next cycle. Symstack: \n");
+    /** fprintf(stderr, "Next cycle. Symstack: \n"); */
+    /**
+      * if(exprCanEnd){
+      *   fprintf(stderr, "Expression can end\n");
+      * }else{
+      *   fprintf(stderr, "Expression can't end\n");
+      * }
+      */
     debugPrint(symstack);
 
     if(getNewToken){
       // Get a new token
       ret = scanner(&token);
       condVypluj;
+      /**
+        * if(token->data){
+        *   fprintf(stderr, "Next token type is %d and data %s\n", token->type, token->data);
+        * }else{
+        *   fprintf(stderr, "Next token type is %d and data NULL\n", token->type);
+        * }
+        */
 
 
       // Check if the next token is a part of the expression
@@ -697,11 +716,9 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         || token->type == t_comma
         || token->type == t_assignment
         || (strcmp(token->data, "nil") && isKeyword(token))){
-      printf("<%s>\n", token->data);
-      fprintf(stderr, "received a ,/:/= or a keyword\n");
+      /** fprintf(stderr, "received a ,/:/= or a keyword\n"); */
       stashToken(token);
       token = NULL;
-      printf("Setting exprend to true\n");
       exprEnd = true;
       inputSymbol = allocateSymbol(st_reduce);
       inputSymbol->op = pt_dollar;
@@ -713,8 +730,9 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
           token->type == t_idOrKeyword 
           || token->type == t_int 
           || token->type == t_num 
-          || token->type == t_sciNum)){
-        fprintf(stderr, "received an id or a literal after exprCanEnd\n");
+          || token->type == t_sciNum
+          || token->type == t_str)){
+        /** fprintf(stderr, "received an id or a literal after exprCanEnd\n"); */
         stashToken(token);
         token = NULL;
         exprEnd = true;
@@ -730,24 +748,17 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         inputSymbol = parseToken(symtab, token);
       }
 
-      // If the symbol is not an operator, the expr can end by the next token
-      // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
-      if(inputSymbol->type == st_operator){
-        exprCanEnd = false;
-      }else{
-        exprCanEnd = true;
-      }
-
+    }
+    // If the symbol is not an operator, the expr can end by the next token
+    // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
+    if(inputSymbol->type == st_operator){
+      /** printf("Input symbol type is %d -> expr can't end\n", inputSymbol->type); */
+      exprCanEnd = false;
+    }else{
+      /** printf("Input symbol type is %d -> expr can end\n", inputSymbol->type); */
+      exprCanEnd = true;
     }
 
-    /**
-      * if(exprEnd){
-      *   printf("expr end!\n");
-      *   break;
-      * }else{
-      *   printf("no expr end!\n");
-      * }
-      */
 
     // Update the top symbol since it might have changed
     topSymbol = SStackTopTerminal(symstack);
@@ -756,7 +767,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       return -1;
     }
     char precTableSymbol = precTab[topSymbol->op][inputSymbol->op];
-    fprintf(stderr, "The precedence table symbol: %c\n", precTableSymbol);
 
     if (precTableSymbol == '=') {
       // Push the input symbol to the stack
@@ -768,10 +778,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     } else if (precTableSymbol == '<') {
       // Allocate a new symbol ('<') and push it after the top terminal
-      /** debugPrint(symstack); */
       ret = SStackPushAfterTopTerminal(symstack, allocateSymbol(st_push));
-      printf("Pushing after top terminal\n");
-      /** debugPrint(symstack); */
       if(ret == -1){
         printf("no terminal on stack. Hmm\n");
         // no terminal on the stack
@@ -786,7 +793,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     // Reduce ('Convert') top terminals to an expression
     } else if (precTableSymbol == '>') {
-      /** debugPrint(symstack); */
 
       // Call rule functions - if one of them has a rule that reduces the
       // expression, it returns 0 and we're done reducing for now
@@ -808,22 +814,17 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         //opSymbols++;
         tmp = tmp->next;
       }
-      printf("Opsymbols: %d\n", opSymbols);
 
       // In case opSymbols is negative / there is no op symbol / there are more
       // than three op symbols -> error
       if(opSymbols < 0 || opSymbols == 0 || opSymbols > 3){
-        fprintf(stderr, "jebal by to pes\n");
         vypluj err(SYNTAX_ERR); // TODO errcode
       }else{
-        /** printf("Before checking the rules:\n"); */
         /** debugPrint(symstack); */
         ret = checkRules(symstack, opSymbols);
-        fprintf(stderr, "checkrules returned %d\n", ret);
         if(ret == -1){
           // A rule function returned -1 <=> there's no rule able to reduce
           // this expression, which means that there is an error
-          fprintf(stderr, "TODO errcode\n");
           ret = 15; // TODO errcode if no rule was found!
         }
         CondReturn;
@@ -839,10 +840,8 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       && symstack && symstack->top && symstack->top->next
       && symstack->top->type == st_expr
       && symstack->top->next->type == st_dollar){
-      printf("expr end!\n");
       break;
     }else{
-      printf("no expr end!\n");
     }
 
   }
@@ -855,7 +854,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     fprintf(stderr, "Done with precedence analysis\n");
   }else{
     debugPrint(symstack);
-    fprintf(stderr, "PA while broke but we're not done\n");
     return 15; // TODO errcode
   }
   // Return the name of the variable where the result of the expression is stored

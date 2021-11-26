@@ -79,6 +79,9 @@ int STInsert(STStack *frameStack, char *key) {
  * @return STElem if it finds it, else NULL
  */
 STElem *STFind(STStack *stack, char *key) {
+  if(!key){
+    return NULL;
+  }
   int i = 0;
   STStackElem *tmp = STStackNthElem(stack, i);
   STElem *data = NULL;

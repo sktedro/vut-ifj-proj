@@ -19,7 +19,16 @@ char *retVarName = NULL;
 void consumeTokens(int amount){
   for(int i = 0; i < amount; i++){
     scanner(&token);
+    if(token->data){
+      fprintf(stderr, "Testing: Consumed token, type is %d and data %s\n", token->type, token->data);
+    }else{
+      fprintf(stderr, "Testing: Consumed token, type is %d and data NULL\n", token->type);
+    }
   }
+}
+
+void printTokenData(){
+  printf("Testing: Token type is \'%d\' and data \'%s\'\n", token->type, token->data);
 }
 
 void pushVarToSymtab(char *name, int dataType){
@@ -38,28 +47,9 @@ void pushFnToSymtab(char *name){
  * Tests
  */
 
-// Function call (should return the token)
-// fn()
-int test1(){
-  parseExpression(symtable, token, &retVarName);
-
-  // Precedence analysis should have returned the token
-  ret = scanner(&token);
-  CondReturn;
-  if(strcmp(token->data, "fn")){
-    fprintf(stderr, "Function call token was not returned by the precedence analysis.\n");
-    return 1;
-  }
-
-  // Consume the tokens: fn, (, )
-  consumeTokens(3);
-
-  return 0;
-}
-
 // A variable
 // var
-int test2(){
+int test1(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -72,7 +62,7 @@ int test2(){
 
 // An integer literal
 // 1
-int test3(){
+int test2(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -85,7 +75,7 @@ int test3(){
 
 // A string literal
 // "abc"
-int test4(){
+int test3(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -98,7 +88,7 @@ int test4(){
 
 // A simple expression with literals
 // 1 + 1
-int test5(){
+int test4(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -111,7 +101,7 @@ int test5(){
 
 // A simple expression with variables
 // varInt1 + varInt2
-int test6(){
+int test5(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -125,7 +115,17 @@ int test6(){
 // A simple expressions with a literal and a variable
 // varInt1 + 1
 // varInt1 - 1
-int test7(){
+int test6(){
+  parseExpression(symtable, token, &retVarName);
+
+  if(!retVarName){
+    fprintf(stderr, "No variable name was returned by the precedence analysis\n");
+    return 1;
+  }
+
+  ret = scanner(&token);
+  CondReturn;
+
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -140,7 +140,27 @@ int test7(){
 // varInt1 * 2.0
 // varInt1 / 2.0
 // 1.1E2 // varInt1
-int test8(){
+int test7(){
+  parseExpression(symtable, token, &retVarName);
+
+  if(!retVarName){
+    fprintf(stderr, "No variable name was returned by the precedence analysis\n");
+    return 1;
+  }
+
+  ret = scanner(&token);
+  CondReturn;
+
+  parseExpression(symtable, token, &retVarName);
+
+  if(!retVarName){
+    fprintf(stderr, "No variable name was returned by the precedence analysis\n");
+    return 1;
+  }
+
+  ret = scanner(&token);
+  CondReturn;
+
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -153,7 +173,7 @@ int test8(){
 
 // Test a simple concat expr
 // varStr1 .. "abc"
-int test9(){
+int test8(){
   parseExpression(symtable, token, &retVarName);
 
   if(!retVarName){
@@ -164,9 +184,27 @@ int test9(){
   return 0;
 }
 
+// Function call (should return the token)
+// fn()
+int test9(){
+  parseExpression(symtable, token, &retVarName);
+
+  // Precedence analysis should have returned the token (consume it)
+  ret = scanner(&token);
+  CondReturn;
+  if(strcmp(token->data, "fn")){
+    fprintf(stderr, "Function call token was not returned by the precedence analysis.\n");
+    return 1;
+  }
+
+  // Consume the tokens: ( and )
+  consumeTokens(2);
+
+  return 0;
+}
+
 // A simple expression with an unary operator
 // #"abc"
-// #varStr1
 int test10(){
   parseExpression(symtable, token, &retVarName);
 
@@ -202,75 +240,100 @@ int main(){
   pushFnToSymtab("fn");
   pushVarToSymtab("varInt1", dt_integer);
   pushVarToSymtab("varInt2", dt_integer);
-  pushVarToSymtab("varStr1", dt_integer);
+  pushVarToSymtab("varStr1", dt_string);
 
 
   /*
    * Run the tests: get a token and call the test function
    */
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'varInt1\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'fn()\'\n");
+  printTokenData();
   ret = test1();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'1\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'varInt1\'\n");
+  printTokenData();
   ret = test2();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'\"abc\"\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'1\'\n");
+  printTokenData();
   ret = test3();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'1 + 1\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'\"abc\"\'\n");
+  printTokenData();
   ret = test4();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'varInt1 + varInt2\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'1 + 1\'\n");
+  printTokenData();
   ret = test5();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'varInt1 + 1\' and \'varInt1 - 1\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'varInt1 + varInt2\'\n");
+  printTokenData();
   ret = test6();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'varInt1 * 2.0\' and \'varInt1 / 2.0\' and \'1.1E2 // varInt1\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'varInt1 + 1\' and \'varInt1 - 1\'\n");
+  printTokenData();
   ret = test7();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'varStr1 .. \"abc\"\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'varInt1 * 2.0\' and \'varInt1 / 2.0\' and \'1.1E2 // varInt1\'\n");
+  printTokenData();
   ret = test8();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'fn()\'\n");
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'varStr1 .. \"abc\"\'\n");
+  printTokenData();
   ret = test9();
   CondReturn;
 
+  printf("====================NEXT TEST=====================\n");
+  printf("Testing: \'#\"abc\"\'\n");
+  consumeTokens(2); // consume i and = 
   ret = scanner(&token);
   CondReturn;
-  printf("Testing: \'#\"abc\"\' and \'#varStr1\'\n");
+  printTokenData();
   ret = test10();
   CondReturn;
 
+  return 0;
+
+  // TODO Advanced expressions
   ret = scanner(&token);
   CondReturn;
+  printTokenData();
   ret = test11();
   CondReturn;
 

@@ -1,5 +1,3 @@
-fn()
-
 varInt1
 
 1
@@ -19,7 +17,8 @@ varInt1 / 2.0
 
 varStr1 .. "abc"
 
-#"abc"
-#varStr1
+fn()
+
+i = #"abc"
 
 todo

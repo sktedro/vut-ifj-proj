@@ -162,56 +162,56 @@ int genVarAssign(Token *token, int frameNumber, char *assignValue) {
  */
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("ADD %s %s %s", dest, src1->data, src2->data);
+  printf("ADD %s %s %s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("SUB %s %s %s", dest, src1->data, src2->data);
+  printf("SUB %s %s %s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("MUL %s %s %s", dest, src1->data, src2->data);
+  printf("MUL %s %s %s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("DIV %s %s %s", dest, src1->data, src2->data);
+  printf("DIV %s %s %s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("DIV %s %s %s", dest, src1->data, src2->data);
+  printf("DIV %s %s %s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("CONCAT %s %s", src1->data, src2->data);
+  printf("CONCAT %s %s\n", src1->data, src2->data);
   return dest;
 }
 
 char *genConvertFloatToInt(SStackElem *src) {
   char *dest = genTmpVar();
-  printf("FLOAT2INT %s %s", dest, src->data);
+  printf("FLOAT2INT %s %s\n", dest, src->data);
   return dest;
 }
 
 char *genConvertIntToFloat(SStackElem *src) {
   char *dest = genTmpVar();
-  printf("INT2FLOAT %s %s", dest, src->data);
+  printf("INT2FLOAT %s %s\n", dest, src->data);
   return dest;
 }
 
 char *genUnaryOperation(SStackElem *src) {
   char *dest = genTmpVar();
-  printf("STRLEN %s %s", dest, src->data);
+  printf("STRLEN %s %s\n", dest, src->data);
   return dest;
 }
 
@@ -232,9 +232,9 @@ void genFnDefRet() {
 
 void genWrite(char *name, int frame) {
   if(frame == 0) {
-    printf("WRITE GF@%s", genName(name, frame));
+    printf("WRITE GF@%s\n", genName(name, frame));
   } else {
-    printf("WRITE TF@%s", genName(name, frame));
+    printf("WRITE TF@%s\n", genName(name, frame));
   }
 }
 
