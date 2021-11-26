@@ -215,12 +215,12 @@ char *genUnaryOperation(SStackElem *src) {
   return dest;
 }
 
-void genFnCall(SStackElem *element) {
-  printf("CALL %s0\n",element->data);
+void genFnCall(char *name) {
+  printf("CALL %s0\n",name);
 }
 
-void genFnDef(SStackElem *element) {
-  printf("LABEL %s0\n", element->data);
+void genFnDef(char *name) {
+  printf("LABEL %s0\n", name);
   printf("PUSHFRAME\n");
 }
 
@@ -230,11 +230,11 @@ void genFnDefRet() {
 }
 
 
-void genWrite(SStackElem *element, int frame) {
+void genWrite(char *name, int frame) {
   if(frame == 0) {
-    printf("WRITE GF@%s", genName(element->data, frame));
+    printf("WRITE GF@%s", genName(name, frame));
   } else {
-    printf("WRITE TF@%s", genName(element->data, frame));
+    printf("WRITE TF@%s", genName(name, frame));
   }
 }
 

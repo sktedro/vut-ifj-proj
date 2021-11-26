@@ -108,7 +108,7 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
     vypluj 1; // TODO errcode
   }
   if(!stack->top){
-    printf(stderr, "NO SYMBOL ON THE STACK!!!\n");
+    fprintf(stderr, "NO SYMBOL ON THE STACK!!!\n");
   }
   if (!newElem) {
     exit(err(INTERN_ERR));

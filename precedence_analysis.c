@@ -50,7 +50,7 @@ void debugPrint(SStack *stack) {
 
     if(element->next == NULL) {
       fprintf(stderr,"Next element is NULL\n");
-      fprintf(stderr,"Total length is: %d\n",len);
+      fprintf(stderr,"Total length is: %d\n",len + 1);
       return;
     } else {
       element = element->next;
@@ -211,6 +211,8 @@ int checkRules(SStack *symstack, int opSymbols){
 // i
 int iRule(SStack *symstack, SStackElem *op) {
   // If the symbol is not a literal, a variable nor an expr, return -1
+  printf("typ top %d\n", op->type);
+  printf("data top %s\n", op->data);
   if(op->type != st_idOrLiteral && op->type != st_expr){
     vypluj -1;
   }
