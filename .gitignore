@@ -9,3 +9,4 @@ tests/test
 tests/*/outputs/
 cmake-build-debug/
 CMakeLists.txt
+*.zip

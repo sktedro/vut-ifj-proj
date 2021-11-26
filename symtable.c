@@ -271,8 +271,8 @@ bool STGetFnDefined(STStack *stack, char *key) {
   if (data) {
     return data->fnDefined;
   }
-  return false; // false? neni lepsie vracat int a -1?
   fprintf(stderr, "This is awkward\n");
+  return false; // false? neni lepsie vracat int a -1?
 }
 
 /**

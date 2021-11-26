@@ -25,8 +25,9 @@ OUTPUTDIR=./build
 
 .PHONY: all
 all:
-	mkdir -p $(OUTPUTDIR)
-	$(CC) $(MAIN) $(LIBS) -o $(OUTPUTDIR)/main $(CFLAGS)
+	# mkdir -p $(OUTPUTDIR)
+	# $(CC) $(MAIN) $(LIBS) -o $(OUTPUTDIR)/main $(CFLAGS)
+	$(CC) $(MAIN) $(LIBS) -o main $(CFLAGS)
 
 
 .PHONY: run
