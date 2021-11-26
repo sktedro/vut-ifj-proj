@@ -42,6 +42,12 @@ test:
 	@cd tests && \
 	$(TESTSCRIPT) $(target)
 
+pack: clean
+	mkdir -p pack
+	cp *.c *.h Makefile pack/
+	cd pack && zip xskalo01.zip ./*
+	mv pack/xskalo01.zip ./
+	rm -rf pack
 
 clean:
-	rm -rf build logs
+	rm -rf build logs pack
