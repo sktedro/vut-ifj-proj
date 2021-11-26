@@ -216,7 +216,8 @@ int scanner(Token **token) {
 
         // #
       } else if (c == '#') {
-        state = s_strOp;
+        // state = s_strOp;
+        return returnToken(token, t_strOp, buf);
 
         // .
       } else if (c == '.') {
@@ -426,7 +427,8 @@ int scanner(Token **token) {
     case s_arithmOpDiv:
       if (c == '/') {
         // state = s_arithmOp;
-        charBufAppend(buf, c);
+        /** charBufAppend(buf, c); */ // TODO why does this need to be
+        // commented? scanner returns "///" instead of "//" but why?
         return returnToken(token, t_arithmOp, buf);
       } else {
         charMem = c;
