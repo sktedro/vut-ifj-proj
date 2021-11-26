@@ -197,16 +197,18 @@ char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
   char *op1 = src1->data, *op2 = src2->data;
 
-  // If it is not an ID, put parantheses around it
-  if(!src1->isId){
-
-    src1->data = strcat("(", src1->data);
-    src1->data = strcat(src1->data, ")");
-
+  // If it is not an ID, put " around it
+  if(src1 && !src1->isId){
+    op1 = malloc(sizeof(char) * (strlen(src1->data) + 2 + 1));
+    op1 = strcat(op1, "\"");
+    op1 = strcat(op1, src1->data);
+    op1 = strcat(op1, "\"");
   }
-  if(!src2->isId){
-    src1->data = strcat("(", src1->data);
-    src1->data = strcat(src1->data, ")");
+  if(src2 && !src2->isId){
+    op2 = malloc(sizeof(char) * (strlen(src2->data) + 2 + 1));
+    op2 = strcat(op2, "\"");
+    op2 = strcat(op2, src2->data);
+    op2 = strcat(op2, "\"");
   }
   printf("CONCAT %s %s %s\n", dest, op1, op2);
   return dest;
@@ -226,7 +228,16 @@ char *genConvertIntToFloat(SStackElem *src) {
 
 char *genUnaryOperation(SStackElem *src) {
   char *dest = genTmpVar();
-  printf("STRLEN %s %s\n", dest, src->data);
+  char *op = src->data;
+  // If it is not an ID, put " around it
+  // TODO make it a function?
+  if(src && !src->isId){
+    op = malloc(sizeof(char) * (strlen(src->data) + 2 + 1));
+    op = strcat(op, "\"");
+    op = strcat(op, src->data);
+    op = strcat(op, "\"");
+  }
+  printf("STRLEN %s %s\n", dest, op);
   return dest;
 }
 
