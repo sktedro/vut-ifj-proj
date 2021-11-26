@@ -112,40 +112,40 @@ char *genLabelName() {
  * a je v globále
  * v ifjcode bude názov a0
  */
-void genVarDef(SStackElem *element, int frame) {
-  printf("DEFVAR LF@%s\n", genName(element->data, frame));
-  printf("MOVE LF@%s nil@nil\n", genName(element->data, frame));
+void genVarDef(char *name, int frame) {
+  printf("DEFVAR LF@%s\n", genName(name, frame));
+  printf("MOVE LF@%s nil@nil\n", genName(name, frame));
 }
 
 /**
  * identifikátor, frame number, priradzovaná hodnota
  * TODO na konstantu pouzit %a
  */
-int genVarAssign(SStackElem *element, int frameNumber, char *assignValue) {
+int genVarAssign(Token *token, int frameNumber, char *assignValue) {
 
-  if(element->dataType == t_int) {
-    printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
+  if(token->type == t_int) {
+    printf("MOVE TF@%s int@%s\n", genName(token->data, frameNumber), assignValue);
   
-  } else if(element->type == t_num) {
-    printf("MOVE TF@%s float@%s\n", genName(element->data, frameNumber), assignValue);
+  } else if(token->type == t_num) {
+    printf("MOVE TF@%s float@%s\n", genName(token->data, frameNumber), assignValue);
   
-  } else if(element->type == t_sciNum) {
-    printf("MOVE TF@%s float@%a\n", genName(element->data, frameNumber), atof(assignValue));
+  } else if(token->type == t_sciNum) {
+    printf("MOVE TF@%s float@%a\n", genName(token->data, frameNumber), atof(assignValue));
   
-  } else if(element->type == t_str) {
-    printf("MOVE TF@%s int@%s\n", genName(element->data, frameNumber), assignValue);
+  } else if(token->type == t_str) {
+    printf("MOVE TF@%s int@%s\n", genName(token->data, frameNumber), assignValue);
   
-  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
-    printf("MOVE TF@%s nil@nil\n", genName(element->data, frameNumber));
+  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
+    printf("MOVE TF@%s nil@nil\n", genName(token->data, frameNumber));
   
-  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
-    printf("READ TF@%s int\n", genName(element->data, frameNumber));
+  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
+    printf("READ TF@%s int\n", genName(token->data, frameNumber));
   
-  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
-    printf("READ TF@%s float\n", genName(element->data, frameNumber));
+  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
+    printf("READ TF@%s float\n", genName(token->data, frameNumber));
   
-  } else if(element->type == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
-    printf("READ TF@%s string\n", genName(element->data, frameNumber));
+  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
+    printf("READ TF@%s string\n", genName(token->data, frameNumber));
   
   } else {
     // TODO add error code
