@@ -9,6 +9,7 @@
 
 extern int ret;
 
+
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
@@ -28,25 +29,26 @@ char precTab[12][12] = {
 };
 
 
+/**
+ * @brief Simple function to print all elements on the symbol stack
+ *
+ * @param stack to print out
+ */
 void debugPrint(SStack *stack) {
   return;
-  SStackElem *element;
   int len = 0;
-
-  element = SStackTop(stack);
+  SStackElem *element = SStackTop(stack);;
   fprintf(stderr, "--------STACK------------\n");
   while (element != NULL) {
-    fprintf(stderr,"Element number from the top: %d\n",len);
+    fprintf(stderr,"Element type: %d\n",element->type);
+    fprintf(stderr,"Element op: %d\n",element->op);
     if(element->data != NULL) {
       fprintf(stderr,"Element data: %s\n",element->data);
     }else{
       fprintf(stderr,"Element data is NULL\n");
     }
-    
-    fprintf(stderr,"Element dataType: %d\n",element->dataType);
     fprintf(stderr,"Element isId: %d\n",element->isId);
-    fprintf(stderr,"Element op: %d\n",element->op);
-    fprintf(stderr,"Element type: %d\n",element->type);
+    fprintf(stderr,"Element dataType: %d\n",element->dataType);
     fprintf(stderr, "-------------------------\n");
 
     if(element->next == NULL) {
@@ -59,15 +61,14 @@ void debugPrint(SStack *stack) {
       len++;
     }
   }
-  
   fprintf(stderr, "Stack is empty\n");
-
 }
 
 /**
- * @brief Allocates a new symbol (to be inserted to the symbol stack)
+ * @brief Allocates a new symbol and initializes it (a symbol to be inserted to 
+ * the symbol stack)
  *
- * @param symbol: enumeration of symbol stack type 
+ * @param symbol: enum value of symbol stack type 
  *
  * @return SStackElem as a new, allocated symbol stack element
  */
@@ -89,7 +90,7 @@ SStackElem *allocateSymbol(int symbol) {
 /**
  * @brief Destroys (frees data allocated by) a symbol of the symbol stack
  *
- * @param elem - symbol to be destroyed
+ * @param elem to be destroyed
  */
 void destroySymbol(SStackElem **elem){
   if(elem && *elem){
@@ -102,10 +103,13 @@ void destroySymbol(SStackElem **elem){
 }
 
 
-// Guess this should be tested
 /**
- * @brief Check if a number is zero, checking for future division
+ * @brief Check if a string represents a zero (as a number)
  *
+ * @param str containing the number (can be an integer, a floating point number
+ * or in scientific format)
+ *
+ * TODO test this somehow please
  */
 bool isZero(char *str){
   char *todptr = NULL;
@@ -142,11 +146,9 @@ int checkRules(SStack *symstack, int opSymbols){
     // Pop the '<'
     SStackPop(symstack);
     // i rule
-    // TODO pop the '<'?
     rulesRet = iRule(symstack, op1);
     if(rulesRet != -1){
       return rulesRet;
-    }else{
     }
   // We have a unary or a binary operator:
   } else {
@@ -547,19 +549,6 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
 
   switch (token->type) {
     case t_idOrKeyword:
-      /* Toto asi netreba kedze keyword checkujeme uz pred volanim tejto funkcie
-            // Check if it is a keyword - if it is, that's bad
-            // If the token is not a nil literal, check if it is a keyword
-            // (it can be a nil (value), but nil is also a keyword)
-            if(strcmp(token->data, "nil")){
-              if(isKeyword(token)){
-                // The token is a keyword (not a nil)
-                exit(err(1)); // TODO errcode
-                return NULL;
-              }
-            }
-      */
-
       // Check if it is a nil (cause it might be)
       if(!strcmp(token->data, "nil")){
         newElem->isId = false;
@@ -601,6 +590,7 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
       memcpy(newElem->data, token->data, strlen(token->data) + 1);
       break;
 
+    // TODO remove these three cases when PA is tested
     case t_colon:
     case t_comma:
     case t_assignment:
@@ -652,37 +642,62 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
 }
 
 /**
- * The precedence analysis algorithm
+ * @brief Init before the precedence analysis begins. Init the symbol stack,
+ * push '$' to it, check if we received a token from the parser and check if
+ * the token is a function (we don't parse functions here)
+ *
+ * @param symtab: symbol table
+ * @param symstack: where to save the initialized symbol stack
+ * @param token: the token received from the parser
+ *
+ * @return 0 if successful, -1 if the token is a function call
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
-  SStack *symstack = SStackInit();
-
-  // Get a new token if it was not provided by the parser
-  if(!token){
-    ret = scanner(&token);
-    condVypluj;
-  }
-  /**
-    * if(token->data){
-    *   fprintf(stderr, "Next token type is %d and data %s\n", token->type, token->data);
-    * }else{
-    *   fprintf(stderr, "Next token type is %d and data NULL\n", token->type);
-    * }
-    */
-
-  // If the next token is a function
-  if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
-    /** fprintf(stderr, "Next token (%s) is a functino\n", token->data); */
-    stashToken(token);
-    return -1;
-  }
+int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token){
+  // Initialize a symbol stack
+  *symstack = SStackInit();
 
   // Push a $ to the stack
   SStackElem *initialSymbol = allocateSymbol(st_dollar);
   initialSymbol->type = st_dollar;
   initialSymbol->op = pt_dollar;
-  ret = SStackPush(symstack, initialSymbol);
+  ret = SStackPush(*symstack, initialSymbol);
   CondReturn;
+
+  // Get a new token if it was not provided by the parser
+  if(!(*token)){
+    ret = scanner(token);
+    condVypluj;
+  }
+
+  // Check if the next token is a function - if so, stash the token and let the
+  // parser know by returning -1
+  if(STFind(symtab, (*token)->data) && !STGetIsVariable(symtab, (*token)->data)){
+    stashToken(*token);
+    return -1;
+  }
+}
+
+/**
+ * @brief A precedence analysis algorithm. Parses an expression, checks for
+ * errors and generates code
+ *
+ * @param symtab: symbol table containing variables and functions
+ * @param token: first token of the expression
+ * @param returnVarName: pointer to a string where this function writes the 
+ * name of the variable where the expression result is stored (in the generated
+ * code)
+ *
+ * @return 0 if successful
+ */
+int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
+
+  // Init
+  SStack *symstack = NULL;
+  SStackElem *topSymbol = NULL, *inputSymbol = NULL;
+  ret = precedenceAnalysisInit(symtab, &symstack, &token);
+  if(ret != 0){
+    return ret;
+  }
 
   // Will be checked every cycle of the 'while' - if true, new token is fetched
   // We already have one to process (param)
@@ -693,34 +708,19 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // expression, we have encountered an error
   bool exprCanEnd = true;
 
+  // True if the last scanned token was not a part of the expression. If true,
+  // no tokens will be received and only the 'reduce' rule will be used
   bool exprEnd = false;
   
-  SStackElem *topSymbol = NULL;
-  SStackElem *inputSymbol = parseToken(symtab, token);
+  inputSymbol = parseToken(symtab, token);
 
   while (1) {
-    /** fprintf(stderr, "Next cycle. Symstack: \n"); */
-    /**
-      * if(exprCanEnd){
-      *   fprintf(stderr, "Expression can end\n");
-      * }else{
-      *   fprintf(stderr, "Expression can't end\n");
-      * }
-      */
     debugPrint(symstack);
 
     if(getNewToken){
       // Get a new token
       ret = scanner(&token);
       condVypluj;
-      /**
-        * if(token->data){
-        *   fprintf(stderr, "Next token type is %d and data %s\n", token->type, token->data);
-        * }else{
-        *   fprintf(stderr, "Next token type is %d and data NULL\n", token->type);
-        * }
-        */
-
 
       // Check if the next token is a part of the expression
 
@@ -731,15 +731,15 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       // If it is a ',', ':' or '=', it means the end of the expression
       // If it is a keyword, this is the end of the expr (unless it's a nil)
       }else if(token->type == t_colon
-        || token->type == t_comma
-        || token->type == t_assignment
-        || (strcmp(token->data, "nil") && isKeyword(token))){
-      /** fprintf(stderr, "received a ,/:/= or a keyword\n"); */
-      stashToken(token);
-      token = NULL;
-      exprEnd = true;
-      inputSymbol = allocateSymbol(st_reduce);
-      inputSymbol->op = pt_dollar;
+          || token->type == t_comma
+          || token->type == t_assignment
+          || (strcmp(token->data, "nil") && isKeyword(token))){
+        /** fprintf(stderr, "received a ,/:/= or a keyword\n"); */
+        stashToken(token);
+        token = NULL;
+        exprEnd = true;
+        inputSymbol = allocateSymbol(st_reduce);
+        inputSymbol->op = pt_dollar;
       
 
       // If the last token was not an operator, but an ID or a literal and the 
@@ -770,10 +770,8 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     // If the symbol is not an operator, the expr can end by the next token
     // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
     if(inputSymbol->type == st_operator){
-      /** printf("Input symbol type is %d -> expr can't end\n", inputSymbol->type); */
       exprCanEnd = false;
     }else{
-      /** printf("Input symbol type is %d -> expr can end\n", inputSymbol->type); */
       exprCanEnd = true;
     }
 
@@ -822,14 +820,11 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         // '<' found
         if(tmp->type == st_push){
           // Set opSymbols to a positive value
-          // TODO change#321:
           opSymbols = - opSymbols;
           break;
         }
         // Keep opSymbols negative and invert the value when '<' is found
-        // TODO change#321:
         opSymbols--;
-        //opSymbols++;
         tmp = tmp->next;
       }
 
@@ -855,9 +850,9 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     }
 
     if(exprEnd
-      && symstack && symstack->top && symstack->top->next
-      && symstack->top->type == st_expr
-      && symstack->top->next->type == st_dollar){
+        && symstack && symstack->top && symstack->top->next
+        && symstack->top->type == st_expr
+        && symstack->top->next->type == st_dollar){
       break;
     }else{
     }
@@ -869,7 +864,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   if(symstack && symstack->top && symstack->top->next
       && symstack->top->type == st_expr
       && symstack->top->next->type == st_dollar){
-    fprintf(stderr, "Done with precedence analysis\n");
+    printf("Done with precedence analysis\n");
   }else{
     debugPrint(symstack);
     return 15; // TODO errcode
