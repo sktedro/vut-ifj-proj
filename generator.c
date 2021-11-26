@@ -122,7 +122,6 @@ void genVarDef(char *name, int frame) {
 
 /**
  * identifikátor, frame number, priradzovaná hodnota
- * TODO na konstantu pouzit %a
  */
 int genVarAssign(Token *token, int frameNumber, char *assignValue) {
 
@@ -151,7 +150,7 @@ int genVarAssign(Token *token, int frameNumber, char *assignValue) {
     printf("READ TF@%s string\n", genName(token->data, frameNumber));
   
   } else {
-    // TODO add error code
+    // TODO add error code - vypisujú sa tu normálne code errors alebo nejaké špeciálne pre ifjcode21? 
     return 1;
   }
 
@@ -200,10 +199,14 @@ char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
 
   // If it is not an ID, put parantheses around it
   if(!src1->isId){
-    // TODO put parentheses around the src1->data and put it into op1
+
+    src1->data = strcat("(", src1->data);
+    src1->data = strcat(src1->data, ")");
+
   }
   if(!src2->isId){
-    // TODO same
+    src1->data = strcat("(", src1->data);
+    src1->data = strcat(src1->data, ")");
   }
   printf("CONCAT %s %s %s\n", dest, op1, op2);
   return dest;

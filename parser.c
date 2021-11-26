@@ -314,16 +314,19 @@ int pReq() {
  *
  */
 int pNewFunId(Token *token) {
+
   if (token->type == t_idOrKeyword) {
+
     if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
       fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
       vypluj err(ID_DEF_ERR);
     } else {
       fprintf(stderr, "CREATING NEW STACK\n");
       STInsert(symtab, token->data);
-
       STSetIsVariable(symtab, token->data, false);
+      STSetFnDefined(symtab, token->data, true);
     }
+
   } else {
     fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
     vypluj err(SYNTAX_ERR);
@@ -349,8 +352,177 @@ int pCodeBody() {
   ret = scanner(&token);
   CondReturn;
 
+  if(token == NULL) { //-> eps | EOF
+    vypluj 0;
+  }
+
+  if(token->type != t_idOrKeyword) {
+    vypluj err(1); // TODO ADD ERR CODE
+  }
+
+  // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+  if(strcmp(token->data, "function") == 0) {
+
+    tokenDestroy(&token);
+    ret = scanner(&token);
+    CondReturn;
+
+    ret = pNewFunId(token);
+    CondReturn;
+
+    genFnDef(token->data);
+
+    tokenDestroy(&token);
+
+    ret = scanner(&token);
+    CondReturn;
+
+    // check for (
+    if(token->type != t_leftParen) {
+      tokenDestroy(&token);
+      vypluj err(1); // TODO ARR CODE
+    }
+    tokenDestroy(&token);
+    //TODO DONE THIS
+    ret = pFnArgList();
+    CondReturn;
+
+    ret = scanner(&token);
+    CondReturn;
+
+    // check for )
+    if(token->type != t_rightParen) {
+      tokenDestroy(&token);
+      vypluj err(1); // TODO ARR CODE
+    }
+
+    tokenDestroy(&token);
+
+    // <fnRet>
+    // TODO DONE THIS
+    ret = pFnRet();
+    CondReturn;
+
+    // <stat>
+    // TODO DONE THIS
+    ret = pStat();
+    CondReturn;
+    
+    // <ret>
+    // TODO DONE THIS
+    ret = pRet();
+    CondReturn;
+
+    // end
+    ret = scanner(&token);
+    CondReturn;
+
+    if(strcmp(token->data, "end") != 0) {
+      tokenDestroy(&token);
+      vypluj err(1); //TODO ADD ERR
+    }
+
+    tokenDestroy(&token);
+
+    // <codeBody>
+    ret = pCodeBody();
+    CondReturn;
+
+    vypluj 0;
+
+  } else if(strcmp(token->data, "global") == 0) {
+    // 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+
+    tokenDestroy(&token);
+
+    // [id]
+    ret = scanner(&token);
+    CondReturn;
+
+    ret = pNewFunId(token);
+    CondReturn;
+
+    tokenDestroy(&token);
+
+    // :
+    ret = scanner(&token);
+    CondReturn;
+
+    if(token->type != t_colon) {
+      tokenDestroy(&token);
+      vypluj err(0); // TODO ADD ERR
+    }
+
+    tokenDestroy(&token);
+
+    // function
+    ret = scanner(&token);
+    CondReturn;
+
+    if(strcmp(token->data, "function") != 0) {
+      tokenDestroy(&token);
+      vypluj err(0); // TODO ADD ERR
+    }
+
+    tokenDestroy(&token);
+
+    // (
+    ret = scanner(&token);
+    CondReturn;
+
+    if(strcmp(token->data, "(") != 0) {
+      tokenDestroy(&token);
+      vypluj err(0); // TODO ADD ERR
+    }
+
+    tokenDestroy(&token);
+
+    // <typeList>
+    ret = pTypeList();
+    CondReturn;
+
+    // )
+    ret = scanner(&token);
+    CondReturn;
+
+    if(strcmp(token->data, ")") != 0) {
+      tokenDestroy(&token);
+      vypluj err(0); // TODO ADD ERR
+    }
+
+    tokenDestroy(&token);
+
+    // <fnRet>
+    // TODO
+    ret = pFnRet();
+    CondReturn;
+
+    // <codeBody>
+    ret = pCodeBody();
+    CondReturn;
+
+    vypluj 0;
+    
+  } else if(token->type == t_idOrKeyword && STGetFnDefined(symtab, token->data)) {
+    tokenDestroy(&token);
+
+    // <fnCall>
+    ret = pFnCall();
+    CondReturn;
+
+    // <codeBody>
+    ret = pCodeBody();
+    CondReturn;
+
+    vypluj 0;
+
+  } else {
+    tokenDestroy(&token);
+    vypluj err(1); //TODO ADD ERR
+  }
+
   // -> eps
-  if (token == NULL) { // EOF
+  /*if (token == NULL) { // EOF
     vypluj 0;
   } else if (token->type == t_idOrKeyword) {
     //-> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
@@ -531,7 +703,7 @@ int pCodeBody() {
     } else {
       vypluj err(ID_DEF_ERR); // TODO errcode asi good?
     }
-  }
+  }*/
   vypluj 0;
 }
 
@@ -1171,7 +1343,8 @@ int pFnArgList() {
   CondReturn;
   
   printToken(token);
-
+  
+  
   // -> eps
   if(!(token->type == t_idOrKeyword && token->type != t_idOrKeyword)) {
     stashToken(token);
@@ -1201,6 +1374,8 @@ int pFnArgList() {
 
   // <nextFnArg>
   vypluj pNextFnArg();
+  
+
   
 
 // OLD CODE, DELETE IF THE NEW CODE WORKS
