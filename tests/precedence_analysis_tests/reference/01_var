@@ -1,2 +1,3 @@
 Testing: Token type is '0' and data 'varInt1'
-Expression result is in: varInt1
+Testing: Expression result is in: varInt1
+Testing: Precedence analysis returned 0

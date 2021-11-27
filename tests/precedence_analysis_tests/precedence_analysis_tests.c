@@ -76,8 +76,9 @@ int main(){
   printTokenData();
 
   // Run the test
-  parseExpression(symtable, token, &retVarName);
-  printf("Expression result is in: %s\n", retVarName);
+  int ret = parseExpression(symtable, token, &retVarName);
+  printf("Testing: Expression result is in: %s\n", retVarName);
+  printf("Testing: Precedence analysis returned %d\n", ret);
 
   return 0;
 }
