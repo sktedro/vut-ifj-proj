@@ -49,8 +49,6 @@ char precTab[12][12] = {
  * @return 0 if successful, errcode otherwise 
  */
 int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
-  printf("Precedence analysis starting\n");
-
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
