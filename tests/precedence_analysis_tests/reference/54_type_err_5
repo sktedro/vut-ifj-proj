@@ -1,0 +1,4 @@
+ERROR: Types of an expression operands are not compatible.
+Testing: Token type is '0' and data 'varNum1'
+DEFVAR LF@%tmp0
+INT2FLOAT LF@%tmp0 LF@varNum1

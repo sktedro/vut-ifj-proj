@@ -26,7 +26,7 @@ for input in ./inputs/*; do
     printf ${RED}"Is the output right? [y to confirm] "${NC}
     read confirmation
     if [ "$confirmation" = "y" ]; then
-      echo ${GREEN}"Copying the output to the reference folder\n"${NC}
+      printf ${GREEN}"Copying the output to the reference folder\n"${NC}
       cp "$outputsFolder"/"$filename" "$referenceFolder"
     fi
   else

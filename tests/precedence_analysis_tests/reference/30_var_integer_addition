@@ -1,0 +1,5 @@
+Testing: Token type is '0' and data 'varInt1'
+DEFVAR LF@%tmp0
+ADD LF@%tmp0 LF@varInt1 LF@varInt2
+Testing: Expression result is in: %tmp0
+Testing: Precedence analysis returned 0

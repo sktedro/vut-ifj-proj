@@ -35,7 +35,7 @@ int err(int errCode) {
   } else if (errCode == 5) {
     fprintf(stderr, "Function parameters or return values error. Check types.\n"); //TODO
   } else if (errCode == 6) {
-    fprintf(stderr, "Types of an expression operands are not compatible.\n"); //TODO
+    fprintf(stderr, "Types of operands in an expression are not compatible.\n"); //TODO
   } else if (errCode == 7) {
     fprintf(stderr, "Semantic error.\n"); //TODO
   } else if (errCode == 8) {
