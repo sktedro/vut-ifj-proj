@@ -470,7 +470,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // If and operand is a nil, we can only compare by '==' or '~='
     if((op1->dataType == dt_nil || op3->dataType == dt_nil)
-        && (strcmp(op2->data, "==") != 0 || strcmp(op2->data, "~=") != 0)){
+        && (!strEq(op2->data, "==") || !strEq(op2->data, "~="))){
       return err(NIL_ERR); // TODO nemalo by byť TYPE_EXPR_ERR??
     }
 
@@ -487,11 +487,11 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     }
 
     // Generate code
-    if(!strcmp(op2->data, "<") || !strcmp(op2->data, ">=")){
+    if(strEq(op2->data, "<") || strEq(op2->data, ">=")){
       newSymbolName = genLower(op1, op3);
-    }else if(!strcmp(op2->data, ">") || !strcmp(op2->data, "<=")){
+    }else if(strEq(op2->data, ">") || strEq(op2->data, "<=")){
       newSymbolName = genGreater(op1, op3);
-    }else if(!strcmp(op2->data, "==") || !strcmp(op2->data, "~=")){
+    }else if(strEq(op2->data, "==") || strEq(op2->data, "~=")){
       newSymbolName = genEqual(op1, op3);
     }
 
@@ -500,8 +500,8 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Generate code for NOT (negate the result of the expression)
     // eg. for '<=', we'll generate '>' and negate it
-    if(!strcmp(op2->data, "<=") || !strcmp(op2->data, ">=") 
-        || !strcmp(op2->data, "~=")){
+    if(strEq(op2->data, "<=") || strEq(op2->data, ">=") 
+        || strEq(op2->data, "~=")){
       newSymbol->data = genNot(newSymbol);
     }
 
@@ -537,7 +537,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
     case t_idOrKeyword:
       *newSymbol = createNewSymbol(st_idOrLiteral, pt_id, false, -1, NULL);
       // If it is a nil literal
-      if(!strcmp(token->data, "nil")){
+      if(strEq(token->data, "nil")){
         (*newSymbol)->isId = false;
         (*newSymbol)->dataType = dt_nil;
       // If it is an ID (and not a nil)
@@ -593,19 +593,19 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
     case t_arithmOp:
     case t_strOp:
       *newSymbol = createNewSymbol(st_operator, -1, false, -1, NULL);
-      if (strcmp(token->data, "+") == 0) {
+      if (strEq(token->data, "+")) {
         (*newSymbol)->op = pt_add;
-      } else if (strcmp(token->data, "-") == 0) {
+      } else if (strEq(token->data, "-")) {
         (*newSymbol)->op = pt_sub;
-      } else if (strcmp(token->data, "#") == 0) {
+      } else if (strEq(token->data, "#")) {
         (*newSymbol)->op = pt_strlen;
-      } else if (strcmp(token->data, "*") == 0) {
+      } else if (strEq(token->data, "*")) {
         (*newSymbol)->op = pt_mult;
-      } else if (strcmp(token->data, "/") == 0) {
+      } else if (strEq(token->data, "/")) {
         (*newSymbol)->op = pt_div;
-      } else if (strcmp(token->data, "//") == 0) {
+      } else if (strEq(token->data, "//")) {
         (*newSymbol)->op = pt_intDiv;
-      } else if (strcmp(token->data, "..") == 0) {
+      } else if (strEq(token->data, "..")) {
         (*newSymbol)->op = pt_concat;
       }
       break;
@@ -702,6 +702,9 @@ int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token){
   return 0;
 }
 
+/**
+ * TODO
+ */
 int reduceStep(SStack *symstack){
   // Count symbols that are to be reduced (eg. 2 for "#str")
   int opSymbols = 0;
@@ -713,6 +716,48 @@ int reduceStep(SStack *symstack){
   // Call rule functions - if a rule is found, expr will be reduced, code
   // generated and 0 returned. Returns -1 if no rule was found
   return checkRules(symstack, opSymbols);
+}
+
+int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd){
+  // Call the scanner
+  CondCall(scanner, token);
+
+  // ',', ':', '=' and keywords (not including nil) can't be a part of expr
+  if(!exprEnd && !isTokenAllowedInExpr(*token)){
+    stashToken(token);
+    *exprEnd = true;
+  }
+  // If the last token was an operand and the next token is too, expr ends
+  if(exprCanEnd && isTokenIdOrLiteral(*token)){
+    stashToken(token);
+    *exprEnd = true;
+  }
+  return 0;
+}
+
+int getNewSymbol(STStack *symtab, Token **token, SStackElem **inputSymbol, bool getNewToken, bool *exprCanEnd, bool *exprEnd){
+  // Get a new token (check if it is a part of the expression)
+  if(getNewToken){
+    CondCall(fetchNewToken, token, *exprCanEnd, exprEnd);
+  }
+
+  // Parse the token into a symbol (if we're still fetching new tokens)
+  if(!(*exprEnd)){
+    CondCall(parseToken, symtab, *token, inputSymbol);
+  // If we fetched all tokens belonging to the expression, input should be '>'
+  }else{
+    *inputSymbol = createNewSymbol(st_reduce, pt_dollar, false, -1, NULL);
+  }
+
+  // If the symbol is not an operator, the expr can end by the next token
+  // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
+  if((*inputSymbol)->type == st_operator){
+    *exprCanEnd = false;
+  }else{
+    *exprCanEnd = true;
+  }
+
+  return 0;
 }
 
 
@@ -739,6 +784,9 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     return -1;
   }
 
+  // An actual symbol from the precedence table will be saved here
+  char precTableSymbol = '\0';
+
   // Will be checked every cycle of the 'while' - if true, new token is fetched
   // We already have one to process (param)
   bool getNewToken = false; 
@@ -752,49 +800,21 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // no tokens will be received and only the 'reduce' rule will be used
   bool exprEnd = false;
   
-  CondCall(parseToken, symtab, token, &inputSymbol);
+  /*
+   * The algorithm:
+   */
 
   // End when we parsed all tokens of the expr and there is just $E in the stack
   while (!exprEnd || !isExprAtomic(symstack)) {
-    debugPrint(symstack);
-
-    if(getNewToken){
-      // Get a new token
-      CondCall(scanner, &token);
-
-      // Check if the next token is a part of the expression
-      if(exprEnd){
-        inputSymbol = allocateSymbol(st_reduce);
-        inputSymbol->op = pt_dollar;
-
-      // ',', ':', '=' and keywords (not including nil) can't be a part of expr
-      // If the last token was an operand and the next token is too, expr ends
-      }else if(!isTokenAllowedInExpr(token) 
-          || (exprCanEnd && isTokenIdOrLiteral(token))){
-        stashToken(&token);
-        exprEnd = true;
-        inputSymbol = createNewSymbol(st_reduce, pt_dollar, false, -1, NULL);
-      }
-
-      // Parse the new token into a symbol if we're still parsing
-      if(!exprEnd){
-        CondCall(parseToken, symtab, token, &inputSymbol);
-      }
-
-    }
-
-    // If the symbol is not an operator, the expr can end by the next token
-    // eg. 1 + 1 <expr can end here>; 1 + 1 + <expr cannot end here>
-    if(inputSymbol->type == st_operator){
-      exprCanEnd = false;
-    }else{
-      exprCanEnd = true;
-    }
-
-    // Update the top symbol since it might have changed
+    
+    // Get the top symbol
     topSymbol = SStackTopTerminal(symstack);
 
-    char precTableSymbol = precTab[topSymbol->op][inputSymbol->op];
+    // Get the input symbol
+    CondCall(getNewSymbol, symtab, &token, &inputSymbol, getNewToken, &exprCanEnd, &exprEnd);
+
+    // Get the character from the precedence table
+    precTableSymbol = precTab[topSymbol->op][inputSymbol->op];
 
     // Shift (the top terminal)
     if (precTableSymbol == '=') {
@@ -812,6 +832,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       reduceStep(symstack);
       getNewToken = false;
 
+    // Syntax error
     } else if(precTableSymbol == '_'){
       vypluj err(SYNTAX_ERR);
     }
