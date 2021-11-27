@@ -109,49 +109,50 @@ char *genLabelName() {
   return ret;
 }
 
+char *genTmpVarDef() {
+  char *name = genTmpVar();
+  return name;
+}
 /**
  * identifikátor, frame number
  * a = 1
  * a je v globále
  * v ifjcode bude názov a0
  */
+
 void genVarDef(char *name, int frame) {
   printf("DEFVAR LF@%s\n", genName(name, frame));
-  printf("MOVE LF@%s nil@nil\n", genName(name, frame));
 }
 
 /**
- * identifikátor, frame number, priradzovaná hodnota
+ * identifikátor, dátový typ, priradzovaná hodnota
  */
-int genVarAssign(Token *token, int frameNumber, char *assignValue) {
-
-  if(token->type == t_int) {
-    printf("MOVE LF@%s int@%s\n", genName(token->data, frameNumber), assignValue);
+int genVarAssign(char *name, int dataType, char *assignValue) {
+  if(dataType == dt_integer) {
+    printf("MOVE LF@%s int@%s\n", name, assignValue);
   
-  } else if(token->type == t_num) {
-    printf("MOVE LF@%s float@%s\n", genName(token->data, frameNumber), assignValue);
+  } else if(dataType == dt_number) {
+    printf("MOVE LF@%s float@%s\n", name, assignValue);
+    /** // TODO convert from scientific form if needed */
+    /** printf("MOVE LF@%s float@%a\n", name, atof(assignValue)); */
   
-  } else if(token->type == t_sciNum) {
-    printf("MOVE LF@%s float@%a\n", genName(token->data, frameNumber), atof(assignValue));
+  } else if(dataType == dt_string) {
+    printf("MOVE LF@%s string@%s\n", name, assignValue);
   
-  } else if(token->type == t_str) {
-    printf("MOVE LF@%s int@%s\n", genName(token->data, frameNumber), assignValue);
+  } else if(strcmp(assignValue, "nil") == 0) {
+    printf("MOVE LF@%s nil@nil\n", name);
   
-  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "nil") == 0) {
-    printf("MOVE LF@%s nil@nil\n", genName(token->data, frameNumber));
+  } else if(strcmp(assignValue, "readi") == 0) {
+    printf("READ LF@%s int\n", name);
   
-  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "readi") == 0) {
-    printf("READ LF@%s int\n", genName(token->data, frameNumber));
+  } else if(strcmp(assignValue, "readn") == 0) {
+    printf("READ LF@%s float\n", name);
   
-  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "readn") == 0) {
-    printf("READ LF@%s float\n", genName(token->data, frameNumber));
-  
-  } else if(token->type == t_idOrKeyword && strcmp(assignValue, "reads") == 0) {
-    printf("READ LF@%s string\n", genName(token->data, frameNumber));
+  } else if(strcmp(assignValue, "reads") == 0) {
+    printf("READ LF@%s string\n", name);
   
   } else {
-    // TODO add error code - vypisujú sa tu normálne code errors alebo nejaké špeciálne pre ifjcode21? 
-    return 1;
+    return 1; // TODO errcode?
   }
 
   return 0;
@@ -189,7 +190,7 @@ char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
 
 char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  printf("DIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
+  printf("IDIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 

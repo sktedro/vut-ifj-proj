@@ -215,6 +215,13 @@ int iRule(SStack *symstack, SStackElem *op) {
   // The symbol needs to be an 'i'
   if(op->type == st_idOrLiteral){
     op->type = st_expr;
+    // TODO framenumber as the second param:
+    // If it is literal, save it into a variable and assign it a value
+    if(!op->isId){
+      char *newName = genTmpVarDef();
+      CondCall(genVarAssign, newName, op->dataType, op->data);
+      op->data = newName;
+    }
     SStackPush(symstack, op);
     vypluj 0;
   }
