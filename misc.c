@@ -11,6 +11,10 @@
  * Miscellaneous functions
  */
 
+
+bool strEq(char *str1, char *str2){
+  return !strcmp(str1, str2);
+}
 /**
  * @brief Writes an error message to stdout and returns back the error code
  *

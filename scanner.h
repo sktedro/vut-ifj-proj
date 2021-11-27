@@ -14,7 +14,7 @@
  *
  * @param token to be stashed
  */
-int stashToken(Token *token);
+int stashToken(Token **token);
 
 /**
  * @brief Restore last read character that didn't belong to the last returned

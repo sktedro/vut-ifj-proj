@@ -770,7 +770,7 @@ int pFnRet() {
   // <fnRet>           -> eps
   if (token->type != t_colon) { // :
     printf("STASH TOKEN FNRET\n");
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
 
   // <fnRet>           -> : <type> <nextType>
@@ -810,12 +810,12 @@ int pFnCallArgList() {
 
   // -> eps
   if(token->type == t_rightParen) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
   // -> <fnCallArg> <nextFnCallArg>
-  stashToken(token);
+  stashToken(&token);
   ret = pFnCallArg();
   CondReturn;
   vypluj pNextFnCallArg();
@@ -851,7 +851,7 @@ int pNextFnCallArg() {
 
   // -> eps
   } else {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 }
@@ -954,7 +954,7 @@ int pStat() {
 
   // -> eps
   if (token->type != t_idOrKeyword) {
-    stashToken(token);
+    stashToken(&token);
     token = NULL;
     vypluj 0;
   }
@@ -1081,7 +1081,7 @@ int pStat() {
       tokenDestroy(&token);
       vypluj err(SYNTAX_ERR);
     }
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
     
   } else if(strcmp(token->data, "return") == 0) {
@@ -1091,7 +1091,7 @@ int pStat() {
     printToken(token);
     fprintf(stderr, "SME V ENDE\n");
   
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
@@ -1120,7 +1120,7 @@ int pStat() {
 
   // -> eps
   else {
-    stashToken(token);
+    stashToken(&token);
     token = NULL;
     vypluj 0;
   }
@@ -1347,7 +1347,7 @@ int pFnArgList() {
   
   // -> eps
   if(!(token->type == t_idOrKeyword && token->type != t_idOrKeyword)) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
@@ -1382,7 +1382,7 @@ int pFnArgList() {
 /*
   if (token->type == t_rightParen) { // ) // tady nemáš co hledat závorku jeď podle gramatiky
     fprintf(stderr, "PRAVA ZATVORKA\n");
-    stashToken(token);
+    stashToken(&token);
     token = NULL;
     vypluj 0; //TODO
   } else if (token->type == t_idOrKeyword) {
@@ -1443,7 +1443,7 @@ int pNextFnArg() {
   // -> eps
   if (token->type != t_comma) {
     tokenDestroy(&token);
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1554,7 +1554,7 @@ int pRetNextArg() {
   // -> eps
   // ','
   if (token->type != t_comma) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1632,7 +1632,7 @@ int pNextType() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
@@ -1762,7 +1762,7 @@ int pNextId() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1779,7 +1779,7 @@ int pNextId() {
       genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
       tokenDestroy(&token);
     } else { // -> eps
-      stashToken(token);
+      stashToken(&token);
       vypluj 0;
     }
   }
@@ -1814,7 +1814,7 @@ int pNewIdAssign() {
 
   // -> eps
   if (!(token->type == t_assignment && !strcmp(token->data, "="))) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
@@ -1867,7 +1867,7 @@ int pNextExpr() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(token);
+    stashToken(&token);
     vypluj 0;
   }
 
@@ -2033,7 +2033,7 @@ int pExpr() {
     } else if (isExpressionParser(*token) == false) {
       printf("FALSE\n");
       printToken(token);
-      stashToken(token);
+      stashToken(&token);
       //tokenDestroy(&token);
       vypluj 0;
     } else if (isExpressionParser(*token) && token->type == t_idOrKeyword) {
@@ -2045,7 +2045,7 @@ int pExpr() {
       if ((token->type == t_relOp || token->type == t_arithmOp) && isExpressionParser(*token)) {
       
       } else {
-        stashToken(token);
+        stashToken(&token);
         vypluj 0;
       }
     }

@@ -219,6 +219,8 @@ typedef struct {
  * Miscellaneous functions
  */
 
+bool strEq(char *str1, char *str2);
+
 /**
  * @brief Writes an error message to stdout and returns back the error code
  *
