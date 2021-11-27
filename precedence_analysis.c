@@ -79,18 +79,18 @@ void debugPrint(SStack *stack) {
  * @return SStackElem as a new, allocated symbol stack element
  */
 SStackElem *allocateSymbol(int symbol) {
-  SStackElem *newElem = malloc(sizeof(SStackElem));
-  if (!newElem) {
+  SStackElem *newSymbol = malloc(sizeof(SStackElem));
+  if (!newSymbol) {
     exit(err(INTERN_ERR));
     vypluj NULL;
   }
-  newElem->type = symbol;
-  newElem->op = -1;
-  newElem->isId = false;
-  newElem->dataType = -1;
-  newElem->data = NULL;
-  newElem->next = NULL;
-  return newElem;
+  newSymbol->type = symbol;
+  newSymbol->op = -1;
+  newSymbol->isId = false;
+  newSymbol->dataType = -1;
+  newSymbol->data = NULL;
+  newSymbol->next = NULL;
+  return newSymbol;
 }
 
 /**
@@ -211,16 +211,16 @@ int iRule(SStack *symstack, SStackElem *op) {
 }
 
 
-SStackElem *newSymbol(int type, int op, bool isId, int dataType, char *data){
-  SStackElem *newElem = allocateSymbol(type);
-  if(!newElem){
+SStackElem *createNewSymbol(int type, int op, bool isId, int dataType, char *data){
+  SStackElem *newSymbol = allocateSymbol(type);
+  if(!newSymbol){
     return NULL;
   }
-  newElem->op = op;
-  newElem->isId = isId;
-  newElem->dataType = dataType;
-  newElem->data = data;
-  return newElem;
+  newSymbol->op = op;
+  newSymbol->isId = isId;
+  newSymbol->dataType = dataType;
+  newSymbol->data = data;
+  return newSymbol;
 }
 
 /**
@@ -229,6 +229,8 @@ SStackElem *newSymbol(int type, int op, bool isId, int dataType, char *data){
  * TODO
  */
 int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
+  char *newSymbolName = NULL;
+
   if(op1->type == st_operator && op1->op == pt_strlen){
 
     // We received a '#' operator but no i after it
@@ -242,11 +244,11 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
     }
 
     // Generate code
-    char *name = genUnaryOperation(op2);
+    newSymbolName = genUnaryOperation(op2);
 
     // Create a new sym stack element (E) and push it
-    SStackElem *newElem = newSymbol(st_expr, pt_id, true, dt_integer, name);
-    SStackPush(symstack, newElem);
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, dt_integer, newSymbolName);
+    SStackPush(symstack, newSymbol);
 
     // Destroy both old symbols
     destroySymbol(&op1);
@@ -281,6 +283,13 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
   vypluj 0;
 }
 
+/**
+ * @brief If an operand is not an integer, convert it (generate code)
+ *
+ * @param op that should be an integer
+ *
+ * @return 0 if successful
+ */
 int ensureInteger(SStackElem *op){
   // If it is a number, convert it to an integer
   if(op->dataType == dt_number){
@@ -293,6 +302,13 @@ int ensureInteger(SStackElem *op){
   return 0;
 }
 
+/**
+ * @brief If an operand is not a number, convert it (generate code)
+ *
+ * @param op that should be a number
+ *
+ * @return 0 if successful
+ */
 int ensureNumber(SStackElem *op){
   // If it is an integer, convert it to a number
   if(op->dataType == dt_integer){
@@ -305,7 +321,17 @@ int ensureNumber(SStackElem *op){
   return 0;
 }
 
-int checkDataTypesOfBinaryOperations(SStackElem *op1, SStackElem *op2, 
+/**
+ * @param Check data types of operators of a binary operation (and convert them
+ * if necessary)
+ *
+ * @param op1: first operand
+ * @param op2: operator
+ * @param op3: second operand
+ *
+ * @return 0 if successful
+ */
+int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2, 
     SStackElem *op3){
   // Concatenation operation needs two strings
   if(op2->op == pt_concat && (op1->dataType != dt_string || op3->dataType != dt_string)){
@@ -324,8 +350,6 @@ int checkDataTypesOfBinaryOperations(SStackElem *op1, SStackElem *op2,
   // Otherwise, if we have an integer and a number -> convert the int to num
   }else if(op1->dataType == dt_integer && op3->dataType == dt_number){
     CondCall(ensureNumber, op1);
-
-  // ... and vice versa
   }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
     CondCall(ensureNumber, op3);
 
@@ -342,50 +366,62 @@ bool isOperand(SStackElem *op){
 bool isUnaryOperator(SStackElem *op){
   return true;
 }
-bool isBinaryArithmeticOperator(SStackElem *op){
+bool isBinArithmOp(SStackElem *op){
   return op->type == st_operator && 
       (op->op == pt_mult || op->op == pt_div || op->op == pt_intDiv
       || op->op == pt_add || op->op == pt_sub || op->op == pt_concat);
 }
 
-// i OPERATOR i or E OPERATOR E ?
-// "+ - * / // .."
-//
-// pt_concat only works with two strings
-// pt_{mult, div, add, sub} work with integers and numbers
-// pt_intDiv works with integers and numbers, always returns an integer
+/**
+ * @brief "arithmetic operator rule" - addition, subtraction, multiplication,
+ * division, integer division and concatenation (+ - * / // ..) - check the
+ * data types and everything and generate code
+ *
+ * @param symstack - symbol stack
+ * @param op1: first operand
+ * @param op2: arithmetic operator
+ * @param op3: second operand
+ *
+ * @return 0 if successful, -1 if no rule was found and applied
+ *
+ * pt_concat only works with two strings
+ * pt_{mult, add, sub} work with integers and numbers
+ * pt_div works with numbers and returns a number
+ * pt_intDiv works with integers and returns an integer
+ */
 int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
+  char *newSymbolName = NULL;
+  int dataType = -1;
 
   // op2 needs to be an arithmetic operator, op1 and op3 need to be E
-  if(isBinaryArithmeticOperator(op2) && op1->type == st_expr && op3->type == st_expr){
+  if(isBinArithmOp(op2) && op1->type == st_expr && op3->type == st_expr){
+
 
     // Check the data types
-    CondCall(checkDataTypesOfBinaryOperations, op1, op2, op3);
+    CondCall(checkDataTypesOfBinOps, op1, op2, op3);
 
     // Division by zero check (op3 can't be zero)
     if((op2->op == pt_div || op2->op == pt_intDiv) && isZero(op3)){
       return err(DIV_BY_ZERO_ERR);
     }
 
-    char *newName = NULL;
-    int dataType = -1;
 
     // Generate the operator code:
     if(op2->op == pt_add){
-      newName = genBinaryOperationAdd(op1, op3);
+      newSymbolName = genBinaryOperationAdd(op1, op3);
     }else if(op2->op == pt_sub){
-      newName = genBinaryOperationSub(op1, op3);
+      newSymbolName = genBinaryOperationSub(op1, op3);
     }else if(op2->op == pt_mult){
-      newName = genBinaryOperationMul(op1, op3);
+      newSymbolName = genBinaryOperationMul(op1, op3);
     }else if(op2->op == pt_div){
-      newName = genBinaryOperationDiv(op1, op3);
+      newSymbolName = genBinaryOperationDiv(op1, op3);
       dataType = dt_number;
     }else if(op2->op == pt_intDiv){
-      newName = genBinaryOperationIDiv(op1, op3);
+      newSymbolName = genBinaryOperationIDiv(op1, op3);
       dataType = dt_integer;
     }else if(op2->op == pt_concat){
-      newName = genBinaryOperationConcat(op1, op3);
+      newSymbolName = genBinaryOperationConcat(op1, op3);
     }else{
       return err(SYNTAX_ERR);
     }
@@ -396,8 +432,8 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op3);
 
     // Create a new symbol and push it to the symstack
-    SStackElem *newElem = newSymbol(st_expr, pt_id, false, dataType, newName);
-    SStackPush(symstack, newElem);
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, false, dataType, newSymbolName);
+    SStackPush(symstack, newSymbol);
 
   }else{
     // No rule
@@ -408,144 +444,124 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
 }
 
 
-// i RELOP i or E RELOP E ?
+/**
+ * @brief "relational operator rule" - == ~= < > <= >= - check the data types
+ * and everything and generate code
+ *
+ * @param symstack - symbol stack
+ * @param op1: first operand
+ * @param op2: relational operator
+ * @param op3: second operand
+ *
+ * @return 0 if successful, -1 if no rule was found and applied
+ */
 int relationalOperatorsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
+  char *newSymbolName = NULL;
 
-  // op2 needs to be st_operator and op == pt_relOp
-  // op1 and op3 both need to be i or E
-  if(op2->type == st_operator && op2->op == pt_relOp
-      && (op1->type == st_idOrLiteral || op1->type == st_expr)
-      && (op3->type == st_idOrLiteral || op3->type == st_expr)){
+  // Format needs to be "E relOp E"
+  if(op2->op == pt_relOp && op1->type == st_expr && op3->type == st_expr){
 
-    // If all or one of the operands is a nil
-    if(op1->dataType == dt_nil || op3->dataType == dt_nil){
-      // If the op2 is not "==" and neither "~=" we throw an error, since nil
-      // can only be compared by these two operators
-      if(strcmp(op2->data, "==") && strcmp(op2->data, "~=")){
-        return err(NIL_ERR);
-      }
-    // If none of the operands are a nil
-    }else{
-      // If the data types of op1 and op3 don't match
-      if(op1->dataType != op3->dataType){
-
-        // If we have an integer and a number -> convert the int to num
-        if(op1->dataType == dt_integer && op3->dataType == dt_number){
-          // Convert op1 from int to number 
-          op1->data = genConvertIntToFloat(op1);
-          op1->dataType = dt_number;
-
-
-        }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
-          // Convert op3 from int to number 
-          op3->data = genConvertIntToFloat(op3);
-          op3->dataType = dt_number;
-
-        // Else, throw an error
-        }else{
-          return err(TYPE_EXPR_ERR);
-        }
-      }
+    // If and operand is a nil, we can only compare by '==' or '~='
+    if((op1->dataType == dt_nil || op3->dataType == dt_nil)
+        && (strcmp(op2->data, "==") != 0 || strcmp(op2->data, "~=") != 0)){
+      return err(NIL_ERR); // TODO nemalo by byť TYPE_EXPR_ERR??
     }
 
-    SStackElem *newElem = allocateSymbol(st_expr);
-    newElem->op = pt_id;
-    newElem->isId = true;
-    newElem->dataType = -1; // It's gonna be a boolean.. So.. What now?
+    // If we have an integer and a number -> convert the int to num
+    if(op1->dataType == dt_integer && op3->dataType == dt_number){
+      CondCall(ensureNumber, op1);
+    }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
+      CondCall(ensureNumber, op3);
+    }
 
+    // If the data types of operands still don't match -> err
+    if(op1->dataType != op3->dataType){
+      return err(TYPE_EXPR_ERR);
+    }
+
+    // Generate code
     if(!strcmp(op2->data, "<") || !strcmp(op2->data, ">=")){
-      newElem->data = genLower(op1, op3);
+      newSymbolName = genLower(op1, op3);
     }else if(!strcmp(op2->data, ">") || !strcmp(op2->data, "<=")){
-      newElem->data = genGreater(op1, op3);
+      newSymbolName = genGreater(op1, op3);
     }else if(!strcmp(op2->data, "==") || !strcmp(op2->data, "~=")){
-      newElem->data = genEqual(op1, op3);
-    }else{
-      fprintf(stderr, "This is awkward. The operator should be relational.\n");
-      return err(-1); // todo? This should not be possible
+      newSymbolName = genEqual(op1, op3);
     }
 
-    // Generate code for NOT - to negate the result of the expression
-    // eg. if we have '~=', we'll generate code for '==' but need to negate it,
-    // for '<=', we'll generate '>',...
-    if(!strcmp(op2->data, "<=") 
-        || !strcmp(op2->data, ">=") 
+    // Create a new symbol. What should be its data type? It should be a bool..
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, -1, newSymbolName);
+
+    // Generate code for NOT (negate the result of the expression)
+    // eg. for '<=', we'll generate '>' and negate it
+    if(!strcmp(op2->data, "<=") || !strcmp(op2->data, ">=") 
         || !strcmp(op2->data, "~=")){
-      newElem->data = genUnaryOperation(op1);
-      // newElem->data = gen...
-      newElem->data = genNot(op1, op3);
+      newSymbol->data = genNot(newSymbol);
     }
 
-    // Push the new element to the symstack (E)
-    SStackPush(symstack, newElem);
+    // Push the new symbol to the symstack (E)
+    SStackPush(symstack, newSymbol);
 
+    // Destroy all old symbols
+    destroySymbol(&op1);
+    destroySymbol(&op2);
+    destroySymbol(&op3);
+
+    return 0;
   }else{
     // No rule
     return -1;
   }
-
-  // Destroy all old symbols
-  destroySymbol(&op1);
-  destroySymbol(&op2);
-  destroySymbol(&op3);
-
-
-  vypluj 0;
 }
 
 
 
 /**
- * @brief Receives a token and return a new element of the symbol stack
+ * @brief Receives a token and return a new symbol of the symbol stack
  *
+ * @param symtab: the symbol table 
  * @param token to be converted to SStackElem
+ *
  * @return SStackElem* converted from token
  */
-SStackElem *parseToken(STStack *symtab, Token *token) {
-  // Allocate and initialize new symbol stack element
-  SStackElem *newElem = allocateSymbol(-1);
-
+int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
   switch (token->type) {
+
+    // Variable, or a nil literal
     case t_idOrKeyword:
-      // Check if it is a nil (cause it might be)
+      *newSymbol = createNewSymbol(st_idOrLiteral, pt_id, false, -1, NULL);
+      // If it is a nil literal
       if(!strcmp(token->data, "nil")){
-        newElem->isId = false;
-        newElem->dataType = dt_nil;
-
-      // Check it the ID exists (we now know it is an ID)
-      }else if(!STFind(symtab, token->data)){
-        fprintf(stderr, "This ID does not exist in the symbol table: %s\n", token->data);
-        // THE ID DOES NOT EXIST
-        exit(ID_DEF_ERR);
-        return NULL;
-      // It is an ID (and not a nil)
+        (*newSymbol)->isId = false;
+        (*newSymbol)->dataType = dt_nil;
+      // If it is an ID (and not a nil)
+      }else if(STFind(symtab, token->data)){
+        (*newSymbol)->isId = true;
+        (*newSymbol)->dataType = STGetVarDataType(symtab, token->data);
+      // The ID does not exist!
       }else{
-        newElem->isId = true;
-        // Read the data type from the symbol table
-        newElem->dataType = STGetVarDataType(symtab, token->data);
-
+        return err(ID_DEF_ERR);
       }
-      newElem->type = st_idOrLiteral;
-      newElem->op = pt_id;
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
+      (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+      memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
       break;
 
+    // A literal (integer, number, string)
     case t_int:
     case t_num:
     case t_sciNum:
     case t_str:
-      newElem->type = st_idOrLiteral;
-      newElem->op = pt_id;
+      *newSymbol = createNewSymbol(st_idOrLiteral, pt_id, false, -1, NULL);
+      // Copy the data
       if(token->type == t_int){
-        newElem->dataType = dt_integer;
+        (*newSymbol)->dataType = dt_integer;
       }else if(token->type == t_num || token->type == t_sciNum){
-        newElem->dataType = dt_number;
+        (*newSymbol)->dataType = dt_number;
       }else if(token->type == t_str){
-        newElem->dataType = dt_string;
+        (*newSymbol)->dataType = dt_string;
       }
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
+      (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+      memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
       break;
 
     // TODO remove these three cases when PA is tested
@@ -554,49 +570,49 @@ SStackElem *parseToken(STStack *symtab, Token *token) {
     case t_assignment:
       // We're not calling this function if we encounter one of these types
       fprintf(stderr, "This is awkward. How did we get this in parse token function?\n");
-      free(newElem);
-      return NULL;
+      return 15; // TODO errcode
       break;
 
-    case t_rightParen:
-      newElem->type = st_operator;
-      newElem->op = pt_rParen;
-      break;
-
+    // (
     case t_leftParen:
-      newElem->type = st_operator;
-      newElem->op = pt_lParen;
+      *newSymbol = createNewSymbol(st_operator, pt_lParen, false, -1, NULL);
       break;
 
+    // )
+    case t_rightParen:
+      *newSymbol = createNewSymbol(st_operator, pt_rParen, false, -1, NULL);
+      break;
+
+    // Arithmetic and string operators (+ - * / // .. #)
     case t_arithmOp:
     case t_strOp:
-      newElem->type = st_operator;
+      *newSymbol = createNewSymbol(st_operator, -1, false, -1, NULL);
       if (strcmp(token->data, "+") == 0) {
-        newElem->op = pt_add;
+        (*newSymbol)->op = pt_add;
       } else if (strcmp(token->data, "-") == 0) {
-        newElem->op = pt_sub;
+        (*newSymbol)->op = pt_sub;
       } else if (strcmp(token->data, "#") == 0) {
-        newElem->op = pt_strlen;
+        (*newSymbol)->op = pt_strlen;
       } else if (strcmp(token->data, "*") == 0) {
-        newElem->op = pt_mult;
+        (*newSymbol)->op = pt_mult;
       } else if (strcmp(token->data, "/") == 0) {
-        newElem->op = pt_div;
+        (*newSymbol)->op = pt_div;
       } else if (strcmp(token->data, "//") == 0) {
-        newElem->op = pt_intDiv;
+        (*newSymbol)->op = pt_intDiv;
       } else if (strcmp(token->data, "..") == 0) {
-        newElem->op = pt_concat;
+        (*newSymbol)->op = pt_concat;
       }
       break;
 
+    // Relational operators (== ~= < > <= >=)
     case t_relOp:
-      newElem->type = st_operator;
-      newElem->op = pt_relOp;
-      newElem->data = malloc(sizeof(char) * (strlen(token->data) + 1));
-      memcpy(newElem->data, token->data, strlen(token->data) + 1);
+      *newSymbol = createNewSymbol(st_operator, pt_relOp, false, -1, NULL);
+      (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+      memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
       break;
   }
 
-  return newElem;
+  return 0;
 }
 
 /**
@@ -671,7 +687,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // no tokens will be received and only the 'reduce' rule will be used
   bool exprEnd = false;
   
-  inputSymbol = parseToken(symtab, token);
+  CondCall(parseToken, symtab, token, &inputSymbol);
 
   while (1) {
     debugPrint(symstack);
@@ -721,7 +737,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
       // If exprEnd is true, it means that the token was stashed and does not
       // exist any more
       if(!exprEnd){
-        inputSymbol = parseToken(symtab, token);
+        CondCall(parseToken, symtab, token, &inputSymbol);
       }
 
     }
@@ -799,7 +815,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
         && symstack->top->type == st_expr
         && symstack->top->next->type == st_dollar){
       break;
-    }else{
     }
 
   }
@@ -816,8 +831,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   }
   // Return the name of the variable where the result of the expression is stored
   *returnVarName = symstack->top->data;
-
-  // TODO anything else here to finish up??
 
   vypluj 0;
 }

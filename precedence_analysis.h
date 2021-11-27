@@ -19,7 +19,7 @@
  * @param token to be converted to SStackElem
  * @return SStackElem* converted from token
  */
-SStackElem *parseToken(STStack *symtable, Token *token);
+int parseToken(STStack *symtable, Token *token, SStackElem **newSymbol);
 
 int parseExpression(STStack *symtab, Token *token, char **returnVarName);
 

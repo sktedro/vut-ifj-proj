@@ -21,4 +21,8 @@ fn()
 
 i = #"abc"
 
-todo
+todo relOps
+
+todo advanced expr
+
+todo invalid expr

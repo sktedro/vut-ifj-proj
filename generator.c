@@ -282,9 +282,9 @@ char *genEqual(SStackElem *element1, SStackElem *element2) {
   return tmp;
 }
 
-char *genNot(SStackElem *element1, SStackElem *element2) {
+char *genNot(SStackElem *src) {
   char *tmp = genTmpVar();
-  printf("NOT %s %s %s\n", tmp, element1->data, element2->data);
+  printf("NOT %s %s\n", tmp, src->data);
   return tmp;
 }
 
