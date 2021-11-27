@@ -9,7 +9,7 @@
     rulesRet = FN(symstack, __VA_ARGS__); \
     if(rulesRet != -1){                   \
       return rulesRet;                    \
-    }                                     \
+    }
 
 #include "precedence_analysis.h"
 
@@ -117,12 +117,14 @@ void destroySymbol(SStackElem **elem){
  *
  * TODO test this somehow please
  */
-bool isZero(char *str){
-  char *todptr = NULL;
-  double res = strtod(str, &todptr);
-  if(!todptr || todptr[0] == 'e' || todptr[0] == 'E' || todptr[0] == '\0'){
-    if(res == 0.0){
-      return true;
+bool isZero(SStackElem *operand){
+  if(operand && operand->isId == false){
+    char *todptr = NULL;
+    double res = strtod(operand->data, &todptr);
+    if(!todptr || todptr[0] == 'e' || todptr[0] == 'E' || todptr[0] == '\0'){
+      if(res == 0.0){
+        return true;
+      }
     }
   }
   return false;
@@ -140,33 +142,31 @@ bool isZero(char *str){
  *
  * TODO
  */
-void popSymbolsForReduction(SStack *symstack, SStackElem **op1, 
+int getSymbolsForReduction(SStack *symstack, SStackElem **op1, 
     SStackElem **op2, SStackElem **op3, int amount){
-  // Get the first symbol from the stack and pop it
-  *op1 = SStackTop(symstack);
-  SStackPop(symstack);
 
   if(amount == 1) {
-    // Pop the '<'
-    SStackPop(symstack);
-
+    // Get the first symbol from the stack (and pop it)
+    *op1 = SStackPop(symstack);
   } else if(amount == 2){
-    // Get the second symbol and pop it
-    *op2 = SStackTop(symstack);
-    SStackPop(symstack);
-    // Pop the '<'
-    SStackPop(symstack);
-
+    // Get first two symbols
+    *op1 = SStackPop(symstack);
+    *op2 = SStackPop(symstack);
   }else if(amount == 3){
-    // Get the second symbol and pop it
-    *op2 = SStackTop(symstack);
-    SStackPop(symstack);
-    // Get the third symbol and pop it
-    *op3 = SStackTop(symstack);
-    SStackPop(symstack);
-    // Pop the '<'
-    SStackPop(symstack);
+    // Get three symbols 
+    *op1 = SStackPop(symstack);
+    *op2 = SStackPop(symstack);
+    *op3 = SStackPop(symstack);
+  }else{
+    // In case there is no op symbol or there are too many. Shouldn't happen
+    fprintf(stderr, "This is odd. Wrong amount of symbols to reduce.\n");
+    vypluj err(SYNTAX_ERR); // TODO errcode
   }
+
+  // Pop the '<'
+  SStackPop(symstack);
+
+  return 0;
 }
 
 int checkRules(SStack *symstack, int opSymbols){
@@ -175,7 +175,7 @@ int checkRules(SStack *symstack, int opSymbols){
         
   // Get the symbols that are to be reduced
   SStackElem *op1 = NULL, *op2 = NULL, *op3 = NULL;
-  popSymbolsForReduction(symstack, &op1, &op2, &op3, opSymbols);
+  CondCall(getSymbolsForReduction, symstack, &op1, &op2, &op3, opSymbols);
 
   // If we only have one symbol, call iRule (which reduces i to E)
   if(opSymbols == 1) {
@@ -183,121 +183,93 @@ int checkRules(SStack *symstack, int opSymbols){
 
   // Unary operator
   } else if(opSymbols == 2) {
-    // Call rule functions of unary operators
     TRYRULE(strLenRule, op2, op1);
 
   // Binary operator
   } else if (opSymbols == 3) {
-    // (i) or (E)
     TRYRULE(bracketsRule, op3, op2, op1);
     TRYRULE(arithmeticOperatorsRule, op3, op2, op1);
     TRYRULE(relationalOperatorsRule, op3, op2, op1);
-
-  // Error
-  }else{
-    // In case there is no op symbol or there are too many. Shouldn't happen
-    fprintf(stderr, "This is odd. Wrong amount of symbols to reduce.\n");
-    vypluj err(SYNTAX_ERR); // TODO errcode
   }
 
   vypluj rulesRet;
 }
 
-// i
+/**
+ * @brief "i rule" - just convert the i to E and push it back to the stack
+ *
+ * TODO
+ */
 int iRule(SStack *symstack, SStackElem *op) {
-  // If the symbol is not a literal, a variable nor an expr, return -1
-  if(op->type != st_idOrLiteral && op->type != st_expr){
-    vypluj -1;
+  // The symbol needs to be an 'i'
+  if(op->type == st_idOrLiteral){
+    op->type = st_expr;
+    SStackPush(symstack, op);
+    vypluj 0;
   }
-
-  // Just 'convert' the i to E and push it back to the stack. Nothing else
-  // changes
-  op->type = st_expr;
-  SStackPush(symstack, op);
-
-  vypluj 0;
+  vypluj -1;
 }
 
 
-// #i or #E
+SStackElem *newSymbol(int type, int op, bool isId, int dataType, char *data){
+  SStackElem *newElem = allocateSymbol(type);
+  if(!newElem){
+    return NULL;
+  }
+  newElem->op = op;
+  newElem->isId = isId;
+  newElem->dataType = dataType;
+  newElem->data = data;
+  return newElem;
+}
+
+/**
+ * @brief "#E rule" - generate code for strlen
+ *
+ * TODO
+ */
 int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
-  // Rule of # i/E (string length)
   if(op1->type == st_operator && op1->op == pt_strlen){
 
-    // Create a new sym stack element (E)
-    SStackElem *newElem = allocateSymbol(st_expr);
-    newElem->op = pt_id;
-    newElem->isId = true;
-    newElem->dataType = dt_integer;
-    // newElem->data = temporary variable name (where the result is stored in 
-    // ifjcode)
-
-    // If the op2 is a variable or a literal
-    if(op2->type == st_idOrLiteral){
-      // If it is a variable
-      if(op2->isId == true){
-        // Check if the data type is a string
-        if(op2->dataType == dt_string){
-          newElem->data = genUnaryOperation(op2);
-        }else{
-          // Calling strlen on a non string data type
-          vypluj err(TYPE_EXPR_ERR);
-        }
-
-      // If it is a literal
-      }else {
-        if(op2->dataType == dt_string){
-          newElem->data = genUnaryOperation(op2);
-        }else{
-          // Calling strlen on a non string data type
-          vypluj err(TYPE_EXPR_ERR);
-        }
-        
-      }
-    // If the op2 is an expression
-    }else if(op2->type == st_expr){
-      if(op2->dataType == dt_string){
-        newElem->data = genUnaryOperation(op2);
-      }else{
-        // Calling strlen on a non string data type
-        vypluj TYPE_EXPR_ERR;
-      }
-
-    // We received a '#' operator but no literal, ID or expression following it
-    }else{
-      return err(SYNTAX_ERR); // TODO errcode
+    // We received a '#' operator but no i after it
+    if(op2->type != st_expr){
+      vypluj err(SYNTAX_ERR); // TODO errcode
+    }
+     
+    // The data type of the operand must be a string
+    if(op2->dataType != dt_string){
+      vypluj err(TYPE_EXPR_ERR);
     }
 
-    // Push the new element to the stack
+    // Generate code
+    char *name = genUnaryOperation(op2);
+
+    // Create a new sym stack element (E) and push it
+    SStackElem *newElem = newSymbol(st_expr, pt_id, true, dt_integer, name);
     SStackPush(symstack, newElem);
+
+    // Destroy both old symbols
+    destroySymbol(&op1);
+    destroySymbol(&op2);
+
   }else{
     // No rule
     return -1;
   }
-
-  destroySymbol(&op1);
-  destroySymbol(&op2);
   return 0;
 }
 
-// (E) or (i)?
+/**
+ * @brief "(E) rule" - destroy the parantheses and push the E back
+ *
+ * TODO
+ */
 int bracketsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
-  if(op1->type == st_operator && op3->type == st_operator
-      && op1->op == pt_lParen && op3->op == pt_rParen){
+  if(op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_idOrLiteral){
 
-    // If it was (E), just push it back
-    if(op2->type == st_idOrLiteral){
-      SStackPush(symstack, op2);
-    // If it was (i), change i to E and push it
-    }else if(op2->type == st_expr){
-      op2->type = st_expr;
-      SStackPush(symstack, op2);
-    }else{
-      // No rule
-      return -1;
-    }
-    // Destroy the parentheses
+    // Push the E and destroy the parentheses
+    SStackPush(symstack, op2);
     destroySymbol(&op1);
     destroySymbol(&op3);
 
@@ -309,46 +281,57 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
   vypluj 0;
 }
 
-
-// TODO simplify
-int checkDataTypes(SStackElem *op1, SStackElem *op2, SStackElem *op3){
-  // Check if the types match
-  if(op1->dataType != op3->dataType){
-
-    // If we have an integer and a number -> convert the int to num
-    // Unless the operator is an intDiv (both need to be integers)
-    if(op2->op != pt_intDiv){
-      if(op1->dataType == dt_integer && op3->dataType == dt_number){
-        op1->data = genConvertIntToFloat(op1);
-        op1->dataType = dt_number;
-
-      }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
-        op3->data = genConvertIntToFloat(op3);
-        op3->dataType = dt_number;
-
-      // Else, throw an error
-      }else{
-        return err(TYPE_EXPR_ERR);
-      }
-    }
+int ensureInteger(SStackElem *op){
+  // If it is a number, convert it to an integer
+  if(op->dataType == dt_number){
+    op->data = genConvertFloatToInt(op);
+    op->dataType = dt_integer;
+  // If it not a num and neither an integer, throw an error
+  }else if(op->dataType != dt_integer){
+    return err(TYPE_EXPR_ERR); // TODO errcode
   }
+  return 0;
+}
 
-  // pt_concat needs two strings
-  if(op2->op == pt_concat){
-    if(op1->dataType != dt_string || op3->dataType != dt_string){
-      return err(TYPE_EXPR_ERR); // TODO errcode
-    }
-  // For other operators: 
-  // Data types of both operands should be equal now (if they were an int and 
-  // a num, we've converted int to num)
-  }else{
-    if(op1->dataType != op3->dataType && op2->op != pt_intDiv){
-      return err(TYPE_EXPR_ERR); // TODO errcode
-    }else{
-      if(op1->dataType != dt_integer && op1->dataType != dt_number){
-        return err(TYPE_EXPR_ERR); // TODO errcode
-      }
-    }
+int ensureNumber(SStackElem *op){
+  // If it is an integer, convert it to a number
+  if(op->dataType == dt_integer){
+    op->data = genConvertIntToFloat(op);
+    op->dataType = dt_number;
+  // If it not an int and neither a number, throw an error
+  }else if(op->dataType != dt_number){
+    return err(TYPE_EXPR_ERR); // TODO errcode
+  }
+  return 0;
+}
+
+int checkDataTypesOfBinaryOperations(SStackElem *op1, SStackElem *op2, 
+    SStackElem *op3){
+  // Concatenation operation needs two strings
+  if(op2->op == pt_concat && (op1->dataType != dt_string || op3->dataType != dt_string)){
+    return err(TYPE_EXPR_ERR);
+
+  // If we're dividing with //, convert both operands to integers
+  }else if(op2->op == pt_intDiv){
+    CondCall(ensureInteger, op1);
+    CondCall(ensureInteger, op3);
+
+  // If we're dividing floats, convert both to floats
+  }else if(op2->op == pt_div){
+    CondCall(ensureNumber, op1);
+    CondCall(ensureNumber, op3);
+
+  // Otherwise, if we have an integer and a number -> convert the int to num
+  }else if(op1->dataType == dt_integer && op3->dataType == dt_number){
+    CondCall(ensureNumber, op1);
+
+  // ... and vice versa
+  }else if(op3->dataType == dt_integer && op1->dataType == dt_number){
+    CondCall(ensureNumber, op3);
+
+  // Else, throw an error if types don't match
+  }else if(op1->dataType != op3->dataType){
+    return err(TYPE_EXPR_ERR);
   }
   return 0;
 }
@@ -356,11 +339,13 @@ int checkDataTypes(SStackElem *op1, SStackElem *op2, SStackElem *op3){
 bool isOperand(SStackElem *op){
   return true;
 }
-bool isBinaryOperator(SStackElem *op){
-  return true;
-}
 bool isUnaryOperator(SStackElem *op){
   return true;
+}
+bool isBinaryArithmeticOperator(SStackElem *op){
+  return op->type == st_operator && 
+      (op->op == pt_mult || op->op == pt_div || op->op == pt_intDiv
+      || op->op == pt_add || op->op == pt_sub || op->op == pt_concat);
 }
 
 // i OPERATOR i or E OPERATOR E ?
@@ -372,73 +357,37 @@ bool isUnaryOperator(SStackElem *op){
 int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
 
-  // op2 needs to be st_operator and op2->op needs to be an arithmetic operator
-  // op1 and op3 both need to be either i or E
-  if(op2->type == st_operator 
-      && (op2->op == pt_mult || op2->op == pt_div || op2->op == pt_intDiv
-        || op2->op == pt_add || op2->op == pt_sub || op2->op == pt_concat)
-      && (op1->type == st_idOrLiteral || op1->type == st_expr)
-      && (op3->type == st_idOrLiteral || op3->type == st_expr)){
+  // op2 needs to be an arithmetic operator, op1 and op3 need to be E
+  if(isBinaryArithmeticOperator(op2) && op1->type == st_expr && op3->type == st_expr){
 
-    ret = checkDataTypes(op1, op2, op3);
-    CondReturn;
+    // Check the data types
+    CondCall(checkDataTypesOfBinaryOperations, op1, op2, op3);
 
-    // Division by zero check
-    if(op2->op == pt_div || op2->op == pt_intDiv){
-      // If the op3 is a literal
-      if(op3->type == st_idOrLiteral && op3->isId == false){
-        // If the op3 value is zero -> error
-        if(isZero(op3->data)){
-          return err(DIV_BY_ZERO_ERR);
-        }
-      }
+    // Division by zero check (op3 can't be zero)
+    if((op2->op == pt_div || op2->op == pt_intDiv) && isZero(op3)){
+      return err(DIV_BY_ZERO_ERR);
     }
 
-
-    // A note to creating a result op (E that will be pushed to the symstack):
-    // Since the op1 and op3 should have the same types, we can take either of
-    // them and make it our result. Let us pick op1
-
-    SStackElem *newOp = allocateSymbol(st_expr);
-    newOp->op = pt_id; 
-    newOp->isId = true;
-    newOp->dataType = op1->dataType; // Initially, take the DT from op1
+    char *newName = NULL;
+    int dataType = -1;
 
     // Generate the operator code:
     if(op2->op == pt_add){
-      newOp->data = genBinaryOperationAdd(op1, op3);
+      newName = genBinaryOperationAdd(op1, op3);
     }else if(op2->op == pt_sub){
-      newOp->data = genBinaryOperationSub(op1, op3);
+      newName = genBinaryOperationSub(op1, op3);
     }else if(op2->op == pt_mult){
-      newOp->data = genBinaryOperationMul(op1, op3);
+      newName = genBinaryOperationMul(op1, op3);
     }else if(op2->op == pt_div){
-      // Convert both to floats
-      if(op1->dataType != dt_number){
-        op1->data = genConvertIntToFloat(op1);
-        op1->dataType = dt_number;
-      }
-      if(op3->dataType != dt_number){
-        op3->data = genConvertIntToFloat(op2);
-        op3->dataType = dt_number;
-      }
-      newOp->data = genBinaryOperationDiv(op1, op3);
-      newOp->dataType = dt_number;
+      newName = genBinaryOperationDiv(op1, op3);
+      dataType = dt_number;
     }else if(op2->op == pt_intDiv){
-      // Convert both to integers 
-      if(op1->dataType != dt_integer){
-        op1->data = genConvertFloatToInt(op1);
-        op1->dataType = dt_integer;
-      }
-      if(op3->dataType != dt_integer){
-        op3->data = genConvertFloatToInt(op2);
-        op3->dataType = dt_integer;
-      }
-      newOp->data = genBinaryOperationIDiv(op1, op3);
-      newOp->dataType = dt_integer;
+      newName = genBinaryOperationIDiv(op1, op3);
+      dataType = dt_integer;
     }else if(op2->op == pt_concat){
-      newOp->data = genBinaryOperationConcat(op1, op3);
+      newName = genBinaryOperationConcat(op1, op3);
     }else{
-      //err ??
+      return err(SYNTAX_ERR);
     }
 
     // Destroy all old symbols
@@ -446,8 +395,9 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op2);
     destroySymbol(&op3);
 
-    // Push the new element to symstack (E)
-    SStackPush(symstack, newOp);
+    // Create a new symbol and push it to the symstack
+    SStackElem *newElem = newSymbol(st_expr, pt_id, false, dataType, newName);
+    SStackPush(symstack, newElem);
 
   }else{
     // No rule
@@ -668,13 +618,11 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token){
   SStackElem *initialSymbol = allocateSymbol(st_dollar);
   initialSymbol->type = st_dollar;
   initialSymbol->op = pt_dollar;
-  ret = SStackPush(*symstack, initialSymbol);
-  CondReturn;
+  CondCall(SStackPush, *symstack, initialSymbol);
 
   // Get a new token if it was not provided by the parser
   if(!(*token)){
-    ret = scanner(token);
-    condVypluj;
+    CondCall(scanner, token);
   }
 
   // Check if the next token is a function - if so, stash the token and let the
@@ -683,6 +631,7 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token){
     stashToken(*token);
     return -1;
   }
+  return 0;
 }
 
 /**
@@ -702,10 +651,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
-  ret = precedenceAnalysisInit(symtab, &symstack, &token);
-  if(ret != 0){
-    return ret;
-  }
+  CondCall(precedenceAnalysisInit, symtab, &symstack, &token);
 
   // Will be checked every cycle of the 'while' - if true, new token is fetched
   // We already have one to process (param)
@@ -727,8 +673,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     if(getNewToken){
       // Get a new token
-      ret = scanner(&token);
-      condVypluj;
+      CondCall(scanner, &token);
 
       // Check if the next token is a part of the expression
 

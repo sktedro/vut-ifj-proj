@@ -30,7 +30,7 @@ int SStackPush(SStack *stack, SStackElem *newElem);
  *
  * @param stack
  */
-void SStackPop(SStack *stack);
+SStackElem *SStackPop(SStack *stack);
 
 /*
  * @brief get the element at the top of the stack

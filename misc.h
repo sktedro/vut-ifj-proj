@@ -38,6 +38,10 @@
   vypluj err(ret)
 #define condVypluj CondReturn
 
+#define CondCall(FN, ...) \
+  ret = FN(__VA_ARGS__);  \
+  CondReturn
+
 /*
  * Enumerations
  */
@@ -171,7 +175,7 @@ typedef struct SStackElem {
   int op;                  // Precedence table enum (pt_)
   bool isId;               // So we know if there's an ID or a literal in *data
   int dataType;            // If it is an ID or a literal, we need the datatype
-  char *data;              // ID, literal,...
+  char *data;              // ID (or expr) name or a literal value
   struct SStackElem *next;
 } SStackElem;
 

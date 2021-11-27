@@ -47,13 +47,13 @@ int SStackPush(SStack *stack, SStackElem *newElem) {
  *
  * @param stack
  */
-void SStackPop(SStack *stack) {
+SStackElem *SStackPop(SStack *stack) {
   if (!stack || !stack->top) {
-    return;
+    return NULL;
   }
   SStackElem *tmp = stack->top;
   stack->top = tmp->next;
-  /** free(tmp); */
+  return tmp;
 }
 
 /*
