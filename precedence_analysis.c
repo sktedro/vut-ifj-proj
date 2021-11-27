@@ -651,7 +651,12 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
-  CondCall(precedenceAnalysisInit, symtab, &symstack, &token);
+  ret = precedenceAnalysisInit(symtab, &symstack, &token);
+
+  // If init returned -1, the token is a function call and it is not an error
+  if(ret == -1){
+    return ret;
+  }
 
   // Will be checked every cycle of the 'while' - if true, new token is fetched
   // We already have one to process (param)
