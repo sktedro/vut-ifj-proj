@@ -8,6 +8,7 @@
 #include "scanner.h"
 
 extern int ret;
+extern int LOCCount;
 
 // A memory where we can stash a token (that should be returned with the next
 // scanner() call)
@@ -105,6 +106,19 @@ int returnToken(Token **token, int type, CharBuffer *buf) {
 }
 
 /**
+ * @brief Pretty much just calling ungetc(), but if the character is a newline,
+ * also decrement the global LOCCount
+ *
+ * @param c: character to be returned
+ */
+void returnCharacterToStdin(char c) {
+  if(c == '\n'){
+    LOCCount--;
+  }
+  ungetc(c, stdin);
+}
+
+/**
  * @brief Main scanner function - returns the next token based on lexical
  * analysis of characters from the standard input
  *
@@ -141,6 +155,8 @@ int scanner(Token **token) {
     if (c == EOF) {
       lastChar = true;
       // TODO vyplut token?
+    } else if (c == '\n') {
+      LOCCount++;
     }
     CondCall(charBufAppend, buf, c);
 
@@ -239,7 +255,7 @@ int scanner(Token **token) {
         charBufPop(buf);
         state = s_comment;
       } else {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         return returnToken(token, t_arithmOp, buf);
       }
       break;
@@ -319,7 +335,7 @@ int scanner(Token **token) {
           state = s_scientific;
         } else {
           if (!isWhitespace(c)) {
-            ungetc(c, stdin);
+            returnCharacterToStdin(c);
           }
           charBufPop(buf);
           return returnToken(token, t_int, buf);
@@ -335,7 +351,7 @@ int scanner(Token **token) {
           state = s_scientific;
         } else {
           if (!isWhitespace(c)) {
-            ungetc(c, stdin);
+            returnCharacterToStdin(c);
           }
           charBufPop(buf);
           return returnToken(token, t_num, buf);
@@ -370,7 +386,7 @@ int scanner(Token **token) {
     // returned
     case s_sciNum:
       if (!isNum(c)) {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         charBufPop(buf);
         return returnToken(token, t_sciNum, buf);
       }
@@ -379,7 +395,7 @@ int scanner(Token **token) {
     // Could be an identificator or a keyword
     case s_idOrKeyword:
       if (!(isLetter(c) || isNum(c) || c == '_')) {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         charBufPop(buf);
         vypluj returnToken(token, t_idOrKeyword, buf);
       }
@@ -392,7 +408,7 @@ int scanner(Token **token) {
         // state = s_arithmOp;
         return returnToken(token, t_arithmOp, buf);
       } else {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         charBufPop(buf);
         return returnToken(token, t_arithmOp, buf);
       }
@@ -424,7 +440,7 @@ int scanner(Token **token) {
         // state = s_relOp
         return returnToken(token, t_relOp, buf);
       } else {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         charBufPop(buf);
         return returnToken(token, t_relOp, buf);
       }
@@ -436,7 +452,7 @@ int scanner(Token **token) {
         // state = s_relOp
         return returnToken(token, t_relOp, buf);
       } else {
-        ungetc(c, stdin);
+        returnCharacterToStdin(c);
         charBufPop(buf);
         return returnToken(token, t_assignment, buf);
       }

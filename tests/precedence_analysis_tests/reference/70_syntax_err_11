@@ -1,4 +1,4 @@
-ERROR: Syntax error.
+ERROR: Syntax error at (around) line 1.
 Testing: Token type is '1' and data '1'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 int@1

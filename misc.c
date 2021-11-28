@@ -8,7 +8,7 @@
 #include "misc.h"
 
 int ret = 0;
-
+int LOCCount = 1;
 bool errMessageWritten = false;
 
 /*
@@ -38,31 +38,31 @@ int err(int errCode) {
   if(!errMessageWritten){
     fprintf(stderr, "ERROR: ");
     if (errCode == LEX_ERR) {
-      fprintf(stderr, "Lexical analysis error.\n"); //TODO
+      fprintf(stderr, "Lexical analysis error ");
     } else if (errCode == SYNTAX_ERR) {
-      fprintf(stderr, "Syntax error.\n"); //TODO
+      fprintf(stderr, "Syntax error ");
     } else if (errCode == ID_DEF_ERR) {
-      fprintf(stderr, "Function/variable definition error.\n"); //TODO
+      fprintf(stderr, "Function/variable definition error "); //TODO
     } else if (errCode == ASS_ERR) {
-      fprintf(stderr, "Assignment error (types might be uncompatible).\n"); //TODO
+      fprintf(stderr, "Assignment error (types might be uncompatible) "); //TODO
     } else if (errCode == PARAM_RET_ERR) {
-      fprintf(stderr, "Function parameters or return values error. Check types.\n"); //TODO
+      fprintf(stderr, "Function parameters or return values error. Check types "); //TODO
     } else if (errCode == TYPE_EXPR_ERR) {
-      fprintf(stderr, "Data types of operands in an expression are not compatible.\n"); //TODO
+      fprintf(stderr, "Data types of operands in an expression are not compatible "); //TODO
     } else if (errCode == OTHER_SEM_ERR) {
-      fprintf(stderr, "Semantic error.\n"); //TODO
+      fprintf(stderr, "Semantic error "); //TODO
     } else if (errCode == NIL_ERR) {
-      fprintf(stderr, "Unexpected nil.\n"); //TODO
+      fprintf(stderr, "Unexpected nil "); //TODO
     } else if (errCode == DIV_BY_ZERO_ERR) {
-      fprintf(stderr, "Division by zero error.\n"); //TODO
+      fprintf(stderr, "Division by zero error "); //TODO
     } else if (errCode == INTERN_ERR) {
-      fprintf(stderr, "Internal error.\n"); //TODO
+      fprintf(stderr, "Internal error "); //TODO
     }else{
-      fprintf(stderr, "Unknown error.\n");
+      fprintf(stderr, "Unknown error ");
     }
+    fprintf(stderr, "at (around) line %d.\n", LOCCount);
     errMessageWritten = true;
   }
-
   vypluj errCode;
 }
 
