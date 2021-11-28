@@ -1,4 +1,4 @@
-ERROR: Unexpected nil.
+ERROR: Unexpected nil at (around) line 3.
 Testing: Token type is '0' and data 'varInt1'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 nil@nil

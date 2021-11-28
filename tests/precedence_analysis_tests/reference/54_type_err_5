@@ -1,4 +1,4 @@
-ERROR: Data types of operands in an expression are not compatible.
+ERROR: Data types of operands in an expression are not compatible at (around) line 3.
 Testing: Token type is '0' and data 'nil'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 nil@nil
