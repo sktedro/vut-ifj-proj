@@ -863,10 +863,9 @@ int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd){
 }
 
 /**
- * @brief Check if a string represents a zero (as a number)
+ * @brief Check if a a symbol represents a zero literal (an int or a num)
  *
- * @param str containing the number (can be an integer, a floating point number
- * or in scientific format)
+ * @param operand as a symbol from the symbol stack
  *
  * @return true if the number is a zero
  */
