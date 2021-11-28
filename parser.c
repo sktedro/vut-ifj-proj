@@ -927,8 +927,9 @@ int pRet() {
     ret = pRetArgList();
     CondReturn;
         vypluj 0;
-  }
+  } 
   // -> eps
+  stashToken(&token);
   vypluj 0;
 }
 
@@ -1489,11 +1490,7 @@ int pNextFnArg() {
 int pRetArgList() {
   printf("-----------------------------------------------------------\n");
   printf("RET ARG LIST\n");
-  //Token *token = NULL;
-
-  // -> eps
-  //TODO
-
+  
   // -> <expr> <retNextArg>
   ret = pExpr();
   CondReturn;
@@ -1549,7 +1546,7 @@ int pRetNextArg() {
   ret = scanner(&token);
   CondReturn;
 
-      printToken(token);
+  printToken(token);
 
   // -> eps
   // ','
@@ -1561,7 +1558,6 @@ int pRetNextArg() {
 
   // -> , <expr> <retNextArg>
   // <expr>
-  // TODO semantic actions
   ret = pExpr();
   CondReturn;
 
