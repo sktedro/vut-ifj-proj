@@ -1,4 +1,4 @@
-ERROR: Types of an expression operands are not compatible.
-Testing: Token type is '10' and data '#'
+ERROR: Unexpected nil.
+Testing: Token type is '0' and data 'varInt1'
 DEFVAR LF@%tmp0
-STRLEN LF@%tmp0 LF@varStr1
+MOVE LF@%tmp0 nil@nil

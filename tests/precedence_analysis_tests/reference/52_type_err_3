@@ -1,6 +1,6 @@
 ERROR: Data types of operands in an expression are not compatible.
-Testing: Token type is '0' and data 'nil'
+Testing: Token type is '2' and data '2.0'
 DEFVAR LF@%tmp0
-MOVE LF@%tmp0 nil@nil
+MOVE LF@%tmp0 float@0x1p+1
 DEFVAR LF@%tmp1
 MOVE LF@%tmp1 string@abc

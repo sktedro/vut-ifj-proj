@@ -224,6 +224,7 @@ int iRule(SStack *symstack, SStackElem *op) {
       char *newName = genTmpVarDef();
       CondCall(genVarAssign, newName, op->dataType, op->data);
       op->data = newName;
+      op->isId = true;
     }
     SStackPush(symstack, op);
     vypluj 0;
@@ -328,6 +329,8 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     CondCall(checkDataTypesOfBinOps, op1, op2, op3);
 
     // Division by zero check (op3 can't be zero)
+    // TODO this doesn't work since op3->data is now a name of a termporary
+    // variable where the literal is stored in ifjcode
     if((op2->op == pt_div || op2->op == pt_intDiv) && isZero(op3)){
       return err(DIV_BY_ZERO_ERR);
     }
@@ -359,7 +362,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op3);
 
     // Create a new symbol and push it to the symstack
-    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, false, resultDataType, newSymbolName);
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, resultDataType, newSymbolName);
     SStackPush(symstack, newSymbol);
 
   }else{
@@ -388,12 +391,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
   // Format needs to be "E relOp E"
   if(op2->op == pt_relOp && op1->type == st_expr && op3->type == st_expr){
 
-    // If and operand is a nil, we can only compare by '==' or '~='
-    if((op1->dataType == dt_nil || op3->dataType == dt_nil)
-        && (!strEq(op2->data, "==") || !strEq(op2->data, "~="))){
-      return err(NIL_ERR); // TODO nemalo by byť TYPE_EXPR_ERR??
-    }
-
     // If we have an integer and a number -> convert the int to num
     if(op1->dataType == dt_integer && op3->dataType == dt_number){
       CondCall(ensureNumber, op1);
@@ -401,9 +398,19 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
       CondCall(ensureNumber, op3);
     }
 
-    // If the data types of operands still don't match -> err
-    if(op1->dataType != op3->dataType){
-      return err(TYPE_EXPR_ERR);
+    // If an operand is a nil
+    if(op1->dataType == dt_nil || op3->dataType == dt_nil){
+      // We can only compare by '==' or '~='
+      if(!strEq(op2->data, "==") && !strEq(op2->data, "~=")){
+        return err(NIL_ERR); // TODO nemalo by byť TYPE_EXPR_ERR??
+      }
+
+    // If no operand is a nil
+    }else{
+      // The data types of operands must match now (we made sure they do)
+      if(op1->dataType != op3->dataType){
+        return err(TYPE_EXPR_ERR);
+      }
     }
 
     // Generate code
@@ -854,7 +861,10 @@ bool isZero(SStackElem *operand){
   if(operand && operand->isId == false){
     char *todptr = NULL;
     double res = strtod(operand->data, &todptr);
-    if(!todptr || todptr[0] == 'e' || todptr[0] == 'E' || todptr[0] == '\0'){
+    fprintf(stderr, "res: %f\nptr: %s\n", res, todptr);
+    // If conversion was successful (todptr[0] == '\0')
+    if(!todptr[0]){
+      // If the number equals 0
       if(res == 0.0){
         return true;
       }

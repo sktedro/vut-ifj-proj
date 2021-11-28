@@ -1,0 +1,6 @@
+ERROR: Syntax error.
+Testing: Token type is '1' and data '1'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 int@1
+DEFVAR LF@%tmp1
+MOVE LF@%tmp1 int@2

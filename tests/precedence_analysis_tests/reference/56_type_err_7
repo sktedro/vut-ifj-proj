@@ -1,2 +1,6 @@
-ERROR: Types of an expression operands are not compatible.
-Testing: Token type is '0' and data 'varInt1'
+ERROR: Data types of operands in an expression are not compatible.
+Testing: Token type is '10' and data '#'
+DEFVAR LF@%tmp0
+STRLEN LF@%tmp0 LF@varStr1
+DEFVAR LF@%tmp1
+MOVE LF@%tmp1 string@abc

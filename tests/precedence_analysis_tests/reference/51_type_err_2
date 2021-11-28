@@ -1,0 +1,4 @@
+ERROR: Data types of operands in an expression are not compatible.
+Testing: Token type is '0' and data 'varStr1'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 int@2

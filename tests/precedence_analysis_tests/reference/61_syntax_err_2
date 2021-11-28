@@ -1,0 +1,4 @@
+ERROR: Syntax error.
+Testing: Token type is '10' and data '..'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 string@abc
