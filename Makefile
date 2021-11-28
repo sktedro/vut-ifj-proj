@@ -17,7 +17,11 @@ token.c
 # why is parser not included as a lib, you might ask? Cause if you include it,
 # the compiler won't compile but throw a thousand errors instead :)))
 
-TESTSCRIPT=./test.sh
+TESTSDIR=./tests
+TESTSSCRIPT=./test.sh
+
+TESTDIR=./ifjtest
+TESTSCRIPT=./ifjtest
 
 OUTPUTDIR=./build
 
@@ -35,13 +39,16 @@ run: all
 	$(OUTPUTDIR)/main
 
 
-# Run tests for a target given by an argument (eg. make test target=scanner)
-# TODO
+.PHONY: tests
+tests:
+	@echo Running all unit tests
+	cd $(TESTSDIR) && $(TESTSSCRIPT) all
+
 .PHONY: test
 test:
-	@echo To run tests from the base directory, run eg. \'make test target=scanner\'
-	@cd tests && \
-	$(TESTSCRIPT) $(target)
+	@echo Running tests by Ondroid
+	cd $(TESTDIR) && $(TESTSCRIPT)
+	
 
 pack: clean
 	mkdir -p pack
