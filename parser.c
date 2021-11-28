@@ -962,8 +962,8 @@ int pStat() {
 
   // -> local <idList> : <type> <newIdAssign> <stat>
   if (strcmp(token->data, "local") == 0) {
+   
     // <idList>
-    
     ret = pIdList();
     CondReturn;
     tokenDestroy(&token);
