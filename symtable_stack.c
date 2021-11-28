@@ -44,7 +44,7 @@ int STStackPush(STStack *stack, STTreeNode *table, int depth) {
 }
 
 /**
- * @brief remove (and free it's allocated memory) the top element
+ * @brief remove the top element
  *
  * @param stack
  */
@@ -54,8 +54,6 @@ void STStackPop(STStack *stack) {
   }
   STStackElem *tmp = stack->top;
   stack->top = stack->top->next;
-  treeDestroy(&(tmp->table));
-  free(tmp);
 }
 
 /**
@@ -109,22 +107,6 @@ STStackElem *STStackNthElem(STStack *stack, int n) {
     tmp = tmp->next;
   }
   return tmp;
-}
-
-/**
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void STStackDestroy(STStack **stack) {
-  if (!stack || !(*stack)) {
-    return;
-  }
-  while ((*stack)->top) {
-    STStackPop(*stack);
-  }
-  free(*stack);
-  *stack = NULL;
 }
 
 #endif

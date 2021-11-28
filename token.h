@@ -27,12 +27,5 @@ int tokenInit(Token **token, int type) ForceRetUse;
  */
 int tokenAddAttrib(Token *token, char *data) ForceRetUse;
 
-/**
- * @brief Free all memory allocated for the token
- *
- * @param token to destroy
- */
-void tokenDestroy(Token **token);
-
 #endif
 /* end of file token.h */

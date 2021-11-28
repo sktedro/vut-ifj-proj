@@ -63,12 +63,5 @@ SStackElem *SStackTopTerminal(SStack *stack);
  */
 int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) ForceRetUse;
 
-/*
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void SStackDestroy(SStack *stack);
-
 #endif
 /* end of file symbol_stack.h */

@@ -1,11 +1,14 @@
 #include "parser.c"
-/** #include "garbage_collector.c" */
+
+extern GarbageCollector garbageCollector;
 
 int main() {
   // INIT - symtab
   CondCall(STInit, &symtab);
-
   CondCall(STPush, symtab);
+
+  // Init the garbage collector
+  CondCall(GCInit);
 
   CondCall(STInsert, symtab, "readi");
   STSetIsVariable(symtab, "readi", false);
@@ -27,7 +30,10 @@ int main() {
   STSetFnDefined(symtab, "chr", true);
 
   ret = pStart();
-  CondReturn;
+  if(ret){
+    GCCollect();
+    free(garbageCollector.pointers);
+  }
 
-  return 0;
+  return ret;
 }

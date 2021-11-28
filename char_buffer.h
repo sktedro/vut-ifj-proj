@@ -41,13 +41,6 @@ void charBufPop(CharBuffer *buf);
 void charBufClear(CharBuffer *buf);
 
 /**
- * @brief Free all memory allocated by the buffer (and its data)
- *
- * @param buf: pointer to a buffer that is to be destroyed
- */
-void charBufDestroy(CharBuffer *buf);
-
-/**
  * @brief Appends a string to an existing buffer or initialises a new buffer if the 
  * given pointer is null.
  * 

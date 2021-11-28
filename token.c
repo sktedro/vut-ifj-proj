@@ -44,27 +44,5 @@ int tokenAddAttrib(Token *token, char *data) {
   return 0;
 }
 
-/**
- * @brief Free all memory allocated for the token
- *
- * @param token to destroy
- */
-void tokenDestroy(Token **token) {
-  if (token) {
-    if (*token) {
-      if ((*token)->data) {
-        free((*token)->data);
-      }
-      free(*token);
-      *token = NULL;
-    } else {
-      fprintf(stderr, "Warning: you called token destroy and gave me *token = NULL.\n");
-    }
-
-  } else {
-    fprintf(stderr, "Warning: you called token destroy and gave me token = NULL.\n");
-  }
-}
-
 #endif
 /* end of file token.c */

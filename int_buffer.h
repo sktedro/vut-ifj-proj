@@ -43,12 +43,6 @@ void intBufPop(IntBuffer *buf);
  */
 void intBufClear(IntBuffer *buf);
 
-/**
- * @brief Free all memory allocated by the buffer (and its data)
- *
- * @param buf: pointer to a buffer that is to be destroyed
- */
-void intBufDestroy(IntBuffer *buf);
 
 #endif
 /* end of file int_buffer.h */

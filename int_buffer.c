@@ -62,18 +62,6 @@ void intBufClear(IntBuffer *buf) {
   buf->len = 0;
 }
 
-/** 
- * @brief Free all memory allocated by the buffer (and its data)
- *
- * @param buf: pointer to a buffer that is to be destroyed
- */
-void intBufDestroy(IntBuffer *buf) {
-  if (buf) {
-    free(buf->data);
-    free(buf);
-    buf = NULL;
-  }
-}
 
 #endif
 /* end of file int_buffer.c */

@@ -30,20 +30,6 @@ int newSTTreeNode(STTreeNode **node, char *key) ForceRetUse;
 int treeInsert(STTreeNode **root, char *key) ForceRetUse;
 
 /**
- * @brief Frees all memory allocated by a tree node
- *
- * @param elem to be freed
- */
-void treeElemDestroy(STElem *data);
-
-/**
- * @brief Destroys the whole tree and frees all used memory.
- *
- * @param root a pointer to a tree
- */
-void treeDestroy(STTreeNode **root);
-
-/**
  * @brief Replaces the target node with the rightmost node from the given
  * subtree.
  *

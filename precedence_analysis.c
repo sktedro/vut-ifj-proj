@@ -122,7 +122,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
 /**
  * @brief Shift step of the precedence analysis - just push the input symbol
- * to the symbol stack (and destroy the token)
+ * to the symbol stack
  *
  * @param symstack: symbol stack
  * @param inputSymbol to be pushed to the symbol stack
@@ -133,8 +133,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token) {
   // Push the input symbol to the stack
   CondCall(SStackPush, symstack, inputSymbol);
-  // Destroy the old token
-  tokenDestroy(token);
   return 0;
 }
 
@@ -263,10 +261,6 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
         newSymbolName);
     CondCall(SStackPush, symstack, newSymbol);
 
-    // Destroy both old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-
   } else {
     // No rule
     return -1;
@@ -287,11 +281,8 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
 int bracketsRule(SStack *symstack, SStackElem *op1,
                  SStackElem *op2, SStackElem *op3) {
   if (op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_expr) {
-
-    // Push the E and destroy the parentheses
+    // Push the E back
     CondCall(SStackPush, symstack, op2);
-    destroySymbol(&op1);
-    destroySymbol(&op3);
 
   } else {
     // No rule
@@ -359,11 +350,6 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     } else {
       return err(SYNTAX_ERR);
     }
-
-    // Destroy all old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-    destroySymbol(&op3);
 
     // Create a new symbol and push it to the symstack
     SStackElem *newSymbol = NULL;
@@ -450,11 +436,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Push the new symbol to the symstack (E)
     CondCall(SStackPush, symstack, newSymbol);
-
-    // Destroy all old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-    destroySymbol(&op3);
 
     return 0;
   } else {
@@ -735,21 +716,6 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
   (*newSymbol)->data = data;
   (*newSymbol)->isZero = false;
   return 0;
-}
-
-/**
- * @brief Destroys (frees data allocated by) a symbol of the symbol stack
- *
- * @param elem to be destroyed
- */
-void destroySymbol(SStackElem **elem) {
-  if (elem && *elem) {
-    if ((*elem)->data) {
-      free((*elem)->data);
-    }
-    free(*elem);
-  }
-  *elem = NULL;
 }
 
 /*

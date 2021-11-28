@@ -93,15 +93,7 @@ bool isWhitespace(char c) {
  */
 int returnToken(Token **token, int type, CharBuffer *buf) {
   CondCall(tokenInit, token, type);
-  if (!(*token)) {
-    charBufDestroy(buf);
-    vypluj err(INTERN_ERR);
-  }
-  if (tokenAddAttrib(*token, buf->data)) {
-    charBufDestroy(buf);
-    vypluj err(INTERN_ERR);
-  }
-  charBufDestroy(buf);
+  CondCall(tokenAddAttrib, *token, buf->data);
   vypluj 0;
 }
 
@@ -459,10 +451,6 @@ int scanner(Token **token) {
       break;
     }
   }
-
-  // We should never reach these lines, but in case we do...
-  // Free the allocated buffer
-  charBufDestroy(buf);
   vypluj 0;
 }
 

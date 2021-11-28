@@ -133,20 +133,5 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   return err(SYNTAX_ERR);
 }
 
-/*
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void SStackDestroy(SStack *stack) {
-  if (!stack) {
-    return;
-  }
-  while (stack->top) {
-    SStackPop(stack);
-  }
-  free(stack);
-}
-
 #endif
 /* end of file symbol_stack.c */

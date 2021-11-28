@@ -38,7 +38,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName)
 
 /**
  * @brief Shift step of the precedence analysis - just push the input symbol
- * to the symbol stack (and destroy the token)
+ * to the symbol stack
  *
  * @param symstack: symbol stack
  * @param inputSymbol to be pushed to the symbol stack
@@ -242,13 +242,6 @@ int allocateSymbol(SStackElem **newSymbol, int symbol) ForceRetUse;
  */
 int createSymbol(SStackElem **newSymbol, int type, int op, bool isId, 
     int dataType, char *data) ForceRetUse;
-
-/**
- * @brief Destroys (frees data allocated by) a symbol of the symbol stack
- *
- * @param elem to be destroyed
- */
-void destroySymbol(SStackElem **elem);
 
 
 /*

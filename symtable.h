@@ -18,13 +18,6 @@
 int STInit(STStack **stack) ForceRetUse;
 
 /**
- * @brief Destroy the symbol table
- *
- * @param stack to be destroyed
- */
-void STDestroy(STStack **stack);
-
-/**
  * @brief Push new frame on top of the stack
  *
  * @param stack - stack with frames
