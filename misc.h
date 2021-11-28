@@ -53,22 +53,23 @@
 #define CondGCInsert(ptr)     \
   ret = GCInsert((void*)ptr); \
   if(ret) {                   \
-  } // TODO return ret
+  }
+// TODO return ret
 
 #define GCMalloc(ptr, len)    \
   ptr = malloc(len);          \
   if(!ptr) {                  \
-    return err(INTERN_ERR);   \
   }                           \
   CondGCInsert(ptr);
+// TODO return ret
 
 #define GCRealloc(ptr, len)   \
   GCDelete(ptr);              \
   ptr = realloc(ptr, len);    \
   if(!ptr) {                  \
-    return err(INTERN_ERR);   \
   }                           \
   CondGCInsert(ptr);
+// TODO return ret
 
 /*
  * Enumerations

@@ -51,6 +51,7 @@
 #include "parser.h"
 
 extern int ret;
+extern GarbageCollector garbageCollector;
 
 STStack *symtab;
 
@@ -80,19 +81,17 @@ SStackElem *element;
   token = NULL;
 
 
-void initElement() {
-  element = malloc(sizeof(SStackElem));
-  CondGCInsert(element);
-  element->data = malloc(sizeof(char) * 250);
-  CondGCInsert(element->data);
+int initElement() {
+  GCMalloc(element, sizeof(SStackElem)); 
+  GCMalloc(element->data, sizeof(char) * 250);
 
-  SStackElem *tmp = malloc(sizeof(SStackElem));
-  CondGCInsert(tmp);
-  tmp->data = malloc(sizeof(char) * 250);
-  CondGCInsert(tmp->data);
+  SStackElem *tmp;
+  GCMalloc(tmp, sizeof(SStackElem));
+  GCMalloc(tmp->data, sizeof(char) * 250);
 
   element->next = tmp;
   
+  return 0;
 }
 
 void cleanElement() {
@@ -1616,8 +1615,8 @@ int pType() {
       vypluj err(0);
     }
 
-    STElem *e = malloc(sizeof(STElem));
-    CondGCInsert(e);
+    STElem *e;
+    GCMalloc(e, sizeof(STElem));
     e = STFind(symtab, element->data);
     if(!e){
       printf("is null since it does not exist in the symbol table (yet)\n");
@@ -1669,8 +1668,8 @@ int pIdList() {
   STSetFnDefined(symtab, token->data, false);
   element->data = token->data;
 
-  STElem *e = malloc(sizeof(STElem));
-  CondGCInsert(e);
+  STElem *e;
+  GCMalloc(e, sizeof(STElem));
   e = STFind(symtab, token->data);
 
   if(!e) {

@@ -8,6 +8,7 @@
 #include "generator.h"
 
 extern int ret;
+extern GarbageCollector garbageCollector;
 
 int tmpCounter = 0;
 int labelCounter = 0;
@@ -38,11 +39,11 @@ int digits(int value) {
 char *genName(char *name, int frame) {
 
   if(name[0] != '%') {
-    char *frameNum = malloc(sizeof(char) * (digits(frame) + 1));
-    CondGCInsert(frameNum);
+    char *frameNum;
+    GCMalloc(frameNum, sizeof(char) * (digits(frame) + 1));
     sprintf(frameNum, "%d", frame);
-    char *newName = malloc(sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
-    CondGCInsert(newName);
+    char *newName;
+    GCMalloc(newName, sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
     memcpy(newName, name, strlen(name));
     memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
 
@@ -59,8 +60,8 @@ char *genName(char *name, int frame) {
  * @return ifj21code string
  */
 char *stringConvert(char *string) {
-  char *newString = malloc(sizeof(char) * (strlen(string)*3));
-  CondGCInsert(newString);
+  char *newString;
+  GCMalloc(newString, sizeof(char) * (strlen(string)*3));
   int asciiValue = 0;
   int digitsTmp = 0;
   int k = 0;
@@ -101,8 +102,8 @@ char *stringConvert(char *string) {
  * @return generated temporary variable 
  */
 char *genTmpVar() {
-  char *varName = malloc(sizeof(char) * 10);
-  CondGCInsert(varName);
+  char *varName;
+  GCMalloc(varName, sizeof(char) * 10);
   sprintf(varName, "%s%d", "%tmp", tmpCounter);
   tmpCounter++;
 
@@ -111,8 +112,8 @@ char *genTmpVar() {
 }
 
 char *genLabelName() {
-  char *varName = malloc(sizeof(char) * 10);
-  CondGCInsert(varName);
+  char *varName;
+  GCMalloc(varName, sizeof(char) * 10);
   sprintf(varName, "%s%d", "%label", labelCounter);
   labelCounter++;
   
