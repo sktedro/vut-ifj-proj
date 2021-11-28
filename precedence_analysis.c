@@ -49,6 +49,9 @@ char precTab[12][12] = {
  * @return 0 if successful, errcode otherwise 
  */
 int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
+  // TODO check if the token received from parser is all right (not a keyword
+  // and so on)
+  
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
@@ -102,7 +105,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     // Reduce (the top terminals to an expression)
     } else if (precTableSymbol == '>') {
-      reduceStep(symstack);
+      CondCall(reduceStep, symstack);
       getNewToken = false;
 
     // Syntax error
@@ -282,7 +285,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2){
  */
 int bracketsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
-  if(op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_idOrLiteral){
+  if(op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_expr){
 
     // Push the E and destroy the parentheses
     SStackPush(symstack, op2);
@@ -317,8 +320,6 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
  */
 int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1, 
     SStackElem *op2, SStackElem *op3) {
-  char *newSymbolName = NULL;
-  int dataType = -1;
 
   // op2 needs to be an arithmetic operator, op1 and op3 need to be E
   if(isBinArithmOp(op2) && op1->type == st_expr && op3->type == st_expr){
@@ -331,6 +332,10 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
       return err(DIV_BY_ZERO_ERR);
     }
 
+    // Result will have the same data type as op1 (and op3)
+    int resultDataType = op1->dataType;
+    char *newSymbolName = NULL;
+
     // Generate the operator code:
     if(op2->op == pt_add){
       newSymbolName = genBinaryOperationAdd(op1, op3);
@@ -340,10 +345,8 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
       newSymbolName = genBinaryOperationMul(op1, op3);
     }else if(op2->op == pt_div){
       newSymbolName = genBinaryOperationDiv(op1, op3);
-      dataType = dt_number;
     }else if(op2->op == pt_intDiv){
       newSymbolName = genBinaryOperationIDiv(op1, op3);
-      dataType = dt_integer;
     }else if(op2->op == pt_concat){
       newSymbolName = genBinaryOperationConcat(op1, op3);
     }else{
@@ -356,7 +359,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     destroySymbol(&op3);
 
     // Create a new symbol and push it to the symstack
-    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, false, dataType, newSymbolName);
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, false, resultDataType, newSymbolName);
     SStackPush(symstack, newSymbol);
 
   }else{
@@ -825,12 +828,12 @@ int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd){
   CondCall(scanner, token);
 
   // ',', ':', '=' and keywords (not including nil) can't be a part of expr
-  if(!exprEnd && !isTokenAllowedInExpr(*token)){
+  if(!(*exprEnd) && !isTokenAllowedInExpr(*token)){
     stashToken(token);
     *exprEnd = true;
-  }
+  
   // If the last token was an operand and the next token is too, expr ends
-  if(exprCanEnd && isTokenIdOrLiteral(*token)){
+  }else if(exprCanEnd && isTokenIdOrLiteral(*token)){
     stashToken(token);
     *exprEnd = true;
   }
@@ -884,7 +887,7 @@ bool isTokenAllowedInExpr(Token *token){
   if(token->type == t_colon
       || token->type == t_comma
       || token->type == t_assignment
-      || (strEq(token->data, "nil") && isKeyword(token))){
+      || (!strEq(token->data, "nil") && isKeyword(token))){
     return false;
   }else{
     return true;

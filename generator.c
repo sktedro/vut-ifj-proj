@@ -129,12 +129,25 @@ void genVarDef(char *name, int frame) {
  */
 int genVarAssign(char *name, int dataType, char *assignValue) {
   if(dataType == dt_integer) {
-    printf("MOVE LF@%s int@%s\n", name, assignValue);
+    // Convert to int and check if the conversion was successful
+    char *tolptr = NULL;
+    int val = (int)strtol(assignValue, &tolptr, 10);
+    // If the assignValue contains an invalid number (shouldn't happen since we
+    // are checking it in lexical analysis)
+    if(tolptr[0]){
+      return err(SYNTAX_ERR); // TODO spravny errcode?
+    }
+    printf("MOVE LF@%s int@%d\n", name, val);
   
   } else if(dataType == dt_number) {
-    printf("MOVE LF@%s float@%s\n", name, assignValue);
-    /** // TODO convert from scientific form if needed */
-    /** printf("MOVE LF@%s float@%a\n", name, atof(assignValue)); */
+    // Convert to double and check if the conversion was successful
+    char *todptr = NULL;
+    double val = strtod(assignValue, &todptr);
+    // If the assignValue contains an invalid number (shouldn't happen)
+    if(todptr[0]){
+      return err(SYNTAX_ERR); // TODO spravny errcode?
+    }
+    printf("MOVE LF@%s float@%a\n", name, val);
   
   } else if(dataType == dt_string) {
     printf("MOVE LF@%s string@%s\n", name, assignValue);
@@ -196,22 +209,7 @@ char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
 
 char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
-  char *op1 = src1->data, *op2 = src2->data;
-
-  // If it is not an ID, put " around it
-  if(src1 && !src1->isId){
-    op1 = malloc(sizeof(char) * (strlen(src1->data) + 2 + 1));
-    op1 = strcat(op1, "\"");
-    op1 = strcat(op1, src1->data);
-    op1 = strcat(op1, "\"");
-  }
-  if(src2 && !src2->isId){
-    op2 = malloc(sizeof(char) * (strlen(src2->data) + 2 + 1));
-    op2 = strcat(op2, "\"");
-    op2 = strcat(op2, src2->data);
-    op2 = strcat(op2, "\"");
-  }
-  printf("CONCAT LF@%s LF@%s LF@%s\n", dest, op1, op2);
+  printf("CONCAT LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
@@ -229,16 +227,7 @@ char *genConvertIntToFloat(SStackElem *src) {
 
 char *genUnaryOperation(SStackElem *src) {
   char *dest = genTmpVar();
-  char *op = src->data;
-  // If it is not an ID, put " around it
-  // TODO make it a function?
-  if(src && !src->isId){
-    op = malloc(sizeof(char) * (strlen(src->data) + 2 + 1));
-    op = strcat(op, "\"");
-    op = strcat(op, src->data);
-    op = strcat(op, "\"");
-  }
-  printf("STRLEN LF@%s LF@%s\n", dest, op);
+  printf("STRLEN LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 

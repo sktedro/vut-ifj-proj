@@ -1,9 +1,9 @@
-Testing: Token type is '2' and data '1.0'
+Testing: Token type is '4' and data 'abc'
 DEFVAR LF@%tmp0
-MOVE LF@%tmp0 float@0x1p+0
+MOVE LF@%tmp0 string@abc
 DEFVAR LF@%tmp1
-MOVE LF@%tmp1 float@0x1p+1
+MOVE LF@%tmp1 string@def
 DEFVAR LF@%tmp2
-ADD LF@%tmp2 LF@%tmp0 LF@%tmp1
+CONCAT LF@%tmp2 LF@%tmp0 LF@%tmp1
 Testing: Expression result is in: %tmp2
 Testing: Precedence analysis returned 0

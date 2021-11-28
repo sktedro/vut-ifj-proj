@@ -42,11 +42,11 @@ void initPushToSymtab(){
   pushVarToSymtab("varInt4", dt_integer);
   pushVarToSymtab("varInt5", dt_integer);
 
-  pushVarToSymtab("varNum1", dt_integer);
-  pushVarToSymtab("varNum2", dt_integer);
-  pushVarToSymtab("varNum3", dt_integer);
-  pushVarToSymtab("varNum4", dt_integer);
-  pushVarToSymtab("varNum5", dt_integer);
+  pushVarToSymtab("varNum1", dt_number);
+  pushVarToSymtab("varNum2", dt_number);
+  pushVarToSymtab("varNum3", dt_number);
+  pushVarToSymtab("varNum4", dt_number);
+  pushVarToSymtab("varNum5", dt_number);
 
   pushVarToSymtab("varStr1", dt_string);
   pushVarToSymtab("varStr2", dt_string);
