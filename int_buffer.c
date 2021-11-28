@@ -2,10 +2,12 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef INTBUFFER_C
-#define INTBUFFER_C
+#ifndef INT_BUFFER_C
+#define INT_BUFFER_C
 
 #include "int_buffer.h"
+
+extern int ret;
 
 /**
  * @brief Allocate a new buffer
@@ -15,16 +17,8 @@
  * @return 0 if successful, errcode otherwise
  */
 int intBufInit(IntBuffer **buf) {
-  *buf = (IntBuffer *)malloc(sizeof(IntBuffer));
-  if (!(*buf)) {
-    return err(INTERN_ERR);
-  }
-
-  (*buf)->data = (int *)malloc(INTBUFINITLEN * sizeof(int));
-  if (!(*buf)->data) {
-    free(*buf);
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*buf, sizeof(IntBuffer));
+  GCMalloc((*buf)->data, INTBUFINITLEN * sizeof(int));
   (*buf)->size = INTBUFINITLEN;
   (*buf)->len = 0;
   return 0;
@@ -40,12 +34,7 @@ int intBufInit(IntBuffer **buf) {
  */
 int intBufAppend(IntBuffer *buf, int i) {
   if (buf->len + 1 == buf->size) {
-    buf->data = (int *)realloc(buf->data, 2 * buf->size * sizeof(int));
-    if (buf->data == NULL) {
-      free(buf);
-      buf = NULL;
-      return err(INTERN_ERR);
-    }
+    GCRealloc(buf->data, 2 * buf->size * sizeof(int));
     buf->size *= 2;
   }
   buf->data[buf->len] = i;

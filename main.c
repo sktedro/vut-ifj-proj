@@ -1,5 +1,5 @@
-/** #include "misc.c" */
 #include "parser.c"
+/** #include "garbage_collector.c" */
 
 int main() {
   // INIT - symtab

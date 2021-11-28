@@ -1,10 +1,11 @@
-#ifndef VUT_IFJ_PROJ_GENERATOR_H
-#define VUT_IFJ_PROJ_GENERATOR_H
+/*
+ * Code generator
+ */
+
+#ifndef GENERATOR_H
+#define GENERATOR_H
 
 #include "misc.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
 
 int digits(int value);
 char *genName(char *name, int frame);
@@ -36,4 +37,5 @@ char *genJumpIfEq(char *tmp);
 void genLabel(char *labelName);
 void genStart();
 
-#endif //VUT_IFJ_PROJ_GENERATOR_H
+#endif
+/* end of file generator.c */

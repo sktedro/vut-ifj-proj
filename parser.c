@@ -87,10 +87,14 @@ SStackElem *element;
 
 void initElement() {
   element = malloc(sizeof(SStackElem));
+  CondGCInsert(element);
   element->data = malloc(sizeof(char) * 250);
+  CondGCInsert(element->data);
 
   SStackElem *tmp = malloc(sizeof(SStackElem));
+  CondGCInsert(tmp);
   tmp->data = malloc(sizeof(char) * 250);
+  CondGCInsert(tmp->data);
 
   element->next = tmp;
   
@@ -1680,6 +1684,7 @@ int pType() {
     }
 
     STElem *e = malloc(sizeof(STElem));
+    CondGCInsert(e);
     e = STFind(symtab, element->data);
     if(!e){
       printf("is null since it does not exist in the symbol table (yet)\n");
@@ -1734,6 +1739,7 @@ int pIdList() {
   element->data = token->data;
 
   STElem *e = malloc(sizeof(STElem));
+  CondGCInsert(e);
   e = STFind(symtab, token->data);
 
   if(!e) {

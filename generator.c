@@ -2,7 +2,12 @@
  * Code generator
  */
 
+#ifndef GENERATOR_C
+#define GENERATOR_C
+
 #include "generator.h"
+
+extern int ret;
 
 int tmpCounter = 0;
 int labelCounter = 0;
@@ -34,8 +39,10 @@ char *genName(char *name, int frame) {
 
   if(name[0] != '%') {
     char *frameNum = malloc(sizeof(char) * (digits(frame) + 1));
+    CondGCInsert(frameNum);
     sprintf(frameNum, "%d", frame);
     char *newName = malloc(sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
+    CondGCInsert(newName);
     memcpy(newName, name, strlen(name));
     memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
 
@@ -53,6 +60,7 @@ char *genName(char *name, int frame) {
  */
 char *stringConvert(char *string) {
   char *newString = malloc(sizeof(char) * (strlen(string)*3));
+  CondGCInsert(newString);
   int asciiValue = 0;
   int digitsTmp = 0;
   int k = 0;
@@ -93,20 +101,22 @@ char *stringConvert(char *string) {
  * @return generated temporary variable 
  */
 char *genTmpVar() {
-  char *ret = malloc(sizeof(char) * 10);
-  sprintf(ret, "%s%d", "%tmp", tmpCounter);
+  char *varName = malloc(sizeof(char) * 10);
+  CondGCInsert(varName);
+  sprintf(varName, "%s%d", "%tmp", tmpCounter);
   tmpCounter++;
 
-  printf("DEFVAR LF@%s\n", ret);
-  return ret;
+  printf("DEFVAR LF@%s\n", varName);
+  return varName;
 }
 
 char *genLabelName() {
-  char *ret = malloc(sizeof(char) * 10);
-  sprintf(ret, "%s%d", "%label", labelCounter);
+  char *varName = malloc(sizeof(char) * 10);
+  CondGCInsert(varName);
+  sprintf(varName, "%s%d", "%label", labelCounter);
   labelCounter++;
   
-  return ret;
+  return varName;
 }
 
 char *genTmpVarDef() {
@@ -353,3 +363,6 @@ void genStart() {
  * BREAK x
  * DPRINT
  */
+
+#endif
+/* end of file generator.c */

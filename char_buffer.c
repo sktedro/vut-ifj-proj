@@ -2,8 +2,8 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef CHARBUFFER_C
-#define CHARBUFFER_C
+#ifndef CHAR_BUFFER_C
+#define CHAR_BUFFER_C
 
 #include "char_buffer.h"
 
@@ -20,15 +20,8 @@ extern int ret;
  * @return 0 if successful, errcode otherwise
  */
 int charBufInit(CharBuffer **buf) {
-  *buf = (CharBuffer *)malloc(sizeof(CharBuffer));
-  if (!(*buf)) {
-    return err(INTERN_ERR);
-  }
-  (*buf)->data = (char *)malloc(CHARBUFINITLEN * sizeof(char));
-  if (!(*buf)->data) {
-    free(*buf);
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*buf, sizeof(CharBuffer));
+  GCMalloc((*buf)->data, CHARBUFINITLEN * sizeof(char));
   (*buf)->size = CHARBUFINITLEN;
   (*buf)->data[0] = '\0';
   return 0;
@@ -44,12 +37,7 @@ int charBufInit(CharBuffer **buf) {
  */
 int charBufAppend(CharBuffer *buf, char c) {
   if (buf->len + 1 == buf->size) {
-    buf->data = (char *)realloc(buf->data, 2 * buf->size * sizeof(char));
-    if (buf->data == NULL) {
-      free(buf);
-      buf = NULL;
-      return err(INTERN_ERR);
-    }
+    GCRealloc(buf->data, 2 * buf->size * sizeof(char));
     buf->size *= 2;
   }
   buf->data[buf->len] = c;

@@ -623,7 +623,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       return err(ID_DEF_ERR);
     }
 
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     break;
 
@@ -643,7 +643,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       (*newSymbol)->dataType = dt_string;
     }
 
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     (*newSymbol)->isZero = isZero(*newSymbol);
     break;
@@ -683,7 +683,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
   // Relational operators (== ~= < > <= >=)
   case t_relOp:
     CondCall(createSymbol, newSymbol, st_operator, pt_relOp, false, -1, NULL);
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     break;
   }
@@ -701,10 +701,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
  * @return 0 if successful, errcode otherwise
  */
 int allocateSymbol(SStackElem **newSymbol, int symbol) {
-  *newSymbol = malloc(sizeof(SStackElem));
-  if (!(*newSymbol)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*newSymbol, sizeof(SStackElem));
   (*newSymbol)->type = symbol;
   (*newSymbol)->op = -1;
   (*newSymbol)->isId = false;

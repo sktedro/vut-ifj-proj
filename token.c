@@ -7,6 +7,8 @@
 
 #include "token.h"
 
+extern int ret;
+
 /**
  * @brief allocates memory for a new token and assigns it a type
  *
@@ -16,10 +18,7 @@
  * @return 0 if successful, errcode otherwise
  */
 int tokenInit(Token **token, int type) {
-  *token = malloc(sizeof(Token));
-  if (!(*token)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*token, sizeof(Token));
   (*token)->type = type;
   (*token)->data = NULL;
   return 0;
@@ -38,13 +37,8 @@ int tokenAddAttrib(Token *token, char *data) {
     return 1;
   }
 
-  // Allocate space for data
-  token->data = malloc(strlen(data) + 1);
-  if (!token->data) {
-    return 1;
-  }
-
-  // .. and write the data to the allocated space
+  // Allocate space for data and write the data to the allocated space
+  GCMalloc(token->data, strlen(data) + 1);
   memcpy(token->data, data, strlen(data) + 1);
 
   return 0;

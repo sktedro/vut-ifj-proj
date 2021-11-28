@@ -2,8 +2,8 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef CHARBUFFER_H
-#define CHARBUFFER_H
+#ifndef CHAR_BUFFER_H
+#define CHAR_BUFFER_H
 
 #include "misc.h"
 

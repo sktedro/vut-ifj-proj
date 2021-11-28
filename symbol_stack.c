@@ -17,7 +17,7 @@ extern int ret;
  * @return 0 if successful, errcode otherwise
  */
 int SStackInit(SStack **stack) {
-  *stack = (SStack *)malloc(sizeof(SStack));
+  GCMalloc(*stack, sizeof(SStack));
   if (!(*stack)) {
     return err(INTERN_ERR);
   }

@@ -4,12 +4,12 @@ CFLAGS=-Wall -Wextra -std=c99 -g
 MAIN=main.c
 LIBS=\
 char_buffer.c \
+generator.c \
 int_buffer.c \
 misc.c \
 precedence_analysis.c \
 scanner.c \
 symbol_stack.c \
-generator.c \
 symtable.c \
 symtable_stack.c \
 symtable_tree.c \

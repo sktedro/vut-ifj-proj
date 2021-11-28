@@ -18,33 +18,21 @@ extern int ret;
  * @return 0 if successful, errcode otherwise
  */
 int newSTTreeNode(STTreeNode **node, char *key) {
-  *node = (STTreeNode *)malloc(sizeof(STTreeNode));
-  if (!(*node)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*node, sizeof(STTreeNode));
 
   // Init children
   (*node)->rightChild = NULL;
   (*node)->leftChild = NULL;
 
   // Copy the key
-  (*node)->key = malloc((strlen(key) + 1) * sizeof(char));
-  if (!(*node)->key) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->key, (strlen(key) + 1) * sizeof(char));
   memcpy((*node)->key, key, (strlen(key) + 1) * sizeof(char));
 
   // Init data
-  (*node)->data = malloc(sizeof(STElem));
-  if (!(*node)->data) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->data, sizeof(STElem));
 
   // Copy key
-  (*node)->data->name = malloc((strlen(key) + 1) * sizeof(char));
-  if (!(*node)->data->name) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->data->name, (strlen(key) + 1) * sizeof(char));
   memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
 
   // Init other data

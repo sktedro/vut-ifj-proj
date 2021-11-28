@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define GCINITLEN 1024
+
+
+// #include "garbage_collector.h"
+
 /*
  * ♥
  */
@@ -44,6 +49,26 @@
 #define CondCall(FN, ...) \
   ret = FN(__VA_ARGS__);  \
   CondReturn
+
+#define CondGCInsert(ptr)     \
+  ret = GCInsert((void*)ptr); \
+  if(ret) {                   \
+  } // TODO return ret
+
+#define GCMalloc(ptr, len)    \
+  ptr = malloc(len);          \
+  if(!ptr) {                  \
+    return err(INTERN_ERR);   \
+  }                           \
+  CondGCInsert(ptr);
+
+#define GCRealloc(ptr, len)   \
+  GCDelete(ptr);              \
+  ptr = realloc(ptr, len);    \
+  if(!ptr) {                  \
+    return err(INTERN_ERR);   \
+  }                           \
+  CondGCInsert(ptr);
 
 /*
  * Enumerations
@@ -221,6 +246,33 @@ typedef struct {
   STStackElem *top;
 } STStack;
 
+
+/*
+ * typedef struct {
+ *   Token **token;
+ *   CharBuffer **charBuffer;
+ *   IntBuffer **intBuffer;
+ *   SStack **symstack;
+ *   STStack **symtabStack;
+ *   STStackElem **symtab;
+ * } GCPointers;
+ * 
+ * typedef struct {
+ *   int tokenCount;
+ *   int charBufferCount;
+ *   int intBufferCount;
+ *   int symstackCount;
+ *   int symtabStackCount;
+ *   int symtabCount;
+ * } GCMetadata;
+ */
+
+typedef struct {
+  void **pointers;
+  int ptrsAllocated;
+  int ptrsUsed;
+} GarbageCollector;
+
 /*
  * Miscellaneous functions
  */
@@ -243,6 +295,15 @@ bool strEq(char *str1, char *str2) ForceRetUse;
  * @return errCode
  */
 int err(int errCode) ForceRetUse;
+
+int GCInit() ForceRetUse;
+
+int GCInsert(void *ptr) ForceRetUse;
+
+void GCDelete();
+
+void GCCollect();
+
 
 #endif
 /* end of file misc.h */
