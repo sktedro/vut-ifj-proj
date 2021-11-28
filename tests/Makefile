@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g #-Wall -Wextra
+CFLAGS=-g -Wno-unused-result
 
 
 LIBS=\

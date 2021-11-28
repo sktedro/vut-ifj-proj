@@ -1,2 +1,4 @@
 ERROR: Syntax error.
 Testing: Token type is '10' and data '#'
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 2

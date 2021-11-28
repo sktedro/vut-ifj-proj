@@ -50,7 +50,7 @@
 
 #include "parser.h"
 
-int ret = 0;
+extern int ret;
 
 STStack *symtab;
 
@@ -322,7 +322,7 @@ int pNewFunId(Token *token) {
       vypluj err(ID_DEF_ERR);
     } else {
       fprintf(stderr, "CREATING NEW STACK\n");
-      STInsert(symtab, token->data);
+      CondCall(STInsert, symtab, token->data);
       STSetIsVariable(symtab, token->data, false);
       STSetFnDefined(symtab, token->data, true);
     }
@@ -770,7 +770,7 @@ int pFnRet() {
   // <fnRet>           -> eps
   if (token->type != t_colon) { // :
     printf("STASH TOKEN FNRET\n");
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
 
   // <fnRet>           -> : <type> <nextType>
@@ -810,12 +810,12 @@ int pFnCallArgList() {
 
   // -> eps
   if(token->type == t_rightParen) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> <fnCallArg> <nextFnCallArg>
-  stashToken(&token);
+  CondCall(stashToken, &token);
   ret = pFnCallArg();
   CondReturn;
   vypluj pNextFnCallArg();
@@ -851,7 +851,7 @@ int pNextFnCallArg() {
 
   // -> eps
   } else {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 }
@@ -878,8 +878,8 @@ int pFnCallArg() {
   // -> [id] (must be a variable)
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     fprintf(stderr, "JE TO PREMENNÁ\n");
-    STPush(symtab);
-    STInsert(symtab, token->data);
+    CondCall(STPush, symtab);
+    CondCall(STInsert, symtab, token->data);
 
     // TODO semantic actions (add to fn arg types or something)
     vypluj 0;
@@ -954,7 +954,7 @@ int pStat() {
 
   // -> eps
   if (token->type != t_idOrKeyword) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     token = NULL;
     vypluj 0;
   }
@@ -1010,7 +1010,7 @@ int pStat() {
     }
     tokenDestroy(&token);
 
-    STPush(symtab); //TODO CHECK
+    CondCall(STPush, symtab); //TODO CHECK
 
     // <stat>
     ret = pStat();
@@ -1027,7 +1027,7 @@ int pStat() {
       vypluj err(SYNTAX_ERR);
     }
     tokenDestroy(&token);
-    STPush(symtab);
+    CondCall(STPush, symtab);
 
     // <stat>
     ret = pStat();
@@ -1081,7 +1081,7 @@ int pStat() {
       tokenDestroy(&token);
       vypluj err(SYNTAX_ERR);
     }
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
     
   } else if(strcmp(token->data, "return") == 0) {
@@ -1091,7 +1091,7 @@ int pStat() {
     printToken(token);
     fprintf(stderr, "SME V ENDE\n");
   
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
@@ -1120,7 +1120,7 @@ int pStat() {
 
   // -> eps
   else {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     token = NULL;
     vypluj 0;
   }
@@ -1347,14 +1347,14 @@ int pFnArgList() {
   
   // -> eps
   if(!(token->type == t_idOrKeyword && token->type != t_idOrKeyword)) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> [id] : <type> <nextFnArg>
   // [id]
   genVarDef(token->data, symtab->top->depth);
-  STInsert(symtab, token->data);
+  CondCall(STInsert, symtab, token->data);
   tokenDestroy(&token);
 
   // :
@@ -1443,7 +1443,7 @@ int pNextFnArg() {
   // -> eps
   if (token->type != t_comma) {
     tokenDestroy(&token);
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1554,7 +1554,7 @@ int pRetNextArg() {
   // -> eps
   // ','
   if (token->type != t_comma) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1632,7 +1632,7 @@ int pNextType() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
@@ -1726,7 +1726,7 @@ int pIdList() {
     }
   }
   // declaring a new variable
-  STInsert(symtab, token->data);
+  CondCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
   element->data = token->data;
@@ -1762,7 +1762,7 @@ int pNextId() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
   tokenDestroy(&token);
@@ -1779,13 +1779,13 @@ int pNextId() {
       genVarDef(token->data, symtab->top->depth); // already declared, shoud be just an assignment, is this correct?? TODO
       tokenDestroy(&token);
     } else { // -> eps
-      stashToken(&token);
+      CondCall(stashToken, &token);
       vypluj 0;
     }
   }
   
   // declaring a new variable
-  STInsert(symtab, token->data);
+  CondCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
   
@@ -1814,7 +1814,7 @@ int pNewIdAssign() {
 
   // -> eps
   if (!(token->type == t_assignment && !strcmp(token->data, "="))) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
@@ -1867,7 +1867,7 @@ int pNextExpr() {
 
   // -> eps
   if (token->type != t_comma) {
-    stashToken(&token);
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 

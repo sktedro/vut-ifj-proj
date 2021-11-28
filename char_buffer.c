@@ -10,24 +10,28 @@
 // Initial buffer data length (space allocated)
 #define CHARBUFINITLEN 16
 
+extern int ret;
+
 /**
  * @brief Allocate a new buffer
  *
- * @return new buffer (pointer)
+ * @param buf: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-CharBuffer *charBufInit() {
-  CharBuffer *buf = (CharBuffer *)malloc(sizeof(CharBuffer));
-  if (buf == NULL) {
-    exit(err(INTERN_ERR));
+int charBufInit(CharBuffer **buf) {
+  *buf = (CharBuffer *)malloc(sizeof(CharBuffer));
+  if (!(*buf)) {
+    return err(INTERN_ERR);
   }
-  buf->data = (char *)malloc(CHARBUFINITLEN * sizeof(char));
-  if (buf->data == NULL) {
-    free(buf);
-    exit(err(INTERN_ERR));
+  (*buf)->data = (char *)malloc(CHARBUFINITLEN * sizeof(char));
+  if (!(*buf)->data) {
+    free(*buf);
+    return err(INTERN_ERR);
   }
-  buf->size = CHARBUFINITLEN;
-  buf->data[0] = '\0';
-  return buf;
+  (*buf)->size = CHARBUFINITLEN;
+  (*buf)->data[0] = '\0';
+  return 0;
 }
 
 /**
@@ -36,7 +40,7 @@ CharBuffer *charBufInit() {
  * @param buf: buffer (pointer) to append to
  * @param c: character to append
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int charBufAppend(CharBuffer *buf, char c) {
   if (buf->len + 1 == buf->size) {
@@ -44,7 +48,7 @@ int charBufAppend(CharBuffer *buf, char c) {
     if (buf->data == NULL) {
       free(buf);
       buf = NULL;
-      return 1;
+      return err(INTERN_ERR);
     }
     buf->size *= 2;
   }
@@ -93,15 +97,19 @@ void charBufDestroy(CharBuffer *buf) {
  * 
  * @param orig a string to append
  * @param buffer a pointer to a buffer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void charBufAppendString(char *orig, CharBuffer **buffer) {
+int charBufAppendString(char *orig, CharBuffer **buffer) {
   if (*buffer == NULL) {
-    *buffer = charBufInit();
+    CondCall(charBufInit, buffer);
   }
 
   for (unsigned int i = 0; i < strlen(orig); i++) {
-    charBufAppend(*buffer, orig[i]);
+    CondCall(charBufAppend, *buffer, orig[i]);
   }
+
+  return 0;
 }
 
 #endif

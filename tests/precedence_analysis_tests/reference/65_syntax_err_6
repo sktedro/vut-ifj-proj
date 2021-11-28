@@ -1,2 +1,4 @@
 ERROR: Syntax error.
 Testing: Token type is '0' and data 'varInt1'
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 2

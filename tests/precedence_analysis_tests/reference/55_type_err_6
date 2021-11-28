@@ -1,2 +1,4 @@
 ERROR: Data types of operands in an expression are not compatible.
 Testing: Token type is '10' and data '#'
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 6

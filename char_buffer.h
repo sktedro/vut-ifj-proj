@@ -10,9 +10,11 @@
 /**
  * @brief Allocate a new buffer
  *
- * @return new buffer (pointer)
+ * @param buf: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-CharBuffer *charBufInit();
+int charBufInit(CharBuffer **buf) ForceRetUse;
 
 /**
  * @brief Append a new character to the buffer data
@@ -20,9 +22,9 @@ CharBuffer *charBufInit();
  * @param buf: buffer (pointer) to append to
  * @param c: character to append
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int charBufAppend(CharBuffer *buf, char c);
+int charBufAppend(CharBuffer *buf, char c) ForceRetUse;
 
 /**
  * @brief Remove the last character from the buffer
@@ -46,11 +48,15 @@ void charBufClear(CharBuffer *buf);
 void charBufDestroy(CharBuffer *buf);
 
 /**
- * Appends a string to an existing buffer or initialises a new buffer if the given pointer is null.
+ * @brief Appends a string to an existing buffer or initialises a new buffer if the 
+ * given pointer is null.
+ * 
  * @param orig a string to append
  * @param buffer a pointer to a buffer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void charBufAppendString(char *orig, CharBuffer **buffer);
+int charBufAppendString(char *orig, CharBuffer **buffer);
 
 #endif
 /* end of file char_buffer.h */

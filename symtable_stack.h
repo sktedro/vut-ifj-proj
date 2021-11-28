@@ -11,9 +11,11 @@
 /**
  * @brief Allocate a new stack, initialize it and return it
  *
- * @return a new stack
+ * @param stack: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-STStack *STStackInit();
+int STStackInit(STStack **stack) ForceRetUse;
 
 /**
  * @brief allocate and push a new element to the top of the stack
@@ -21,9 +23,9 @@ STStack *STStackInit();
  * @param stack
  * @param name - new element's name
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int STStackPush(STStack *stack, STTreeNode *table, int depth);
+int STStackPush(STStack *stack, STTreeNode *table, int depth) ForceRetUse;
 
 /**
  * @brief remove (and free it's allocated memory) the top element

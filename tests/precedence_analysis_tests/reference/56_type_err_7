@@ -4,3 +4,5 @@ DEFVAR LF@%tmp0
 STRLEN LF@%tmp0 LF@varStr1
 DEFVAR LF@%tmp1
 MOVE LF@%tmp1 string@abc
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 6

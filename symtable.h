@@ -11,11 +11,11 @@
 /**
  * @brief initialization of symbol table (stack)
  *
- * @param frameStack
+ * @param stack: destination pointer
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-STStack *STInit();
+int STInit(STStack **stack) ForceRetUse;
 
 /**
  * @brief Destroy the symbol table
@@ -29,26 +29,26 @@ void STDestroy(STStack **stack);
  *
  * @param stack - stack with frames
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int STPush(STStack *frameStack);
+int STPush(STStack *stack) ForceRetUse;
 
 /**
  * @brief Pops a frame from the symbol table
  *
- * @param frameStack - stack with frames
+ * @param stack - stack with frames
  */
-void STPop(STStack *frameStack);
+void STPop(STStack *stack);
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
  *
- * @param frameStack - symbol table (stack)
+ * @param stack - symbol table (stack)
  * @param key - name of that new element
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int STInsert(STStack *frameStack, char *key);
+int STInsert(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief Finds element in tree by key and return its data as a pointer
@@ -103,8 +103,10 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param paramType - data type of the parameter to be appended
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void STAppendParamType(STStack *stack, char *key, int paramType);
+int STAppendParamType(STStack *stack, char *key, int paramType) ForceRetUse;
 
 /**
  * @brief Appends a data type of a return value of a function
@@ -112,8 +114,10 @@ void STAppendParamType(STStack *stack, char *key, int paramType);
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param retType - data type of the return value to be appended
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void STAppendRetType(STStack *stack, char *key, int retType);
+int STAppendRetType(STStack *stack, char *key, int retType) ForceRetUse;
 
 /**
  * @brief Returns depth of a symbol table element (if it occurs at various

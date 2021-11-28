@@ -33,7 +33,8 @@
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName);
+int parseExpression(STStack *symtab, Token *token, char **returnVarName) 
+  ForceRetUse;
 
 /**
  * @brief Shift step of the precedence analysis - just push the input symbol
@@ -45,7 +46,8 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName);
  *
  * @returns 0 if successful, errcode otherwise 
  */
-int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token);
+int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token) 
+  ForceRetUse;
 
 /**
  * @brief Reduce step of the precedence analysis - reduce an atomic expression
@@ -56,7 +58,7 @@ int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token);
  *
  * @returns 0 if successful, errcode otherwise 
  */
-int reduceStep(SStack *symstack);
+int reduceStep(SStack *symstack) ForceRetUse;
 
 
 /*
@@ -72,7 +74,7 @@ int reduceStep(SStack *symstack);
  *
  * @return 0 if successful, errcode otherwise 
  */
-int checkRules(SStack *symstack, int opSymbols);
+int checkRules(SStack *symstack, int opSymbols) ForceRetUse;
 
 /**
  * @brief "i rule" - reduce i to E -just convert the i to E and push it back 
@@ -83,7 +85,7 @@ int checkRules(SStack *symstack, int opSymbols);
  *
  * @return 0 if sucessful, -1 if no rule was applied, errcode otherwise
  */
-int iRule(SStack *symstack, SStackElem *op);
+int iRule(SStack *symstack, SStackElem *op) ForceRetUse;
 
 /**
  * @brief "#E rule" - reduce "#E" to "E" - generate code for strlen
@@ -94,7 +96,7 @@ int iRule(SStack *symstack, SStackElem *op);
  *
  * @return 0 if sucessful, -1 if no rule was applied, errcode otherwise
  */
-int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2);
+int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) ForceRetUse;
 
 /**
  * @brief "(E) rule" - destroy the parantheses and push the E back
@@ -107,7 +109,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2);
  * @return 0 if sucessful, -1 if no rule was applied, errcode otherwise
  */
 int bracketsRule(SStack *symstack, SStackElem *op1, 
-    SStackElem *op2, SStackElem *op3);
+    SStackElem *op2, SStackElem *op3) ForceRetUse;
 
 /**
  * @brief "arithmetic operator rule" - reduces a arithmetic operation - 
@@ -128,7 +130,7 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
  * pt_intDiv works with integers and returns an integer
  */
 int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1, 
-    SStackElem *op2, SStackElem *op3);
+    SStackElem *op2, SStackElem *op3) ForceRetUse;
 
 /**
  * @brief "relational operator rule" - reducing relational expressions - 
@@ -142,7 +144,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
  * @return 0 if successful, -1 if no rule was found, errcode otherwise 
  */
 int relationalOperatorsRule(SStack *symstack, SStackElem *op1, 
-    SStackElem *op2, SStackElem *op3);
+    SStackElem *op2, SStackElem *op3) ForceRetUse;
 
 
 /*
@@ -162,7 +164,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
  * @return 0 if successful, errcode otherwise
  */
 int getSymbolsForReduction(SStack *symstack, SStackElem **op1, 
-    SStackElem **op2, SStackElem **op3, int amount);
+    SStackElem **op2, SStackElem **op3, int amount) ForceRetUse;
 
 /**
  * @brief If an operand is not an integer, convert it (generate code)
@@ -171,7 +173,7 @@ int getSymbolsForReduction(SStack *symstack, SStackElem **op1,
  *
  * @return 0 if successful, errcode otherwise 
  */
-int ensureInteger(SStackElem *op);
+int ensureInteger(SStackElem *op) ForceRetUse;
 
 /**
  * @brief If an operand is not a number, convert it (generate code)
@@ -180,7 +182,7 @@ int ensureInteger(SStackElem *op);
  *
  * @return 0 if successful, errcode otherwise 
  */
-int ensureNumber(SStackElem *op);
+int ensureNumber(SStackElem *op) ForceRetUse;
 
 /**
  * @param Check data types of operators of a binary operation (and convert them
@@ -193,7 +195,7 @@ int ensureNumber(SStackElem *op);
  * @return 0 if successful, errcode otherwise 
  */
 int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2, 
-    SStackElem *op3);
+    SStackElem *op3) ForceRetUse;
 
 
 /*
@@ -212,31 +214,34 @@ int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2,
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol);
+int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) 
+  ForceRetUse;
 
 /**
  * @brief Allocates a new symbol and initializes it (a symbol to be inserted to 
  * the symbol stack)
  *
+ * @param newSymbol: destination pointer
  * @param symbol: enum value of symbol stack type 
  *
- * @return SStackElem as a new, allocated symbol stack element
+ * @return 0 if successful, errcode otherwise 
  */
-SStackElem *allocateSymbol(int symbol);
+int allocateSymbol(SStackElem **newSymbol, int symbol) ForceRetUse;
 
 /**
  * @brief Allocates a new symbol and sets its data based on parameters
  *
+ * @param newSymbol: destination pointer
  * @param type
  * @param op: precedence table enum
  * @param isId: bool
  * @param dataType: data type enum
  * @param data: string representing the symbol
  *
- * @return new allocated symbol with initialized data
+ * @return 0 if successful, errcode otherwise 
  */
-SStackElem *createNewSymbol(int type, int op, bool isId, int dataType, 
-    char *data);
+int createSymbol(SStackElem **newSymbol, int type, int op, bool isId, 
+    int dataType, char *data) ForceRetUse;
 
 /**
  * @brief Destroys (frees data allocated by) a symbol of the symbol stack
@@ -264,7 +269,8 @@ void destroySymbol(SStackElem **elem);
  *
  * @return 0 if successful, -1 if the token is a fn call, errcode otherwise 
  */
-int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token);
+int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) 
+  ForceRetUse;
 
 /**
  * @brief If we're still receiving tokens that are a part of the expression, we
@@ -282,7 +288,7 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token);
  * @returns 0 if successful, errcode otherwise 
  */
 int getNewSymbol(STStack *symtab, Token **token, SStackElem **inputSymbol, 
-    bool fetchNewToken, bool *exprCanEnd, bool *exprEnd);
+    bool fetchNewToken, bool *exprCanEnd, bool *exprEnd) ForceRetUse;
 
 /**
  * @brief Get a new token and set exprEnd to true if the new token is not a 
@@ -294,7 +300,7 @@ int getNewSymbol(STStack *symtab, Token **token, SStackElem **inputSymbol,
  *
  * @return 0 if successful, errcode otherwise 
  */
-int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd);
+int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd) ForceRetUse;
 
 /**
  * @brief Check if a a symbol represents a zero literal (an int or a num)

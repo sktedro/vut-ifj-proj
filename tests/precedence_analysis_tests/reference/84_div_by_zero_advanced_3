@@ -12,3 +12,5 @@ DEFVAR LF@%tmp4
 INT2FLOAT LF@%tmp4 LF@%tmp0
 DEFVAR LF@%tmp5
 INT2FLOAT LF@%tmp5 LF@%tmp3
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 9

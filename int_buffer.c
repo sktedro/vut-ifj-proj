@@ -7,28 +7,27 @@
 
 #include "int_buffer.h"
 
-// Initial buffer data length (space allocated)
-#define INTBUFINITLEN 16
-
 /**
  * @brief Allocate a new buffer
  *
- * @return new buffer (pointer)
+ * @param buf: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-IntBuffer *intBufInit() {
-  IntBuffer *buf = (IntBuffer *)malloc(sizeof(IntBuffer));
-  if (buf == NULL) {
-    exit(err(INTERN_ERR));
+int intBufInit(IntBuffer **buf) {
+  *buf = (IntBuffer *)malloc(sizeof(IntBuffer));
+  if (!(*buf)) {
+    return err(INTERN_ERR);
   }
 
-  buf->data = (int *)malloc(INTBUFINITLEN * sizeof(int));
-  if (buf->data == NULL) {
-    free(buf);
-    exit(err(INTERN_ERR));
+  (*buf)->data = (int *)malloc(INTBUFINITLEN * sizeof(int));
+  if (!(*buf)->data) {
+    free(*buf);
+    return err(INTERN_ERR);
   }
-  buf->size = INTBUFINITLEN;
-  buf->len = 0;
-  return buf;
+  (*buf)->size = INTBUFINITLEN;
+  (*buf)->len = 0;
+  return 0;
 }
 
 /**
@@ -37,7 +36,7 @@ IntBuffer *intBufInit() {
  * @param buf: buffer (pointer) to append to
  * @param i: int to append
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int intBufAppend(IntBuffer *buf, int i) {
   if (buf->len + 1 == buf->size) {
@@ -45,7 +44,7 @@ int intBufAppend(IntBuffer *buf, int i) {
     if (buf->data == NULL) {
       free(buf);
       buf = NULL;
-      return 1;
+      return err(INTERN_ERR);
     }
     buf->size *= 2;
   }

@@ -4,8 +4,9 @@
 
 int main(){
   // Init:
-  Token *intToken = tokenInit(t_int);
-  Token *relOpToken = tokenInit(t_relOp);
+  Token *intToken, *relOpToken;
+  tokenInit(&intToken, t_int);
+  tokenInit(&relOpToken, t_relOp);
   if(!intToken || !relOpToken){
     printf("Tokens could not be initialized!\n");
     return 1;

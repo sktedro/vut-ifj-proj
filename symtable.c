@@ -7,15 +7,17 @@
 
 #include "symtable.h"
 
+extern int ret;
+
 /**
  * @brief initialization of symbol table (stack)
  *
- * @param frameStack
+ * @param stack: destination pointer
  *
- * @return 0 if successful
- * */
-STStack *STInit() {
-  return STStackInit();
+ * @return 0 if successful, errcode otherwise
+ */
+int STInit(STStack **stack) {
+  return STStackInit(stack);
 }
 
 /**
@@ -32,41 +34,40 @@ void STDestroy(STStack **stack) {
  *
  * @param stack - stack with frames
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  * */
-int STPush(STStack *frameStack) {
-  STStackElem *top = STStackTop(frameStack);
+int STPush(STStack *stack) {
+  STStackElem *top = STStackTop(stack);
   int depth = 0;
   if (top != NULL) {
     depth = top->depth + 1;
   }
-  if (frameStack != NULL) {
-    STStackPush(frameStack, NULL, depth);
-    return 0;
+  if (stack) {
+    CondCall(STStackPush, stack, NULL, depth);
   }
-  return 1;
+  return 0;
 }
 
 /**
  * @brief Pops a frame from the symbol table
  *
- * @param frameStack - stack with frames
+ * @param stack - stack with frames
  */
-void STPop(STStack *frameStack) {
-  STStackPop(frameStack);
+void STPop(STStack *stack) {
+  STStackPop(stack);
 }
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
  *
- * @param frameStack - symbol table (stack)
+ * @param stack - symbol table (stack)
  * @param key - name of that new element
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int STInsert(STStack *frameStack, char *key) {
-  STStackElem *frame = STStackTop(frameStack);
-  treeInsert(&(frame->table), key);
+int STInsert(STStack *stack, char *key) {
+  STStackElem *frame = STStackTop(stack);
+  CondCall(treeInsert, &(frame->table), key);
   return 0;
 }
 
@@ -159,15 +160,18 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param paramType - data type of the parameter to be appended
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void STAppendParamType(STStack *stack, char *key, int paramType) {
+int STAppendParamType(STStack *stack, char *key, int paramType) {
   STElem *data = STFind(stack, key);
   if (data) {
     if (!data->fnParamTypesBuf) {
-      data->fnParamTypesBuf = intBufInit();
+      CondCall(intBufInit, &(data->fnParamTypesBuf));
     }
-    intBufAppend(data->fnParamTypesBuf, paramType);
+    CondCall(intBufAppend, data->fnParamTypesBuf, paramType);
   }
+  return 0;
 }
 
 /**
@@ -176,15 +180,18 @@ void STAppendParamType(STStack *stack, char *key, int paramType) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param retType - data type of the return value to be appended
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void STAppendRetType(STStack *stack, char *key, int retType) {
+int STAppendRetType(STStack *stack, char *key, int retType) {
   STElem *data = STFind(stack, key);
   if (data) {
     if (!data->fnRetTypesBuf) {
-      data->fnRetTypesBuf = intBufInit();
+      CondCall(intBufInit, &(data->fnRetTypesBuf));
     }
-    intBufAppend(data->fnRetTypesBuf, retType);
+    CondCall(intBufAppend, data->fnRetTypesBuf, retType);
   }
+  return 0;
 }
 
 /**
@@ -221,12 +228,8 @@ bool STGetIsVariable(STStack *stack, char *key) {
   STElem *data = STFind(stack, key);
   if (data) {
     return data->isVariable;
-  }else{
-    fprintf(stderr, "This is awkward, you want to know if an element is"
-                    " a variable but it doesn't exist at all.\n");
   }
-  return false; // false?? nie lepsie vracat int a -1 namisto toho?
-                // - asi ne tohle je good
+  return false;
 }
 
 /**
@@ -274,8 +277,7 @@ bool STGetFnDefined(STStack *stack, char *key) {
   if (data) {
     return data->fnDefined;
   }
-  fprintf(stderr, "This is awkward\n");
-  return false; // false? neni lepsie vracat int a -1?
+  return false;
 }
 
 /**

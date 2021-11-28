@@ -10,18 +10,19 @@
 /**
  * @brief allocates memory for a new token and assigns it a type
  *
+ * @param token: destination pointer
  * @param type of the new token
  *
- * @return token (pointer)
+ * @return 0 if successful, errcode otherwise
  */
-Token *tokenInit(int type) {
-  Token *token = malloc(sizeof(Token));
-  if (!token) {
-    exit(err(INTERN_ERR));
+int tokenInit(Token **token, int type) {
+  *token = malloc(sizeof(Token));
+  if (!(*token)) {
+    return err(INTERN_ERR);
   }
-  token->type = type;
-  token->data = NULL;
-  return token;
+  (*token)->type = type;
+  (*token)->data = NULL;
+  return 0;
 }
 
 /**
@@ -30,7 +31,7 @@ Token *tokenInit(int type) {
  * @param token: token to which the new attribute should be added
  * @param data: data which are to be written to the token
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int tokenAddAttrib(Token *token, char *data) {
   if (!token) {

@@ -6,3 +6,5 @@ DEFVAR LF@%tmp1
 FLOAT2INT LF@%tmp1 LF@varNum1
 DEFVAR LF@%tmp2
 FLOAT2INT LF@%tmp2 LF@%tmp0
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 9

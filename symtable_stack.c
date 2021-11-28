@@ -10,16 +10,17 @@
 /**
  * @brief Allocate a new stack, initialize it and return it
  *
- * @return a new stack
+ * @param stack: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-STStack *STStackInit() {
-  STStack *stack = (STStack *)malloc(sizeof(STStack));
-  if (stack == NULL) {
-    // TODO memleak?
-    exit(err(INTERN_ERR));
+int STStackInit(STStack **stack) {
+  *stack = (STStack *)malloc(sizeof(STStack));
+  if (!(*stack)) {
+    return err(INTERN_ERR);
   }
-  stack->top = NULL;
-  return stack;
+  (*stack)->top = NULL;
+  return 0;
 }
 
 /**
@@ -28,17 +29,15 @@ STStack *STStackInit() {
  * @param stack
  * @param name - new element's name
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int STStackPush(STStack *stack, STTreeNode *table, int depth) {
   if (!stack) {
-    // TODO memleak
-    exit(err(INTERN_ERR));
+    return err(INTERN_ERR);
   }
   STStackElem *newElem = (STStackElem *)malloc(sizeof(STStackElem));
   if (!newElem) {
-    // TODO memleak
-    exit(err(INTERN_ERR));
+    return err(INTERN_ERR);
   }
   newElem->table = table;
   newElem->depth = depth;
@@ -84,13 +83,10 @@ STStackElem *STStackTop(STStack *stack) {
  * @return bottom element
  */
 STStackElem *STStackBottom(STStack *stack) {
-  if (!stack) {
+  if (!stack || !stack->top) {
     return NULL;
   }
   STStackElem *tmp = stack->top;
-  if (!tmp) {
-    return NULL;
-  }
   while (tmp->next) {
     tmp = tmp->next;
   }
