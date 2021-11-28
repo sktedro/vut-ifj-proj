@@ -1,0 +1,8 @@
+ERROR: Division by zero error.
+Testing: Token type is '0' and data 'varNum1'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 float@0x0p+0
+DEFVAR LF@%tmp1
+FLOAT2INT LF@%tmp1 LF@varNum1
+DEFVAR LF@%tmp2
+FLOAT2INT LF@%tmp2 LF@%tmp0

@@ -49,9 +49,6 @@ char precTab[12][12] = {
  * @return 0 if successful, errcode otherwise 
  */
 int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
-  // TODO check if the token received from parser is all right (not a keyword
-  // and so on)
-  
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
@@ -329,9 +326,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     CondCall(checkDataTypesOfBinOps, op1, op2, op3);
 
     // Division by zero check (op3 can't be zero)
-    // TODO this doesn't work since op3->data is now a name of a termporary
-    // variable where the literal is stored in ifjcode
-    if((op2->op == pt_div || op2->op == pt_intDiv) && isZero(op3)){
+    if((op2->op == pt_div || op2->op == pt_intDiv) && op3->isZero){
       return err(DIV_BY_ZERO_ERR);
     }
 
@@ -391,6 +386,11 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
   // Format needs to be "E relOp E"
   if(op2->op == pt_relOp && op1->type == st_expr && op3->type == st_expr){
 
+    // If one of the types is a boolean, it is a result of another rel op
+    if(op1->dataType == dt_boolean || op3->dataType == dt_boolean){
+      return err(SYNTAX_ERR);
+    }
+
     // If we have an integer and a number -> convert the int to num
     if(op1->dataType == dt_integer && op3->dataType == dt_number){
       CondCall(ensureNumber, op1);
@@ -422,8 +422,8 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
       newSymbolName = genEqual(op1, op3);
     }
 
-    // Create a new symbol. What should be its data type? It should be a bool..
-    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, -1, newSymbolName);
+    // Create a new symbol
+    SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, dt_boolean, newSymbolName);
 
     // Generate code for NOT (negate the result of the expression)
     // eg. for '<=', we'll generate '>' and negate it
@@ -622,6 +622,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       }
       (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
       memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
+      (*newSymbol)->isZero = isZero(*newSymbol);
       break;
 
     // TODO remove these three cases when PA is tested
@@ -718,6 +719,7 @@ SStackElem *createNewSymbol(int type, int op, bool isId, int dataType, char *dat
   newSymbol->isId = isId;
   newSymbol->dataType = dataType;
   newSymbol->data = data;
+  newSymbol->isZero = false;
   return newSymbol;
 }
 
@@ -776,6 +778,12 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token){
     stashToken(token);
     return -1;
   }
+
+  // If the token is not allowed to be a part of the expression => syntax err
+  if(!isTokenAllowedInExpr(*token)){
+    return err(SYNTAX_ERR);
+  }
+
   return 0;
 }
 
@@ -858,10 +866,13 @@ int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd){
  * TODO test this somehow please
  */
 bool isZero(SStackElem *operand){
-  if(operand && operand->isId == false){
+  if(operand->type == st_idOrLiteral 
+      && operand->op == pt_id 
+      && operand->isId == false
+      && operand->data
+      && (operand->dataType == dt_integer || operand->dataType == dt_number)){
     char *todptr = NULL;
     double res = strtod(operand->data, &todptr);
-    fprintf(stderr, "res: %f\nptr: %s\n", res, todptr);
     // If conversion was successful (todptr[0] == '\0')
     if(!todptr[0]){
       // If the number equals 0

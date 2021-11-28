@@ -143,6 +143,7 @@ enum IFJ21DataTypes {
   /*01*/ dt_number,
   /*02*/ dt_string,
   /*03*/ dt_nil,
+  /*04*/ dt_boolean,
 };
 
 /*
@@ -175,7 +176,9 @@ typedef struct SStackElem {
   int op;                  // Precedence table enum (pt_)
   bool isId;               // So we know if there's an ID or a literal in *data
   int dataType;            // If it is an ID or a literal, we need the datatype
+                           // Will be -1 for boolean
   char *data;              // ID (or expr) name or a literal value
+  bool isZero;             // Will be true if the elem is a literal equal to 0
   struct SStackElem *next;
 } SStackElem;
 

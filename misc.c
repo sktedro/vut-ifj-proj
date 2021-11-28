@@ -50,7 +50,7 @@ int err(int errCode) {
 
   // TODO:
   exit(errCode);
-  //vypluj errCode;
+  /** vypluj errCode; */
 }
 
 #endif

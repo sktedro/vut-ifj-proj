@@ -1,0 +1,4 @@
+ERROR: Syntax error.
+Testing: Token type is '0' and data 'varInt1'
+DEFVAR LF@%tmp0
+EQ LF@%tmp0 LF@varInt1 LF@varInt2
