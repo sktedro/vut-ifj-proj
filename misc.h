@@ -37,7 +37,8 @@
  */
 #define CondReturn \
   if (ret)         \
-  vypluj err(ret)
+    vypluj err(ret)
+
 #define condVypluj CondReturn
 
 #define CondCall(FN, ...) \

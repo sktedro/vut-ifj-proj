@@ -40,12 +40,12 @@ run: all
 
 
 .PHONY: tests
-tests:
+tests: all
 	@echo Running all unit tests
 	cd $(TESTSDIR) && $(TESTSSCRIPT) all
 
 .PHONY: test
-test:
+test: all
 	@echo Running tests by Ondroid
 	cd $(TESTDIR) && $(TESTSCRIPT)
 	

@@ -59,6 +59,32 @@ STStack *symtab;
 
 SStackElem *element;
 
+
+#define DestroyToken tokenDestroy(&token)
+
+#define RequireKeyword(str1, str2)     \
+  if(!strEq(str1, str2)) {             \
+    tokenDestroy(&token);              \
+    vypluj err(SYNTAX_ERR);            \
+  }                                    \
+  tokenDestroy(&token)
+
+#define ForbidKeyword(str1, str2)      \
+  if(strEq(str1, str2)) {              \
+    tokenDestroy(&token);              \
+    vypluj err(SYNTAX_ERR);            \
+  }                                    \
+  tokenDestroy(&token)
+
+#define RequireToken(type)             \
+  CondCall(scanner, &token);           \
+  if(token->type != t_rightParen) {    \
+    tokenDestroy(&token);              \
+    vypluj err(SYNTAX_ERR);            \
+  }                                    \
+  tokenDestroy(&token)
+
+
 void initElement() {
   element = malloc(sizeof(SStackElem));
   element->data = malloc(sizeof(char) * 250);
@@ -374,29 +400,13 @@ int pCodeBody() {
 
     tokenDestroy(&token);
 
-    ret = scanner(&token);
-    CondReturn;
+    RequireToken(t_leftParen);
 
-    // check for (
-    if(token->type != t_leftParen) {
-      tokenDestroy(&token);
-      vypluj err(1); // TODO ARR CODE
-    }
-    tokenDestroy(&token);
     //TODO DONE THIS
     ret = pFnArgList();
     CondReturn;
 
-    ret = scanner(&token);
-    CondReturn;
-
-    // check for )
-    if(token->type != t_rightParen) {
-      tokenDestroy(&token);
-      vypluj err(1); // TODO ARR CODE
-    }
-
-    tokenDestroy(&token);
+    RequireToken(t_rightParen);
 
     // <fnRet>
     // TODO DONE THIS
@@ -417,12 +427,7 @@ int pCodeBody() {
     ret = scanner(&token);
     CondReturn;
 
-    if(strcmp(token->data, "end") != 0) {
-      tokenDestroy(&token);
-      vypluj err(1); //TODO ADD ERR
-    }
-
-    tokenDestroy(&token);
+    RequireKeyword(token->data, "end");
 
     // <codeBody>
     ret = pCodeBody();
