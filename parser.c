@@ -76,9 +76,9 @@ SStackElem *element;
   }                                    \
   tokenDestroy(&token)
 
-#define RequireToken(type)             \
+#define RequireToken(tokenType)        \
   CondCall(scanner, &token);           \
-  if(token->type != t_rightParen) {    \
+  if(token->type != tokenType) {       \
     tokenDestroy(&token);              \
     vypluj err(SYNTAX_ERR);            \
   }                                    \
@@ -934,7 +934,8 @@ int pRet() {
         vypluj 0;
   } 
   // -> eps
-  stashToken(&token);
+  ret = stashToken(&token);
+  CondReturn;
   vypluj 0;
 }
 
