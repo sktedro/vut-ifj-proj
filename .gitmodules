@@ -1,0 +1,3 @@
+[submodule "ifjtest"]
+	path = ifjtest
+	url = https://github.com/ondrej-mach/ifjtest
