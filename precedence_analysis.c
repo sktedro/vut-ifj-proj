@@ -91,15 +91,19 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     // Shift (the top terminal)
     if (precTableSymbol == '=') {
-      CondCall(shiftStep, symstack, inputSymbol, &token);
+      // Push the input symbol to the symbol stack
+      CondCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Shift and push '<' (after (above) the top terminal)
     } else if (precTableSymbol == '<') {
       SStackElem *newSymbol = NULL;
+      // Allocate a new symbol for '<'
       CondCall(allocateSymbol, &newSymbol, st_push);
+      // Push iit after the top terminal
       CondCall(SStackPushAfterTopTerminal, symstack, newSymbol);
-      CondCall(shiftStep, symstack, inputSymbol, &token);
+      // Push the input symbol to the symbol stack
+      CondCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Reduce (the top terminals to an expression)
@@ -118,22 +122,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   *returnVarName = symstack->top->data;
 
   vypluj 0;
-}
-
-/**
- * @brief Shift step of the precedence analysis - just push the input symbol
- * to the symbol stack
- *
- * @param symstack: symbol stack
- * @param inputSymbol to be pushed to the symbol stack
- * @param token 
- *
- * @returns 0 if successful, errcode otherwise 
- */
-int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token) {
-  // Push the input symbol to the stack
-  CondCall(SStackPush, symstack, inputSymbol);
-  return 0;
 }
 
 /**

@@ -37,19 +37,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName)
   ForceRetUse;
 
 /**
- * @brief Shift step of the precedence analysis - just push the input symbol
- * to the symbol stack
- *
- * @param symstack: symbol stack
- * @param inputSymbol to be pushed to the symbol stack
- * @param token 
- *
- * @returns 0 if successful, errcode otherwise 
- */
-int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token) 
-  ForceRetUse;
-
-/**
  * @brief Reduce step of the precedence analysis - reduce an atomic expression
  * that is on top of the stack - checks if a rule for the expression exists and
  * generates code if it does

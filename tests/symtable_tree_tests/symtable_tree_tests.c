@@ -107,7 +107,7 @@ int main() {
   insert('m');
 
   // Destroy the tree
-  treeDestroy(&tree);
+  tree = NULL;
 
   // Check if any element can be found
   for(c[0] = 'a'; c[0] <= 'z'; c[0] += 1){

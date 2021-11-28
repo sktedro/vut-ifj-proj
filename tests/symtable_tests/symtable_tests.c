@@ -597,12 +597,6 @@ int main(){
     return 1;
   }
 
-  // Destroy the symbol table
-  STDestroy(&stack);
-  if(stack){
-    printf("Could not destroy the symbol table\n");
-  }
-
   printf("Symtable tests finished\n");
   return 0;
 }

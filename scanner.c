@@ -144,6 +144,7 @@ int scanner(Token **token) {
   while (!lastChar) {
 
     c = fgetc(stdin);
+    /** fprintf(stderr, "%c\n", c); */
     if (c == EOF) {
       lastChar = true;
       // TODO vyplut token?

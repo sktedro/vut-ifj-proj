@@ -52,7 +52,6 @@ void STStackPop(STStack *stack) {
   if (!stack || !stack->top) {
     return;
   }
-  STStackElem *tmp = stack->top;
   stack->top = stack->top->next;
 }
 

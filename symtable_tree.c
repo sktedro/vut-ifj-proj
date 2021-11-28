@@ -86,7 +86,6 @@ void replaceByRightmost(STTreeNode *target, STTreeNode **tree) {
   target->key = (*tree)->key;
   target->data = (*tree)->data;
   tmp = (*tree)->leftChild;
-  free(*tree); // free element function????? TODO
   *tree = tmp;
 }
 
@@ -113,15 +112,12 @@ void treeDelete(STTreeNode **root, char *key) {
 
   // key found
   if ((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
-    free(*root);
     *root = NULL;
   } else if ((*root)->leftChild == NULL) {
     tmp = (*root)->rightChild;
-    free(*root);
     *root = tmp;
   } else if ((*root)->rightChild == NULL) {
     tmp = (*root)->leftChild;
-    free(*root);
     *root = tmp;
     vypluj;
   } else {
