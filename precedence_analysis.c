@@ -333,18 +333,24 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     // Result will have the same data type as op1 (and op3)
     int resultDataType = op1->dataType;
     char *newSymbolName = NULL;
+    bool newSymbolIsZero = false;
 
     // Generate the operator code:
     if(op2->op == pt_add){
       newSymbolName = genBinaryOperationAdd(op1, op3);
+      newSymbolIsZero = op1->isZero && op3->isZero;
     }else if(op2->op == pt_sub){
       newSymbolName = genBinaryOperationSub(op1, op3);
+      newSymbolIsZero = op1->isZero && op3->isZero;
     }else if(op2->op == pt_mult){
       newSymbolName = genBinaryOperationMul(op1, op3);
+      newSymbolIsZero = op1->isZero || op3->isZero;
     }else if(op2->op == pt_div){
       newSymbolName = genBinaryOperationDiv(op1, op3);
+      newSymbolIsZero = op1->isZero;
     }else if(op2->op == pt_intDiv){
       newSymbolName = genBinaryOperationIDiv(op1, op3);
+      newSymbolIsZero = op1->isZero;
     }else if(op2->op == pt_concat){
       newSymbolName = genBinaryOperationConcat(op1, op3);
     }else{
@@ -358,6 +364,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Create a new symbol and push it to the symstack
     SStackElem *newSymbol = createNewSymbol(st_expr, pt_id, true, resultDataType, newSymbolName);
+    newSymbol->isZero = newSymbolIsZero;
     SStackPush(symstack, newSymbol);
 
   }else{
@@ -862,8 +869,6 @@ int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd){
  * or in scientific format)
  *
  * @return true if the number is a zero
- *
- * TODO test this somehow please
  */
 bool isZero(SStackElem *operand){
   if(operand->type == st_idOrLiteral 
