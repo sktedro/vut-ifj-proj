@@ -7,55 +7,54 @@
 
 #include "symtable_tree.h"
 
+extern int ret;
+
 /**
  * @brief Creates a new node with the given key and key, allocates memory.
  *
+ * @param node: destination pointer
  * @param key key of the new node
  *
- * @return ptr to the created node
+ * @return 0 if successful, errcode otherwise
  */
-STTreeNode *newSTTreeNode(char *key) {
-  STTreeNode *node = (STTreeNode *)malloc(sizeof(STTreeNode));
-  if (!node) {
-    //TODO memleak
-    exit(err(INTERN_ERR));
+int newSTTreeNode(STTreeNode **node, char *key) {
+  *node = (STTreeNode *)malloc(sizeof(STTreeNode));
+  if (!(*node)) {
+    return err(INTERN_ERR);
   }
 
   // Init children
-  node->rightChild = NULL;
-  node->leftChild = NULL;
+  (*node)->rightChild = NULL;
+  (*node)->leftChild = NULL;
 
   // Copy the key
-  node->key = malloc((strlen(key) + 1) * sizeof(char));
-  if (!node->key) {
-    //TODO memleak
-    exit(err(INTERN_ERR));
+  (*node)->key = malloc((strlen(key) + 1) * sizeof(char));
+  if (!(*node)->key) {
+    return err(INTERN_ERR);
   }
-  memcpy(node->key, key, (strlen(key) + 1) * sizeof(char));
+  memcpy((*node)->key, key, (strlen(key) + 1) * sizeof(char));
 
   // Init data
-  node->data = malloc(sizeof(STElem));
-  if (!node->data) {
-    //TODO memleak
-    exit(err(INTERN_ERR));
+  (*node)->data = malloc(sizeof(STElem));
+  if (!(*node)->data) {
+    return err(INTERN_ERR);
   }
 
   // Copy key
-  node->data->name = malloc((strlen(key) + 1) * sizeof(char));
-  if (!node->data->name) {
-    //TODO memleak
-    exit(err(INTERN_ERR));
+  (*node)->data->name = malloc((strlen(key) + 1) * sizeof(char));
+  if (!(*node)->data->name) {
+    return err(INTERN_ERR);
   }
-  memcpy(node->data->name, key, (strlen(key) + 1) * sizeof(char));
+  memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
 
   // Init other data
-  node->data->isVariable = true;
-  node->data->varDataType = -1;
-  node->data->varAddress = -1;
-  node->data->fnDefined = false;
-  node->data->fnParamTypesBuf = NULL;
-  node->data->fnRetTypesBuf = NULL;
-  vypluj node;
+  (*node)->data->isVariable = true;
+  (*node)->data->varDataType = -1;
+  (*node)->data->varAddress = -1;
+  (*node)->data->fnDefined = false;
+  (*node)->data->fnParamTypesBuf = NULL;
+  (*node)->data->fnRetTypesBuf = NULL;
+  vypluj 0;
 }
 
 /**
@@ -64,20 +63,22 @@ STTreeNode *newSTTreeNode(char *key) {
  * 
  * @param root node of the tree
  * @param name name (and key) of the new node
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void treeInsert(STTreeNode **root, char *key) {
+int treeInsert(STTreeNode **root, char *key) {
   if (!(*root)) {
-    *root = newSTTreeNode(key);
-    vypluj;
+    CondCall(newSTTreeNode, root, key);
+    vypluj 0;
   }
   if (strcmp(key, (*root)->key) < 0) {
-    treeInsert(&((*root)->leftChild), key);
+    CondCall(treeInsert, &((*root)->leftChild), key);
   } else if (strcmp(key, (*root)->key) > 0) {
-    treeInsert(&((*root)->rightChild), key);
-  } else { // found the key
-    fprintf(stderr, "Warning: inserting a key that is already there. Nothing will be changed.\n");
+    CondCall(treeInsert, &((*root)->rightChild), key);
+  } else {
+    fprintf(stderr, "Warning: inserting a key into a binary tree that is already there. Nothing will be changed.\n");
   }
-  // and a name, nothing else
+  vypluj 0;
 }
 
 /**
@@ -112,20 +113,6 @@ void treeDestroy(STTreeNode **root) {
 }
 
 /**
- * @brief Prints from tree to leaves, from left to right (preorder?)
- *
- * @param root root to the tree to be printed
- */
-void treePrint(STTreeNode *root) {
-  if (!root) {
-    vypluj;
-  }
-  printf("%s\n", root->key);
-  treePrint(root->leftChild);
-  treePrint(root->rightChild);
-}
-
-/**
  * @brief Replaces the target node with the rightmost node from the given 
  * subtree.
  * 
@@ -147,7 +134,8 @@ void replaceByRightmost(STTreeNode *target, STTreeNode **tree) {
 }
 
 /**
- * @brief Deletes a node with the given key, frees the memory. If the root is null nothing happens.
+ * @brief Deletes a node with the given key, frees the memory. If the root is 
+ * null nothing happens.
  *
  * @param root node of the tree
  * @param key to delete

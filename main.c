@@ -3,26 +3,26 @@
 
 int main() {
   // INIT - symtab
-  symtab = STInit();
+  CondCall(STInit, &symtab);
 
-  STPush(symtab);
+  CondCall(STPush, symtab);
 
-  STInsert(symtab, "readi");
+  CondCall(STInsert, symtab, "readi");
   STSetIsVariable(symtab, "readi", false);
   STSetFnDefined(symtab, "readi", true);
-  STInsert(symtab, "readn");
+  CondCall(STInsert, symtab, "readn");
   STSetIsVariable(symtab, "readn", false);
   STSetFnDefined(symtab, "readn", true);
-  STInsert(symtab, "reads");
+  CondCall(STInsert, symtab, "reads");
   STSetIsVariable(symtab, "reads", false);
   STSetFnDefined(symtab, "reads", true);
-  STInsert(symtab, "substr");
+  CondCall(STInsert, symtab, "substr");
   STSetIsVariable(symtab, "substr", false);
   STSetFnDefined(symtab, "substr", true);
-  STInsert(symtab, "ord");
+  CondCall(STInsert, symtab, "ord");
   STSetIsVariable(symtab, "ord", false);
   STSetFnDefined(symtab, "ord", true);
-  STInsert(symtab, "chr");
+  CondCall(STInsert, symtab, "chr");
   STSetIsVariable(symtab, "chr", false);
   STSetFnDefined(symtab, "chr", true);
 

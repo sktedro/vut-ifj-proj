@@ -13,16 +13,10 @@
  * @brief Stash a token (to be returned on next scanner() call)
  *
  * @param token to be stashed
+ * 
+ * @return 0 if successful, errcode otherwise
  */
-int stashToken(Token **token);
-
-/**
- * @brief Restore last read character that didn't belong to the last returned
- * token
- *
- * @return true if there was a character in charMem (and was restored)
- */
-bool restoreChar(CharBuffer *buf, char *c);
+int stashToken(Token **token) ForceRetUse;
 
 /**
  * @brief returns true if c is a number
@@ -74,9 +68,10 @@ int returnToken(Token **token, int type, CharBuffer *buf);
  * analysis of characters from the standard input
  *
  * @param token: address to memory where the next token should be written
- * @return error code
+ *
+ * @return 0 if successful, errcode otherwise
  */
-int scanner(Token **token);
+int scanner(Token **token) ForceRetUse;
 
 #endif
 /* end of file scanner.h */

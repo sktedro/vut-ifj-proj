@@ -15,6 +15,8 @@
  */
 #define vypluj return
 
+#define ForceRetUse __attribute__((warn_unused_result))
+
 /*
  *  Error returns (will be enum?)
  */
@@ -222,7 +224,15 @@ typedef struct {
  * Miscellaneous functions
  */
 
-bool strEq(char *str1, char *str2);
+/**
+ * @brief returns true if two strings are equal
+ *
+ * @param str1
+ * @param str2
+ *
+ * @return true if strings are equal
+ */
+bool strEq(char *str1, char *str2) ForceRetUse;
 
 /**
  * @brief Writes an error message to stdout and returns back the error code
@@ -231,7 +241,7 @@ bool strEq(char *str1, char *str2);
  *
  * @return errCode
  */
-int err(int errCode);
+int err(int errCode) ForceRetUse;
 
 #endif
 /* end of file misc.h */

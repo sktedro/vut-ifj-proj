@@ -7,12 +7,17 @@
 
 #include "misc.h"
 
+// Initial buffer data length (space allocated)
+#define INTBUFINITLEN 16
+
 /**
  * @brief Allocate a new buffer
  *
- * @return new buffer (pointer)
+ * @param buf: destination pointer
+ *
+ * @return 0 if successful, errcode otherwise
  */
-IntBuffer *intBufInit();
+int intBufInit(IntBuffer **buf) ForceRetUse;
 
 /**
  * @brief Append a new int to the buffer data
@@ -20,9 +25,9 @@ IntBuffer *intBufInit();
  * @param buf: buffer (pointer) to append to
  * @param i: int to append
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int intBufAppend(IntBuffer *buf, int i);
+int intBufAppend(IntBuffer *buf, int i) ForceRetUse;
 
 /**
  * @brief Remove the last int from the buffer

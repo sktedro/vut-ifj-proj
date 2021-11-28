@@ -10,20 +10,21 @@
 /*
  * @brief Allocate a new stack, initialize it and return it
  *
- * @return a new stack
+ * @param stack: destination pointer
+ * 
+ * @return 0 if successful, errcode otherwise
  */
-SStack *SStackInit();
+int SStackInit(SStack **stack) ForceRetUse;
 
 /*
  * @brief allocate and push a new element to the top of the stack
  *
  * @param stack
- * @param new element's symbol
- * @param new element's type
+ * @param newElem to be pushed
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int SStackPush(SStack *stack, SStackElem *newElem);
+int SStackPush(SStack *stack, SStackElem *newElem) ForceRetUse;
 
 /*
  * @brief remove (and free it's allocated memory) the top element
@@ -56,12 +57,11 @@ SStackElem *SStackTopTerminal(SStack *stack);
  * stack and appends a new element after it
  *
  * @param stack
- * @param symbol of the new element
- * @param type of the new element
+ * @param newElem to be pushed
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
-int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem);
+int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) ForceRetUse;
 
 /*
  * @brief Free all memory allocated by the symbol stack

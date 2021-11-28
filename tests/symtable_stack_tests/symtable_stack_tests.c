@@ -8,7 +8,8 @@ int main(){
 
 
   // Initialize the stack
-  STStack *stack = STStackInit();
+  STStack *stack = NULL;
+  STStackInit(&stack);
   if(!stack){
     printf("Couldn't allocate\n");
     return 1;
@@ -98,7 +99,7 @@ int main(){
   tree1 = NULL;
 
   // Insert two elements and test all functions
-  stack = STStackInit();
+  STStackInit(&stack);
   treeInsert(&tree1, "abc");
   treeInsert(&tree2, "def");
   STStackPush(stack, tree1, 0);
@@ -124,7 +125,7 @@ int main(){
   tree1 = tree2 = NULL;
 
   // Insert three elements and test all functions
-  stack = STStackInit();
+  STStackInit(&stack);
   treeInsert(&tree1, "abc");
   treeInsert(&tree2, "def");
   treeInsert(&tree3, "ghi");

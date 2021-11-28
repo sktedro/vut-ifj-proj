@@ -7,19 +7,22 @@
 
 #include "symbol_stack.h"
 
+extern int ret;
+
 /*
  * @brief Allocate a new stack, initialize it and return it
  *
- * @return a new stack
+ * @param stack: destination pointer
+ * 
+ * @return 0 if successful, errcode otherwise
  */
-SStack *SStackInit() {
-  SStack *stack = (SStack *)malloc(sizeof(SStack));
-  if (!stack) {
-    exit(err(INTERN_ERR));
+int SStackInit(SStack **stack) {
+  *stack = (SStack *)malloc(sizeof(SStack));
+  if (!(*stack)) {
+    return err(INTERN_ERR);
   }
-
-  stack->top = NULL;
-  return stack;
+  (*stack)->top = NULL;
+  return 0;
 }
 
 /*
@@ -28,11 +31,11 @@ SStack *SStackInit() {
  * @param stack
  * @param newElem to be pushed
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int SStackPush(SStack *stack, SStackElem *newElem) {
   if (!stack) {
-    return 1; // TODO errcode
+    return err(INTERN_ERR);
   }
   if (!newElem) {
     return err(INTERN_ERR);
@@ -99,7 +102,7 @@ SStackElem *SStackTopTerminal(SStack *stack) {
  * @param stack
  * @param newElem to be pushed
  *
- * @return 0 if successful
+ * @return 0 if successful, errcode otherwise
  */
 int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   if (!stack || !stack->top) {
@@ -112,7 +115,7 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   SStackElem *tmp = stack->top;
   if(tmp->type != st_expr){
     // The top terminal is the stack top
-    SStackPush(stack, newElem);
+    CondCall(SStackPush, stack, newElem);
     return 0;
   }
   while(tmp->next){

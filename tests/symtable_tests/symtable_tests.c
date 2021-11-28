@@ -25,7 +25,8 @@ int main(){
   printf("Message is an error message only if it is the last one from the output and the return value != 0\n");
 
   // Stack init
-  STStack *stack = STInit();
+  STStack *stack = NULL;
+  STInit(&stack);
   if(!stack){
     printf("Error while initializing\n");
     return 1;

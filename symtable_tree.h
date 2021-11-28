@@ -11,11 +11,12 @@
 /**
  * @brief Creates a new node with the given key and key, allocates memory.
  *
+ * @param node: destination pointer
  * @param key key of the new node
  *
- * @return ptr to the created node
+ * @return 0 if successful, errcode otherwise
  */
-STTreeNode *newSTTreeNode(char *key);
+int newSTTreeNode(STTreeNode **node, char *key) ForceRetUse;
 
 /**
  * @brief Creates and inserts a new node to the tree, placing it accordingly to
@@ -23,8 +24,10 @@ STTreeNode *newSTTreeNode(char *key);
  *
  * @param root node of the tree
  * @param name name (and key) of the new node
+ *
+ * @return 0 if successful, errcode otherwise
  */
-void treeInsert(STTreeNode **root, char *key);
+int treeInsert(STTreeNode **root, char *key) ForceRetUse;
 
 /**
  * @brief Frees all memory allocated by a tree node
@@ -39,13 +42,6 @@ void treeElemDestroy(STElem *data);
  * @param root a pointer to a tree
  */
 void treeDestroy(STTreeNode **root);
-
-/**
- * @brief Prints from tree to leaves, from left to right (preorder?)
- *
- * @param root root to the tree to be printed
- */
-void treePrint(STTreeNode *root);
 
 /**
  * @brief Replaces the target node with the rightmost node from the given

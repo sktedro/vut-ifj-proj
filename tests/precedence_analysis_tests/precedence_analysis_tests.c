@@ -65,7 +65,7 @@ void printTokenData(){
 
 int main(){
   // Init a symtable and push one frame
-  symtable = STStackInit();
+  STStackInit(&symtable);
   STPush(symtable);
 
   // Push 5 IDs to the symtab for every data type: fn1, fn2...fn3, varInt1, ...

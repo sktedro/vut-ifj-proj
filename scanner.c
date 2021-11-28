@@ -7,13 +7,7 @@
 
 #include "scanner.h"
 
-// TODO:
-// return what we have when we reach the last input character
-
-// A memory keeping the last read character, if it wasn't a part of the last
-// returned token. Upon every scanner called, character from this variable (if
-// it is not '\0') should be processed before reading from stdin
-char charMem = '\0';
+extern int ret;
 
 // A memory where we can stash a token (that should be returned with the next
 // scanner() call)
@@ -23,33 +17,17 @@ Token *tokenMem = NULL;
  * @brief Stash a token (to be returned on next scanner() call)
  * 
  * @param token to be stashed
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int stashToken(Token **token) {
   if (tokenMem) {
-    fprintf(stderr, "This is bad, can't stash another token\n");
-    return err(INTERN_ERR); //TODO different err code??
+    fprintf(stderr, "ERROR: An attempt to stash two tokens was made.\n");
+    return err(INTERN_ERR);
   }
   tokenMem = *token;
   *token = NULL;
   return 0;
-}
-
-/**
- * @brief Restore last read character that didn't belong to the last returned
- * token
- *
- * @return true if there was a character in charMem (and was restored)
- */
-bool restoreChar(CharBuffer *buf, char *c) {
-  if (charMem != '\0') {
-    if (charBufAppend(buf, charMem)) {
-      return err(INTERN_ERR);
-    }
-    *c = charMem;
-    charMem = '\0';
-    vypluj true;
-  }
-  vypluj false;
 }
 
 /**
@@ -113,7 +91,7 @@ bool isWhitespace(char c) {
  * @return true if char is a space, newline or tabulator
  */
 int returnToken(Token **token, int type, CharBuffer *buf) {
-  *token = tokenInit(type);
+  CondCall(tokenInit, token, type);
   if (!(*token)) {
     charBufDestroy(buf);
     vypluj err(INTERN_ERR);
@@ -131,9 +109,11 @@ int returnToken(Token **token, int type, CharBuffer *buf) {
  * analysis of characters from the standard input
  *
  * @param token: address to memory where the next token should be written
- * @return error code
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int scanner(Token **token) {
+  // Returned the stashed token (if there is one)
   if (tokenMem) {
     *token = tokenMem;
     tokenMem = NULL;
@@ -141,10 +121,8 @@ int scanner(Token **token) {
   }
 
   // Token data (characters composing it) will be written here
-  CharBuffer *buf = charBufInit();
-  if (!buf) {
-    return err(INTERN_ERR);
-  }
+  CharBuffer *buf = NULL;
+  CondCall(charBufInit, &buf);
 
   // Starting state of the finite state machine is s_start
   int state = s_start;
@@ -159,21 +137,12 @@ int scanner(Token **token) {
   // character decide what to do - change state, return token,...
   while (!lastChar) {
 
-    // Only if there was no character in charMem, read a new one from stdin
-    // (otherwise process the character from charMem)
-    if (!restoreChar(buf, &c)) {
-      c = fgetc(stdin); // TODO c should be int?
-      if (c != EOF) {
-        if (charBufAppend(buf, c)) {
-          return err(INTERN_ERR);
-        }
-      } else {
-        lastChar = true;
-        /*
-         * vyplut token??? TODO
-         */
-      }
+    c = fgetc(stdin);
+    if (c == EOF) {
+      lastChar = true;
+      // TODO vyplut token?
     }
+    CondCall(charBufAppend, buf, c);
 
     // Main switch to change the program flow based on the actual FSM state
     switch (state) {
@@ -270,7 +239,7 @@ int scanner(Token **token) {
         charBufPop(buf);
         state = s_comment;
       } else {
-        charMem = c;
+        ungetc(c, stdin);
         return returnToken(token, t_arithmOp, buf);
       }
       break;
@@ -337,15 +306,8 @@ int scanner(Token **token) {
         // If there is an escaped character, instantly append it
       } else if (c == '\\') {
         c = fgetc(stdin);
-        if (c <= 31) { //TODO nepovolene znaky???
-          vypluj err(LEX_ERR);
-        }
-        if (charBufAppend(buf, c)) {
-          return err(INTERN_ERR);
-        }
-      } else if (c <= 31) { //TODO nepovolene znaky??
-        vypluj err(LEX_ERR);
-      }
+        CondCall(charBufAppend, buf, c);
+      } 
       break;
 
     // So far, received only digits (0-9) so it is an integer literal
@@ -357,7 +319,7 @@ int scanner(Token **token) {
           state = s_scientific;
         } else {
           if (!isWhitespace(c)) {
-            charMem = c;
+            ungetc(c, stdin);
           }
           charBufPop(buf);
           return returnToken(token, t_int, buf);
@@ -373,7 +335,7 @@ int scanner(Token **token) {
           state = s_scientific;
         } else {
           if (!isWhitespace(c)) {
-            charMem = c;
+            ungetc(c, stdin);
           }
           charBufPop(buf);
           return returnToken(token, t_num, buf);
@@ -408,7 +370,7 @@ int scanner(Token **token) {
     // returned
     case s_sciNum:
       if (!isNum(c)) {
-        charMem = c;
+        ungetc(c, stdin);
         charBufPop(buf);
         return returnToken(token, t_sciNum, buf);
       }
@@ -417,7 +379,7 @@ int scanner(Token **token) {
     // Could be an identificator or a keyword
     case s_idOrKeyword:
       if (!(isLetter(c) || isNum(c) || c == '_')) {
-        charMem = c;
+        ungetc(c, stdin);
         charBufPop(buf);
         vypluj returnToken(token, t_idOrKeyword, buf);
       }
@@ -428,11 +390,9 @@ int scanner(Token **token) {
     case s_arithmOpDiv:
       if (c == '/') {
         // state = s_arithmOp;
-        /** charBufAppend(buf, c); */ // TODO why does this need to be
-        // commented? scanner returns "///" instead of "//" but why?
         return returnToken(token, t_arithmOp, buf);
       } else {
-        charMem = c;
+        ungetc(c, stdin);
         charBufPop(buf);
         return returnToken(token, t_arithmOp, buf);
       }
@@ -464,7 +424,7 @@ int scanner(Token **token) {
         // state = s_relOp
         return returnToken(token, t_relOp, buf);
       } else {
-        charMem = c;
+        ungetc(c, stdin);
         charBufPop(buf);
         return returnToken(token, t_relOp, buf);
       }
@@ -472,12 +432,11 @@ int scanner(Token **token) {
 
     // A simple assignment ('=')
     case s_assignment:
-      //printf("C = %c\n",c);
       if (c == '=') {
         // state = s_relOp
         return returnToken(token, t_relOp, buf);
       } else {
-        charMem = c;
+        ungetc(c, stdin);
         charBufPop(buf);
         return returnToken(token, t_assignment, buf);
       }
@@ -490,6 +449,7 @@ int scanner(Token **token) {
   charBufDestroy(buf);
   vypluj 0;
 }
+
 
 #endif
 /* end of file scanner.c */
