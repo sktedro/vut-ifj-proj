@@ -64,6 +64,14 @@ bool isWhitespace(char c);
 int returnToken(Token **token, int type, CharBuffer *buf);
 
 /**
+ * @brief Pretty much just calling ungetc(), but if the character is a newline,
+ * also decrement the global LOCCount
+ *
+ * @param c: character to be returned
+ */
+void returnCharacterToStdin(char c);
+
+/**
  * @brief Main scanner function - returns the next token based on lexical
  * analysis of characters from the standard input
  *
