@@ -110,8 +110,7 @@ char *genLabelName() {
 }
 
 char *genTmpVarDef() {
-  char *name = genTmpVar();
-  return name;
+  return genTmpVar();
 }
 /**
  * identifikátor, frame number
