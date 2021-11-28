@@ -22,7 +22,7 @@ int main(){
     printf("A token has an attribute after initialization!\n");
     return 1;
   }
-  tokenDestroy(relOpToken);
+  tokenDestroy(&relOpToken);
 
   char str[] = "abcdsa";
   // Add an attribute
@@ -35,7 +35,6 @@ int main(){
     printf("An attribute was added but its content is wrong! ('%s' vs '%s')\n", intToken->data, str);
     return 1;
   }
-  tokenDestroy(intToken);
-  // TODO test multiple attributes if necessary!
+  tokenDestroy(&intToken);
   return 0;
 }

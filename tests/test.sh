@@ -5,35 +5,20 @@ RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 BLUE=`tput setaf 4`
 NC=`tput sgr0` # No color
-# RED='\033[0;31m'
-# GREEN='\033[0;32m'
-# BLUE='\033[0;34m'
-# NC='\033[0m' # No color
 
 help() {
   echo "Usage: test [-h|--help]"
-  # echo "       test [TARGET] [COMMAND]"
-  echo "       test [TARGETS]"
-  echo
-  echo "If you are executing the tests using make, please follow this example:"
-  echo "  make test target=[TARGET]"
+  echo "       test [TARGET]"
   echo
   echo "TARGET"
-  echo "  SCANNER       scanner tests"
+  echo "  ALL           run all tests"
   echo "  TOKEN         token tests"
+  echo "  SCANNER       scanner tests"
   echo "  ..."
   echo
-  # echo "COMMAND"
-  # echo "  -a ALL        all tests to selected target"
-  # echo
 }
 
-# all() {
-  # testTarget=scanner
-  # runTests
-# }
-
-runTests() {
+runTest() {
   # This is the test case name and at the same time, folder in which the tests are
   echo ${BLUE}========================================
   echo Testing $(echo "$testTarget" | tr a-z A-Z) "(compile and run tests)": 
@@ -85,7 +70,6 @@ runTests() {
     # Run the test (save stdout AND STDERR to the output folder)
     echo ${BLUE}Testing "$inputName" input ${NC}
     "$testFile" < "$input" > "$outputsFolder"/"$inputName" 2>&1
-    testReturnCode="$?"
 
     # If there was no reference output, stop here
     if [ "$run" = "y" ]; then
@@ -97,24 +81,28 @@ runTests() {
     output=$(diff -s "$outputsFolder"/"$inputName" "$referenceFolder"/"$inputName")
     diffReturnCode="$?"
 
-    # diff returns 0 if files are the same
-    if [ $diffReturnCode -eq 0 ]; then
+    # Diff returns 0 if files are the same
+    if [ "$diffReturnCode" -eq 0 ]; then
       echo ${GREEN}Test passed${NC}
     else
       echo ${RED}"Test not passed. Diff:"${NC}
       echo diff is also saved to logs/tests/
       echo "$output"
       echo "$output" > "$logFolder"/"$inputName"_diff
+      returnCode="$diffReturnCode"
     fi
   done
+
   echo ${BLUE}========================================
   echo Testing $(echo "$testTarget" | tr a-z A-Z) done
   echo ========================================
   echo ========================================${NC}
+
+  if [ -n "$returnCode" ]; then
+    exit 1
+  fi
 }
 
-
-# EXEC=""
 
 if [ -z "$1" ]; then
   echo ${RED}Please type targets as arguments ${NC}
@@ -122,31 +110,29 @@ if [ -z "$1" ]; then
 fi
 
 
-while [ "$#" -gt 0 ]; do
-  case $1 in
+case $1 in
 
-    -h | --help)
-      help
-      exit 0
-      ;;
+  -h | --help)
+    help
+    exit 0
+    ;;
 
-    # -a | all | ALL)
-      # all
-      # exit 0
-      # ;;
+  *)
+    # Convert to lowercase
+    testTarget=$(echo "$1""_tests" | tr A-Z a-z)
 
-    *)
-      # Convert to lowercase
-      testTarget=$(echo "$1""_tests" | tr A-Z a-z)
+    if [ "$testTarget" = "all_tests" ]; then
+      make all
+      exit "$?"
+    fi
 
-      # If there is no directory containing tests for that target
-      if [ ! -d ./"$testTarget" ]; then
-        echo ${RED}Tests for target \'"$testTarget"\' do not exist!
-      else
-        runTests
-      fi
-      shift
-      ;;
+    # If there is no directory containing tests for that target
+    if [ ! -d ./"$testTarget" ]; then
+      echo ${RED}Tests for target \'"$testTarget"\' do not exist!
+    else
+      runTest
+      exit "$?"
+    fi
+    ;;
 
-  esac
-done
+esac
