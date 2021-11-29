@@ -1284,7 +1284,7 @@ int pNextAssign() {
 
   if (token->type != t_comma) {
     tokenDestroy(&token);
-    vypluj err(SYNTAX_ERR); // TODO maybe ass_err my brain can't compreheend errors right now
+    vypluj err(SYNTAX_ERR);
   }
   vypluj 0;
 }
@@ -1622,21 +1622,16 @@ int pTypeList() {
 
   printToken(token);
 
-  if (token->type == t_idOrKeyword && isDataType(token->data)) {
-
-      //TODO SAVE TOKEN TYPE FOR GENERATING VARIABLE IN IFJ21CODE
-
-      vypluj 0;
-
-    // Huh?
-    /*if (strcmp(token->data, "nil") == 0) {
-      tokenDestroy(&token);
-      ret = pNextType();
-      CondReturn;
-    }*/
-  } else {
-    vypluj err(SYNTAX_ERR);
+  // eps
+  if(!isDataType(token->data)) {
+    CondCall(stashToken, &token);
+    vypluj 0;
   }
+
+  tokenDestroy(&token);
+
+  ret = pNextType();
+  CondReturn;
 
   vypluj 0;
 }
