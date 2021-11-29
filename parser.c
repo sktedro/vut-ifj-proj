@@ -10,21 +10,19 @@
  * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
  * --------------------------------------------------
  *
- * 1. code generating not implemented yet, first parser testing
- * 2. code in testing
- * 3. change error codes
+ * 1. code in testing
  *
  * --------------------------------------------------
  * Function             State
  * --------------------------------------------------
- * pStart()             Change error codes
- * pReq()               Change error codes
+ * pStart()             DONE
+ * pReq()               DONEN
  * pCodeBody()          DONE
- * pFnCall()            Change error codes
- * pFnRet()             Change error codes
+ * pFnCall()            DONE
+ * pFnRet()             DONE
  * pFnCallArgList()     DONE
- * pNextFnCallArg()     Change error codes
- * pFnCallArg()         Change error codes
+ * pNextFnCallArg()     DONE
+ * pFnCallArg()         RETRACTOR
  * pRet()               DONE
  * pStat()              Waiting for pExpr()
  * pStatWithId()        Waiting for pExpr()
@@ -119,6 +117,49 @@ bool isDataType(char *data) {
   } else {
     vypluj false;
   }
+}
+
+/**
+ * @brief check if token is read function
+ * 
+ * @param data 
+ * @return true if data is read function
+ * @return false otherwise
+ */
+bool isReadFunction(char *data) {
+  if(strcmp(data, "readi") == 0 ||
+  strcmp(data, "reads") == 0 ||
+  strcmp(data, "readn") == 0) {
+    vypluj true;
+  } 
+
+  vypluj false;
+}
+
+/**
+ * @brief check if token is read function in ifj21
+ * 
+ * @param token 
+ * @return true if it is read function, destroys () behind read, generates code
+ * 
+ */
+bool readFunction(Token *token) {
+
+  // if token is not a keyword returns false and stashToken
+  if(token->type != t_idOrKeyword) {
+    CondCall(stashToken, &token);
+    vypluj false;
+  }
+
+  // if token is not a read function, returns false and stashToken
+  if(!isReadFunction(token->data)) {
+    CondCall(stashToken, &token);
+    
+    vypluj false;
+  }
+  
+  CondCall(genVarAssign, element->data, element->dataType, token->data);
+  vypluj true;
 }
 
 
@@ -484,173 +525,6 @@ int pCodeBody() {
     vypluj err(SYNTAX_ERR);
   }
 
-  // -> eps
-  /*if (token == NULL) { // EOF
-    vypluj 0;
-    } else if (token->type == t_idOrKeyword) {
-  //-> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
-  if (strcmp(token->data, "function") == 0) {
-  ret = scanner(&token);
-  CondReturn;
-
-
-  // [id] - function name
-  ret = pNewFunId(token);
-  CondReturn;
-  STSetFnDefined(symtab, token->data, true);
-
-  genFnDef(token->data);
-  // (
-  ret = scanner(&token);
-  CondReturn;
-  printToken(token);
-
-  if (token->type != t_leftParen) {
-  cleanElement();
-  vypluj err(SYNTAX_ERR);
-  }
-  //TODO TU POKRAČUJ
-
-  // <fnArgList>
-  ret = pFnArgList();
-
-  CondReturn;
-
-  // )
-  ret = scanner(&token);
-
-  CondReturn;
-  printToken(token);
-  if (token->type != t_rightParen) {
-  vypluj err(SYNTAX_ERR);
-  }
-
-  // <fnRet>
-  ret = pFnRet();
-  CondReturn;
-  // <stat>
-  // TODO new stack frame (symbol table)
-  ret = pStat();
-  CondReturn;
-  // <ret>
-  ret = pRet();
-  CondReturn;
-  // end
-  ret = scanner(&token);
-  CondReturn;
-  if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
-  STDestroy(&symtab);
-  vypluj err(SYNTAX_ERR);
-  }
-  STPop(symtab);
-
-  // <codeBody>
-  ret = pCodeBody();
-  CondReturn;
-  //-> global [id] : function ( <typeList> ) <fnRet> <codeBody>
-  } else if (strcmp(token->data, "global") == 0) {
-  // [id]
-  ret = scanner(&token);
-  CondReturn;
-
-  printToken(token);
-
-  ret = pNewFunId(token);
-  CondReturn;
-
-  STSetFnDefined(symtab, token->data, false);
-
-  // :
-  ret = scanner(&token);
-  CondReturn;
-
-  printToken(token);
-
-  if (token->type != t_colon) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // function
-  ret = scanner(&token);
-  CondReturn;
-  if (!(token->type == t_idOrKeyword && strcmp(token->data, "function") == 0)) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // (
-  ret = scanner(&token);
-  CondReturn;
-
-  if (token->type != t_leftParen) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // <typeList>
-  ret = pTypeList();
-  CondReturn;
-
-  // )
-  ret = scanner(&token);
-  CondReturn;
-
-  if (token->type != t_rightParen) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // <fnRet>
-  ret = pFnRet();
-  CondReturn;
-
-  // <codeBody>
-  ret = pCodeBody();
-  CondReturn;
-}
-
-//-> [id] <fnCall> <codeBody> - calling a build in function
-else if (isBuiltInFunction(token)) {
-  if (strcmp(token->data, "write") == 0) {
-
-    ret = pFnCall();
-    CondReturn;
-    ret = pCodeBody();
-    CondReturn;
-    vypluj 0;
-  }
-
-  //-> [id] <fnCall> <codeBody> - calling a user function
-} else if (STFind(symtab, token->data) != NULL) {
-  fprintf(stderr, "user function call\n");
-  // [id]
-  // If the id is a variable or is not defined yet, we can't call it as a function...
-
-  STElem *element = STFind(symtab, token->data);
-  fprintf(stderr, "ELEMENT %s\n",element->name);
-
-  if(element->fnDefined) {
-    fprintf(stderr, "TRUE\n");
-  } else {
-    fprintf(stderr, "FALSE\n");
-  }
-
-
-  if (STGetIsVariable(symtab, token->data) || !STGetFnDefined(symtab, token->data)) {
-    fprintf(stderr, "FN NENI DEFINOVANÁ\n");
-    vypluj err(ID_DEF_ERR);
-  }
-  fprintf(stderr, "FN JE DEFINOVANÁ\n");
-
-  // <fnCall>
-  ret = pFnCall();
-  CondReturn;
-  // TODO generate code?
-
-  // <codeBody>
-  ret = pCodeBody();
-  CondReturn;
-} else {
-  vypluj err(ID_DEF_ERR); // TODO errcode asi good?
-}
-}*/
 vypluj 0;
 }
 
@@ -701,9 +575,8 @@ int pFnRet() {
     printf("STASH TOKEN FNRET\n");
     CondCall(stashToken, &token);
     vypluj 0;
-
+  }
     // <fnRet>           -> : <type> <nextType>
-  } else {
     // : processed by the previous if
 
     // <type>
@@ -711,7 +584,7 @@ int pFnRet() {
 
     // <nextType>
     CondCall(pNextType);
-  }
+
   vypluj 0;
 }
 
@@ -761,20 +634,20 @@ int pNextFnCallArg() {
 
   CondCall(scanner, &token);
   printToken(token);
-
-  // -> , <fnCallArg> <nextFnCallArg>
-  if (token->type == t_comma) {
-    // <fnCallArg>
-    CondCall(pFnCallArg);
-    // <nextFnCallArg>
-    CondCall(pNextFnCallArg);
-    vypluj 0;
-
-    // -> eps
-  } else {
+  
+  // -> eps
+  if(token->type != t_comma) {
     CondCall(stashToken, &token);
     vypluj 0;
   }
+
+  // <fnCallArg>
+  CondCall(pFnCallArg);
+  
+  // <nextFnCallArg>
+  CondCall(pNextFnCallArg);
+  
+  vypluj 0;
 }
 
 /**
@@ -838,16 +711,15 @@ int pRet() {
   CondCall(scanner, &token);
   printToken(token);
 
-  // -> return <retArgList>
-  if (token->type == t_idOrKeyword && strcmp(token->data, "return") == 0) {
-
-    // <retArgList>
-    CondCall(pRetArgList);
+  // -> eps
+  if(strcmp(token->data, "return") != 0) {
+    CondCall(stashToken, &token);
     vypluj 0;
   }
-  // -> eps
-  ret = stashToken(&token);
-  CondReturn;
+
+  // <retArgList>
+  CondCall(pRetArgList);
+    
   vypluj 0;
 }
 
@@ -887,10 +759,11 @@ int pStat() {
     RequireToken(t_colon);
 
     // <type>
-
     CondCall(pType);
+    
     // <newIdAssign>
     CondCall(pNewIdAssign);
+    
     // <stat>
     CondCall(pStat);
 
