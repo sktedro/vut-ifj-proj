@@ -112,7 +112,7 @@ void destroyElement() {
 /**
  * @brief Check if string is a data type
  * 
- * @return if type is data type return 0, else 1
+ * @return if string is data type return true, else false
  */
 bool isDataType(char *data) {
   if (strcmp(data, "string") == 0) {
@@ -121,10 +121,36 @@ bool isDataType(char *data) {
     vypluj true;
   } else if (strcmp(data, "number") == 0) {
     vypluj true;
+  } else if(strcmp(data, "nil")) {
+    vypluj true;
   } else {
     vypluj false;
   }
 }
+
+
+/**
+ * @brief returns value of data type in IFJ21DataTypes
+ * 
+ * @param string
+ * 
+ * @return return value in range <0, 3> if it is in datastructure, else -1
+ */
+
+int getDataTypeInt(char *data) {
+  if (strcmp(data, "integer") == 0) {
+    vypluj 0;
+  } else if (strcmp(data, "number") == 0) {
+    vypluj 1;
+  } else if (strcmp(data, "string") == 0) {
+    vypluj 2;
+  } else if(strcmp(data, "nil")) {
+    vypluj 3;
+  } else {
+    vypluj -1;
+  }
+}
+
 
 /**
  * @brief Check if token is built in function
@@ -383,7 +409,7 @@ int pCodeBody() {
   }
 
   if(token->type != t_idOrKeyword) {
-    vypluj err(1); // TODO ADD ERR CODE
+    vypluj err(SYNTAX_ERR);
   }
 
   // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
@@ -447,7 +473,7 @@ int pCodeBody() {
     ret = pNewFunId(token);
     CondReturn;
 
-    tokenDestroy(&token);
+    tokenDestroy(&token); 
 
     // :
     ret = scanner(&token);
@@ -455,7 +481,7 @@ int pCodeBody() {
 
     if(token->type != t_colon) {
       tokenDestroy(&token);
-      vypluj err(0); // TODO ADD ERR
+      vypluj err(SYNTAX_ERR);
     }
 
     tokenDestroy(&token);
@@ -466,7 +492,7 @@ int pCodeBody() {
 
     if(strcmp(token->data, "function") != 0) {
       tokenDestroy(&token);
-      vypluj err(0); // TODO ADD ERR
+      vypluj err(ID_DEF_ERR);
     }
 
     tokenDestroy(&token);
@@ -477,7 +503,7 @@ int pCodeBody() {
 
     if(strcmp(token->data, "(") != 0) {
       tokenDestroy(&token);
-      vypluj err(0); // TODO ADD ERR
+      vypluj err(SYNTAX_ERR);
     }
 
     tokenDestroy(&token);
@@ -492,7 +518,7 @@ int pCodeBody() {
 
     if(strcmp(token->data, ")") != 0) {
       tokenDestroy(&token);
-      vypluj err(0); // TODO ADD ERR
+      vypluj err(SYNTAX_ERR);
     }
 
     tokenDestroy(&token);
@@ -523,7 +549,7 @@ int pCodeBody() {
 
   } else {
     tokenDestroy(&token);
-    vypluj err(1); //TODO ADD ERR
+    vypluj err(SYNTAX_ERR);
   }
 
   // -> eps
@@ -773,7 +799,7 @@ int pFnRet() {
   printToken(token);
 
   // <fnRet>           -> eps
-  if (token->type != t_colon) { // :
+  if (token->type != t_colon) {
     printf("STASH TOKEN FNRET\n");
     CondCall(stashToken, &token);
     vypluj 0;
@@ -978,6 +1004,7 @@ int pStat() {
     ret = scanner(&token);
     CondReturn;
     printToken(token);
+    
     if (token->type != t_colon) {
       tokenDestroy(&token);
       vypluj err(SYNTAX_ERR);
@@ -1225,7 +1252,7 @@ int pNextAssign() {
   
   // -> , [id] <nextAssign> <expr> ,
   if(token->type != t_comma) {
-    vypluj err(ASS_ERR); 
+    vypluj err(SYNTAX_ERR); 
   }
 
   tokenDestroy(&token);
@@ -1665,35 +1692,23 @@ int pType() {
   CondReturn;
   printToken(token);
 
-  if ((strcmp(token->data, "nil") == 0) || isDataType(token->data)) {
-    printf("IF\n");
-    if(strcmp(token->data, "integer") == 0) {
-      STSetVarDataType(symtab, element->data,dt_integer);
-    } else if(strcmp(token->data, "number") == 0) {
-      STSetVarDataType(symtab, element->data,dt_number);
-    } else if(strcmp(token->data, "string") == 0) {
-      STSetVarDataType(symtab, element->data,dt_string);
-    } else if(strcmp(token->data, "nil") == 0) {
-      STSetVarDataType(symtab, element->data,dt_nil);
-    } else {
-      vypluj err(0);
-    }
+  if(isDataType(token->data)) {
 
-    STElem *e = malloc(sizeof(STElem));
-    e = STFind(symtab, element->data);
-    if(!e){
-      printf("is null since it does not exist in the symbol table (yet)\n");
-    }
+    // Adding data type to existing variable in ST
+    // else pType() is called as data type of function, do nothing
+    if (element->data != NULL) {
+      STSetVarDataType(symtab, element->data, getDataTypeInt(token->data));
 
-    printf("DATA : %s\n", e->name);
-    printf("TYPE : %d\n", e->varDataType);
-    free(e);
-    cleanElement();
-    fprintf(stderr, "IS DATA TYPE\n");
+      // TODO call gen function for fn param definition -> fn not done yet
+      genVarDef(element->data, symtab->top->depth);
+
+      cleanElement();
+      tokenDestroy(&token);
+    } 
     vypluj 0;
-  } else {
-    vypluj err(SYNTAX_ERR);
   }
+
+  vypluj err(1); // TODO ADD ERR CODE
 }
 
 /**
