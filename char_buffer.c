@@ -22,6 +22,7 @@ extern int ret;
 int charBufInit(CharBuffer **buf) {
   GCMalloc(*buf, sizeof(CharBuffer));
   GCMalloc((*buf)->data, CHARBUFINITLEN * sizeof(char));
+  (*buf)->len = 0;
   (*buf)->size = CHARBUFINITLEN;
   (*buf)->data[0] = '\0';
   return 0;
@@ -36,13 +37,15 @@ int charBufInit(CharBuffer **buf) {
  * @return 0 if successful, errcode otherwise
  */
 int charBufAppend(CharBuffer *buf, char c) {
-  if (buf->len + 1 == buf->size) {
-    GCRealloc(buf->data, 2 * buf->size * sizeof(char));
-    buf->size *= 2;
+  if(buf){
+    if (buf->len + 1 == buf->size) {
+      GCRealloc(buf->data, 2 * buf->size * sizeof(char));
+      buf->size *= 2;
+    }
+    buf->data[buf->len] = c;
+    (buf->len)++;
+    buf->data[buf->len] = '\0';
   }
-  buf->data[buf->len] = c;
-  (buf->len)++;
-  buf->data[buf->len] = '\0';
   return 0;
 }
 
