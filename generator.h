@@ -23,6 +23,7 @@ char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2);
 char *genConvertFloatToInt(SStackElem *src);
 char *genConvertIntToFloat(SStackElem *src);
 char *genUnaryOperation(SStackElem *src);
+int genReadFunction(char *varName, char *builtInFnName, int frame);
 void genFnCall(char *name);
 void genFnDef(char *name);
 void genFnDefRet();

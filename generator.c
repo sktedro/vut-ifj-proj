@@ -163,6 +163,9 @@ int genVarAssign(char *name, int dataType, char *assignValue) {
   } else if(strcmp(assignValue, "reads") == 0) {
     printf("READ LF@%s string\n", name);
   
+  } else if(dataType == -1) {
+    // TODO change TF to LF if expression variable is in local frame
+    printf("MOVE LF@%s TF@%s", name, assignValue);
   } else {
     return 1; // TODO errcode?
   }
@@ -170,6 +173,48 @@ int genVarAssign(char *name, int dataType, char *assignValue) {
   return 0;
 }
 
+int genReadFunction(char *varName, char *builtInFnName, int frame) {
+  
+  if(strcmp(builtInFnName, "readi") == 0) {
+      printf("READ LF@%s int\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else if(strcmp(builtInFnName, "readn") == 0) {
+      printf("READ LF@%s float\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else if(strcmp(builtInFnName, "reads") == 0) {
+      printf("READ LF@%s string\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else {
+    vypluj err(1); // TODO INTERNAL ERROR
+  }
+
+  vypluj 0;
+}
+// IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
+/*
+int genStringFunction(char *varName, char *builtInFnName, int frame) {
+  
+  if(strcmp(builtInFnName, "substr") == 0) {
+      printf("READ LF@%s int\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else if(strcmp(builtInFnName, "ord") == 0) {
+      printf("READ LF@%s float\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else if(strcmp(builtInFnName, "chr") == 0) {
+      printf("READ LF@%s string\n", genName(varName, frame));
+      RequireToken(t_leftParen);
+      RequireToken(t_rightParen);
+  } else {
+    vypluj err(1); // TODO INTERNAL ERROR
+  }
+
+  vypluj 0;
+}*/
 
 /**
  * volane bude z precedenčnej analýzy (iba)

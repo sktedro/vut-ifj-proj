@@ -25,11 +25,11 @@
  * pNextFnCallArg()     DONE
  * pFnCallArg()         RETRACTOR
  * pRet()               DONE
- * pStat()              Waiting for pExpr()
+ * pStat()              ADD GENERATING CODE
  * pStatWithId()        Waiting for pExpr()
  * pNextAssign()        Change error codes
- * pFnArgList()         Change error codes, check last 2 todos
- * pNextFnArg()         Change error codes
+ * pFnArgList()         DONE
+ * pNextFnArg()         DONE --
  * pRetArgList()        DONE
  * pRetNextArg()        DONE
  * pTypeList()          DONE
@@ -130,6 +130,22 @@ bool isReadFunction(char *data) {
   if(strcmp(data, "readi") == 0 
   || strcmp(data, "reads") == 0 
   || strcmp(data, "readn") == 0) {
+    vypluj true;
+  } 
+  vypluj false;
+}
+
+/**
+ * @brief check if token is string operation function
+ * 
+ * @param data 
+ * @return true if data is string operation function
+ * @return false otherwise
+ */
+bool isStringOperationFunction(char *data) {
+  if(strcmp(data, "substr") == 0 
+  || strcmp(data, "ord") == 0 
+  || strcmp(data, "chr") == 0) {
     vypluj true;
   } 
   vypluj false;
@@ -387,21 +403,22 @@ int pReq() {
  *
  */
 int pNewFunId(Token *token) {
-  if (token->type == t_idOrKeyword) {
-    if (STFind(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
-      fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
-      vypluj err(ID_DEF_ERR);
-    } else {
-      fprintf(stderr, "ADDING TO SYMTAB\n");
-      CondCall(STInsert, symtab, token->data);
-      STSetIsVariable(symtab, token->data, false);
-      STSetFnDefined(symtab, token->data, true);
-      vypluj 0;
-    }
-
-  } else {
+  if (token->type != t_idOrKeyword) {
     fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
     vypluj err(SYNTAX_ERR);
+  }
+  
+  if (STFind(symtab, token->data)) {
+    if(STGetFnDefined(symtab, token->data)) {
+      fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
+      vypluj err(ID_DEF_ERR);
+    }
+  } else {
+    fprintf(stderr, "ADDING TO SYMTAB\n");
+    CondCall(STInsert, symtab, token->data);
+    STSetIsVariable(symtab, token->data, false);
+    STSetFnDefined(symtab, token->data, true);
+    vypluj 0;
   }
 }
 
@@ -439,22 +456,18 @@ int pCodeBody() {
     RequireToken(t_leftParen);
 
     // <fnArgList>
-    //TODO DONE THIS
     CondCall(pFnArgList);
 
     // )
     RequireToken(t_rightParen);
 
     // <fnRet>
-    // TODO DONE THIS
     CondCall(pFnRet);
 
     // <stat>
-    // TODO DONE THIS
     CondCall(pStat);
 
     // <ret>
-    // TODO DONE THIS
     CondCall(pRet);
 
     // end
@@ -491,7 +504,6 @@ int pCodeBody() {
     RequireToken(t_rightParen);
 
     // <fnRet>
-    // TODO - DO WHAT??
     CondCall(pFnRet);
 
     // <codeBody>
@@ -568,8 +580,7 @@ int pFnRet() {
   vypluj pNextType();
 }
 
-//"z pravidla 13 asi budeme musieť urobiť dve - ak je next token [id] tak
-//sa použije jedno, ak to bude literál tak druhé, inak 12" - proč ale tady a ne ve fnCallArg? [confused unga bunga]
+
 /**
  * @brief
  *
@@ -771,7 +782,7 @@ int pStat() {
       vypluj err(SYNTAX_ERR);
     }
 
-    CondCall(STPush, symtab); //TODO CHECK - check what??
+    CondCall(STPush, symtab);
 
     // <stat>
     CondCall(pStat);
@@ -807,7 +818,7 @@ int pStat() {
     // <expr>
     // TODO semantic actions - use that retVarName - the result of the expr is there
     char *retVarName = NULL;
-    CondCall(pExpr, &retVarName); //TODO
+    CondCall(pExpr, &retVarName);
 
     // do
     CondCall(scanner, &token);
@@ -828,20 +839,19 @@ int pStat() {
     CondCall(stashToken, &token); // WHY??
     vypluj 0;
 
-  } else if(strcmp(token->data, "return") == 0) { // ?????????
-    vypluj 0; // tady by se asi neměl returnovat a měl by dál zpracovávat stat ne?
+  } else if(strcmp(token->data, "return") == 0) {
+    CondCall(pExpr, NULL); // TODO NAHRADIŤ NULL
+    vypluj 0;
   } else if(strcmp(token->data, "end") == 0) {
     printToken(token);
-    fprintf(stderr, "SME V ENDE\n");
 
-    CondCall(stashToken, &token); // WHY
+    CondCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> [id] <statWithId> <stat> - built in write function call
    else if (strcmp(token->data, "write") == 0) {
     CondCall(pFnCall, "write");
-    //fprintf(stderr, "BACK IN STAT\n");
     CondCall(pStat);
     vypluj 0;
     // TODO other built in functions call?
@@ -918,7 +928,8 @@ int pStatWithId(char *idName) {
       // <expr>
       char *retVarName = NULL;
       CondCall(pExpr, &retVarName);
-      // TODO use that retvarname (MOVE it to token->data, since the result of the expression is stored there)
+
+      genVarAssign(token->data, -1 ,retVarName);
 
       // ,
       RequireToken(t_comma);
@@ -1128,18 +1139,16 @@ int pNextFnArg() {
   // [id]
   CondCall(scanner, &token);
   printToken(token);
-  // TODO
-  // tu načteme id a musíme zjistit či je ok a tak
+
   CondCall(STInsert, symtab, token->data);
   element->data = token->data;
+  genVarDef(token->data, symtab->top->depth);
   // :
   RequireToken(t_colon);
 
   // <type>
   CondCall(pType, &token);
   printToken(token);
-
-  
 
   // <nextFnArg>
   vypluj pNextFnArg(&token);
@@ -1529,11 +1538,19 @@ int pExpr(char **retVarName) {
       && STGetFnDefined(symtab, token->data)){
 
     // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
-    if(strcmp(token->data, "readi") == 0) {
-      //genVarAssign(element, symtab->top->depth, "readi");
+    
+    if(isReadFunction(token->data)) {
+      genReadFunction(element->data, token->data, symtab->top->depth);
+    } else if(isStringOperationFunction(token->data)) {
+      // IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
+    }
+    
+    // THIS WILL BE DELETED SOON
+    /*if(strcmp(token->data, "readi") == 0) {
+      genVarAssign(element, symtab->top->depth, "readi");
+      RequireToken(t_leftParen);
       RequireToken(t_rightParen);
-
-      vypluj err(SYNTAX_ERR);
+      vypluj 0;
     } else if(strcmp(token->data, "reads") == 0) {
       // asi už nie TODO GENERATE STRING READ
       //genVarAssign(element, symtab->top->depth, "reads");
@@ -1556,7 +1573,7 @@ int pExpr(char **retVarName) {
       vypluj err(PARAM_RET_ERR);
     }
 
-  }
+  }*/
 
   vypluj 0;
 }
