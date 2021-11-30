@@ -770,7 +770,7 @@ void destroySymbol(SStackElem **elem) {
  * @param symstack: where to save the initialized symbol stack
  * @param token: the token received from the parser
  *
- * @return 0 if successful, -1 if the token is a fn call, errcode otherwise 
+ * @return 0 if successful, errcode otherwise 
  */
 int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
 
@@ -786,14 +786,6 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
   // Get a new token if it was not provided by the parser
   if (!(*token)) {
     CondCall(scanner, token);
-  }
-
-  // Check if the next token is a function - if so, stash the token and let the
-  // parser know by returning -1
-  if (STFind(symtab, (*token)->data) 
-      && !STGetIsVariable(symtab, (*token)->data)) {
-    CondCall(stashToken, token);
-    return -1;
   }
 
   // If the token is not allowed to be a part of the expression => syntax err

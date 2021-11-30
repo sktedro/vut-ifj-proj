@@ -267,7 +267,7 @@ void destroySymbol(SStackElem **elem);
  * @param symstack: where to save the initialized symbol stack
  * @param token: the token received from the parser
  *
- * @return 0 if successful, -1 if the token is a fn call, errcode otherwise 
+ * @return 0 if successful, errcode otherwise 
  */
 int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) 
   ForceRetUse;
