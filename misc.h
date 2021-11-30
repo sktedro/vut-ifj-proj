@@ -41,9 +41,10 @@
 
 #define condVypluj CondReturn
 
-#define CondCall(FN, ...) \ // TODO celkem zavádějící název, zní jakože se to volá
-                        // jenom za podmínky, lepší by bylo něco jako callWithCondReturn
-                        // ale bojím se na to chytat
+// TODO celkem zavádějící název, zní jakože se to volá
+// jenom za podmínky, lepší by bylo něco jako callWithCondReturn
+// ale bojím se na to chytat
+#define CondCall(FN, ...) \
   ret = FN(__VA_ARGS__);  \
   CondReturn
 
