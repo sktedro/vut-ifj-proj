@@ -518,7 +518,7 @@ int pCodeBody() {
  *
  * 09. <fnCall>          -> ( <fnCallArgList> )
  */
-int pFnCall(char *fnName) {
+int pFnCall() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   fprintf(stderr, "PARSER FNCALL\n");
   Token *token = NULL;
@@ -1131,7 +1131,7 @@ int pNextFnArg() {
   printToken(token);
   // TODO
   // tu načteme id a musíme zjistit či je ok a tak
-  STInsert(symtab, token->data);
+  CondCall(STInsert, symtab, token->data);
   element->data = token->data;
   // :
   RequireToken(t_colon);
