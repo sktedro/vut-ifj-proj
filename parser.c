@@ -6,6 +6,7 @@
  *
  * --------------------------------------------------
  * TOP PRIORITY
+ * TODO když dostaneme EOF (token == NULL) někde random uprostřed pravidla
  * WE NEED MORE STATES FOR BUILT IN FUNCTIONS
  * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
  * --------------------------------------------------
@@ -550,7 +551,7 @@ int pFnCall() {
   fprintf(stderr, "back in fn call \n");
   RequireToken(t_rightParen);
 
-  printf("FN CALL RET\n");
+  fprintf(stderr, "FN CALL RET\n");
   vypluj 0;
 }
 
@@ -563,8 +564,8 @@ int pFnCall() {
  * 11. <fnRet>           -> : <type> <nextType>
  */
 int pFnRet() {
-  printf("-----------------------------------------------------------\n");
-  printf("FNRET\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "FNRET\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -572,7 +573,7 @@ int pFnRet() {
 
   // <fnRet>           -> eps
   if (token->type != t_colon) {
-    printf("STASH TOKEN FNRET\n");
+    fprintf(stderr, "STASH TOKEN FNRET\n");
     CondCall(stashToken, &token);
     vypluj 0;
   }
@@ -599,8 +600,8 @@ int pFnRet() {
  * 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
  */
 int pFnCallArgList() {
-  printf("-----------------------------------------------------------\n");
-  printf("FN CALL ARG LIST\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "FN CALL ARG LIST\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -616,7 +617,6 @@ int pFnCallArgList() {
   CondCall(stashToken, &token);
   CondCall(pFnCallArg);
   vypluj pNextFnCallArg();
-
 }
 
 /**
@@ -628,8 +628,8 @@ int pFnCallArgList() {
  * 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
  */
 int pNextFnCallArg() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT FN CALL ARG\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT FN CALL ARG\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -645,9 +645,7 @@ int pNextFnCallArg() {
   CondCall(pFnCallArg);
   
   // <nextFnCallArg>
-  CondCall(pNextFnCallArg);
-  
-  vypluj 0;
+  vypluj pNextFnCallArg();
 }
 
 /**
@@ -659,8 +657,8 @@ int pNextFnCallArg() {
  * 17. <fnCallArg>       -> [literal]
  */
 int pFnCallArg() {
-  printf("-----------------------------------------------------------\n");
-  printf("FN CALL ARG\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "FN CALL ARG\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -704,8 +702,8 @@ int pFnCallArg() {
  * 20. <ret>             -> return <retArgList>
  */
 int pRet() {
-  printf("-----------------------------------------------------------\n");
-  printf("RET\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "RET\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -735,8 +733,8 @@ int pRet() {
  * 26. <stat>            -> while <expr> do <stat> end <stat>
  */
 int pStat() {
-  printf("-----------------------------------------------------------\n");
-  printf("STAT\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "STAT\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -778,7 +776,7 @@ int pStat() {
     // then
     CondCall(scanner, &token);
     printToken(token);
-    printf("TU\n");
+    fprintf(stderr, "TU\n");
 
     if (!(token->type == t_idOrKeyword && strcmp(token->data, "then") == 0)) {
       vypluj err(SYNTAX_ERR);
@@ -890,8 +888,8 @@ int pStat() {
  * 29. <statWithId>      -> <fnCall>
  */
 int pStatWithId() {
-  printf("-----------------------------------------------------------\n");
-  printf("STAT WITH ID\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "STAT WITH ID\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -940,8 +938,8 @@ int pStatWithId() {
  * 32. <nextAssign>  -> =
  */
 int pNextAssign() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT ASSIGN\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT ASSIGN\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -991,8 +989,8 @@ int pNextAssign() {
  * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
  */
 int pBuiltInFunctions() {
-  printf("-----------------------------------------------------------\n");
-  printf("BUILt IN FUNCTIONS\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "BUILt IN FUNCTIONS\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1060,15 +1058,15 @@ int pBuiltInFunctions() {
  * 35. <fnArgList>       -> [id] : <type> <nextFnArg>
  */
 int pFnArgList() {
-  printf("-----------------------------------------------------------\n");
-  printf("FN ARG LIST\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "FN ARG LIST\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
-
   printToken(token);
 
   // -> eps
+  // TODO seems not so sure man
   if(!(token->type == t_idOrKeyword && token->type != t_idOrKeyword)) {
     CondCall(stashToken, &token);
     vypluj 0;
@@ -1184,8 +1182,8 @@ int pNextFnArg() {
  * 40. <retArgList>      -> <expr> <retNextArg>
  */
 int pRetArgList() {
-  printf("-----------------------------------------------------------\n");
-  printf("RET ARG LIST\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "RET ARG LIST\n");
 
   // -> <expr> <retNextArg>
   CondCall(pExpr);
@@ -1194,7 +1192,7 @@ int pRetArgList() {
 }
 
 bool isExpressionParser(Token token) {
-  printf("is %s expression ?\n", token.data);
+  fprintf(stderr, "is %s expression ?\n", token.data);
 
   if (token.type == t_leftParen) {
     vypluj true;
@@ -1234,8 +1232,8 @@ bool isExpressionParser(Token token) {
  * 42. <retNextArg>      -> , <expr> <retNextArg>
  */
 int pRetNextArg() {
-  printf("-----------------------------------------------------------\n");
-  printf("REG NEXT ARG\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "REG NEXT ARG\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1271,8 +1269,8 @@ int pRetNextArg() {
  * 48. <typeList>        -> nil <nextType>
  */
 int pTypeList() {
-  printf("-----------------------------------------------------------\n");
-  printf("TYPE LIST\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "TYPE LIST\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1300,8 +1298,8 @@ int pTypeList() {
  * 51. <nextType>        -> , <type> <nextType>
  */
 int pNextType() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT TYPE\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT TYPE\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1332,8 +1330,8 @@ int pNextType() {
  * 56. <type>            -> nil
  */
 int pType() {
-  printf("-----------------------------------------------------------\n");
-  printf("TYPE\n");
+  fprintf(stderr,"-----------------------------------------------------------\n");
+  fprintf(stderr,"TYPE\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1365,8 +1363,8 @@ int pType() {
  * 58. <idList>          -> [id] <nextId> (variable declaration)
  */
 int pIdList() {
-  printf("-----------------------------------------------------------\n");
-  printf(" ID LIST\n");
+  fprintf(stderr,"-----------------------------------------------------------\n");
+  fprintf(stderr," ID LIST\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1377,7 +1375,7 @@ int pIdList() {
   }
 
   if (STFind(symtab, token->data)) {
-    printf("ISDSD\n");
+    fprintf(stderr, "ISDSD\n");
     if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
       fprintf(stderr, "warning: declaring a variable again\n");
       element->data = token->data;
@@ -1396,9 +1394,9 @@ int pIdList() {
   e = STFind(symtab, token->data);
 
   if(!e) {
-    printf("DOESNT EXIST\n");
+    fprintf(stderr, "DOESNT EXIST\n");
   } else {
-    printf("NAME : %s\n", e->name);
+    fprintf(stderr, "NAME : %s\n", e->name);
   }
 
   vypluj pNextId();
@@ -1413,14 +1411,15 @@ int pIdList() {
  * 60. <nextId>          -> , [id] <nextId>
  */
 int pNextId() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT ID \n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "NEXT ID \n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
   printToken(token);
 
   // -> eps
+  // ,
   if (token->type != t_comma) {
     CondCall(stashToken, &token);
     vypluj 0;
@@ -1459,22 +1458,21 @@ int pNextId() {
  * 63. <newIdAssign>     -> = <exprList>
  */
 int pNewIdAssign() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEW ID ASSIGN\n");
+  fprintf(stder, "-----------------------------------------------------------\n");
+  fprintf(stder, "NEW ID ASSIGN\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
   printToken(token);
 
   // -> eps
+  // =
   if (!(token->type == t_assignment && !strcmp(token->data, "="))) {
     CondCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> = <exprList>
-  // '='
-
   // <exprList>
   vypluj pExprList();
 }
@@ -1487,15 +1485,13 @@ int pNewIdAssign() {
  * 65. <exprList>        -> <expr> <nextExpr>
  */
 int pExprList() {
-  printf("EXPR LIST \n");
+  fprintf(stder, "EXPR LIST \n");
   // <expr>
   // TODO semantic actions
   CondCall(pExpr);
 
   // <nextExpr>
-  CondCall(pNextExpr);
-
-  vypluj 0;
+  vypluj pNextExpr();
 }
 
 /**
@@ -1507,30 +1503,27 @@ int pExprList() {
  * 67. <nextExpr>        -> , <expr> <nextExpr>
  */
 int pNextExpr() {
-  printf("-----------------------------------------------------------\n");
-  printf("NEXT EXPR\n");
+  fprintf(stder, "-----------------------------------------------------------\n");
+  fprintf(stder, "NEXT EXPR\n");
   Token *token = NULL;
 
   CondCall(scanner, &token);
   printToken(token);
 
   // -> eps
+  // ,
   if (token->type != t_comma) {
     CondCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> , <expr> <nextExpr>
-  // ','
-
   // <expr>
   // TODO semantic actions
   CondCall(pExpr);
 
   // <nextExpr>
-  CondCall(pNextExpr);
-
-  vypluj 0;
+  vypluj pNextExpr();
 }
 
 //-----------------------------------
@@ -1549,10 +1542,10 @@ int pExpr() {
   printToken(token);
 
   ret = parseExpression(symtab, token, &varName);
-  printf("RET = %d\n", ret);
-  printf("%s\n", varName);
+  fprintf(stder, "RET = %d\n", ret);
+  fprintf(stder, "%s\n", varName);
   if(ret == -1) {
-    printf("IDDDFFDF\n");
+    fprintf(stder, "IDDDFFDF\n");
     CondCall(scanner, &token);
 
     printToken(token);
@@ -1618,7 +1611,7 @@ int pExpr() {
     } else if(strcmp(token->data, "chr") == 0) {
       // TODO GENERATE INTEGER READ
     } else {
-      printf("KOKI\n");
+      fprintf(stderr, "KOKI\n");
       vypluj err(PARAM_RET_ERR);
     }
 
@@ -1660,7 +1653,7 @@ int pExpr() {
     }
 
     } else if (isExpressionParser(*token) == false) {
-    printf("FALSE\n");
+    fprintf(stderr, "FALSE\n");
     printToken(token);
     stashToken(&token);
     vypluj 0;
