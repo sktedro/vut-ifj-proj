@@ -77,8 +77,7 @@ SStackElem *element;
   if(token->type != tokenType) {       \
     vypluj err(SYNTAX_ERR);            \
   }                                    \
-  printToken(token);                   \
-  tokenDestroy(&token) 
+  printToken(token);
 
 
 void initElement() {
@@ -1402,7 +1401,6 @@ int pNextId() {
     CondCall(stashToken, &token);
     vypluj 0;
   }
-  tokenDestroy(&token);
 
   // 60. <nextId>          -> , [id] <nextId>
   CondCall(scanner, &token);
@@ -1450,7 +1448,6 @@ int pNewIdAssign() {
     CondCall(stashToken, &token);
     vypluj 0;
   }
-  tokenDestroy(&token);
 
   // 63. <newIdAssign>     -> = <exprList>
   // <exprList>
@@ -1497,7 +1494,6 @@ int pNextExpr() {
     CondCall(stashToken, &token);
     vypluj 0;
   }
-  tokenDestroy(&token);
 
   // 67. <nextExpr>        -> , <expr> <nextExpr>
   // <expr>
