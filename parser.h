@@ -40,6 +40,9 @@ bool isKeyword(Token *token);
  */
 void printToken(Token *token);
 
+
+int pStringFunctions();
+
 /*
  * Rules
  */

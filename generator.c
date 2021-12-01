@@ -193,13 +193,24 @@ int genReadFunction(char *varName, char *builtInFnName, int frame) {
 
   vypluj 0;
 }
-// IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
-/*
-int genStringFunction(char *varName, char *builtInFnName, int frame) {
+
+int genSubstrFunction(char *target, char *string, double start, int end, int frame) {
   
+}
+
+
+// IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
+int genStringFunction(char *varName, char *builtInFnName, int frame) {
+  Token *token;
+
   if(strcmp(builtInFnName, "substr") == 0) {
-      printf("READ LF@%s int\n", genName(varName, frame));
       RequireToken(t_leftParen);
+
+
+      char *string;
+      
+      printf("READ LF@%s int\n", genName(varName, frame));
+      
       RequireToken(t_rightParen);
   } else if(strcmp(builtInFnName, "ord") == 0) {
       printf("READ LF@%s float\n", genName(varName, frame));
@@ -214,7 +225,7 @@ int genStringFunction(char *varName, char *builtInFnName, int frame) {
   }
 
   vypluj 0;
-}*/
+}
 
 /**
  * volane bude z precedenčnej analýzy (iba)

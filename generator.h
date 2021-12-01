@@ -24,6 +24,8 @@ char *genConvertFloatToInt(SStackElem *src);
 char *genConvertIntToFloat(SStackElem *src);
 char *genUnaryOperation(SStackElem *src);
 int genReadFunction(char *varName, char *builtInFnName, int frame);
+int genStringFunction(char *varName, char *builtInFnName, int frame);
+int genSubstrFunction(char *target, char *string, double start, int end, int frame);
 void genFnCall(char *name);
 void genFnDef(char *name);
 void genFnDefRet();

@@ -1514,6 +1514,59 @@ int pNextExpr() {
   vypluj pNextExpr();
 }
 
+int pStringFunctions(char *varName) {
+  Token *token = NULL;
+
+  CondCall(scanner, &token);
+  printToken(token);
+
+  if(strcmp(token->data, "substr") == 0) {
+
+    RequireToken(t_leftParen);
+
+    CondCall(scanner, &token);
+    Token *string = NULL;
+    double i;
+    double j;
+    char *endPtr;
+
+    if(token->type != t_str || token->type != t_idOrKeyword) {
+      tokenDestroy(&token);
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    string = token;
+
+    CondCall(scanner, &token);
+
+    if(token->type != t_int || token->type != t_num) {
+      tokenDestroy(&token);
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    i = strtod(token->data, &endPtr);
+
+
+    CondCall(scanner, &token);
+
+    if(token->type != t_int || token->type != t_num) {
+      tokenDestroy(&token);
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    j = strtod(token->data, &endPtr);
+
+
+    RequireToken(t_rightParen);
+
+    genSubstrFunction(varName, string, i, j, symtab->top->depth);
+
+    vypluj 0;
+
+  }
+
+}
+
 //-----------------------------------
 /**
  * @brief
@@ -1540,9 +1593,15 @@ int pExpr(char **retVarName) {
     // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
     
     if(isReadFunction(token->data)) {
+      // asi bude treba overiť či táto gen funkcie nenarazili na err
       genReadFunction(element->data, token->data, symtab->top->depth);
     } else if(isStringOperationFunction(token->data)) {
-      // IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
+      stashToken(token);
+      pStringFunctions(retVarName);
+      vypluj 0;
+      //CondReturn(pStringFunctions);
+      // asi bude treba overiť či táto gen funkcie nenarazili na err
+     //genStringFunction(element->data, token->data, symtab->top->depth);
     }
     
     // THIS WILL BE DELETED SOON
