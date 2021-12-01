@@ -41,7 +41,7 @@ bool isKeyword(Token *token);
 void printToken(Token *token);
 
 
-int pStringFunctions();
+int pStringFunctions(char *varName);
 
 /*
  * Rules

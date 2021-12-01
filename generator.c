@@ -177,16 +177,10 @@ int genReadFunction(char *varName, char *builtInFnName, int frame) {
   
   if(strcmp(builtInFnName, "readi") == 0) {
       printf("READ LF@%s int\n", genName(varName, frame));
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
   } else if(strcmp(builtInFnName, "readn") == 0) {
       printf("READ LF@%s float\n", genName(varName, frame));
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
   } else if(strcmp(builtInFnName, "reads") == 0) {
       printf("READ LF@%s string\n", genName(varName, frame));
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
   } else {
     vypluj err(1); // TODO INTERNAL ERROR
   }
@@ -194,35 +188,16 @@ int genReadFunction(char *varName, char *builtInFnName, int frame) {
   vypluj 0;
 }
 
-int genSubstrFunction(char *target, char *string, double start, int end, int frame) {
-  
+int genSubstrFunction(char *target, Token *string, double start, int end, int frame) {
+  return 0;
 }
 
 
 // IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
 int genStringFunction(char *varName, char *builtInFnName, int frame) {
-  Token *token;
+  //Token *token;
 
-  if(strcmp(builtInFnName, "substr") == 0) {
-      RequireToken(t_leftParen);
-
-
-      char *string;
-      
-      printf("READ LF@%s int\n", genName(varName, frame));
-      
-      RequireToken(t_rightParen);
-  } else if(strcmp(builtInFnName, "ord") == 0) {
-      printf("READ LF@%s float\n", genName(varName, frame));
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
-  } else if(strcmp(builtInFnName, "chr") == 0) {
-      printf("READ LF@%s string\n", genName(varName, frame));
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
-  } else {
-    vypluj err(1); // TODO INTERNAL ERROR
-  }
+  
 
   vypluj 0;
 }

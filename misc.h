@@ -49,6 +49,7 @@
   ret = FN(__VA_ARGS__);  \
   CondReturn
 
+
 /*
  * Enumerations
  */

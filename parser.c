@@ -79,21 +79,16 @@ SStackElem *element;
   }                                    \
   printToken(token);
 
+void cleanElement() {
+  free(element->data);
+  free(element);
+  element->next->data = NULL;
+  element->data = NULL;
+}
 
 void initElement() {
   element = malloc(sizeof(SStackElem));
-  element->data = malloc(sizeof(char) * 250);
-
-  SStackElem *tmp = malloc(sizeof(SStackElem));
-  tmp->data = malloc(sizeof(char) * 250);
-
-  element->next = tmp;
-
-}
-
-void cleanElement() {
-  element->next->data = NULL;
-  element->data = NULL;
+  element->data = malloc(sizeof(char) * 100);
 }
 
 //------------------------------------------------------------
@@ -356,6 +351,7 @@ int pStart() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   fprintf(stderr, "PARSER START\n");
   Token *token = NULL;
+
   initElement();
 
   CondCall(scanner, &token);
@@ -420,6 +416,7 @@ int pNewFunId(Token *token) {
     STSetFnDefined(symtab, token->data, true);
     vypluj 0;
   }
+  vypluj err(1);
 }
 
 /**
@@ -843,6 +840,7 @@ int pStat() {
     CondCall(pExpr, NULL); // TODO NAHRADIŤ NULL
     vypluj 0;
   } else if(strcmp(token->data, "end") == 0) {
+
     printToken(token);
 
     CondCall(stashToken, &token);
@@ -1334,7 +1332,6 @@ int pType() {
     // TODO call gen function for fn param definition -> fn not done yet
     genVarDef(element->data, symtab->top->depth);
 
-    cleanElement();
   }
   vypluj 0;
 }
@@ -1360,7 +1357,6 @@ int pIdList() {
   }
 
   if (STFind(symtab, token->data)) {
-    fprintf(stderr, "ISDSD\n");
     if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
       fprintf(stderr, "warning: declaring a variable again\n");
       element->data = token->data;
@@ -1373,16 +1369,8 @@ int pIdList() {
   CondCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
-  element->data = token->data;
-
-  STElem *element = NULL; // = malloc(sizeof(STElem)); TODO má to být pointer do ST nebo to chceš zkopírovat?
-  element = STFind(symtab, token->data);
-
-  if(!element) {
-    fprintf(stderr, "DOESNT EXIST\n");
-  } else {
-    fprintf(stderr, "NAME : %s\n", element->name);
-  }
+  printf("sdsd\n");
+  strcpy(element->data,token->data);
 
   // <nextId>
   vypluj pNextId();
@@ -1565,6 +1553,8 @@ int pStringFunctions(char *varName) {
 
   }
 
+  vypluj err(1);
+
 }
 
 //-----------------------------------
@@ -1582,59 +1572,72 @@ int pExpr(char **retVarName) {
   printToken(token);
 
   char *varName = NULL;
-  CondCall(parseExpression, symtab, token, &varName);
-  fprintf(stderr, "Result is stored in %s\n", varName);
+  
 
   // If it is a function (and is defined), don't call the shift-reduce parser at all
-  if(STFind(symtab, token->data) 
-      && !STGetIsVariable(symtab, token->data) 
-      && STGetFnDefined(symtab, token->data)){
-
-    // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
+  if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
+      // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
     
     if(isReadFunction(token->data)) {
       // asi bude treba overiť či táto gen funkcie nenarazili na err
       genReadFunction(element->data, token->data, symtab->top->depth);
-    } else if(isStringOperationFunction(token->data)) {
-      stashToken(token);
-      pStringFunctions(retVarName);
-      vypluj 0;
-      //CondReturn(pStringFunctions);
-      // asi bude treba overiť či táto gen funkcie nenarazili na err
-     //genStringFunction(element->data, token->data, symtab->top->depth);
-    }
-    
-    // THIS WILL BE DELETED SOON
-    /*if(strcmp(token->data, "readi") == 0) {
-      genVarAssign(element, symtab->top->depth, "readi");
+
       RequireToken(t_leftParen);
       RequireToken(t_rightParen);
       vypluj 0;
-    } else if(strcmp(token->data, "reads") == 0) {
-      // asi už nie TODO GENERATE STRING READ
-      //genVarAssign(element, symtab->top->depth, "reads");
+    } else if(isStringOperationFunction(token->data)) {
 
-    } else if(strcmp(token->data, "readn") == 0) {
-      // asi už nie TODO GENERATE NUMBER READ
-      //genVarAssign(element, symtab->top->depth, "readn");
+      if(strcmp(token->data, "substr") == 0) {
+      
+        CondCall(scanner, &token);
 
-      vypluj err(SYNTAX_ERR);
-    } else if(strcmp(token->data, "substr") == 0) {
-      // TODO GENERATE INTEGER READ
+        if(token->type != t_leftParen) {
+          vypluj err(SYNTAX_ERR);
+        }
+        //char *string
+      
+        CondCall(scanner, &token);
 
-    } else if(strcmp(token->data, "ord") == 0) {
-      // TODO GENERATE INTEGER READ
+        if(token->type != t_rightParen) {
+          vypluj err(-1); // TODO ADD ERR CODE
+        }
+      } else if(strcmp(token->data, "ord") == 0) {
+          CondCall(scanner, &token);
 
-    } else if(strcmp(token->data, "chr") == 0) {
-      // TODO GENERATE INTEGER READ
+          if(token->type != t_leftParen) {
+          vypluj err(-1); // TODO ADD ERR CODE
+          }
+          CondCall(scanner, &token);
 
-    } else {
-      vypluj err(PARAM_RET_ERR);
+          if(token->type != t_rightParen) {
+            vypluj err(-1); // TODO ADD ERR CODE
+          }
+      } else if(strcmp(token->data, "chr") == 0) {
+          CondCall(scanner, &token);
+
+          if(token->type != t_leftParen) {
+            vypluj err(-1); // TODO ADD ERR CODE
+          }
+
+          CondCall(scanner, &token);
+
+          if(token->type != t_rightParen) {
+            vypluj err(-1); // TODO ADD ERR CODE
+          }
+      } else {
+          vypluj err(-1); // TODO INTERNAL ERROR
+      }
     }
+    vypluj 0;
 
-  }*/
-
+  } else if(isKeyword(token)) {
+    CondCall(stashToken, token);
+    vypluj 0;
+  } else {
+  CondCall(parseExpression, symtab, token, &varName);
+  fprintf(stderr, "Result is stored in %s\n", varName);
   vypluj 0;
+  }
 }
 
 #endif
