@@ -138,6 +138,11 @@ void genVarDef(char *name, int frame) {
   printf("DEFVAR LF@%s\n", genName(name, frame));
 }
 
+int genPassParam(char *varInLF, char *varInTF){
+  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
+
+  return 0;
+}
 /**
  * identifikátor, dátový typ, priradzovaná hodnota
  */
@@ -204,18 +209,31 @@ int genReadFunction(char *varName, char *builtInFnName, int frame) {
 }
 
 int genSubstrFunction(char *target, Token *string, double start, int end, int frame) {
+
+  printf("LABEL: $substr");
+
+  printf("PUSHFRAME");
+
+  printf("DEFVAR LF@$substrRET");
+  printf("MOVE LF@$substrRET nil@nil");
+
+  printf("DEFVAR LF@$in1");
+  printf("MOVE LF@$in1 ni");
+
+  printf("DEFVAR LF@$in2");
+  printf("MOVE LF@$in2 nil@nil");
+
+  printf("DEFVAR LF@$in3");
+  printf("MOVE LF@$in3 nil@nil");
+
+
+  printf("");
+
+
   return 0;
 }
 
 
-// IN DEVELOPMENT DONT TOUCH THIS !!!!!!!!!!!!
-int genStringFunction(char *varName, char *builtInFnName, int frame) {
-  //Token *token;
-
-  
-
-  vypluj 0;
-}
 
 // Create a TF
 void genFnCallInit(){

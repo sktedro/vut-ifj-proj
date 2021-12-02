@@ -18,29 +18,20 @@
  * --------------------------------------------------
  * pStart()             FULLY DONE
  * pReq()               FULLY DONE
- * pCodeBody()          DONE
+ * pCodeBody()          
  * pFnCall()            FULLY DONE
- * pFnRet()             DONE
- * pFnCallArgList()     FULLY DONE (just one more TODO)
- * pNextFnCallArg()     FULLY DONE (just one more TODO)
- * pFnCallArg()         RETRACTOR
- * pRet()               DONE
- * pStat()              ADD GENERATING CODE
- * pStatWithId()        Waiting for pExpr()
- * pNextAssign()        Change error codes
- * pFnArgList()         DONE
- * pNextFnArg()         DONE --
- * pRetArgList()        DONE
- * pRetNextArg()        DONE
- * pTypeList()          FULLY DONE
- * pNextType()          DEPEDNANT ON pType - NOT DONE
+ * pFnRet()             
+ * pFnCallArgList()     FULLY DONE (TODO errcode)
+ * pNextFnCallArg()     FULLY DONE (TODO errcode)
+ * pFnCallArg()         FULLY DONE (hopefully) (TODO errcode)
+ * pRet()               dependant on pType? - NOT DONE
  * pType()              FUCK
- * pIdList()            DONE
- * pNextId()            DONE
- * pNewIdAssign()       DONE
- * pExprList()          DONE
- * pNextExpr()          DONE
- * pExpr()              NOT IMPLEMENTED YET -- CALL BOTTOM UP PARSER (NOT DONE YET TOO)
+ * pIdList()            
+ * pNextId()            
+ * pNewIdAssign()       
+ * pExprList()          
+ * pNextExpr()          
+ * pExpr()              CALL BOTTOM UP PARSER (NOT DONE YET TOO)
  * -----------------------------------------------------------------------
  */
 
@@ -166,6 +157,7 @@ int pCodeBody() {
 
     // <fnArgList>
     TryCall(pFnArgList);
+    // TODO niekde tu si ukladať všetky názvy parametrov do string bufferu
 
     // )
     RequireTokenType(t_rightParen);
@@ -205,7 +197,7 @@ int pCodeBody() {
     RequireTokenType(t_leftParen);
 
     // <typeList>
-    TryCall(pTypeList);
+    TryCall(pTypeList, fnName);
 
     // )
     RequireTokenType(t_rightParen);
@@ -330,8 +322,8 @@ int pFnCallArgList(char *fnName) {
     STElem *fn = STFind(symtab, fnName);
     // Amount of arguments doesn't match
     if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != 0){
-      LOG("Param amount doesn't match\n"); // TODO errcode
-      vypluj err(SYNTAX_ERR);
+      LOG("Param amount doesn't match\n");
+      vypluj err(SYNTAX_ERR); // TODO errcode
     }
 
     // Stash the token
@@ -375,7 +367,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
     argCount++;
 
     // <fnCallArg>
-    TryCall(pFnCallArg, fnName);
+    TryCall(pFnCallArg, fnName, argCount);
     
     // <nextFnCallArg>
     TryCall(pNextFnCallArg, fnName,argCount);
@@ -385,6 +377,13 @@ int pNextFnCallArg(char *fnName, int argCount) {
 
     STElem *fn = STFind(symtab, fnName);
 
+    // TODO remove this later
+    if(!fn || !fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
+      LOG("Special error\n");
+      return 1;
+    }
+
+    //older code TODO delete
     // Amount of arguments doesn't match
     /*if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
       LOG("Param amount doesn't match\n");
@@ -412,16 +411,26 @@ int pFnCallArg(char *fnName, int argCount) {
   TryCall(scanner, &token);
 
   STElem *fn = STFind(symtab, fnName);
+
+  // TODO remove this later
+  if(!fn){
+    LOG("Special error\n");
+    return 1;
+  }
+
   int dataType = -1;
+  int depth = symtab->top->depth; // TODO depth + 1??
 
   // -> [id] (a variable)
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     LOG("JE TO PREMENNÁ\n");
     dataType = STGetVarDataType(symtab, token->data);
-    // TODO MOVE it from LF to TF
-
-    /** TryCall(STPush, symtab); WUT prečo to hádzať do symtab?*/
-    /** TryCall(STInsert, symtab, token->data); ??? */
+    // Pass the parameter by MOVE TF@paramName LF@argVarName
+    char *argVarName = token->data;
+    argVarName = genName(argVarName, depth);
+    char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
+    paramName = genName(paramName, depth + 1);
+    genPassParam(argVarName, paramName);
 
     // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -434,8 +443,11 @@ int pFnCallArg(char *fnName, int argCount) {
     }else if(token->type == t_str){
       dataType = dt_string;
     }
-    // TODO Define it in TF (generate code)
-    // (generate a name, genVarDef and genVarAssign)
+    // Define it in TF (generate code)
+    char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
+    genVarDef(paramName, depth + 1);
+    *paramName = genName(paramName, depth + 1);
+    genVarAssign(paramName, dataType, token->data);
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -445,6 +457,11 @@ int pFnCallArg(char *fnName, int argCount) {
     vypluj err(SYNTAX_ERR);
   }
 
+  // TODO remove this later
+  if(!fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
+    LOG("Special error\n");
+    return 1;
+  }
   // A parameter data type doesn't match
   /*if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
     LOG("Param data type doesn't match\n");
@@ -683,6 +700,7 @@ int pStatWithId(char *idName) {
       if (!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
         vypluj err(SYNTAX_ERR);
       }
+ //* 41. <retNextArg>      -> eps
 
       // TODO define variables for idName and token->data
       genVarDef(token->data, symtab->top->depth);
@@ -769,6 +787,7 @@ int pNextAssign() {
   // ','
   RequireTokenType(t_comma);
 
+ //* 41. <retNextArg>      -> eps
   vypluj 0;
 }
 
@@ -782,6 +801,7 @@ int pNextAssign() {
  * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
  */
 int pBuiltInFunctions() {
+ //* 41. <retNextArg>      -> eps
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -1119,7 +1139,7 @@ int pIdList() {
   TryCall(scanner, &token);
   printToken(token);
 
-  if (!(token->type == t_idOrKeyword && !isKeyword(token))) {
+  if (token->type != t_idOrKeyword || isKeyword(token)) {
     vypluj err(SYNTAX_ERR);
   }
 
@@ -1356,16 +1376,17 @@ int pExpr(char **retVarName) {
       
         TryCall(scanner, &token);
 
-        if(token->type != t_leftParen) {
-          vypluj err(SYNTAX_ERR);
-        }
-        //char *string
-      
+        RequireTokenType(t_leftParen);
+        
         TryCall(scanner, &token);
 
-        if(token->type != t_rightParen) {
-          vypluj err(-1); // TODO ADD ERR CODE
-        }
+        
+        
+
+
+        TryCall(scanner, &token);
+        RequireTokenType(t_rightParen);
+      
       } else if(strcmp(token->data, "ord") == 0) {
           TryCall(scanner, &token);
 
@@ -1394,6 +1415,7 @@ int pExpr(char **retVarName) {
       }
     }
     vypluj 0;
+
 
   } else if(isKeyword(token) && strcmp(token->data, "nil")) {
     TryCall(stashToken, &token);
