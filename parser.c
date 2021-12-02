@@ -19,10 +19,10 @@
  * pStart()             FULLY DONE
  * pReq()               FULLY DONE
  * pCodeBody()          DONE
- * pFnCall()            DONE
+ * pFnCall()            FULLY DONE
  * pFnRet()             DONE
- * pFnCallArgList()     DONE
- * pNextFnCallArg()     DONE
+ * pFnCallArgList()     FULLY DONE (just one more TODO)
+ * pNextFnCallArg()     FULLY DONE (just one more TODO)
  * pFnCallArg()         RETRACTOR
  * pRet()               DONE
  * pStat()              ADD GENERATING CODE
@@ -116,6 +116,12 @@ int pReq() {
   vypluj 0;
 }
 
+/*
+ *
+ * TODO:
+ *
+ */
+
 /**
  * @brief Rule for <codebody> string
  *
@@ -133,7 +139,7 @@ int pCodeBody() {
   Token *token = NULL;
   TryCall(scanner, &token);
 
-  // If it is not eps, it has to be an ID or keyword
+  // If it is not eps, it has to be an ID or a keyword
   if(token && token->type != t_idOrKeyword){
     vypluj err(SYNTAX_ERR);
   }
@@ -150,10 +156,10 @@ int pCodeBody() {
     char *fnName = token->data;
 
     // Define the new function (in the symtable)
-    TryCall(newFunctionDefinition, token->data);
+    TryCall(newFunctionDefinition, fnName);
 
     // Generate code
-    genFnDef(token->data);
+    genFnDef(fnName);
 
     // (
     RequireTokenType(t_leftParen);
@@ -187,7 +193,7 @@ int pCodeBody() {
     char *fnName = token->data;
 
     // Declare the new function (in the symtable)
-    TryCall(newFunctionDeclaration, token->data);
+    TryCall(newFunctionDeclaration, fnName);
 
     // :
     RequireTokenType(t_colon);
@@ -245,20 +251,21 @@ int pFnCall(char *fnName) {
   LOG();
   Token *token = NULL;
 
-  // TODO create a TF?
+  // Code gen: create a temporary frame
+  genFnCallInit();
 
   // (
   RequireTokenType(t_leftParen);
 
   // <fnCallArgList>
-  TryCall(pFnCallArgList);
+  TryCall(pFnCallArgList, fnName);
 
   // )
   RequireTokenType(t_rightParen);
 
-  // TODO generate code to call the function
+  // Code gen: call the function
+  genFnCall(fnName);
 
-  fprintf(stderr, "FN CALL RET\n");
   vypluj 0;
 }
 
@@ -305,28 +312,42 @@ int pFnRet(char *fnName) {
  * 12. <fnCallArgList>   -> eps
  * 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
  */
-int pFnCallArgList() {
+int pFnCallArgList(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
+
+  // Functions can have several args (params) - this helps keep track of which
+  // one we're processing right now (will be passed as a param to nextFnCallArg)
+  int argCount = 0;
 
   TryCall(scanner, &token);
   printToken(token);
 
   // 12. <fnCallArgList>   -> eps
   if(token->type == t_rightParen) {
+
+    STElem *fn = STFind(symtab, fnName);
+    // Amount of arguments doesn't match
+    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != 0){
+      LOG("Param amount doesn't match\n"); // TODO errcode
+      vypluj err(SYNTAX_ERR);
+    }
+
+    // Stash the token
     TryCall(stashToken, &token);
-    vypluj 0;
-  }
 
   // 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
-  TryCall(stashToken, &token);
+  }else{
+    argCount++;
 
-  //<fnCallArg>
-  TryCall(pFnCallArg);
+    // <fnCallArg>
+    TryCall(pFnCallArg, fnName, argCount);
 
-  // <nextFnCallArg>
-  vypluj pNextFnCallArg();
+    // <nextFnCallArg>
+    TryCall(pNextFnCallArg, fnName, argCount);
+  }
+  return 0;
 }
 
 /**
@@ -337,27 +358,40 @@ int pFnCallArgList() {
  * 14. <nextFnCallArg>   -> eps
  * 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
  */
-int pNextFnCallArg() {
+int pNextFnCallArg(char *fnName, int argCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
   TryCall(scanner, &token);
   printToken(token);
+
   
-  // 14. <nextFnCallArg>   -> eps
+  // 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
   // ,
-  if(token->type != t_comma) {
+  if(token->type == t_comma) {
+    argCount++;
+
+    // <fnCallArg>
+    TryCall(pFnCallArg, fnName);
+    
+    // <nextFnCallArg>
+    TryCall(pNextFnCallArg, fnName,argCount);
+
+  // 14. <nextFnCallArg>   -> eps
+  }else{
+
+    STElem *fn = STFind(symtab, fnName);
+    // Amount of arguments doesn't match
+    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
+      LOG("Param amount doesn't match\n");
+      vypluj err(SYNTAX_ERR); // TODO errcode
+    }
+
     TryCall(stashToken, &token);
-    vypluj 0;
   }
 
-  // 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
-  // <fnCallArg>
-  TryCall(pFnCallArg);
-  
-  // <nextFnCallArg>
-  vypluj pNextFnCallArg();
+  return 0;
 }
 
 /**
@@ -368,41 +402,54 @@ int pNextFnCallArg() {
  * 16. <fnCallArg>       -> [id]
  * 17. <fnCallArg>       -> [literal]
  */
-int pFnCallArg() {
+int pFnCallArg(char *fnName, int argCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
   TryCall(scanner, &token);
-  printToken(token);
 
-  int tokenType = token->type;
+  STElem *fn = STFind(symtab, fnName);
+  int dataType = -1;
 
-  // -> [id] (must be a variable)
+  // -> [id] (a variable)
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
-    fprintf(stderr, "JE TO PREMENNÁ\n");
-    TryCall(STPush, symtab);
-    TryCall(STInsert, symtab, token->data);
+    LOG("JE TO PREMENNÁ\n");
+    dataType = STGetVarDataType(symtab, token->data);
+    // TODO MOVE it from LF to TF
 
-    // TODO semantic actions (add to fn arg types or something)
-    vypluj 0;
+    /** TryCall(STPush, symtab); WUT prečo to hádzať do symtab?*/
+    /** TryCall(STInsert, symtab, token->data); ??? */
 
     // -> [literal]
-  } else if (tokenType == t_int || tokenType == t_num ||
-      tokenType == t_sciNum || tokenType == t_str) {
-    fprintf(stderr, "JE TO LITERÁL\n");
-    // TODO semantic actions
-    vypluj 0;
+  } else if (token->type == t_int || token->type == t_num ||
+      token->type == t_sciNum || token->type == t_str) {
+    LOG("JE TO LITERÁL\n");
+    if(token->type == t_int){
+      dataType = dt_integer;
+    }else if(token->type == t_num || token->type == t_sciNum){
+      dataType = dt_number;
+    }else if(token->type == t_str){
+      dataType = dt_string;
+    }
+    // TODO Define it in TF (generate code)
+    // (generate a name, genVarDef and genVarAssign)
 
   } else {
-    fprintf(stderr, "NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
-    if(tokenType == t_idOrKeyword) {
+    LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
+    if(token->type == t_idOrKeyword) {
       vypluj err(ID_DEF_ERR);
     }
     vypluj err(SYNTAX_ERR);
-
   }
-  vypluj 0; // what?
+
+  // A parameter data type doesn't match
+  if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
+    LOG("Param data type doesn't match\n");
+    vypluj err(SYNTAX_ERR); // TODO errcode
+  }
+
+  vypluj 0;
 }
 
 /**

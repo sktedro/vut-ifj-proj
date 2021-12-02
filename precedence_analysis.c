@@ -238,7 +238,7 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
     }
 
     // Generate code
-    newSymbolName = genUnaryOperation(op2);
+    newSymbolName = genStrlen(op2);
 
     // Create a new sym stack element (E) and push it
     SStackElem *newSymbol = NULL;

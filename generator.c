@@ -7,6 +7,10 @@
 
 #include "generator.h"
 
+// TODO use this instead of hardcoding it in every printf
+char labelPrefix = '$';
+char varPrefix = '%';
+
 extern int ret;
 extern GarbageCollector garbageCollector;
 
@@ -213,10 +217,59 @@ int genStringFunction(char *varName, char *builtInFnName, int frame) {
   vypluj 0;
 }
 
-/**
- * volane bude z precedenčnej analýzy (iba)
- * potrebujeme asi tri symbol stack elementy - ľavý op, pravý op a operátor
+// Create a TF
+void genFnCallInit(){
+  printf("CREATEFRAME\n");
+}
+
+// After TF is created and all parameters are moved, push the TF to the stack
+// and call the function
+void genFnCall(char *fnName) {
+  printf("PUSHFRAME\n");
+  printf("CALL %s0\n", fnName);
+}
+
+void genFnDef(char *name) {
+  printf("LABEL %s0\n", name);
+}
+
+void genFnDefRet() {
+  printf("RETURN\n");
+}
+
+
+void genWrite(char *name, int frame) {
+  if(frame == 0) {
+    printf("WRITE GF@%s\n", genName(name, frame));
+  } else {
+    printf("WRITE TF@%s\n", genName(name, frame));
+  }
+}
+
+char *genJumpIfNeq(char *tmp) {
+  char *label = genLabelName();
+  printf("JUMPIFNEQ label%s LF@%s bool@true\n", label ,tmp);
+  return label;
+}
+
+char *genJumpIfEq(char *tmp) {
+  char *label = genLabelName();
+  printf("JUMPIFEQ label%s LF@%s bool@true\n", label ,tmp);
+  return label;
+}
+
+void genLabel(char *labelName) {
+  printf("LABEL %s\n", labelName);
+}
+
+void genStart() {
+  printf(".IFJcode21\n\n");
+}
+
+/*
+ * Functions that are to be called by the shift-reduce parser only
  */
+
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();
   printf("ADD LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
@@ -266,33 +319,10 @@ char *genConvertIntToFloat(SStackElem *src) {
   return dest;
 }
 
-char *genUnaryOperation(SStackElem *src) {
+char *genStrlen(SStackElem *src) {
   char *dest = genTmpVar();
   printf("STRLEN LF@%s LF@%s\n", dest, src->data);
   return dest;
-}
-
-void genFnCall(char *name) {
-  printf("CALL %s0\n",name);
-}
-
-void genFnDef(char *name) {
-  printf("LABEL %s0\n", name);
-  printf("PUSHFRAME\n");
-}
-
-void genFnDefRet() {
-  printf("POPFRAME\n");
-  printf("RETURN\n");
-}
-
-
-void genWrite(char *name, int frame) {
-  if(frame == 0) {
-    printf("WRITE GF@%s\n", genName(name, frame));
-  } else {
-    printf("WRITE TF@%s\n", genName(name, frame));
-  }
 }
 
 char *genLower(SStackElem *element1, SStackElem *element2) {
@@ -317,26 +347,6 @@ char *genNot(SStackElem *src) {
   char *tmp = genTmpVar();
   printf("NOT LF@%s LF@%s\n", tmp, src->data);
   return tmp;
-}
-
-char *genJumpIfNeq(char *tmp) {
-  char *label = genLabelName();
-  printf("JUMPIFNEQ label%s LF@%s bool@true\n", label ,tmp);
-  return label;
-}
-
-char *genJumpIfEq(char *tmp) {
-  char *label = genLabelName();
-  printf("JUMPIFEQ label%s LF@%s bool@true\n", label ,tmp);
-  return label;
-}
-
-void genLabel(char *labelName) {
-  printf("LABEL %s\n", labelName);
-}
-
-void genStart() {
-  printf(".IFJcode21\n\n");
 }
 
 /*
