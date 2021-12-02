@@ -253,6 +253,12 @@ typedef struct {
   int size; // Size allocated for the buffer
 } IntBuffer;
 
+typedef struct {
+  char **data;
+  int len;
+  int size;
+} StringBuffer;
+
 // Structure defining a token
 typedef struct {
   int type;
@@ -284,6 +290,7 @@ typedef struct {
   int varAddress;
   bool fnDefined;
   IntBuffer *fnParamTypesBuf;
+  StringBuffer *fnParamNamesBuf;
   IntBuffer *fnRetTypesBuf;
 } STElem;
 
