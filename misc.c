@@ -47,7 +47,47 @@ int getDataTypeFromString(char *str){
     return dt_nil;
   }else{
     return -1;
+  }
 }
+
+/**
+ * @brief Check if token is keyword in IFJ21 language
+ *
+ * @param token
+ *
+ * @return true if the string is a keyword
+ */
+bool isIFJ21Keyword(Token *token) {
+  int keywordsCount = 15;
+  char *keywords[] = {
+    "do", 
+    "global", 
+    "number", 
+    "else", 
+    "if", 
+    "require", 
+    "end", 
+    "integer", 
+    "return", 
+    "function", 
+    "local", 
+    "string", 
+    "nil", 
+    "then", 
+    "while"
+  };
+  if(token->type != t_idOrKeyword){
+    return false;
+  }
+  for(int i = 0; i < keywordsCount; i++){
+    if(strEq(token->data, keywords[i])){
+      return true;
+    }
+  }
+  return false;
+}
+
+
 
 /**
  * @brief Writes an error message to stdout and returns back the error code

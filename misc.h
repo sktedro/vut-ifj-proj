@@ -264,7 +264,7 @@ typedef struct {
  *
  * @return true if strings are equal
  */
-bool strEq(char *str1, char *str2) ForceRetUse;
+bool strEq(char *str1, char *str2);
 
 /**
  * @brief returns an integer representation (enum) of the string, if it
@@ -275,6 +275,15 @@ bool strEq(char *str1, char *str2) ForceRetUse;
  * @return data type enum or -1 if str is not a data type keyword
  */
 int getDataTypeFromString(char *str);
+
+/**
+ * @brief Check if token is keyword in IFJ21 language
+ *
+ * @param token
+ *
+ * @return true if the string is a keyword
+ */
+bool isIFJ21Keyword(Token *token);
 
 /**
  * @brief Writes an error message to stdout and returns back the error code

@@ -433,6 +433,7 @@ int pCodeBody() {
   if(strcmp(token->data, "function") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
+    char *fnName = token->data;
 
     // Define the new function (in the symtable)
     TryCall(newFunctionDefinition, token->data);
@@ -450,7 +451,7 @@ int pCodeBody() {
     RequireTokenType(t_rightParen);
 
     // <fnRet>
-    TryCall(pFnRet);
+    TryCall(pFnRet, fnName);
 
     // <stat>
     TryCall(pStat);
@@ -469,6 +470,7 @@ int pCodeBody() {
   else if(strcmp(token->data, "global") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
+    char *fnName = token->data;
 
     // Declare the new function (in the symtable)
     TryCall(newFunctionDeclaration, token->data);
@@ -489,7 +491,7 @@ int pCodeBody() {
     RequireTokenType(t_rightParen);
 
     // <fnRet>
-    TryCall(pFnRet);
+    TryCall(pFnRet, fnName);
 
     // <codeBody>
     TryCall(pCodeBody);
@@ -554,7 +556,7 @@ int pFnCall(char *fnName) {
  * 10. <fnRet>           -> eps
  * 11. <fnRet>           -> : <type> <nextType>
  */
-int pFnRet() {
+int pFnRet(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -575,7 +577,9 @@ int pFnRet() {
   TryCall(pType);
 
   // <nextType>
-  vypluj pNextType();
+  TryCall(pNextType, fnName);
+
+  return 0;
 }
 
 
@@ -1266,7 +1270,7 @@ int pTypeList(char *fnName) {
   // integer/number/string/nil
   if(isDataType(token->data)) {
     int dataType = getDataTypeFromString(token->data);
-    TryCall(STAppendParamType, symtable, fnName, dataType);
+    TryCall(STAppendParamType, symtab, fnName, dataType);
 
     // <nextType>
     TryCall(pNextType, fnName);
@@ -1303,10 +1307,10 @@ int pNextType(char *fnName) {
     // TODO we're not calling pType here, btw. According to CFG, we should
     RequireTokenType(t_idOrKeyword);
     int dataType = getDataTypeFromString(token->data);
-    TryCall(STAppendParamType, symtable, token->data, dataType);
+    TryCall(STAppendParamType, symtab, token->data, dataType);
 
     // <nextType>
-    TryCall(pNextType);
+    TryCall(pNextType, fnName);
 
   // 50. <nextType>        -> eps
   }else{

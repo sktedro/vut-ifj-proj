@@ -51,10 +51,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
-  if (precedenceAnalysisInit(symtab, &symstack, &token) == -1) {
-    // The token is a function call (it is not an error)
-    return -1;
-  }
+  TryCall(precedenceAnalysisInit, symtab, &symstack, &token);
 
   // An actual symbol from the precedence table will be saved here
   char precTableSymbol = '\0';
@@ -870,7 +867,7 @@ bool isTokenAllowedInExpr(Token *token) {
   if (token->type == t_colon 
       || token->type == t_comma 
       || token->type == t_assignment 
-      || (!strEq(token->data, "nil") && isKeyword(token))) {
+      || (!strEq(token->data, "nil") && isIFJ21Keyword(token))) {
     return false;
   }
   return true;
