@@ -16,8 +16,8 @@
  * --------------------------------------------------
  * Function             State
  * --------------------------------------------------
- * pStart()             DONE
- * pReq()               DONEN
+ * pStart()             FULLY DONE
+ * pReq()               FULLY DONE
  * pCodeBody()          DONE
  * pFnCall()            DONE
  * pFnRet()             DONE
@@ -49,6 +49,9 @@
 
 #include "parser.h"
 
+// If set to 0, no debug prints will be written
+#define DEBUGTOGGLE 1
+
 extern int ret;
 
 STStack *symtab;
@@ -59,25 +62,52 @@ STStack *symtab;
 SStackElem *element;
 
 
-#define RequireKeyword(str1, str2)     \
-  if(!strEq(str1, str2)) {             \
-    vypluj err(SYNTAX_ERR);            \
-  }                                    \
+#define RequireKeyword(str1, str2)                                             \
+  if(!strEq(str1, str2)) {                                                     \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
 
-#define ForbidKeyword(str1, str2)      \
-  if(strEq(str1, str2)) {              \
-    vypluj err(SYNTAX_ERR);            \
-  }                                    \
+#define ForbidKeyword(str1, str2)                                              \
+  if(strEq(str1, str2)) {                                                      \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
 
-#define RequireToken(tokenType)        \
-  CondCall(scanner, &token);           \
-  if(!token){                          \
-    return 0;                          \
-  }                                    \
-  if(token->type != tokenType) {       \
-    vypluj err(SYNTAX_ERR);            \
-  }                                    \
+#define RequireTokenType(tokenType)                                            \
+  CondCall(scanner, &token);                                                   \
+  if(!token){                                                                  \
+    return 0;                                                                  \
+  }                                                                            \
+  if(token->type != tokenType) {                                               \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
   printToken(token);
+
+#define RequireToken(tokenType, tokenData)                                     \
+  CondCall(scanner, &token);                                                   \
+  if(!token){                                                                  \
+    return err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  if(token->type != tokenType                                                  \
+      || strcmp(token->data, #tokenData) != 0) {                               \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  printToken(token);
+
+#define LOG(fmt, ...)                                                          \
+  do {                                                                         \
+    if (DEBUGTOGGLE) {                                                         \
+      fprintf(stderr, "LOG: %s:%d:%s(): " fmt,                                 \
+          __FILE__, __LINE__, __func__, ##__VA_ARGS__);                        \
+      fprintf(stderr, "\n");                                                   \
+    }                                                                          \
+  } while (0)
+
+#define DEBUG(TEXT)                                                            \
+  if(DEBUGTOGGLE){                                                             \
+    fprintf(stderr, "Debug: ");                                                \
+    fprintf(stderr, "%s", TEXT);                                               \
+    fprintf(stderr, "\n");                                                     \
+  }
 
 void cleanElement() {
   free(element->data);
@@ -349,25 +379,20 @@ void printToken(Token *token) {
  */
 int pStart() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "PARSER START\n");
+  LOG();
   Token *token = NULL;
-
   initElement();
 
-  CondCall(scanner, &token);
-  printToken(token);
+  // require
+  RequireToken(t_idOrKeyword, require);
 
-  if (token->type == t_idOrKeyword && strcmp(token->data, "require") == 0) {
-    CondCall(pReq);
-    fprintf(stderr, "PARSER START -> ifj21 is \n");
+  // <req>
+  CondCall(pReq);
 
-    vypluj pCodeBody();
-  } else {
-    vypluj err(SYNTAX_ERR);
-  }
-  // asi už done a nie todo idk zomrieme TODO generate .ifjcode21
-  genStart();
-  vypluj 0;
+  // <codeBody>
+  CondCall(pCodeBody);
+
+  return 0;
 }
 
 /**
@@ -379,44 +404,60 @@ int pStart() {
  */
 int pReq() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "PARSER REQUIRE\n");
+  LOG();
   Token *token = NULL;
 
-  CondCall(scanner, &token);
-  printToken(token);
+  // "ifj21"
+  RequireToken(t_str, ifj21);
 
-  if (token->type == t_str && strcmp(token->data, "ifj21") == 0) {
-    vypluj 0;
-  } else {
-    vypluj err(SYNTAX_ERR);
-  }
+  // Generate code
+  genStart();
+
+  vypluj 0;
 }
 
 /**
- * @brief Check if token is ID and ads it to ST
+ * @brief If the function wasn't already defiend, define it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
  *
  * @return error code
- *
  */
-int pNewFunId(Token *token) {
-  if (token->type != t_idOrKeyword) {
-    fprintf(stderr, "NOT A ID OR KEYWORD -> ERROR\n");
-    vypluj err(SYNTAX_ERR);
-  }
-  
-  if (STFind(symtab, token->data)) {
-    if(STGetFnDefined(symtab, token->data)) {
-      fprintf(stderr, "FUNCTION ALREADY EXISTS -> ERROR\n");
-      vypluj err(ID_DEF_ERR);
-    }
+int newFunctionDefinition(char *fnName) {
+  if (STFind(symtab, fnName) 
+      && !STGetIsVariable(symtab, token->data) 
+      && STGetFnDefined(symtab, fnName)) {
+    LOG("Function already defiend");
+    vypluj err(ID_DEF_ERR);
   } else {
-    fprintf(stderr, "ADDING TO SYMTAB\n");
-    CondCall(STInsert, symtab, token->data);
-    STSetIsVariable(symtab, token->data, false);
-    STSetFnDefined(symtab, token->data, true);
-    vypluj 0;
+    LOG("Adding to the symtable (definition)");
+    CondCall(STInsert, symtab, fnName);
+    STSetIsVariable(symtab, fnName, false);
+    STSetFnDefined(symtab, fnName, true);
   }
-  vypluj err(1);
+  vypluj 0;
+}
+
+/**
+ * @brief If the function wasn't already declared, declare it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
+ *
+ * @return error code
+ */
+int newFunctionDeclaration(char *fnName) {
+  if (STFind(symtab, fnName)) {
+    LOG("Function already declared");
+    vypluj err(1); // TODO errcode (declaration when fn is already declared/defined)
+  } else {
+    LOG("Adding to the symtable (declaration)");
+    CondCall(STInsert, symtab, fnName);
+    STSetIsVariable(symtab, fnName, false);
+    STSetFnDefined(symtab, fnName, false);
+  }
+  vypluj 0;
 }
 
 /**
@@ -431,10 +472,15 @@ int pNewFunId(Token *token) {
  */
 int pCodeBody() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "PARSER CODE BODY\n");
+  LOG();
 
   Token *token = NULL;
-  RequireToken(t_idOrKeyword);
+  CondCall(scanner, &token);
+
+  // If it is not eps, it has to be an ID or keyword
+  if(token && token->type != t_idOrKeyword){
+    vypluj err(SYNTAX_ERR);
+  }
 
   // 04. <codeBody>        -> eps
   if(token == NULL) {
@@ -444,19 +490,22 @@ int pCodeBody() {
   // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
     // [id]
-    CondCall(scanner, &token);
-    ret = pNewFunId(token);
-    CondReturn;
+    RequireTokenType(t_idOrKeyword);
+
+    // Define the new function (in the symtable)
+    CondCall(newFunctionDefinition, token->data);
+
+    // Generate code
     genFnDef(token->data);
 
     // (
-    RequireToken(t_leftParen);
+    RequireTokenType(t_leftParen);
 
     // <fnArgList>
     CondCall(pFnArgList);
 
     // )
-    RequireToken(t_rightParen);
+    RequireTokenType(t_rightParen);
 
     // <fnRet>
     CondCall(pFnRet);
@@ -468,55 +517,62 @@ int pCodeBody() {
     CondCall(pRet);
 
     // end
-    CondCall(scanner, &token);
-    RequireKeyword(token->data, "end");
+    RequireToken(t_idOrKeyword, "end");
 
     // <codeBody>
-    vypluj pCodeBody();
+    CondCall(pCodeBody);
   }
 
   // 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
   else if(strcmp(token->data, "global") == 0) {
     // [id]
-    CondCall(scanner, &token);
-    ret = pNewFunId(token);
-    CondReturn;
+    RequireTokenType(t_idOrKeyword);
+
+    // Declare the new function (in the symtable)
+    CondCall(newFunctionDeclaration, token->data);
 
     // :
-    RequireToken(t_colon);
+    RequireTokenType(t_colon);
 
     // function
-    CondCall(scanner, &token);
-    if(strcmp(token->data, "function") != 0) {
-      vypluj err(SYNTAX_ERR);
-    }
+    RequireToken(t_idOrKeyword, "function");
 
     // (
-    RequireToken(t_leftParen);
+    RequireTokenType(t_leftParen);
 
     // <typeList>
     CondCall(pTypeList);
 
     // )
-    RequireToken(t_rightParen);
+    RequireTokenType(t_rightParen);
 
     // <fnRet>
     CondCall(pFnRet);
 
     // <codeBody>
-    vypluj pCodeBody();
+    CondCall(pCodeBody);
   }
 
   // 07. <codeBody>        -> [id] <fnCall> <codeBody>
-  else if(token->type == t_idOrKeyword && STGetFnDefined(symtab, token->data)) {
+  else if(token->type == t_idOrKeyword) {
+
+    // The function name must be in the symtab, must be a function and defined
+    if(!STFind(symtab, token->data) || !STGetFnDefined(symtab, token->data)){
+      LOG("Calling an undefined function");
+      vypluj err(SYNTAX_ERR);
+    }
+
     // <fnCall>
     CondCall(pFnCall, token->data);
 
     // <codeBody>
-    vypluj pCodeBody();
+    CondCall(pCodeBody);
+
   } else {
     vypluj err(SYNTAX_ERR);
   }
+
+  vypluj 0;
 }
 
 /**
@@ -526,20 +582,23 @@ int pCodeBody() {
  *
  * 09. <fnCall>          -> ( <fnCallArgList> )
  */
-int pFnCall() {
+int pFnCall(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "PARSER FNCALL\n");
+  LOG();
   Token *token = NULL;
 
+  // TODO create a TF?
+
   // (
-  RequireToken(t_leftParen);
+  RequireTokenType(t_leftParen);
 
   // <fnCallArgList>
   CondCall(pFnCallArgList);
 
   // )
-  fprintf(stderr, "back in fn call \n");
-  RequireToken(t_rightParen);
+  RequireTokenType(t_rightParen);
+
+  // TODO generate code to call the function
 
   fprintf(stderr, "FN CALL RET\n");
   vypluj 0;
@@ -555,7 +614,7 @@ int pFnCall() {
  */
 int pFnRet() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "FNRET\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -588,7 +647,7 @@ int pFnRet() {
  */
 int pFnCallArgList() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "FN CALL ARG LIST\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -620,7 +679,7 @@ int pFnCallArgList() {
  */
 int pNextFnCallArg() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT FN CALL ARG\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -651,7 +710,7 @@ int pNextFnCallArg() {
  */
 int pFnCallArg() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "FN CALL ARG\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -696,7 +755,7 @@ int pFnCallArg() {
  */
 int pRet() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "RET\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -727,7 +786,7 @@ int pRet() {
  */
 int pStat() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "STAT\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -748,7 +807,7 @@ int pStat() {
     CondCall(pIdList);
 
     // :
-    RequireToken(t_colon);
+    RequireTokenType(t_colon);
 
     // <type>
     CondCall(pType);
@@ -886,7 +945,7 @@ int pStat() {
  */
 int pStatWithId(char *idName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "STAT WITH ID\n");
+  LOG();
   Token *token = NULL;
 
   // -> <fnCall>
@@ -911,7 +970,7 @@ int pStatWithId(char *idName) {
     if (token->type == t_comma) {
 
       // [id]
-      RequireToken(t_idOrKeyword);
+      RequireTokenType(t_idOrKeyword);
       if (!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
         vypluj err(SYNTAX_ERR);
       }
@@ -930,7 +989,7 @@ int pStatWithId(char *idName) {
       genVarAssign(token->data, -1 ,retVarName);
 
       // ,
-      RequireToken(t_comma);
+      RequireTokenType(t_comma);
 
       retVarName = NULL;
       CondCall(pExpr, &retVarName);
@@ -963,7 +1022,7 @@ int pStatWithId(char *idName) {
  */
 int pNextAssign() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT ASSIGN\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -999,7 +1058,7 @@ int pNextAssign() {
   CondCall(pExpr, &retVarName);
 
   // ','
-  RequireToken(t_comma);
+  RequireTokenType(t_comma);
 
   vypluj 0;
 }
@@ -1015,7 +1074,7 @@ int pNextAssign() {
  */
 int pBuiltInFunctions() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "BUILt IN FUNCTIONS\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1083,7 +1142,7 @@ int pBuiltInFunctions() {
  */
 int pFnArgList() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "FN ARG LIST\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1101,7 +1160,7 @@ int pFnArgList() {
   CondCall(STInsert, symtab, token->data);
 
   // :
-  RequireToken(t_colon);
+  RequireTokenType(t_colon);
 
   // <type>
   CondCall(pType);
@@ -1120,7 +1179,7 @@ int pFnArgList() {
  */
 int pNextFnArg() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT FN ARG\n");
+  LOG();
   Token *token = NULL;
 
   // ,
@@ -1142,7 +1201,7 @@ int pNextFnArg() {
   element->data = token->data;
   genVarDef(token->data, symtab->top->depth);
   // :
-  RequireToken(t_colon);
+  RequireTokenType(t_colon);
 
   // <type>
   CondCall(pType, &token);
@@ -1162,7 +1221,7 @@ int pNextFnArg() {
  */
 int pRetArgList() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "RET ARG LIST\n");
+  LOG();
 
   // 39. <retArgList>      -> eps
   // TODO
@@ -1220,7 +1279,7 @@ bool isExpressionParser(Token token) {
  */
 int pRetNextArg() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "REG NEXT ARG\n");
+  LOG();
   Token *token = NULL;
 
   // ','
@@ -1256,7 +1315,7 @@ int pRetNextArg() {
  */
 int pTypeList() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "TYPE LIST\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1282,7 +1341,7 @@ int pTypeList() {
  */
 int pNextType() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT TYPE\n");
+  LOG();
   Token *token = NULL;
 
   // ,
@@ -1386,7 +1445,7 @@ int pIdList() {
  */
 int pNextId() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT ID \n");
+  LOG();
   Token *token = NULL;
 
   // ,
@@ -1433,7 +1492,7 @@ int pNextId() {
  */
 int pNewIdAssign() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEW ID ASSIGN\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1479,7 +1538,7 @@ int pExprList() {
  */
 int pNextExpr() {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "NEXT EXPR\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1510,7 +1569,7 @@ int pStringFunctions(char *varName) {
 
   if(strcmp(token->data, "substr") == 0) {
 
-    RequireToken(t_leftParen);
+    RequireTokenType(t_leftParen);
 
     CondCall(scanner, &token);
     Token *string = NULL;
@@ -1519,7 +1578,6 @@ int pStringFunctions(char *varName) {
     char *endPtr;
 
     if(token->type != t_str || token->type != t_idOrKeyword) {
-      tokenDestroy(&token);
       vypluj err(1); // TODO CHANGE ERR CODE
     }
 
@@ -1528,7 +1586,6 @@ int pStringFunctions(char *varName) {
     CondCall(scanner, &token);
 
     if(token->type != t_int || token->type != t_num) {
-      tokenDestroy(&token);
       vypluj err(1); // TODO CHANGE ERR CODE
     }
 
@@ -1538,14 +1595,13 @@ int pStringFunctions(char *varName) {
     CondCall(scanner, &token);
 
     if(token->type != t_int || token->type != t_num) {
-      tokenDestroy(&token);
       vypluj err(1); // TODO CHANGE ERR CODE
     }
 
     j = strtod(token->data, &endPtr);
 
 
-    RequireToken(t_rightParen);
+    RequireTokenType(t_rightParen);
 
     genSubstrFunction(varName, string, i, j, symtab->top->depth);
 
@@ -1565,7 +1621,7 @@ int pStringFunctions(char *varName) {
  */
 int pExpr(char **retVarName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "EXPR\n");
+  LOG();
   Token *token = NULL;
 
   CondCall(scanner, &token);
@@ -1574,16 +1630,18 @@ int pExpr(char **retVarName) {
   char *varName = NULL;
   
 
-  // If it is a function (and is defined), don't call the shift-reduce parser at all
-  if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
+  // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
+  if(STFind(symtab, token->data) 
+      && !STGetIsVariable(symtab, token->data) 
+      && STGetFnDefined(symtab, token->data)) {
       // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
     
     if(isReadFunction(token->data)) {
       // asi bude treba overiť či táto gen funkcie nenarazili na err
       genReadFunction(element->data, token->data, symtab->top->depth);
 
-      RequireToken(t_leftParen);
-      RequireToken(t_rightParen);
+      RequireTokenType(t_leftParen);
+      RequireTokenType(t_rightParen);
       vypluj 0;
     } else if(isStringOperationFunction(token->data)) {
 
@@ -1631,13 +1689,13 @@ int pExpr(char **retVarName) {
     vypluj 0;
 
   } else if(isKeyword(token)) {
-    CondCall(stashToken, token);
-    vypluj 0;
+    CondCall(stashToken, &token);
+
   } else {
-  CondCall(parseExpression, symtab, token, &varName);
-  fprintf(stderr, "Result is stored in %s\n", varName);
-  vypluj 0;
+    CondCall(parseExpression, symtab, token, &varName);
+    fprintf(stderr, "Result is stored in %s\n", varName);
   }
+  vypluj 0;
 }
 
 #endif
