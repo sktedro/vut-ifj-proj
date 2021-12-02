@@ -2,8 +2,8 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef CHARBUFFER_H
-#define CHARBUFFER_H
+#ifndef CHAR_BUFFER_H
+#define CHAR_BUFFER_H
 
 #include "misc.h"
 
@@ -39,13 +39,6 @@ void charBufPop(CharBuffer *buf);
  * @param buf: pointer to the buffer that is to be cleared
  */
 void charBufClear(CharBuffer *buf);
-
-/**
- * @brief Free all memory allocated by the buffer (and its data)
- *
- * @param buf: pointer to a buffer that is to be destroyed
- */
-void charBufDestroy(CharBuffer *buf);
 
 /**
  * @brief Appends a string to an existing buffer or initialises a new buffer if the 

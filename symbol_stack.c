@@ -17,7 +17,7 @@ extern int ret;
  * @return 0 if successful, errcode otherwise
  */
 int SStackInit(SStack **stack) {
-  *stack = (SStack *)malloc(sizeof(SStack));
+  GCMalloc(*stack, sizeof(SStack));
   if (!(*stack)) {
     return err(INTERN_ERR);
   }
@@ -131,21 +131,6 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
 
   // This line should never be ran, but in case it does...
   return err(SYNTAX_ERR);
-}
-
-/*
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void SStackDestroy(SStack *stack) {
-  if (!stack) {
-    return;
-  }
-  while (stack->top) {
-    SStackPop(stack);
-  }
-  free(stack);
 }
 
 #endif

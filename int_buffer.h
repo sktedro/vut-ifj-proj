@@ -2,8 +2,8 @@
  * A buffer - basically just a dynamic-sized string
  */
 
-#ifndef INTBUFFER_H
-#define INTBUFFER_H
+#ifndef INT_BUFFER_H
+#define INT_BUFFER_H
 
 #include "misc.h"
 
@@ -43,12 +43,6 @@ void intBufPop(IntBuffer *buf);
  */
 void intBufClear(IntBuffer *buf);
 
-/**
- * @brief Free all memory allocated by the buffer (and its data)
- *
- * @param buf: pointer to a buffer that is to be destroyed
- */
-void intBufDestroy(IntBuffer *buf);
 
 #endif
 /* end of file int_buffer.h */

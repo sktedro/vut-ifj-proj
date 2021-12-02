@@ -7,6 +7,8 @@
 
 #include "symtable_stack.h"
 
+extern int ret;
+
 /**
  * @brief Allocate a new stack, initialize it and return it
  *
@@ -15,10 +17,7 @@
  * @return 0 if successful, errcode otherwise
  */
 int STStackInit(STStack **stack) {
-  *stack = (STStack *)malloc(sizeof(STStack));
-  if (!(*stack)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*stack, sizeof(STStack));
   (*stack)->top = NULL;
   return 0;
 }
@@ -35,10 +34,8 @@ int STStackPush(STStack *stack, STTreeNode *table, int depth) {
   if (!stack) {
     return err(INTERN_ERR);
   }
-  STStackElem *newElem = (STStackElem *)malloc(sizeof(STStackElem));
-  if (!newElem) {
-    return err(INTERN_ERR);
-  }
+  STStackElem *newElem = NULL;
+  GCMalloc(newElem, sizeof(STStackElem));
   newElem->table = table;
   newElem->depth = depth;
   newElem->next = stack->top;
@@ -47,7 +44,7 @@ int STStackPush(STStack *stack, STTreeNode *table, int depth) {
 }
 
 /**
- * @brief remove (and free it's allocated memory) the top element
+ * @brief remove the top element
  *
  * @param stack
  */
@@ -55,10 +52,7 @@ void STStackPop(STStack *stack) {
   if (!stack || !stack->top) {
     return;
   }
-  STStackElem *tmp = stack->top;
   stack->top = stack->top->next;
-  treeDestroy(&(tmp->table));
-  free(tmp);
 }
 
 /**
@@ -112,22 +106,6 @@ STStackElem *STStackNthElem(STStack *stack, int n) {
     tmp = tmp->next;
   }
   return tmp;
-}
-
-/**
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void STStackDestroy(STStack **stack) {
-  if (!stack || !(*stack)) {
-    return;
-  }
-  while ((*stack)->top) {
-    STStackPop(*stack);
-  }
-  free(*stack);
-  *stack = NULL;
 }
 
 #endif

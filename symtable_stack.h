@@ -28,7 +28,7 @@ int STStackInit(STStack **stack) ForceRetUse;
 int STStackPush(STStack *stack, STTreeNode *table, int depth) ForceRetUse;
 
 /**
- * @brief remove (and free it's allocated memory) the top element
+ * @brief remove the top element
  *
  * @param stack
  */
@@ -60,13 +60,6 @@ STStackElem *STStackBottom(STStack *stack);
  * @return n-th element (if n = 0, returns stack top)
  */
 STStackElem *STStackNthElem(STStack *stack, int n);
-
-/**
- * @brief Free all memory allocated by the symbol stack
- *
- * @param stack to be freed
- */
-void STStackDestroy(STStack **stack);
 
 #endif
 /* end of file symtable_stack.h */

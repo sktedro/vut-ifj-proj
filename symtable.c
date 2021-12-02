@@ -21,15 +21,6 @@ int STInit(STStack **stack) {
 }
 
 /**
- * @brief Destroy the symbol table
- *
- * @param stack to be destroyed
- */
-void STDestroy(STStack **stack) {
-  STStackDestroy(stack);
-}
-
-/**
  * @brief Push new frame on top of the stack
  *
  * @param stack - stack with frames

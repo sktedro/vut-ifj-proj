@@ -90,12 +90,8 @@ int main(){
     printf("Nth doesn't return the right element (stack size = 1, test 2)\n");
     return 1;
   }
-  // Destroy the stack with only one element
-  STStackDestroy(&stack);
-  if(stack){
-    printf("Destroying the stack unsuccessful\n");
-    return 1;
-  }
+  // Destroy the stack 
+  stack = NULL;
   tree1 = NULL;
 
   // Insert two elements and test all functions
@@ -117,11 +113,7 @@ int main(){
     return 1;
   }
   // Destroy a stack with two elements
-  STStackDestroy(&stack);
-  if(stack){
-    printf("Destroying the stack unsuccessful (stack size was 2)\n");
-    return 1;
-  }
+  stack = NULL;
   tree1 = tree2 = NULL;
 
   // Insert three elements and test all functions

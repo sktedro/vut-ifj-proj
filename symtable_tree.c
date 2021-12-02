@@ -18,33 +18,21 @@ extern int ret;
  * @return 0 if successful, errcode otherwise
  */
 int newSTTreeNode(STTreeNode **node, char *key) {
-  *node = (STTreeNode *)malloc(sizeof(STTreeNode));
-  if (!(*node)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*node, sizeof(STTreeNode));
 
   // Init children
   (*node)->rightChild = NULL;
   (*node)->leftChild = NULL;
 
   // Copy the key
-  (*node)->key = malloc((strlen(key) + 1) * sizeof(char));
-  if (!(*node)->key) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->key, (strlen(key) + 1) * sizeof(char));
   memcpy((*node)->key, key, (strlen(key) + 1) * sizeof(char));
 
   // Init data
-  (*node)->data = malloc(sizeof(STElem));
-  if (!(*node)->data) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->data, sizeof(STElem));
 
   // Copy key
-  (*node)->data->name = malloc((strlen(key) + 1) * sizeof(char));
-  if (!(*node)->data->name) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc((*node)->data->name, (strlen(key) + 1) * sizeof(char));
   memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
 
   // Init other data
@@ -82,37 +70,6 @@ int treeInsert(STTreeNode **root, char *key) {
 }
 
 /**
- * @brief Frees all memory allocated by a tree node
- *
- * @param elem to be freed
- */
-void treeElemDestroy(STElem *data) {
-  if (data) {
-    free(data->name);
-    intBufDestroy(data->fnParamTypesBuf);
-    intBufDestroy(data->fnRetTypesBuf);
-    free(data);
-  }
-}
-
-/**
- * @brief Destroys the whole tree and frees all used memory.
- *
- * @param root a pointer to a tree
- */
-void treeDestroy(STTreeNode **root) {
-  if (!root || !(*root)) {
-    vypluj;
-  }
-  treeDestroy(&((*root)->leftChild));
-  treeDestroy(&((*root)->rightChild));
-  treeElemDestroy((*root)->data);
-  free((*root)->key);
-  free((*root));
-  *root = NULL;
-}
-
-/**
  * @brief Replaces the target node with the rightmost node from the given 
  * subtree.
  * 
@@ -129,7 +86,6 @@ void replaceByRightmost(STTreeNode *target, STTreeNode **tree) {
   target->key = (*tree)->key;
   target->data = (*tree)->data;
   tmp = (*tree)->leftChild;
-  free(*tree); // free element function????? TODO
   *tree = tmp;
 }
 
@@ -156,15 +112,12 @@ void treeDelete(STTreeNode **root, char *key) {
 
   // key found
   if ((*root)->rightChild == NULL && (*root)->leftChild == NULL) {
-    free(*root);
     *root = NULL;
   } else if ((*root)->leftChild == NULL) {
     tmp = (*root)->rightChild;
-    free(*root);
     *root = tmp;
   } else if ((*root)->rightChild == NULL) {
     tmp = (*root)->leftChild;
-    free(*root);
     *root = tmp;
     vypluj;
   } else {

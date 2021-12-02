@@ -91,15 +91,19 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
     // Shift (the top terminal)
     if (precTableSymbol == '=') {
-      CondCall(shiftStep, symstack, inputSymbol, &token);
+      // Push the input symbol to the symbol stack
+      CondCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Shift and push '<' (after (above) the top terminal)
     } else if (precTableSymbol == '<') {
       SStackElem *newSymbol = NULL;
+      // Allocate a new symbol for '<'
       CondCall(allocateSymbol, &newSymbol, st_push);
+      // Push iit after the top terminal
       CondCall(SStackPushAfterTopTerminal, symstack, newSymbol);
-      CondCall(shiftStep, symstack, inputSymbol, &token);
+      // Push the input symbol to the symbol stack
+      CondCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Reduce (the top terminals to an expression)
@@ -118,24 +122,6 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   *returnVarName = symstack->top->data;
 
   vypluj 0;
-}
-
-/**
- * @brief Shift step of the precedence analysis - just push the input symbol
- * to the symbol stack (and destroy the token)
- *
- * @param symstack: symbol stack
- * @param inputSymbol to be pushed to the symbol stack
- * @param token 
- *
- * @returns 0 if successful, errcode otherwise 
- */
-int shiftStep(SStack *symstack, SStackElem *inputSymbol, Token **token) {
-  // Push the input symbol to the stack
-  CondCall(SStackPush, symstack, inputSymbol);
-  // Destroy the old token
-  tokenDestroy(token);
-  return 0;
 }
 
 /**
@@ -263,10 +249,6 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
         newSymbolName);
     CondCall(SStackPush, symstack, newSymbol);
 
-    // Destroy both old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-
   } else {
     // No rule
     return -1;
@@ -287,11 +269,8 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
 int bracketsRule(SStack *symstack, SStackElem *op1,
                  SStackElem *op2, SStackElem *op3) {
   if (op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_expr) {
-
-    // Push the E and destroy the parentheses
+    // Push the E back
     CondCall(SStackPush, symstack, op2);
-    destroySymbol(&op1);
-    destroySymbol(&op3);
 
   } else {
     // No rule
@@ -359,11 +338,6 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     } else {
       return err(SYNTAX_ERR);
     }
-
-    // Destroy all old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-    destroySymbol(&op3);
 
     // Create a new symbol and push it to the symstack
     SStackElem *newSymbol = NULL;
@@ -450,11 +424,6 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Push the new symbol to the symstack (E)
     CondCall(SStackPush, symstack, newSymbol);
-
-    // Destroy all old symbols
-    destroySymbol(&op1);
-    destroySymbol(&op2);
-    destroySymbol(&op3);
 
     return 0;
   } else {
@@ -623,7 +592,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       return err(ID_DEF_ERR);
     }
 
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     break;
 
@@ -643,7 +612,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       (*newSymbol)->dataType = dt_string;
     }
 
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     (*newSymbol)->isZero = isZero(*newSymbol);
     break;
@@ -683,7 +652,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
   // Relational operators (== ~= < > <= >=)
   case t_relOp:
     CondCall(createSymbol, newSymbol, st_operator, pt_relOp, false, -1, NULL);
-    (*newSymbol)->data = malloc(sizeof(char) * (strlen(token->data) + 1));
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     break;
   }
@@ -701,10 +670,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
  * @return 0 if successful, errcode otherwise
  */
 int allocateSymbol(SStackElem **newSymbol, int symbol) {
-  *newSymbol = malloc(sizeof(SStackElem));
-  if (!(*newSymbol)) {
-    return err(INTERN_ERR);
-  }
+  GCMalloc(*newSymbol, sizeof(SStackElem));
   (*newSymbol)->type = symbol;
   (*newSymbol)->op = -1;
   (*newSymbol)->isId = false;
@@ -738,21 +704,6 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
   (*newSymbol)->data = data;
   (*newSymbol)->isZero = false;
   return 0;
-}
-
-/**
- * @brief Destroys (frees data allocated by) a symbol of the symbol stack
- *
- * @param elem to be destroyed
- */
-void destroySymbol(SStackElem **elem) {
-  if (elem && *elem) {
-    if ((*elem)->data) {
-      free((*elem)->data);
-    }
-    free(*elem);
-  }
-  *elem = NULL;
 }
 
 /*

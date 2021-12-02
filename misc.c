@@ -10,6 +10,7 @@
 int ret = 0;
 int LOCCount = 1;
 bool errMessageWritten = false;
+GarbageCollector garbageCollector;
 
 /*
  * Miscellaneous functions
@@ -64,6 +65,47 @@ int err(int errCode) {
     errMessageWritten = true;
   }
   vypluj errCode;
+}
+
+int GCInit(){
+  garbageCollector.pointers = malloc(sizeof(void*) * GCINITLEN);
+  if(!garbageCollector.pointers){
+    return err(INTERN_ERR);
+  }
+  garbageCollector.ptrsAllocated = GCINITLEN;
+  garbageCollector.ptrsUsed = 0;
+  return 0;
+}
+
+int GCInsert(void *ptr) {
+  // We need to test if we have some allocated or the tests won't run well
+  if(garbageCollector.ptrsAllocated != 0){
+    if(garbageCollector.ptrsAllocated == garbageCollector.ptrsUsed){
+      int newLen = sizeof(void*) * 2 * garbageCollector.ptrsAllocated;
+      garbageCollector.pointers = realloc(garbageCollector.pointers, newLen);
+      if(!(garbageCollector.pointers)){
+        return err(INTERN_ERR);
+      }
+      garbageCollector.ptrsAllocated = newLen;
+    }
+    garbageCollector.pointers[garbageCollector.ptrsUsed] = ptr;
+    (garbageCollector.ptrsUsed)++;
+  }
+  return 0;
+}
+
+void GCDelete(void *ptr) {
+  for(int i = 0; i < garbageCollector.ptrsUsed; i++){
+    if(ptr == garbageCollector.pointers[i]){
+      garbageCollector.pointers[i] = NULL;
+    }
+  }
+}
+
+void GCCollect(){
+  for(int i = 0; i < garbageCollector.ptrsUsed; i++){
+    free(garbageCollector.pointers[i]);
+  }
 }
 
 #endif

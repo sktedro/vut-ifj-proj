@@ -110,15 +110,13 @@ SStackElem *element;
   }
 
 void cleanElement() {
-  free(element->data);
-  free(element);
   element->next->data = NULL;
   element->data = NULL;
 }
 
 void initElement() {
-  element = malloc(sizeof(SStackElem));
-  element->data = malloc(sizeof(char) * 100);
+  GCMalloc(element, sizeof(SStackElem));
+  GCMalloc(element->data, sizeof(char) * 100);
 }
 
 //------------------------------------------------------------
@@ -426,7 +424,7 @@ int pReq() {
  */
 int newFunctionDefinition(char *fnName) {
   if (STFind(symtab, fnName) 
-      && !STGetIsVariable(symtab, token->data) 
+      && !STGetIsVariable(symtab, fnName) 
       && STGetFnDefined(symtab, fnName)) {
     LOG("Function already defiend");
     vypluj err(ID_DEF_ERR);
