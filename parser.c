@@ -32,9 +32,9 @@
  * pNextFnArg()         DONE --
  * pRetArgList()        DONE
  * pRetNextArg()        DONE
- * pTypeList()          DONE
- * pNextType()          DONE
- * pType()              DONE
+ * pTypeList()          FULLY DONE
+ * pNextType()          DEPEDNANT ON pType - NOT DONE
+ * pType()              FUCK
  * pIdList()            DONE
  * pNextId()            DONE
  * pNewIdAssign()       DONE
@@ -1244,7 +1244,7 @@ int pRetNextArg() {
   vypluj pRetNextArg();
 }
 
-/** // TODO this makes me want to vomit as well as most functions below (retraktor comming soon)
+/**
  * @brief
  *
  * @return error code
@@ -1255,7 +1255,7 @@ int pRetNextArg() {
  * 47. <typeList>        -> string <nextType>
  * 48. <typeList>        -> nil <nextType>
  */
-int pTypeList() {
+int pTypeList(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -1263,14 +1263,20 @@ int pTypeList() {
   TryCall(scanner, &token);
   printToken(token);
 
-  // eps or type
-  if(!isDataType(token->data)) {
+  // integer/number/string/nil
+  if(isDataType(token->data)) {
+    int dataType = getDataTypeFromString(token->data);
+    TryCall(STAppendParamType, symtable, fnName, dataType);
+
+    // <nextType>
+    TryCall(pNextType, fnName);
+
+  // eps
+  }else{
     TryCall(stashToken, &token);
-    vypluj 0;
   }
 
-  // <nextType>
-  vypluj pNextType();
+  vypluj 0;
 }
 
 /**
@@ -1281,31 +1287,37 @@ int pTypeList() {
  * 50. <nextType>        -> eps
  * 51. <nextType>        -> , <type> <nextType>
  */
-int pNextType() {
+int pNextType(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
-  // ,
   TryCall(scanner, &token);
   printToken(token);
 
+  // 51. <nextType>        -> , <type> <nextType>
+  // ,
+  if(token->type == t_comma){
+
+    // <type>
+    // TODO we're not calling pType here, btw. According to CFG, we should
+    RequireTokenType(t_idOrKeyword);
+    int dataType = getDataTypeFromString(token->data);
+    TryCall(STAppendParamType, symtable, token->data, dataType);
+
+    // <nextType>
+    TryCall(pNextType);
+
   // 50. <nextType>        -> eps
-  if (token->type != t_comma) {
+  }else{
     TryCall(stashToken, &token);
-    vypluj 0;
   }
 
-  // 51. <nextType>        -> , <type> <nextType>
-  // <type>
-  TryCall(pType);
-
-  // <nextType>
-  vypluj pNextType();
+  vypluj 0;
 }
 
 /**
- * @brief
+ * @brief TODO what do we do in this function? I guess the cfg itself is wrong
  *
  * @return error code
  *
@@ -1315,25 +1327,12 @@ int pNextType() {
  * 56. <type>            -> nil
  */
 int pType() {
-  fprintf(stderr,"-----------------------------------------------------------\n");
-  fprintf(stderr,"TYPE\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
   Token *token = NULL;
 
-  TryCall(scanner, &token);
-  printToken(token);
+  /** RequireTokenType(t_idOrKeyword); */
 
-  if(!isDataType(token->data)) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // Adding data type to existing variable in ST
-  // else pType() is called as data type of function, do nothing
-  if (element->data != NULL) {
-    STSetVarDataType(symtab, element->data, getDataTypeInt(token->data));
-    // TODO call gen function for fn param definition -> fn not done yet
-    genVarDef(element->data, symtab->top->depth);
-
-  }
   vypluj 0;
 }
 
@@ -1345,8 +1344,8 @@ int pType() {
  * 58. <idList>          -> [id] <nextId> - variable declaration
  */
 int pIdList() {
-  fprintf(stderr,"-----------------------------------------------------------\n");
-  fprintf(stderr," ID LIST\n");
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
   Token *token = NULL;
 
   // [id]

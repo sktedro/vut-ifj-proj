@@ -267,6 +267,16 @@ typedef struct {
 bool strEq(char *str1, char *str2) ForceRetUse;
 
 /**
+ * @brief returns an integer representation (enum) of the string, if it
+ * contains a data type keyword
+ *
+ * @param str
+ *
+ * @return data type enum or -1 if str is not a data type keyword
+ */
+int getDataTypeFromString(char *str);
+
+/**
  * @brief Writes an error message to stdout and returns back the error code
  *
  * @param errCode

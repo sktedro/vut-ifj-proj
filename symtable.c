@@ -156,6 +156,9 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
  */
 int STAppendParamType(STStack *stack, char *key, int paramType) {
   STElem *data = STFind(stack, key);
+  if(paramType == -1){
+    return err(SYNTAX_ERR);
+  }
   if (data) {
     if (!data->fnParamTypesBuf) {
       TryCall(intBufInit, &(data->fnParamTypesBuf));

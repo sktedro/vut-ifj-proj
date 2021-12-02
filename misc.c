@@ -29,6 +29,27 @@ bool strEq(char *str1, char *str2){
 }
 
 /**
+ * @brief returns an integer representation (enum) of the string, if it
+ * contains a data type keyword
+ *
+ * @param str
+ *
+ * @return data type enum or -1 if str is not a data type keyword
+ */
+int getDataTypeFromString(char *str){
+  if(strEq(str, "integer")){
+    return dt_integer;
+  }else if(strEq(str, "number")){
+    return dt_number;
+  }else if(strEq(str, "string")){
+    return dt_string;
+  }else if(strEq(str, "nil")){
+    return dt_nil;
+  }else{
+    return -1;
+}
+
+/**
  * @brief Writes an error message to stdout and returns back the error code
  *
  * @param errCode
