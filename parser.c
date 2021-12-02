@@ -49,267 +49,25 @@
 
 #include "parser.h"
 
-// If set to 0, no debug prints will be written
-#define DEBUGTOGGLE 1
-
 extern int ret;
 
 STStack *symtab;
 
-//----------------------------------
 // SStackElem stuff, just ignore TODO move somewhere?
-
 SStackElem *element;
-
-
-// TODO
-#define RequireKeyword(str1, str2)                                             \
-  if(!strEq(str1, str2)) {                                                     \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-
-// TODO
-#define ForbidKeyword(str1, str2)                                              \
-  if(strEq(str1, str2)) {                                                      \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-
-// Get a new token and if the type doesn't match, throw a syntax err
-#define RequireTokenType(tokenType)                                            \
-  TryCall(scanner, &token);                                                    \
-  if(!token){                                                                  \
-    return 0;                                                                  \
-  }                                                                            \
-  if(token->type != tokenType) {                                               \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-  printToken(token);
-
-// Get a new token and if the type or data don't match, throw a syntax err
-#define RequireToken(tokenType, tokenData)                                     \
-  TryCall(scanner, &token);                                                    \
-  if(!token){                                                                  \
-    return err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-  if(token->type != tokenType                                                  \
-      || strcmp(token->data, #tokenData) != 0) {                               \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-  printToken(token);
-
-// Prints filename, line number, fn name and given arguments to stderr
-#define LOG(fmt, ...)                                                          \
-  do {                                                                         \
-    if (DEBUGTOGGLE) {                                                         \
-      fprintf(stderr, "LOG: %s:%d:%s(): " fmt,                                 \
-          __FILE__, __LINE__, __func__, ##__VA_ARGS__);                        \
-      fprintf(stderr, "\n");                                                   \
-    }                                                                          \
-  } while (0)
-
 void cleanElement() {
   element->next->data = NULL;
   element->data = NULL;
 }
-
 void initElement() {
   GCMalloc(element, sizeof(SStackElem));
   GCMalloc(element->data, sizeof(char) * 100);
 }
 
-//------------------------------------------------------------
-
-/**
- * @brief Check if a string represents a data type
- *
- * @param data: input string
- *
- * @return true if the string represents a data type
- */
-bool isDataType(char *data) {
-  if (strcmp(data, "string") == 0) {
-    vypluj true;
-  } else if (strcmp(data, "integer") == 0) {
-    vypluj true;
-  } else if (strcmp(data, "number") == 0) {
-    vypluj true;
-  } else if(strcmp(data, "nil")) {
-    vypluj true;
-  } else {
-    vypluj false;
-  }
-}
-
-/**
- * @brief check if token is read function
- * 
- * @param data 
- * @return true if data is read function
- * @return false otherwise
- */
-bool isReadFunction(char *data) {
-  if(strcmp(data, "readi") == 0 
-  || strcmp(data, "reads") == 0 
-  || strcmp(data, "readn") == 0) {
-    vypluj true;
-  } 
-  vypluj false;
-}
-
-/**
- * @brief check if token is string operation function
- * 
- * @param data 
- * @return true if data is string operation function
- * @return false otherwise
- */
-bool isStringOperationFunction(char *data) {
-  if(strcmp(data, "substr") == 0 
-  || strcmp(data, "ord") == 0 
-  || strcmp(data, "chr") == 0) {
-    vypluj true;
-  } 
-  vypluj false;
-}
-
-/**
- * @brief check if token is read function in ifj21
- * 
- * @param token 
- * @return true if it is read function, destroys () behind read, generates code
- * 
- */
-bool readFunction(Token *token) {
-  // if token is not a keyword returns false and stashToken
-  if(token->type != t_idOrKeyword) {
-    TryCall(stashToken, &token);
-    vypluj false;
-  }
-
-  // if token is not a read function, returns false and stashToken
-  if(!isReadFunction(token->data)) {
-    TryCall(stashToken, &token);
-    vypluj false;
-  }
-  
-  TryCall(genVarAssign, element->data, element->dataType, token->data);
-  vypluj true;
-}
-
-
-/** TODO do we ever use this?
- * @brief returns value of data type in IFJ21DataTypes
- *
- * @param string
- *
- * @return return value in range <0, 3> if it is in datastructure, else -1
- */
-
-int getDataTypeInt(char *data) {
-  if (strcmp(data, "integer") == 0) {
-    vypluj dt_integer;
-  } else if (strcmp(data, "number") == 0) {
-    vypluj dt_number;
-  } else if (strcmp(data, "string") == 0) {
-    vypluj dt_string;
-  } else if(strcmp(data, "nil")) {
-    vypluj dt_nil;
-  } else {
-    vypluj -1;
-  }
-}
-
-
-/**
- * @brief Check if token is built in function
- *
- * @return if token is built in function return true, else false
- */
-bool isBuiltInFunction(Token *token) {
-  if (token->type == t_idOrKeyword) {
-    if (strcmp(token->data, "reads") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "readi") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "readn") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "write") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "tointeger") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "substr") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "ord") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "chr") == 0) {
-      vypluj true;
-    }
-  }
-  vypluj false;
-}
-
-/**
- * @brief Check if token is keyword
- *
- * @return if token is keyword return true, else false
- */
-bool isKeyword(Token *token) {
-
-  if (token->type == t_idOrKeyword) {
-
-    if (strcmp(token->data, "do") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "else") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "end") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "function") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "global") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "if") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "integer") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "local") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "nil") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "number") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "require") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "return") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "string") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "then") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "while") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "reads") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "readi") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "readn") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "write") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "tointeger") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "substr") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "ord") == 0) {
-      vypluj true;
-    } else if (strcmp(token->data, "chr") == 0) {
-      vypluj true;
-    }
-  }
-  return false;
-}
-
 /*
+ *
  * Rules
+ *
  */
 
 /**
@@ -355,50 +113,6 @@ int pReq() {
   // Generate code
   genStart();
 
-  vypluj 0;
-}
-
-/**
- * @brief If the function wasn't already defiend, define it (add it to the
- * symtable)
- *
- * @param fnName: name of the function
- *
- * @return error code
- */
-int newFunctionDefinition(char *fnName) {
-  if (STFind(symtab, fnName) 
-      && !STGetIsVariable(symtab, fnName) 
-      && STGetFnDefined(symtab, fnName)) {
-    LOG("Function already defiend");
-    vypluj err(ID_DEF_ERR);
-  } else {
-    LOG("Adding to the symtable (definition)");
-    TryCall(STInsert, symtab, fnName);
-    STSetIsVariable(symtab, fnName, false);
-    STSetFnDefined(symtab, fnName, true);
-  }
-  vypluj 0;
-}
-
-/**
- * @brief If the function wasn't already declared, declare it (add it to the
- * symtable)
- *
- * @param fnName: name of the function
- *
- * @return error code
- */
-int newFunctionDeclaration(char *fnName) {
-  if (STFind(symtab, fnName)) {
-    LOG("Function already declared");
-    vypluj err(1); // TODO errcode (declaration when fn is already declared/defined)
-  } else {
-    LOG("Adding to the symtable (declaration)");
-    TryCall(STInsert, symtab, fnName);
-    STSetIsVariable(symtab, fnName, false);
-    STSetFnDefined(symtab, fnName, false);
-  }
   vypluj 0;
 }
 
@@ -1639,6 +1353,242 @@ int pExpr(char **retVarName) {
   } else {
     TryCall(parseExpression, symtab, token, &varName);
     fprintf(stderr, "Result is stored in %s\n", varName);
+  }
+  vypluj 0;
+}
+
+/*
+ *
+ * HELPER FUNCTIONS
+ *
+ */
+
+/**
+ * @brief Check if a string represents a data type
+ *
+ * @param data: input string
+ *
+ * @return true if the string represents a data type
+ */
+bool isDataType(char *data) {
+  if (strcmp(data, "string") == 0) {
+    vypluj true;
+  } else if (strcmp(data, "integer") == 0) {
+    vypluj true;
+  } else if (strcmp(data, "number") == 0) {
+    vypluj true;
+  } else if(strcmp(data, "nil")) {
+    vypluj true;
+  } else {
+    vypluj false;
+  }
+}
+
+/**
+ * @brief check if token is read function
+ * 
+ * @param data 
+ * @return true if data is read function
+ * @return false otherwise
+ */
+bool isReadFunction(char *data) {
+  if(strcmp(data, "readi") == 0 
+  || strcmp(data, "reads") == 0 
+  || strcmp(data, "readn") == 0) {
+    vypluj true;
+  } 
+  vypluj false;
+}
+
+/**
+ * @brief check if token is string operation function
+ * 
+ * @param data 
+ * @return true if data is string operation function
+ * @return false otherwise
+ */
+bool isStringOperationFunction(char *data) {
+  if(strcmp(data, "substr") == 0 
+  || strcmp(data, "ord") == 0 
+  || strcmp(data, "chr") == 0) {
+    vypluj true;
+  } 
+  vypluj false;
+}
+
+/**
+ * @brief check if token is read function in ifj21
+ * 
+ * @param token 
+ * @return true if it is read function, destroys () behind read, generates code
+ * 
+ */
+bool readFunction(Token *token) {
+  // if token is not a keyword returns false and stashToken
+  if(token->type != t_idOrKeyword) {
+    TryCall(stashToken, &token);
+    vypluj false;
+  }
+
+  // if token is not a read function, returns false and stashToken
+  if(!isReadFunction(token->data)) {
+    TryCall(stashToken, &token);
+    vypluj false;
+  }
+  
+  TryCall(genVarAssign, element->data, element->dataType, token->data);
+  vypluj true;
+}
+
+/** TODO do we ever use this?
+ * @brief returns value of data type in IFJ21DataTypes
+ *
+ * @param string
+ *
+ * @return return value in range <0, 3> if it is in datastructure, else -1
+ */
+int getDataTypeInt(char *data) {
+  if (strcmp(data, "integer") == 0) {
+    vypluj dt_integer;
+  } else if (strcmp(data, "number") == 0) {
+    vypluj dt_number;
+  } else if (strcmp(data, "string") == 0) {
+    vypluj dt_string;
+  } else if(strcmp(data, "nil")) {
+    vypluj dt_nil;
+  } else {
+    vypluj -1;
+  }
+}
+
+/**
+ * @brief Check if token is built in function
+ *
+ * @return if token is built in function return true, else false
+ */
+bool isBuiltInFunction(Token *token) {
+  if (token->type == t_idOrKeyword) {
+    if (strcmp(token->data, "reads") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "readi") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "readn") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "write") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "tointeger") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "substr") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "ord") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "chr") == 0) {
+      vypluj true;
+    }
+  }
+  vypluj false;
+}
+
+/**
+ * @brief Check if token is keyword
+ *
+ * @return if token is keyword return true, else false
+ */
+bool isKeyword(Token *token) {
+
+  if (token->type == t_idOrKeyword) {
+
+    if (strcmp(token->data, "do") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "else") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "end") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "function") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "global") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "if") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "integer") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "local") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "nil") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "number") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "require") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "return") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "string") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "then") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "while") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "reads") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "readi") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "readn") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "write") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "tointeger") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "substr") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "ord") == 0) {
+      vypluj true;
+    } else if (strcmp(token->data, "chr") == 0) {
+      vypluj true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @brief If the function wasn't already defiend, define it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
+ *
+ * @return error code
+ */
+int newFunctionDefinition(char *fnName) {
+  if (STFind(symtab, fnName) 
+      && !STGetIsVariable(symtab, fnName) 
+      && STGetFnDefined(symtab, fnName)) {
+    LOG("Function already defiend");
+    vypluj err(ID_DEF_ERR);
+  } else {
+    LOG("Adding to the symtable (definition)");
+    TryCall(STInsert, symtab, fnName);
+    STSetIsVariable(symtab, fnName, false);
+    STSetFnDefined(symtab, fnName, true);
+  }
+  vypluj 0;
+}
+
+/**
+ * @brief If the function wasn't already declared, declare it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
+ *
+ * @return error code
+ */
+int newFunctionDeclaration(char *fnName) {
+  if (STFind(symtab, fnName)) {
+    LOG("Function already declared");
+    vypluj err(1); // TODO errcode (declaration when fn is already declared/defined)
+  } else {
+    LOG("Adding to the symtable (declaration)");
+    TryCall(STInsert, symtab, fnName);
+    STSetIsVariable(symtab, fnName, false);
+    STSetFnDefined(symtab, fnName, false);
   }
   vypluj 0;
 }

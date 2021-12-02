@@ -10,21 +10,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Constants
+ */
+
+// If set to 0, no debug prints will be written
+#define DEBUGTOGGLE 1
+
+// Garbage collector - initial length of the pointer array
 #define GCINITLEN 1024
 
-
-// #include "garbage_collector.h"
-
 /*
- * ♥
+ *  Error codes
  */
-#define vypluj return
 
-#define ForceRetUse __attribute__((warn_unused_result))
-
-/*
- *  Error returns (will be enum?)
- */
 #define LEX_ERR 1         // lexical analysis error
 #define SYNTAX_ERR 2      // syntax error
 #define ID_DEF_ERR 3      // undefined/redefined function/variable
@@ -34,40 +33,103 @@
 #define OTHER_SEM_ERR 7   // other semantic error
 #define NIL_ERR 8         // unexpected nil
 #define DIV_BY_ZERO_ERR 9 // integer division by zero
-
-#define INTERN_ERR 99 // intern error (memory allocation etc.)
+#define INTERN_ERR 99     // intern error (memory allocation etc.)
 
 /*
  * Macros
  */
-#define CondReturn \
-  if (ret)         \
-    vypluj err(ret)
 
+// ♥
+#define vypluj return
 #define condVypluj CondReturn
 
-#define TryCall(FN, ...) \
-  ret = FN(__VA_ARGS__);  \
+// If ret is non-zero, return it
+#define CondReturn                                                             \
+  if (ret)                                                                     \
+    vypluj err(ret)
+
+// Call a function and return its return value if it is non-zero
+#define TryCall(FN, ...)                                                       \
+  ret = FN(__VA_ARGS__);                                                       \
   CondReturn
 
+// Prints filename, line number, fn name and given arguments to stderr
+#define LOG(fmt, ...)                                                          \
+  do {                                                                         \
+    if (DEBUGTOGGLE) {                                                         \
+      fprintf(stderr, "LOG: %s:%d:%s(): " fmt,                                 \
+          __FILE__, __LINE__, __func__, ##__VA_ARGS__);                        \
+      fprintf(stderr, "\n");                                                   \
+    }                                                                          \
+  } while (0)
+
+// TODO
+#define RequireKeyword(str1, str2)                                             \
+  if(!strEq(str1, str2)) {                                                     \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+
+// TODO
+#define ForbidKeyword(str1, str2)                                              \
+  if(strEq(str1, str2)) {                                                      \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+
+// Get a new token and if the type doesn't match, throw a syntax err
+#define RequireTokenType(tokenType)                                            \
+  TryCall(scanner, &token);                                                    \
+  if(!token){                                                                  \
+    return 0;                                                                  \
+  }                                                                            \
+  if(token->type != tokenType) {                                               \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  printToken(token);
+
+// Get a new token and if the type or data don't match, throw a syntax err
+#define RequireToken(tokenType, tokenData)                                     \
+  TryCall(scanner, &token);                                                    \
+  if(!token){                                                                  \
+    return err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  if(token->type != tokenType                                                  \
+      || strcmp(token->data, #tokenData) != 0) {                               \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  printToken(token);
+
+// Precedence analysis: call a rule function and if it returned an error code
+// (not -1), return it
+#define TRYRULE(FN, ...)                                                       \
+    rulesRet = FN(symstack, __VA_ARGS__);                                      \
+    if(rulesRet != -1){                                                        \
+      return rulesRet;                                                         \
+    }
+
+// Malloc, check if successful and save it to the garbage collector
 #define GCMalloc(ptr, len)                                                     \
   ptr = malloc(len);                                                           \
   if(!ptr) {                                                                   \
+    /*TODO return err(INTERN_ERR);                                                    */\
   }                                                                            \
   ret = GCInsert((void*)ptr);                                                  \
   if(ret) {                                                                    \
+    /*TODO return err(ret);                                                           */\
   }
-// TODO return ret
 
+// Realloc, check if successful and update the pointer in the garbage collector
 #define GCRealloc(ptr, len)                                                    \
   GCDelete(ptr);                                                               \
   ptr = realloc(ptr, len);                                                     \
   if(!ptr) {                                                                   \
+    /*TODO return err(INTERN_ERR);                                                    */\
   }                                                                            \
   ret = GCInsert((void*)ptr);                                                  \
   if(ret) {                                                                    \
+    /*TODO return err(ret);                                                           */\
   }
-// TODO return ret
+
+#define ForceRetUse __attribute__((warn_unused_result))
 
 /*
  * Enumerations
@@ -80,7 +142,7 @@ enum FSMEnum {
   s_start,
 
   // Identificator or a keyword
-  s_idOrKeyword,
+  s_idOrKeyword, 
 
   // Number literals
   s_int,

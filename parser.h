@@ -12,35 +12,6 @@
 #include "symtable.h"
 #include "generator.h"
 
-/**
- * @brief Check if string is a data type
- * 
- * @return if type is data type retrun 0, else 1
- */
-bool isDataType(char *data);
-
-/**
- * @brief Check if token is built in function
- *
- * @return if token is built in function return true, else false
- */
-bool isBuiltInFunction(Token *token);
-
-/**
- * @brief Check if token is keyword
- *
- * @return if token is keyword return true, else false
- */
-bool isKeyword(Token *token);
-
-/**
- * @brief This function is for debug print of token
- *
- * @param token
- */
-void printToken(Token *token);
-
-
 int pStringFunctions(char *varName);
 
 /*
@@ -314,6 +285,91 @@ int pNextExpr();
  * @return error code
  */
 int pExpr();
+
+/*
+ *
+ * HELPER FUNCTIONS
+ *
+ */
+
+/**
+ * @brief Check if a string represents a data type
+ *
+ * @param data: input string
+ *
+ * @return true if the string represents a data type
+ */
+bool isDataType(char *data);
+
+/**
+ * @brief check if token is read function
+ * 
+ * @param data 
+ * @return true if data is read function
+ * @return false otherwise
+ */
+bool isReadFunction(char *data);
+
+/**
+ * @brief check if token is string operation function
+ * 
+ * @param data 
+ * @return true if data is string operation function
+ * @return false otherwise
+ */
+bool isStringOperationFunction(char *data);
+
+/**
+ * @brief check if token is read function in ifj21
+ * 
+ * @param token 
+ * @return true if it is read function, destroys () behind read, generates code
+ * 
+ */
+bool readFunction(Token *token);
+
+/** TODO do we ever use this?
+ * @brief returns value of data type in IFJ21DataTypes
+ *
+ * @param string
+ *
+ * @return return value in range <0, 3> if it is in datastructure, else -1
+ */
+int getDataTypeInt(char *data);
+
+/**
+ * @brief Check if token is built in function
+ *
+ * @return if token is built in function return true, else false
+ */
+bool isBuiltInFunction(Token *token);
+
+/**
+ * @brief Check if token is keyword
+ *
+ * @return if token is keyword return true, else false
+ */
+bool isKeyword(Token *token);
+
+/**
+ * @brief If the function wasn't already defiend, define it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
+ *
+ * @return error code
+ */
+int newFunctionDefinition(char *fnName);
+
+/**
+ * @brief If the function wasn't already declared, declare it (add it to the
+ * symtable)
+ *
+ * @param fnName: name of the function
+ *
+ * @return error code
+ */
+int newFunctionDeclaration(char *fnName);
 
 #endif
 /* end of file parser.h */

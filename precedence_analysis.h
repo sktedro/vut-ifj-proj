@@ -13,14 +13,6 @@
 #include "parser.h"
 #include "generator.h"
 
-
-#define TRYRULE(FN, ...)                  \
-    rulesRet = FN(symstack, __VA_ARGS__); \
-    if(rulesRet != -1){                   \
-      return rulesRet;                    \
-    }
-
-
 /**
  * @brief A precedence analysis algorithm. Parses an expression, checks for
  * errors and generates code
