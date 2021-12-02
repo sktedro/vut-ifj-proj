@@ -341,6 +341,8 @@ int pFnCallArgList(char *fnName) {
   }else{
     argCount++;
 
+    TryCall(stashToken, &token); // cause we didn't actually process the first arg
+
     // <fnCallArg>
     TryCall(pFnCallArg, fnName, argCount);
 
@@ -382,11 +384,12 @@ int pNextFnCallArg(char *fnName, int argCount) {
   }else{
 
     STElem *fn = STFind(symtab, fnName);
+
     // Amount of arguments doesn't match
-    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
+    /*if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
       LOG("Param amount doesn't match\n");
       vypluj err(SYNTAX_ERR); // TODO errcode
-    }
+    }*/ // tedro will fix
 
     TryCall(stashToken, &token);
   }
@@ -406,7 +409,6 @@ int pFnCallArg(char *fnName, int argCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
-
   TryCall(scanner, &token);
 
   STElem *fn = STFind(symtab, fnName);
@@ -444,10 +446,10 @@ int pFnCallArg(char *fnName, int argCount) {
   }
 
   // A parameter data type doesn't match
-  if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
+  /*if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
     LOG("Param data type doesn't match\n");
     vypluj err(SYNTAX_ERR); // TODO errcode
-  }
+  }*/ // tedro will fix
 
   vypluj 0;
 }
@@ -1095,8 +1097,8 @@ int pType() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
-
-  /** RequireTokenType(t_idOrKeyword); */
+  scanner(&token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
+  /* RequireTokenType(t_idOrKeyword); */
 
   vypluj 0;
 }
@@ -1134,7 +1136,6 @@ int pIdList() {
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
-  printf("sdsd\n");
   strcpy(element->data,token->data);
 
   // <nextId>
@@ -1394,7 +1395,7 @@ int pExpr(char **retVarName) {
     }
     vypluj 0;
 
-  } else if(isKeyword(token)) {
+  } else if(isKeyword(token) && strcmp(token->data, "nil")) {
     TryCall(stashToken, &token);
 
   } else {
