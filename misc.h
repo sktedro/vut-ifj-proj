@@ -46,34 +46,27 @@
 
 #define condVypluj CondReturn
 
-// TODO celkem zavádějící název, zní jakože se to volá
-// jenom za podmínky, lepší by bylo něco jako callWithCondReturn
-// ale bojím se na to chytat
-// TODO rename to TryCall
 #define TryCall(FN, ...) \
   ret = FN(__VA_ARGS__);  \
   CondReturn
 
-
-#define CondGCInsert(ptr)     \
-  ret = GCInsert((void*)ptr); \
-  if(ret) {                   \
+#define GCMalloc(ptr, len)                                                     \
+  ptr = malloc(len);                                                           \
+  if(!ptr) {                                                                   \
+  }                                                                            \
+  ret = GCInsert((void*)ptr);                                                  \
+  if(ret) {                                                                    \
   }
 // TODO return ret
 
-#define GCMalloc(ptr, len)    \
-  ptr = malloc(len);          \
-  if(!ptr) {                  \
-  }                           \
-  CondGCInsert(ptr);
-// TODO return ret
-
-#define GCRealloc(ptr, len)   \
-  GCDelete(ptr);              \
-  ptr = realloc(ptr, len);    \
-  if(!ptr) {                  \
-  }                           \
-  CondGCInsert(ptr);
+#define GCRealloc(ptr, len)                                                    \
+  GCDelete(ptr);                                                               \
+  ptr = realloc(ptr, len);                                                     \
+  if(!ptr) {                                                                   \
+  }                                                                            \
+  ret = GCInsert((void*)ptr);                                                  \
+  if(ret) {                                                                    \
+  }
 // TODO return ret
 
 /*
@@ -252,27 +245,7 @@ typedef struct {
   STStackElem *top;
 } STStack;
 
-
-/*
- * typedef struct {
- *   Token **token;
- *   CharBuffer **charBuffer;
- *   IntBuffer **intBuffer;
- *   SStack **symstack;
- *   STStack **symtabStack;
- *   STStackElem **symtab;
- * } GCPointers;
- * 
- * typedef struct {
- *   int tokenCount;
- *   int charBufferCount;
- *   int intBufferCount;
- *   int symstackCount;
- *   int symtabStackCount;
- *   int symtabCount;
- * } GCMetadata;
- */
-
+// Garbage collector (storage for pointers to every allocated memory block)
 typedef struct {
   void **pointers;
   int ptrsAllocated;
