@@ -82,11 +82,11 @@ void charBufClear(CharBuffer *buf) {
  */
 int charBufAppendString(char *orig, CharBuffer **buffer) {
   if (*buffer == NULL) {
-    CondCall(charBufInit, buffer);
+    TryCall(charBufInit, buffer);
   }
 
   for (unsigned int i = 0; i < strlen(orig); i++) {
-    CondCall(charBufAppend, *buffer, orig[i]);
+    TryCall(charBufAppend, *buffer, orig[i]);
   }
 
   return 0;

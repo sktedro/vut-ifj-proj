@@ -4,29 +4,29 @@ extern GarbageCollector garbageCollector;
 
 int main() {
   // Init the garbage collector
-  CondCall(GCInit);
+  TryCall(GCInit);
 
   // INIT - symtab
-  CondCall(STInit, &symtab);
-  CondCall(STPush, symtab);
+  TryCall(STInit, &symtab);
+  TryCall(STPush, symtab);
 
   /**
-    * CondCall(STInsert, symtab, "readi");
+    * TryCall(STInsert, symtab, "readi");
     * STSetIsVariable(symtab, "readi", false);
     * STSetFnDefined(symtab, "readi", true);
-    * CondCall(STInsert, symtab, "readn");
+    * TryCall(STInsert, symtab, "readn");
     * STSetIsVariable(symtab, "readn", false);
     * STSetFnDefined(symtab, "readn", true);
-    * CondCall(STInsert, symtab, "reads");
+    * TryCall(STInsert, symtab, "reads");
     * STSetIsVariable(symtab, "reads", false);
     * STSetFnDefined(symtab, "reads", true);
-    * CondCall(STInsert, symtab, "substr");
+    * TryCall(STInsert, symtab, "substr");
     * STSetIsVariable(symtab, "substr", false);
     * STSetFnDefined(symtab, "substr", true);
-    * CondCall(STInsert, symtab, "ord");
+    * TryCall(STInsert, symtab, "ord");
     * STSetIsVariable(symtab, "ord", false);
     * STSetFnDefined(symtab, "ord", true);
-    * CondCall(STInsert, symtab, "chr");
+    * TryCall(STInsert, symtab, "chr");
     * STSetIsVariable(symtab, "chr", false);
     * STSetFnDefined(symtab, "chr", true);
     */

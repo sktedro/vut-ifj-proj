@@ -92,8 +92,8 @@ bool isWhitespace(char c) {
  * @return true if char is a space, newline or tabulator
  */
 int returnToken(Token **token, int type, CharBuffer *buf) {
-  CondCall(tokenInit, token, type);
-  CondCall(tokenAddAttrib, *token, buf->data);
+  TryCall(tokenInit, token, type);
+  TryCall(tokenAddAttrib, *token, buf->data);
   vypluj 0;
 }
 
@@ -128,7 +128,7 @@ int scanner(Token **token) {
 
   // Token data (characters composing it) will be written here
   CharBuffer *buf = NULL;
-  CondCall(charBufInit, &buf);
+  TryCall(charBufInit, &buf);
 
   // Starting state of the finite state machine is s_start
   int state = s_start;
@@ -151,7 +151,7 @@ int scanner(Token **token) {
     } else if (c == '\n') {
       LOCCount++;
     }
-    CondCall(charBufAppend, buf, c);
+    TryCall(charBufAppend, buf, c);
 
     // Main switch to change the program flow based on the actual FSM state
     switch (state) {
@@ -315,7 +315,7 @@ int scanner(Token **token) {
         // If there is an escaped character, instantly append it
       } else if (c == '\\') {
         c = fgetc(stdin);
-        CondCall(charBufAppend, buf, c);
+        TryCall(charBufAppend, buf, c);
       } 
       break;
 

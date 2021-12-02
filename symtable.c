@@ -34,7 +34,7 @@ int STPush(STStack *stack) {
     depth = top->depth + 1;
   }
   if (stack) {
-    CondCall(STStackPush, stack, NULL, depth);
+    TryCall(STStackPush, stack, NULL, depth);
   }
   return 0;
 }
@@ -58,7 +58,7 @@ void STPop(STStack *stack) {
  */
 int STInsert(STStack *stack, char *key) {
   STStackElem *frame = STStackTop(stack);
-  CondCall(treeInsert, &(frame->table), key);
+  TryCall(treeInsert, &(frame->table), key);
   return 0;
 }
 
@@ -158,9 +158,9 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
   STElem *data = STFind(stack, key);
   if (data) {
     if (!data->fnParamTypesBuf) {
-      CondCall(intBufInit, &(data->fnParamTypesBuf));
+      TryCall(intBufInit, &(data->fnParamTypesBuf));
     }
-    CondCall(intBufAppend, data->fnParamTypesBuf, paramType);
+    TryCall(intBufAppend, data->fnParamTypesBuf, paramType);
   }
   return 0;
 }
@@ -178,9 +178,9 @@ int STAppendRetType(STStack *stack, char *key, int retType) {
   STElem *data = STFind(stack, key);
   if (data) {
     if (!data->fnRetTypesBuf) {
-      CondCall(intBufInit, &(data->fnRetTypesBuf));
+      TryCall(intBufInit, &(data->fnRetTypesBuf));
     }
-    CondCall(intBufAppend, data->fnRetTypesBuf, retType);
+    TryCall(intBufAppend, data->fnRetTypesBuf, retType);
   }
   return 0;
 }

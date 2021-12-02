@@ -83,7 +83,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     topSymbol = SStackTopTerminal(symstack);
 
     // Get the input symbol
-    CondCall(getNewSymbol, symtab, &token, &inputSymbol, getNewToken, 
+    TryCall(getNewSymbol, symtab, &token, &inputSymbol, getNewToken, 
         &exprCanEnd, &exprEnd);
 
     // Get the character from the precedence table
@@ -92,23 +92,23 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
     // Shift (the top terminal)
     if (precTableSymbol == '=') {
       // Push the input symbol to the symbol stack
-      CondCall(SStackPush, symstack, inputSymbol);
+      TryCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Shift and push '<' (after (above) the top terminal)
     } else if (precTableSymbol == '<') {
       SStackElem *newSymbol = NULL;
       // Allocate a new symbol for '<'
-      CondCall(allocateSymbol, &newSymbol, st_push);
+      TryCall(allocateSymbol, &newSymbol, st_push);
       // Push iit after the top terminal
-      CondCall(SStackPushAfterTopTerminal, symstack, newSymbol);
+      TryCall(SStackPushAfterTopTerminal, symstack, newSymbol);
       // Push the input symbol to the symbol stack
-      CondCall(SStackPush, symstack, inputSymbol);
+      TryCall(SStackPush, symstack, inputSymbol);
       getNewToken = true;
 
       // Reduce (the top terminals to an expression)
     } else if (precTableSymbol == '>') {
-      CondCall(reduceStep, symstack);
+      TryCall(reduceStep, symstack);
       getNewToken = false;
 
       // Syntax error
@@ -164,7 +164,7 @@ int checkRules(SStack *symstack, int opSymbols) {
 
   // Get the symbols that are to be reduced
   SStackElem *op1 = NULL, *op2 = NULL, *op3 = NULL;
-  CondCall(getSymbolsForReduction, symstack, &op1, &op2, &op3, opSymbols);
+  TryCall(getSymbolsForReduction, symstack, &op1, &op2, &op3, opSymbols);
 
   // If we only have one symbol, call iRule (which reduces i to E)
   if (opSymbols == 1) {
@@ -205,12 +205,12 @@ int iRule(SStack *symstack, SStackElem *op) {
     // If it is literal, save it into a variable and assign it a value
     if (!op->isId) {
       char *newName = genTmpVarDef();
-      CondCall(genVarAssign, newName, op->dataType, op->data);
+      TryCall(genVarAssign, newName, op->dataType, op->data);
       op->data = newName;
       op->isId = true;
     }
     // And push it back to the stack as E
-    CondCall(SStackPush, symstack, op);
+    TryCall(SStackPush, symstack, op);
     vypluj 0;
   }
   vypluj - 1;
@@ -245,9 +245,9 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
 
     // Create a new sym stack element (E) and push it
     SStackElem *newSymbol = NULL;
-    CondCall(createSymbol, &newSymbol, st_expr, pt_id, true, dt_integer, 
+    TryCall(createSymbol, &newSymbol, st_expr, pt_id, true, dt_integer, 
         newSymbolName);
-    CondCall(SStackPush, symstack, newSymbol);
+    TryCall(SStackPush, symstack, newSymbol);
 
   } else {
     // No rule
@@ -270,7 +270,7 @@ int bracketsRule(SStack *symstack, SStackElem *op1,
                  SStackElem *op2, SStackElem *op3) {
   if (op1->op == pt_lParen && op3->op == pt_rParen && op2->type == st_expr) {
     // Push the E back
-    CondCall(SStackPush, symstack, op2);
+    TryCall(SStackPush, symstack, op2);
 
   } else {
     // No rule
@@ -305,7 +305,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
   if (isBinArithmOp(op2) && op1->type == st_expr && op3->type == st_expr) {
 
     // Check the data types
-    CondCall(checkDataTypesOfBinOps, op1, op2, op3);
+    TryCall(checkDataTypesOfBinOps, op1, op2, op3);
 
     // Division by zero check (op3 can't be zero)
     if ((op2->op == pt_div || op2->op == pt_intDiv) && op3->isZero) {
@@ -341,10 +341,10 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Create a new symbol and push it to the symstack
     SStackElem *newSymbol = NULL;
-    CondCall(createSymbol, &newSymbol, st_expr, pt_id, true, resultDataType, 
+    TryCall(createSymbol, &newSymbol, st_expr, pt_id, true, resultDataType, 
         newSymbolName);
     newSymbol->isZero = newSymbolIsZero;
-    CondCall(SStackPush, symstack, newSymbol);
+    TryCall(SStackPush, symstack, newSymbol);
 
   } else {
     // No rule
@@ -380,9 +380,9 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // If we have an integer and a number -> convert the int to num
     if (op1->dataType == dt_integer && op3->dataType == dt_number) {
-      CondCall(ensureNumber, op1);
+      TryCall(ensureNumber, op1);
     } else if (op3->dataType == dt_integer && op1->dataType == dt_number) {
-      CondCall(ensureNumber, op3);
+      TryCall(ensureNumber, op3);
     }
 
     // If an operand is a nil
@@ -411,7 +411,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Create a new symbol
     SStackElem *newSymbol = NULL;
-    CondCall(createSymbol, &newSymbol, st_expr, pt_id, true, dt_boolean, 
+    TryCall(createSymbol, &newSymbol, st_expr, pt_id, true, dt_boolean, 
         newSymbolName);
 
     // Generate code for NOT (negate the result of the expression)
@@ -423,7 +423,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     }
 
     // Push the new symbol to the symstack (E)
-    CondCall(SStackPush, symstack, newSymbol);
+    TryCall(SStackPush, symstack, newSymbol);
 
     return 0;
   } else {
@@ -533,19 +533,19 @@ int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2,
 
     // If we're dividing with //, convert both operands to integers
   } else if (op2->op == pt_intDiv) {
-    CondCall(ensureInteger, op1);
-    CondCall(ensureInteger, op3);
+    TryCall(ensureInteger, op1);
+    TryCall(ensureInteger, op3);
 
     // If we're dividing floats, convert both to floats
   } else if (op2->op == pt_div) {
-    CondCall(ensureNumber, op1);
-    CondCall(ensureNumber, op3);
+    TryCall(ensureNumber, op1);
+    TryCall(ensureNumber, op3);
 
     // Otherwise, if we have an integer and a number -> convert the int to num
   } else if (op1->dataType == dt_integer && op3->dataType == dt_number) {
-    CondCall(ensureNumber, op1);
+    TryCall(ensureNumber, op1);
   } else if (op3->dataType == dt_integer && op1->dataType == dt_number) {
-    CondCall(ensureNumber, op3);
+    TryCall(ensureNumber, op3);
 
     // Else, throw an error if types don't match
   } else if (op1->dataType != op3->dataType) {
@@ -575,7 +575,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
 
   // Variable, or a nil literal
   case t_idOrKeyword:
-    CondCall(createSymbol, newSymbol, st_idOrLiteral, pt_id, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_idOrLiteral, pt_id, false, -1, NULL);
 
     // If it is a nil literal
     if (strEq(token->data, "nil")) {
@@ -601,7 +601,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
   case t_num:
   case t_sciNum:
   case t_str:
-    CondCall(createSymbol, newSymbol, st_idOrLiteral, pt_id, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_idOrLiteral, pt_id, false, -1, NULL);
 
     // Copy the data
     if (token->type == t_int) {
@@ -619,18 +619,18 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
 
   // (
   case t_leftParen:
-    CondCall(createSymbol, newSymbol, st_operator, pt_lParen, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_operator, pt_lParen, false, -1, NULL);
     break;
 
   // )
   case t_rightParen:
-    CondCall(createSymbol, newSymbol, st_operator, pt_rParen, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_operator, pt_rParen, false, -1, NULL);
     break;
 
   // Arithmetic and string operators (+ - * / // .. #)
   case t_arithmOp:
   case t_strOp:
-    CondCall(createSymbol, newSymbol, st_operator, -1, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_operator, -1, false, -1, NULL);
 
     if (strEq(token->data, "+")) {
       (*newSymbol)->op = pt_add;
@@ -651,7 +651,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
 
   // Relational operators (== ~= < > <= >=)
   case t_relOp:
-    CondCall(createSymbol, newSymbol, st_operator, pt_relOp, false, -1, NULL);
+    TryCall(createSymbol, newSymbol, st_operator, pt_relOp, false, -1, NULL);
     GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
     memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
     break;
@@ -694,7 +694,7 @@ int allocateSymbol(SStackElem **newSymbol, int symbol) {
  */
 int createSymbol(SStackElem **newSymbol, int type, int op, bool isId, 
     int dataType, char *data) {
-  CondCall(allocateSymbol, newSymbol, type);
+  TryCall(allocateSymbol, newSymbol, type);
   if (!(*newSymbol)) {
     return err(INTERN_ERR);
   }
@@ -726,17 +726,17 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
 int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
 
   // Initialize a symbol stack
-  CondCall(SStackInit, symstack);
+  TryCall(SStackInit, symstack);
 
   // Push a $ to the stack
   SStackElem *initialSymbol = NULL;
 
-  CondCall(createSymbol, &initialSymbol, st_dollar, pt_dollar, false, -1, NULL);
-  CondCall(SStackPush, *symstack, initialSymbol);
+  TryCall(createSymbol, &initialSymbol, st_dollar, pt_dollar, false, -1, NULL);
+  TryCall(SStackPush, *symstack, initialSymbol);
 
   // Get a new token if it was not provided by the parser
   if (!(*token)) {
-    CondCall(scanner, token);
+    TryCall(scanner, token);
   }
 
   // If the token is not allowed to be a part of the expression => syntax err
@@ -767,15 +767,15 @@ int getNewSymbol(STStack *symtab, Token **token, SStackElem **inputSymbol,
 
   // Get a new token (check if it is a part of the expression)
   if (getNewToken) {
-    CondCall(fetchNewToken, token, *exprCanEnd, exprEnd);
+    TryCall(fetchNewToken, token, *exprCanEnd, exprEnd);
   }
 
   // Parse the token into a symbol (if we're still fetching new tokens)
   if (!(*exprEnd)) {
-    CondCall(parseToken, symtab, *token, inputSymbol);
+    TryCall(parseToken, symtab, *token, inputSymbol);
     // If we fetched all tokens belonging to the expression, input should be '>'
   } else {
-    CondCall(createSymbol, inputSymbol, st_reduce, pt_dollar, false, -1, NULL);
+    TryCall(createSymbol, inputSymbol, st_reduce, pt_dollar, false, -1, NULL);
   }
 
   // If the symbol is not an operator, the expr can end by the next token
@@ -801,16 +801,16 @@ int getNewSymbol(STStack *symtab, Token **token, SStackElem **inputSymbol,
  */
 int fetchNewToken(Token **token, bool exprCanEnd, bool *exprEnd) {
   // Call the scanner
-  CondCall(scanner, token);
+  TryCall(scanner, token);
 
   // ',', ':', '=' and keywords (not including nil) can't be a part of expr
   if (!(*exprEnd) && !isTokenAllowedInExpr(*token)) {
-    CondCall(stashToken, token);
+    TryCall(stashToken, token);
     *exprEnd = true;
 
     // If the last token was an operand and the next token is too, expr ends
   } else if (exprCanEnd && isTokenIdOrLiteral(*token)) {
-    CondCall(stashToken, token);
+    TryCall(stashToken, token);
     *exprEnd = true;
   }
   return 0;

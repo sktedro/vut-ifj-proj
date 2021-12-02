@@ -50,7 +50,7 @@
 // jenom za podmínky, lepší by bylo něco jako callWithCondReturn
 // ale bojím se na to chytat
 // TODO rename to TryCall
-#define CondCall(FN, ...) \
+#define TryCall(FN, ...) \
   ret = FN(__VA_ARGS__);  \
   CondReturn
 

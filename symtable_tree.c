@@ -56,13 +56,13 @@ int newSTTreeNode(STTreeNode **node, char *key) {
  */
 int treeInsert(STTreeNode **root, char *key) {
   if (!(*root)) {
-    CondCall(newSTTreeNode, root, key);
+    TryCall(newSTTreeNode, root, key);
     vypluj 0;
   }
   if (strcmp(key, (*root)->key) < 0) {
-    CondCall(treeInsert, &((*root)->leftChild), key);
+    TryCall(treeInsert, &((*root)->leftChild), key);
   } else if (strcmp(key, (*root)->key) > 0) {
-    CondCall(treeInsert, &((*root)->rightChild), key);
+    TryCall(treeInsert, &((*root)->rightChild), key);
   } else {
     fprintf(stderr, "Warning: inserting a key into a binary tree that is already there. Nothing will be changed.\n");
   }

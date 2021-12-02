@@ -115,7 +115,7 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   SStackElem *tmp = stack->top;
   if(tmp->type != st_expr){
     // The top terminal is the stack top
-    CondCall(SStackPush, stack, newElem);
+    TryCall(SStackPush, stack, newElem);
     return 0;
   }
   while(tmp->next){
