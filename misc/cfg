@@ -21,7 +21,7 @@
 21. 
 22. <stat>            -> eps
 23. <stat>            -> [id] <statWithId> <stat>
-24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+24. <stat>            -> local [id] : <type> <expr> <stat>
 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
 26. <stat>            -> while <expr> do <stat> end <stat>
 27. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
@@ -55,9 +55,9 @@
 55. <type>            -> string
 56. <type>            -> nil
 57. 
-58. <idList>          -> [id] <nextId>
-59. <nextId>          -> eps
-60. <nextId>          -> , [id] <nextId>
+58. 
+59. 
+60. 
 61. 
 62. <newIdAssign>     -> eps
 63. <newIdAssign>     -> = <exprList>

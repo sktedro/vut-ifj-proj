@@ -14,7 +14,7 @@ char *genTmpVar();
 char *genLabelName();
 char *genTmpVarDef();
 void genVarDef(char *name, int frame);
-int genVarAssign(char *name, int frameNumber, char *assignValue);
+int genVarAssign(char *name, int frame, int dataType, char *assignValue);
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2);

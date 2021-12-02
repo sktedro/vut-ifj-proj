@@ -134,19 +134,45 @@ char *genTmpVarDef() {
  * v ifjcode bude názov a0
  */
 
-void genVarDef(char *name, int frame) {
-  printf("DEFVAR LF@%s\n", genName(name, frame));
+void genJumpIfFalse(char *labelName, char *varName){
+  // TODO JUMPIFNEQ to bool literal
 }
 
-int genPassParam(char *varInLF, char *varInTF){
-  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
+void genUnconditionalJump(char *labelName){
+  printf("JUMP %s\n", labelName);
+}
 
+void genVarDef(char *name, int frame) {
+  name = genName(name, frame);
+  printf("DEFVAR LF@%s\n", name);
+}
+
+int genPassParam(char *varInLF, char *varInTF, int frameOfLF){
+  varInTF = genName(varInTF, frameOfLF + 1);
+  varInLF = genName(varInLF, frameOfLF);
+  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   return 0;
 }
+
+int genReturn(char *varInTF, char *varInLF, int frameOfTF){
+  varInTF = genName(varInTF, frameOfTF);
+  varInLF = genName(varInLF, frameOfTF - 1);
+  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
+  return 0;
+}
+
+int genMove(char *dest, char *src, int frame){
+  dest = genName(dest, frame);
+  src = genName(src, frame);
+  printf("MOVE LF@%s LF@%s\n", dest, src);
+  return 0;
+}
+
 /**
  * identifikátor, dátový typ, priradzovaná hodnota
  */
-int genVarAssign(char *name, int dataType, char *assignValue) {
+int genVarAssign(char *name, int frame, int dataType, char *assignValue) {
+  name = genName(name, frame);
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;
@@ -218,22 +244,45 @@ int genSubstrFunction(char *target, Token *string, double start, int end, int fr
   printf("MOVE LF@$substrRET nil@nil");
 
   printf("DEFVAR LF@$in1");
-  printf("MOVE LF@$in1 ni");
+  printf("MOVE LF@$in1 $STRING");
 
   printf("DEFVAR LF@$in2");
-  printf("MOVE LF@$in2 nil@nil");
+  printf("MOVE LF@$in2 $START");
 
   printf("DEFVAR LF@$in3");
-  printf("MOVE LF@$in3 nil@nil");
+  printf("MOVE LF@$in3 $END");
+
+  //TODO porovnanie ak nil => err 8, ak start>end alebo 1 > s a e > strlen => prázdny string
+  //in2 je start in3 je end
+  printf("LT $nejakyBool $in2 $in3"); //ak start<end tak je dobre a ideme na GETCHAR, inak prázdny reťazec
+
+  printf("JUMPIFEQ LOOP $nejakybool TRUE"); //start<end a v náveští LOOP vypisujem GETCHAR
+
+  printf(""); //prázdny retazec lebo end < start
+
+  printf("LT $nejakyBoo $in2 1"); //ak start<1
 
 
-  printf("");
+  printf("EQ $nejakyBool $in2 $in3"); // ak sú rovnaké tak jeden char
 
+  printf("JUMPIFEQ LOOP $nejakybool TRUE"); 
+
+
+
+
+  //TODO ak je $in2 alebo $in3 nil tak err 8
+
+  //TODO loop from start to end for getchar
+  
+  printf("GETCHAR $tmpPremenna $in1 $in2");
+  
 
   return 0;
 }
 
-
+int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
+  
+}
 
 // Create a TF
 void genFnCallInit(){
@@ -264,16 +313,14 @@ void genWrite(char *name, int frame) {
   }
 }
 
-char *genJumpIfNeq(char *tmp) {
-  char *label = genLabelName();
-  printf("JUMPIFNEQ label%s LF@%s bool@true\n", label ,tmp);
-  return label;
+// Jump if the var is nil or false
+void genJumpIfFalse(char *label, char *varName) {
+  // TODO
 }
 
-char *genJumpIfEq(char *tmp) {
-  char *label = genLabelName();
-  printf("JUMPIFEQ label%s LF@%s bool@true\n", label ,tmp);
-  return label;
+// Jump if the var is true or not nil
+void genJumpIfTrue(char *label, char *varName) {
+  // TODO
 }
 
 void genLabel(char *labelName) {
