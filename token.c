@@ -44,5 +44,59 @@ int tokenAddAttrib(Token *token, char *data) {
   return 0;
 }
 
+/** 
+ * @brief This function is for debug print of a token
+ *
+ * @param token
+ */
+void printToken(Token *token) {
+  char *type;
+  switch (token->type) {
+    case t_idOrKeyword:
+      type = "idOrKeyword";
+      break;
+    case t_colon:
+      type = "colon";
+      break;
+    case t_rightParen:
+      type = "rightParen";
+      break;
+    case t_comma:
+      type = "comma";
+      break;
+    case t_arithmOp:
+      type = "arithmeticOperation";
+      break;
+    case t_assignment:
+      type = "assigment";
+      break;
+    case t_int:
+      type = "integer";
+      break;
+    case t_leftParen:
+      type = "leftParen";
+      break;
+    case t_num:
+      type = "num";
+      break;
+    case t_relOp:
+      type = "relationOperation";
+      break;
+    case t_strOp:
+      type = "stringOperation";
+      break;
+    case t_sciNum:
+      type = "scientificNumber";
+      break;
+    case t_str:
+      type = "string";
+      break;
+    default :
+      fprintf(stderr, "TOKEN IS NULL\n");
+      return;
+  }
+  fprintf(stderr, "Token type : %s, Token data : <%s>\n", type, token->data);
+}
+
 #endif
 /* end of file token.c */

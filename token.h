@@ -27,5 +27,12 @@ int tokenInit(Token **token, int type) ForceRetUse;
  */
 int tokenAddAttrib(Token *token, char *data) ForceRetUse;
 
+/**
+ * @brief This function is for debug print of a token
+ *
+ * @param token
+ */
+void printToken(Token *token);
+
 #endif
 /* end of file token.h */

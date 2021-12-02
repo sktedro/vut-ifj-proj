@@ -62,18 +62,21 @@ STStack *symtab;
 SStackElem *element;
 
 
+// TODO
 #define RequireKeyword(str1, str2)                                             \
   if(!strEq(str1, str2)) {                                                     \
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 
+// TODO
 #define ForbidKeyword(str1, str2)                                              \
   if(strEq(str1, str2)) {                                                      \
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 
+// Get a new token and if the type doesn't match, throw a syntax err
 #define RequireTokenType(tokenType)                                            \
-  TryCall(scanner, &token);                                                   \
+  TryCall(scanner, &token);                                                    \
   if(!token){                                                                  \
     return 0;                                                                  \
   }                                                                            \
@@ -82,8 +85,9 @@ SStackElem *element;
   }                                                                            \
   printToken(token);
 
+// Get a new token and if the type or data don't match, throw a syntax err
 #define RequireToken(tokenType, tokenData)                                     \
-  TryCall(scanner, &token);                                                   \
+  TryCall(scanner, &token);                                                    \
   if(!token){                                                                  \
     return err(SYNTAX_ERR);                                                    \
   }                                                                            \
@@ -93,6 +97,7 @@ SStackElem *element;
   }                                                                            \
   printToken(token);
 
+// Prints filename, line number, fn name and given arguments to stderr
 #define LOG(fmt, ...)                                                          \
   do {                                                                         \
     if (DEBUGTOGGLE) {                                                         \
@@ -101,13 +106,6 @@ SStackElem *element;
       fprintf(stderr, "\n");                                                   \
     }                                                                          \
   } while (0)
-
-#define DEBUG(TEXT)                                                            \
-  if(DEBUGTOGGLE){                                                             \
-    fprintf(stderr, "Debug: ");                                                \
-    fprintf(stderr, "%s", TEXT);                                               \
-    fprintf(stderr, "\n");                                                     \
-  }
 
 void cleanElement() {
   element->next->data = NULL;
@@ -308,60 +306,6 @@ bool isKeyword(Token *token) {
     }
   }
   return false;
-}
-
-/** TODO move to token.c
- * @brief This function is for debug print of token
- *
- * @param token
- */
-void printToken(Token *token) {
-
-  switch (token->type) {
-    case t_idOrKeyword:
-      fprintf(stderr, "Token type : idOrKeyword, Token data : <%s>\n", token->data);
-      break;
-    case t_colon:
-      fprintf(stderr, "Token type : colon, Token data : <%s>\n", token->data);
-      break;
-    case t_rightParen:
-      fprintf(stderr, "Token type : rightParen, Token data : <%s>\n", token->data);
-      break;
-    case t_comma:
-      fprintf(stderr, "Token type : comma, Token data : <%s>\n", token->data);
-      break;
-    case t_arithmOp:
-      fprintf(stderr, "Token type : arithmeticOperation, Token data : <%s>\n", token->data);
-      break;
-    case t_assignment:
-      fprintf(stderr, "Token type : assigment, Token data : <%s> \n", token->data);
-      break;
-    case t_int:
-      fprintf(stderr, "Token type : integer, Token data : <%s> \n", token->data);
-      break;
-    case t_leftParen:
-      fprintf(stderr, "Token type : leftParen, Token data : <%s> \n", token->data);
-      break;
-    case t_num:
-      fprintf(stderr, "Token type : num, Token data : <%s> \n", token->data);
-      break;
-    case t_relOp:
-      fprintf(stderr, "Token type : relationOperation, Token data : <%s> \n", token->data);
-      break;
-    case t_strOp:
-      fprintf(stderr, "Token type : stringOperation, Token data : <%s> \n", token->data);
-      break;
-    case t_sciNum:
-      fprintf(stderr, "Token type : scientificNumber, Token data : <%s> \n", token->data);
-      break;
-    case t_str:
-      fprintf(stderr, "Token type : string, Token data : <%s> \n", token->data);
-      break;
-    default :
-      fprintf(stderr, "TOKEN IS NULL\n");
-      break;
-  }
-
 }
 
 /*
