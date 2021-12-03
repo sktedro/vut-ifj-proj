@@ -187,5 +187,17 @@ int STGetParamType(STStack *stack, char *key, int index);
  */
 int STGetRetType(STStack *stack, char *key, int index);
 
+/**
+ * @brief returns a name of a parameter of a function at index 'index'
+ *
+ * @param stack - symbol table
+ * @param destPtr - destination pointer
+ * @param key (name) of the symbol table element
+ * @param index of the return value (0 = first value, 1 = second value...)
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STGetParamName(STStack *stack, char **destPtr, char *key, int index);
+
 #endif
 /* end of file symtable.h */

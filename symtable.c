@@ -286,13 +286,8 @@ bool STGetFnDefined(STStack *stack, char *key) {
  */
 int STGetParamType(STStack *stack, char *key, int index) {
   STElem *data = STFind(stack, key);
-  if (data) {
-    if (!data->fnParamTypesBuf) {
-      return -1;
-    }
-    if (data->fnParamTypesBuf->len > index) {
-      return data->fnParamTypesBuf->data[index];
-    }
+  if (data && data->fnParamTypesBuf && data->fnParamTypesBuf->len > index) {
+    return data->fnParamTypesBuf->data[index];
   }
   return -1;
 }
@@ -309,13 +304,27 @@ int STGetParamType(STStack *stack, char *key, int index) {
  */
 int STGetRetType(STStack *stack, char *key, int index) {
   STElem *data = STFind(stack, key);
-  if (data) {
-    if (!data->fnRetTypesBuf) {
-      return -1;
-    }
-    if (data->fnRetTypesBuf->len > index) {
-      return data->fnRetTypesBuf->data[index];
-    }
+  if (data && data->fnRetTypesBuf && data->fnRetTypesBuf->len > index) {
+    return data->fnRetTypesBuf->data[index];
+  }
+  return -1;
+}
+
+/**
+ * @brief returns a name of a parameter of a function at index 'index'
+ *
+ * @param stack - symbol table
+ * @param destPtr - destination pointer
+ * @param key (name) of the symbol table element
+ * @param index of the return value (0 = first value, 1 = second value...)
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STGetParamName(STStack *stack, char **destPtr, char *key, int index) {
+  STElem *data = STFind(stack, key);
+  if (data && data->fnParamNamesBuf && data->fnParamNamesBuf->len > index) {
+    *destPtr = data->fnParamNamesBuf->data[index];
+    return 0;
   }
   return -1;
 }

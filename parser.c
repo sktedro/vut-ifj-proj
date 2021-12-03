@@ -21,14 +21,20 @@
  * pCodeBody()          
  * pFnCall()            FULLY DONE
  * pFnRet()             
- * pFnCallArgList()     FULLY DONE (TODO errcode)
- * pNextFnCallArg()     FULLY DONE (TODO errcode)
+ * pFnCallArgList()     FULLY DONE (minor TODOs)
+ * pNextFnCallArg()     FULLY DONE (minor TODOs)
  * pFnCallArg()         FULLY DONE (hopefully) (TODO errcode)
  * pRet()               dependant on pType? - NOT DONE
+ * pStat()
+ * pStatWithId()
+ * pNextAssign()
+ * pFnArgList()
+ * pNextFnArg()
+ * pRetArgList()
+ * pRetNextArg()
+ * pTypeList()
+ * pNextType()
  * pType()              FUCK
- * pIdList()            
- * pNextId()            
- * pNewIdAssign()       
  * pExprList()          
  * pNextExpr()          
  * pExpr()              CALL BOTTOM UP PARSER (NOT DONE YET TOO)
@@ -383,12 +389,11 @@ int pNextFnCallArg(char *fnName, int argCount) {
       return 1;
     }*/
 
-    //older code TODO delete
     // Amount of arguments doesn't match
-    /*if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
+    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
       LOG("Param amount doesn't match\n");
       vypluj err(SYNTAX_ERR); // TODO errcode
-    }*/ // tedro will fix
+    }
 
     TryCall(stashToken, &token);
   }
@@ -419,18 +424,14 @@ int pFnCallArg(char *fnName, int argCount) {
   }*/
 
   int dataType = -1;
-  int depth = symtab->top->depth; // TODO depth + 1??
 
   // -> [id] (a variable)
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     LOG("JE TO PREMENNÁ\n");
     dataType = STGetVarDataType(symtab, token->data);
-    // Pass the parameter by MOVE TF@paramName LF@argVarName
-    char *argVarName = token->data;
-    argVarName = genName(argVarName, depth);
+    // Pass the parameter by MOVE TF@paramName LF@token->data
     char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
-    paramName = genName(paramName, depth + 1);
-    genPassParam(argVarName, paramName);
+    genPassParam(paramName, token->data, symtab->top->depth);
 
     // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -443,11 +444,13 @@ int pFnCallArg(char *fnName, int argCount) {
     }else if(token->type == t_str){
       dataType = dt_string;
     }
-    // Define it in TF (generate code) TODO commented cus sagfault
-    /*char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
-    genVarDef(paramName, depth + 1);
-    *paramName = genName(paramName, depth + 1);
-    genVarAssign(paramName, dataType, token->data);*/
+
+    // Define it in TF (generate code) TODO commented cus segfault
+    /*char *paramName;
+    STGetParamName(symtab, &paramName, fnName, argCount - 1);
+    genVarDef(paramName, symtab->top->depth + 1);
+    genVarAssign(paramName, symtab->top->depth + 1, dataType, token->data);*/
+>>>>>>> 81c6ad7a36d78e1d696d1cb7da719c5c8d40d53a
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -461,12 +464,14 @@ int pFnCallArg(char *fnName, int argCount) {
   /*if(!fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
     LOG("Special error\n");
     return 1;
+
   }*/
+
   // A parameter data type doesn't match
-  /*if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
+  if(STGetParamDataType(symtab, fnName, argCount -1) != dataType){
     LOG("Param data type doesn't match\n");
     vypluj err(SYNTAX_ERR); // TODO errcode
-  }*/ // tedro will fix
+  }
 
   vypluj 0;
 }
@@ -506,7 +511,7 @@ int pRet() {
  *
  * 22. <stat>            -> eps
  * 23. <stat>            -> [id] <statWithId> <stat>
- * 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+ * 24. <stat>            -> local [id] : <type> <expr> <stat>
  * 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
  * 26. <stat>            -> while <expr> do <stat> end <stat>
  * 27. <stat>            -> <ret> <stat>
@@ -523,24 +528,34 @@ int pStat() {
   if (token->type != t_idOrKeyword) {
     fprintf(stderr, " <stat>            -> eps\n");
     TryCall(stashToken, &token);
-    token = NULL;
     vypluj 0;
   }
 
   // 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+  // Should be done - just finish the pType and TODO above it
   if (strcmp(token->data, "local") == 0) {
-    fprintf(stderr, "<stat>            -> local <idList> : <type> <newIdAssign> <stat>\n");
-    // <idList>
-    TryCall(pIdList);
+
+    // [id]
+    RequireTokenType(t_idOrKeyword);
+    char *newVarName = token->data;
+    // Insert the new ID to the symtable
+    STInsert(symtab, newVarName);
+    STSetIsVariable(symtab, newVarName, true);
+    // Code gen variable definition
+    genVarDef(newVarName, symtab->top->depth);
 
     // :
     RequireTokenType(t_colon);
 
     // <type>
+    // TODO set data type (in the following function, I suppose)
     TryCall(pType);
     
-    // <newIdAssign>
-    TryCall(pNewIdAssign);
+    // <expr>
+    char *exprResultVarName;
+    TryCall(pExpr, &exprResultVarName);
+    // Code gen assign the exprResultVarName to newVarName 
+    genMove(newVarName, exprResultVarName, symtab->top->depth);
     
     // <stat>
     TryCall(pStat);
@@ -550,81 +565,102 @@ int pStat() {
 
   // 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
   else if (strcmp(token->data, "if") == 0) {
-    fprintf(stderr, "<stat>            -> if <expr> then <stat> else <stat> end <stat>\n");
+    // Generate new label names for 'else' and 'end' (don't generate code yet)
+    char *elseLabelName = genLabelName(), *endLabelName = genLabelName();
+
     // <expr>
-    // TODO semantic actions - use that retVarName - the result of the expr is there
-    char *retVarName = NULL;
-    TryCall(pExpr, &retVarName);
+    char *exprResultVarName = NULL;
+    TryCall(pExpr, &exprResultVarName);
 
     // then
-    TryCall(scanner, &token);
-    printToken(token);
-    fprintf(stderr, "TU\n");
+    RequireToken(t_idOrKeyword, "then");
 
-    if (!(token->type == t_idOrKeyword && strcmp(token->data, "then") == 0)) {
-      vypluj err(SYNTAX_ERR);
-    }
-
-    TryCall(STPush, symtab);
+    // Code gen conditional jump to the 'else' label name
+    genJumpIfFalse(elseLabelName, exprResultVarName);
 
     // <stat>
+    TryCall(STPush, symtab);
     TryCall(pStat);
     STPop(symtab);
+
+    // Code gen unconditional jump to the 'end' label name
+    genUnconditionalJump(endLabelName);
 
     // else
-    TryCall(scanner, &token);
-    printToken(token);
+    RequireToken(t_idOrKeyword, "else");
 
-    if (!(token->type == t_idOrKeyword && strcmp(token->data, "else") == 0)) {
-      vypluj err(SYNTAX_ERR);
-    }
+    // Code gen label for 'else'
+    genLabel(elseLabelName);
+
+    // <stat>
     TryCall(STPush, symtab);
+    TryCall(pStat);
+    STPop(symtab);
+
+    // end
+    RequireToken(t_idOrKeyword, "end");
+
+    // Code gen label for 'end'
+    genLabel(endLabelName);
 
     // <stat>
     TryCall(pStat);
-    fprintf(stderr, "WE ARE BACK IN STAT\n");
 
-    // end
-    TryCall(scanner, &token);
-    if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
-      vypluj err(SYNTAX_ERR); // todo call the fancy new function
-    }
-    STPop(symtab);
-
-    // <stat>
-    vypluj pStat();
+    return 0;
   }
 
   // 26. <stat>            -> while <expr> do <stat> end <stat>
   else if (strcmp(token->data, "while") == 0) {
-    fprintf(stderr, "<stat>            -> while <expr> do <stat> end <stat>\n");
+    // Generate new label names (don't generate code yet)
+    char *whileLabelName = genLabelName();
+    char *startLabelName = genLabelName();
+    char *endLabelName = genLabelName();
+
+    // Code gen 'start' label
+    genLabel(startLabelName);
+
+    /*
+     * TODO
+     */
+    // TODO Treba toto robiť nejak na novom frame??? lebo sa budú každým cyklom 
+    // definovať a deklarovať nové tmp premenné
+    // !!! We can't call vardef on the same variable (in one frame) more than once !!!
+    // Maybe we can't `vardef_i vardef_i` but we can do `label vardef_i jump_label` ?? :shrunk:
     // <expr>
-    // TODO semantic actions - use that retVarName - the result of the expr is there
-    char *retVarName = NULL;
-    TryCall(pExpr, &retVarName);
+    char *exprResultVarName = NULL;
+    TryCall(pExpr, &exprResultVarName);
+
+    // Code gen conditional jump to 'while'
+    genJumpIfTrue(whileLabelName, exprResultVarName);
+    // Code gen unconditional jump to 'end'
+    genUnconditionalJump(endLabelName);
 
     // do
-    TryCall(scanner, &token);
-    printToken(token);
+    RequireToken(t_idOrKeyword, "do");
 
-    if (!(token->type == t_idOrKeyword && strcmp(token->data, "do") == 0)) {
-      vypluj err(SYNTAX_ERR); // todo function for keywords
-    }
+    // Code gen label for 'while'
+    genLabel(whileLabelName);
 
     // <stat>
+    TryCall(STPush, symtab);
     TryCall(pStat);
+    STPop(symtab);
 
     // end
-    TryCall(scanner, &token);
-    if (!(token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
-      vypluj err(SYNTAX_ERR); // todo call keyword function
-    }
-    TryCall(stashToken, &token); // WHY??
+    RequireToken(t_idOrKeyword, "end");
+
+    // Code gen unconditional jump to 'start'
+    genUnconditionalJump(startLabelName);
+
+    // Code gen label for 'end'
+    genLabel(endLabelName);
+
     vypluj 0;
 
   } else if(strcmp(token->data, "return") == 0) {
     TryCall(pExpr, NULL); // TODO NAHRADIŤ NULL
     vypluj 0;
+
   } else if(strcmp(token->data, "end") == 0) {
 
     printToken(token);
@@ -722,7 +758,7 @@ int pStatWithId(char *idName) {
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
 
-      genVarAssign(token->data, -1 ,retVarName);
+      genVarAssign(token->data, symtab->top->depth, -1 ,retVarName);
 
       // ,
       RequireTokenType(t_comma);
@@ -1123,7 +1159,17 @@ int pNextType(char *fnName) {
  * 55. <type>            -> string
  * 56. <type>            -> nil
  */
-int pType() {
+int pTypeVar() {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+  scanner(&token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
+  /* RequireTokenType(t_idOrKeyword); */
+
+  vypluj 0;
+}
+
+int pTypeFun() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -1153,6 +1199,7 @@ int pIdList() {
     vypluj err(SYNTAX_ERR);
   }
 
+  // TODO toto je nedobre:
   if (STFind(symtab, token->data)) {
     if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
       fprintf(stderr, "warning: declaring a variable again\n");
@@ -1161,16 +1208,21 @@ int pIdList() {
     } else { // can't function call here
       vypluj err(SYNTAX_ERR);
     }
+
   }
-  // declaring a new variable
+
+  // Declare a new variable
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
-  strcpy(element->data,token->data);
+  strcpy(element->data, token->data);
 
   // <nextId>
-  vypluj pNextId();
+  TryCall(pNextId);
+
+  return 0;
 }
+
 
 /**
  * @brief
@@ -1219,6 +1271,7 @@ int pNextId() {
   vypluj pNextId();
 }
 
+
 /**
  * @brief
  *
@@ -1227,6 +1280,7 @@ int pNextId() {
  * 62. <newIdAssign>     -> eps
  * 63. <newIdAssign>     -> = <exprList>
  */
+ 
 int pNewIdAssign() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
@@ -1246,6 +1300,7 @@ int pNewIdAssign() {
   // <exprList>
   vypluj pExprList();
 }
+
 
 /**
  * @brief
@@ -1369,7 +1424,7 @@ int pExpr(char **retVarName) {
 
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(STFind(symtab, token->data) 
-      && !STGetIsVariable(symtab, token->data) 
+      && !STGetIsVariable(symtab, token->data)
       && STGetFnDefined(symtab, token->data)) {
       // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
     
@@ -1381,45 +1436,85 @@ int pExpr(char **retVarName) {
       RequireTokenType(t_rightParen);
       vypluj 0;
     } else if(isStringOperationFunction(token->data)) {
-
+      // 
       if(strcmp(token->data, "substr") == 0) {
-      
+        Token *stringTMP;
+        Token *start;
+        Token *end;
+
         TryCall(scanner, &token);
 
         RequireTokenType(t_leftParen);
         
         TryCall(scanner, &token);
-
         
-        
+        if(token->type != t_str || token->type != t_idOrKeyword) {
+          vypluj err(1); // TODO ADD ERR CODE
+        }
 
+        stringTMP = token;
+
+        TryCall(scanner, &token);
+        
+        if(token->type != t_str || token->type != t_idOrKeyword) {
+          vypluj err(1); // TODO ADD ERR CODE
+        }
+
+        start = token;
+
+        TryCall(scanner, &token);
+        
+        if(token->type != t_str || token->type != t_idOrKeyword) {
+          vypluj err(1); // TODO ADD ERR CODE
+        }
+
+        end = token;
 
         TryCall(scanner, &token);
         RequireTokenType(t_rightParen);
+
+        // CALL GEN SUBSTR CALL FUNSTION
+
+        vypluj 0;
       
       } else if(strcmp(token->data, "ord") == 0) {
+          Token *string;
+          Token *i;
+          
+          RequireTokenType(t_leftParen);
+          
           TryCall(scanner, &token);
 
-          if(token->type != t_leftParen) {
-          vypluj err(-1); // TODO ADD ERR CODE
+          if(token->type != t_str || token->type != t_idOrKeyword) {
+            vypluj err(1); //TODO ADD ERR
           }
+
+          string = token;
+
           TryCall(scanner, &token);
 
-          if(token->type != t_rightParen) {
-            vypluj err(-1); // TODO ADD ERR CODE
+          if(token->type != t_int || token->type != t_num || token->type != t_idOrKeyword) {
+            vypluj err(1);
           }
+
+          i = token;
+
+          RequireTokenType(t_rightParen);
+
+          //TODO CALL GEN ORD CALL FUNCTION
+
       } else if(strcmp(token->data, "chr") == 0) {
-          TryCall(scanner, &token);
-
-          if(token->type != t_leftParen) {
-            vypluj err(-1); // TODO ADD ERR CODE
-          }
+          Token *i;
+          RequireTokenType(t_leftParen);
 
           TryCall(scanner, &token);
 
-          if(token->type != t_rightParen) {
-            vypluj err(-1); // TODO ADD ERR CODE
-          }
+          i = token;
+          
+          RequireTokenType(t_rightParen);
+
+          // TODO ADD GEN CHR CALL FUNCTION
+
       } else {
           vypluj err(-1); // TODO INTERNAL ERROR
       }
@@ -1516,7 +1611,7 @@ bool readFunction(Token *token) {
     vypluj false;
   }
   
-  TryCall(genVarAssign, element->data, element->dataType, token->data);
+  TryCall(genVarAssign, element->data, symtab->top->depth, element->dataType, token->data);
   vypluj true;
 }
 
