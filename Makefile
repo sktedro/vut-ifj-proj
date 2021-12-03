@@ -9,6 +9,7 @@ int_buffer.c \
 misc.c \
 precedence_analysis.c \
 scanner.c \
+string_buffer.c \
 symbol_stack.c \
 symtable.c \
 symtable_stack.c \

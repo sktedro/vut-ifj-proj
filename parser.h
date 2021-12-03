@@ -160,7 +160,7 @@ int pBuiltInFunctions();
  * 34. <fnArgList>       -> eps
  * 35. <fnArgList>       -> [id] : <type> <nextFnArg>
  */
-int pFnArgList();
+int pFnArgList(char *fnName);
 
 /**
  * @brief
@@ -207,6 +207,7 @@ int pRetNextArg();
  */
 int pTypeList();
 
+
 /**
  * @brief
  *
@@ -228,6 +229,12 @@ int pNextType();
  * 56. <type>            -> nil
  */
 int pType();
+
+//pomocné premenné k pType
+
+int typeFunDeclaration();
+int typeFunCall();
+int typeVar();
 
 /**
  * @brief
@@ -338,11 +345,11 @@ bool readFunction(Token *token);
 int getDataTypeInt(char *data);
 
 /**
- * @brief Check if token is built in function
+ * @brief Check if string is built in function
  *
- * @return if token is built in function return true, else false
+ * @return if string is built in function return true, else false
  */
-bool isBuiltInFunction(Token *token);
+bool isBuiltInFunction(char *data);
 
 /**
  * @brief Check if token is keyword

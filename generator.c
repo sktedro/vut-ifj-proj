@@ -124,7 +124,9 @@ char *genLabelName() {
 }
 
 char *genTmpVarDef() {
-  printf("DEFVAR LF@%s\n", genTmpVarName());
+  char *name = genTmpVarName();
+  printf("DEFVAR LF@%s\n", name);
+  return name;
 }
 /**
  * identifikátor, frame number
@@ -137,9 +139,8 @@ void genUnconditionalJump(char *labelName){
   printf("JUMP %s\n", labelName);
 }
 
-void genVarDef(char *name, int frame) {
-  name = genName(name, frame);
-  printf("DEFVAR LF@%s\n", name);
+void genVarDef(char *name) {
+  printf("DEFV;AR LF@%s\n", name);
 }
 
 int genPassParam(char *varInLF, char *varInTF, int frameOfLF){
@@ -166,8 +167,7 @@ int genMove(char *dest, char *src, int frame){
 /**
  * identifikátor, dátový typ, priradzovaná hodnota
  */
-int genVarAssign(char *name, int frame, int dataType, char *assignValue) {
-  name = genName(name, frame);
+int genVarAssign(char *name, int dataType, char *assignValue) {
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;
@@ -214,14 +214,14 @@ int genVarAssign(char *name, int frame, int dataType, char *assignValue) {
   return 0;
 }
 
-int genReadFunction(char *varName, char *builtInFnName, int frame) {
+int genReadFunction(char *varName, char *builtInFnName) {
   
   if(strcmp(builtInFnName, "readi") == 0) {
-      printf("READ LF@%s int\n", genName(varName, frame));
+    printf("READ LF@%s int\n", varName);
   } else if(strcmp(builtInFnName, "readn") == 0) {
-      printf("READ LF@%s float\n", genName(varName, frame));
+    printf("READ LF@%s float\n", varName);
   } else if(strcmp(builtInFnName, "reads") == 0) {
-      printf("READ LF@%s string\n", genName(varName, frame));
+    printf("READ LF@%s string\n", varName);
   } else {
     vypluj err(1); // TODO INTERNAL ERROR
   }
@@ -253,7 +253,7 @@ int genSubstrFunction(char *target, Token *string, double start, int end, int fr
 
   printf("JUMPIFEQ LOOP $nejakybool TRUE"); //start<end a v náveští LOOP vypisujem GETCHAR
 
-  printf(""); //prázdny retazec lebo end < start
+  // printf("TODO"); //prázdny retazec lebo end < start
 
   printf("LT $nejakyBoo $in2 1"); //ak start<1
 
@@ -277,6 +277,7 @@ int genSubstrFunction(char *target, Token *string, double start, int end, int fr
 
 int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
   
+  return 0;
 }
 
 // Create a TF
@@ -300,11 +301,23 @@ void genFnDefRet() {
 }
 
 
-void genWrite(char *name, int frame) {
-  if(frame == 0) {
-    printf("WRITE GF@%s\n", genName(name, frame));
+void genWrite(Token *token, int frame) {
+  char *tmp = genTmpVarDef();
+  char *string;
+
+  fprintf(stderr, "WRIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIITE\n");
+
+  if(token->type == t_str) {
+    string = stringConvert(token->data);
+    token->data = string;
+  }
+
+  if(frame == 0) {  
+    genVarAssign(tmp, token->type, token->data);
+    printf("WRITE GF@%s\n", tmp);
   } else {
-    printf("WRITE TF@%s\n", genName(name, frame));
+    genVarAssign(tmp, token->type, token->data);
+    printf("WRITE LF@%s\n", tmp);
   }
 }
 
@@ -395,79 +408,79 @@ void genStart() {
  */
 
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("ADD LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("SUB LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("MUL LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("DIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("IDIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("CONCAT LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genConvertFloatToInt(SStackElem *src) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("FLOAT2INT LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genConvertIntToFloat(SStackElem *src) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("INT2FLOAT LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genStrlen(SStackElem *src) {
-  char *dest = genTmpVar();
+  char *dest = genTmpVarDef();
   printf("STRLEN LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genLower(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVar();
+  char *tmp = genTmpVarDef();
   printf("LT LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
   return tmp;
 }
 
 char *genGreater(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVar();
+  char *tmp = genTmpVarDef();
   printf("GT LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
   return tmp;
 }
 
 char *genEqual(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVar();
+  char *tmp = genTmpVarDef();
   printf("EQ LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
   return tmp;
 }
 
 char *genNot(SStackElem *src) {
-  char *tmp = genTmpVar();
+  char *tmp = genTmpVarDef();
   printf("NOT LF@%s LF@%s\n", tmp, src->data);
   return tmp;
 }

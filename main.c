@@ -11,6 +11,10 @@ int main() {
   TryCall(STPush, symtab);
 
   
+  TryCall(STInsert, symtab, "write");
+  STSetIsVariable(symtab, "write", false);
+  STSetFnDefined(symtab, "write", true);
+  TryCall(STAppendParamType, symtab, "write", dt_string);
   TryCall(STInsert, symtab, "readi");
   STSetIsVariable(symtab, "readi", false);
   STSetFnDefined(symtab, "readi", true);

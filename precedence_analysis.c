@@ -204,7 +204,7 @@ int iRule(SStack *symstack, SStackElem *op) {
       char *newName = genTmpVarDef();
       //TryCall(genVarAssign, newName, op->dataType, op->data);
       // TODO change this
-      TryCall(genVarAssign, newName,0 ,op->dataType, op->data);
+      TryCall(genVarAssign, newName, op->dataType, op->data);
       op->data = newName;
       op->isId = true;
     }

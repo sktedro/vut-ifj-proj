@@ -7,6 +7,7 @@
 
 #include "misc.h"
 #include "symtable_stack.h"
+#include "string_buffer.h"
 
 /**
  * @brief initialization of symbol table (stack)
@@ -41,6 +42,15 @@ void STPop(STStack *stack);
  * @param name 
  */
 void STSetName(STStack *stack, char *key, char *name);
+
+/**
+ * @brief Returns name of STElement
+ * 
+ * @param stack 
+ * @param key 
+ * @return char* 
+ */
+char *STGetName(STStack *stack, char *key);
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
@@ -109,6 +119,17 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
  * @return 0 if successful, errcode otherwise
  */
 int STAppendParamType(STStack *stack, char *key, int paramType) ForceRetUse;
+
+/**
+ * @brief Appends a name of a paramter of a function
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ * @param paramName - name of the parameter
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STAppendParamName(STStack *stack, char *key, char *paramName);
 
 /**
  * @brief Appends a data type of a return value of a function

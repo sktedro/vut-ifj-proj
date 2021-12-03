@@ -161,6 +161,22 @@ void STSetName(STStack *stack, char *key, char *name) {
 }
 
 /**
+ * @brief Returns name of STElement
+ * 
+ * @param stack 
+ * @param key 
+ * @return char* 
+ */
+char *STGetName(STStack *stack, char *key) {
+  STElem *data = STFind(stack, key);
+
+  if(data) {
+    return data->name;
+  }
+  return NULL;
+}
+
+/**
  * @brief Appends a data type of a paramter of a function
  *
  * @param stack - symbol table
@@ -179,6 +195,29 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
       TryCall(intBufInit, &(data->fnParamTypesBuf));
     }
     TryCall(intBufAppend, data->fnParamTypesBuf, paramType);
+  }
+  return 0;
+}
+
+/**
+ * @brief Appends a name of a paramter of a function
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ * @param paramName - name of the parameter
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STAppendParamName(STStack *stack, char *key, char *paramName) {
+  STElem *data = STFind(stack, key);
+  if(!paramName){
+    return err(SYNTAX_ERR);
+  }
+  if (data) {
+    if (!data->fnParamNamesBuf) {
+      TryCall(stringBufInit, &(data->fnParamNamesBuf));
+    }
+    TryCall(stringBufAppend, data->fnParamNamesBuf, paramName);
   }
   return 0;
 }

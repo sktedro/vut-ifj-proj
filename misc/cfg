@@ -16,15 +16,15 @@
 16. <fnCallArg>       -> [id]
 17. <fnCallArg>       -> [literal]
 18. 
-19. <ret>             -> eps
-20. <ret>             -> return <retArgList>
+19. 
+20. 
 21. 
 22. <stat>            -> eps
 23. <stat>            -> [id] <statWithId> <stat>
-24. <stat>            -> local [id] : <type> <expr> <stat>
+24. <stat>            -> local [id] : <type> <newIdAssign> <stat>
 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
 26. <stat>            -> while <expr> do <stat> end <stat>
-27. <stat>            -> <ret> <stat>
+27. <stat>            -> return <retArgList> <stat> 
 28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
 29. <statWithId>      -> = <expr>
 30. <statWithId>      -> <fnCall>
@@ -60,8 +60,8 @@
 60. 
 61. 
 62. <newIdAssign>     -> eps
-63. <newIdAssign>     -> = <exprList>
+63. <newIdAssign>     -> = <expr>
 64. 
-65. <exprList>        -> <expr> <nextExpr>
-66. <nextExpr>        -> eps
-67. <nextExpr>        -> , <expr> <nextExpr>
+65. 
+66. 
+67. 
