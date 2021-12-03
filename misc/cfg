@@ -2,7 +2,7 @@
 02. <req>             -> "ifj21"
 03. 
 04. <codeBody>        -> eps
-05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
 07. <codeBody>        -> [id] <fnCall> <codeBody>
 08. 
@@ -24,10 +24,10 @@
 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
 26. <stat>            -> while <expr> do <stat> end <stat>
-27. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
-28. <statWithId>      -> = <expr>
-29. <statWithId>      -> <fnCall>
-30. 
+27. <stat>            -> <ret> <stat>
+28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+29. <statWithId>      -> = <expr>
+30. <statWithId>      -> <fnCall>
 31. <nextAssign>      -> , [id] <nextAssign> <expr> ,
 32. <nextAssign>      -> =
 33. 

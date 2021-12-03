@@ -378,10 +378,10 @@ int pNextFnCallArg(char *fnName, int argCount) {
     STElem *fn = STFind(symtab, fnName);
 
     // TODO remove this later
-    if(!fn || !fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
+    /*if(!fn || !fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
       LOG("Special error\n");
       return 1;
-    }
+    }*/
 
     //older code TODO delete
     // Amount of arguments doesn't match
@@ -413,10 +413,10 @@ int pFnCallArg(char *fnName, int argCount) {
   STElem *fn = STFind(symtab, fnName);
 
   // TODO remove this later
-  if(!fn){
+  /*if(!fn){
     LOG("Special error\n");
     return 1;
-  }
+  }*/
 
   int dataType = -1;
   int depth = symtab->top->depth; // TODO depth + 1??
@@ -443,11 +443,11 @@ int pFnCallArg(char *fnName, int argCount) {
     }else if(token->type == t_str){
       dataType = dt_string;
     }
-    // Define it in TF (generate code)
-    char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
+    // Define it in TF (generate code) TODO commented cus sagfault
+    /*char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
     genVarDef(paramName, depth + 1);
     *paramName = genName(paramName, depth + 1);
-    genVarAssign(paramName, dataType, token->data);
+    genVarAssign(paramName, dataType, token->data);*/
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -458,10 +458,10 @@ int pFnCallArg(char *fnName, int argCount) {
   }
 
   // TODO remove this later
-  if(!fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
+  /*if(!fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
     LOG("Special error\n");
     return 1;
-  }
+  }*/
   // A parameter data type doesn't match
   /*if(fn->fnParamTypesBuf->data[argCount - 1] != dataType){
     LOG("Param data type doesn't match\n");
@@ -476,7 +476,7 @@ int pFnCallArg(char *fnName, int argCount) {
  *
  * @return error code
  *
- * 19. <ret>             -> eps
+ * 19. <ret>             -> eps // TODO asi pryč, možná  <retArgList> rovnou do <stat>
  * 20. <ret>             -> return <retArgList>
  */
 int pRet() {
@@ -509,6 +509,7 @@ int pRet() {
  * 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
  * 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
  * 26. <stat>            -> while <expr> do <stat> end <stat>
+ * 27. <stat>            -> <ret> <stat>
  */
 int pStat() {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -518,7 +519,7 @@ int pStat() {
   TryCall(scanner, &token);
   printToken(token);
 
-  // -> eps
+  // 22. <stat>            -> eps
   if (token->type != t_idOrKeyword) {
     fprintf(stderr, " <stat>            -> eps\n");
     TryCall(stashToken, &token);
@@ -526,7 +527,7 @@ int pStat() {
     vypluj 0;
   }
 
-  // -> local <idList> : <type> <newIdAssign> <stat>
+  // 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
   if (strcmp(token->data, "local") == 0) {
     fprintf(stderr, "<stat>            -> local <idList> : <type> <newIdAssign> <stat>\n");
     // <idList>
@@ -547,7 +548,7 @@ int pStat() {
     vypluj 0;
   }
 
-  // -> if <expr> then <stat> else <stat> end <stat>
+  // 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
   else if (strcmp(token->data, "if") == 0) {
     fprintf(stderr, "<stat>            -> if <expr> then <stat> else <stat> end <stat>\n");
     // <expr>
@@ -594,7 +595,7 @@ int pStat() {
     vypluj pStat();
   }
 
-  // -> while <expr> do <stat> end <stat>
+  // 26. <stat>            -> while <expr> do <stat> end <stat>
   else if (strcmp(token->data, "while") == 0) {
     fprintf(stderr, "<stat>            -> while <expr> do <stat> end <stat>\n");
     // <expr>
@@ -632,7 +633,7 @@ int pStat() {
     vypluj 0;
   }
 
-  // -> [id] <statWithId> <stat> - built in write function call
+  // 23. <stat>            -> [id] <statWithId> <stat> - built in write function call
    else if (strcmp(token->data, "write") == 0) {
     TryCall(pFnCall, "write");
     TryCall(pStat);
@@ -640,7 +641,7 @@ int pStat() {
     // TODO other built in functions call?
   }
 
-  // -> [id] <statWithId> <stat> - other
+   // 23. <stat>            -> [id] <statWithId> <stat> - other
   else if (STFind(symtab, token->data)) { // could be any id
     fprintf(stderr, "<stat>            -> [id] <statWithId> <stat>\n");
     // TODO generate something
@@ -651,6 +652,14 @@ int pStat() {
     // <stat>
     vypluj pStat();
   }
+
+  // 27. <stat>            -> <ret> <stat> // todo this FUJ
+  else if (strcmp(token->data, "return")) {
+    TryCall(stashToken, &token);
+    TryCall(pRet);
+    vypluj pStat();
+  }
+
   // -> eps
   else {
     TryCall(stashToken, &token);
@@ -665,16 +674,16 @@ int pStat() {
  *
  * @return error code
  *
- * 27. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
- * 28. <statWithId>      -> = <expr>
- * 29. <statWithId>      -> <fnCall>
+ * 28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+ * 29. <statWithId>      -> = <expr>
+ * 30. <statWithId>      -> <fnCall>
  */
 int pStatWithId(char *idName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
-  // -> <fnCall>
+  // 30. <statWithId>      -> <fnCall>
   if(STFind(symtab, idName) 
       && !STGetIsVariable(symtab, idName) 
       && STGetFnDefined(symtab, idName)){
@@ -690,7 +699,7 @@ int pStatWithId(char *idName) {
     TryCall(scanner, &token);
     printToken(token);
 
-    // -> , [id] <nextAssign> <expr> , <expr>
+    // 28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
     // In idName we have a name of the first variable in this statement
     // In token->data we have a name of the second one
     if (token->type == t_comma) {
@@ -700,7 +709,7 @@ int pStatWithId(char *idName) {
       if (!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
         vypluj err(SYNTAX_ERR);
       }
- //* 41. <retNextArg>      -> eps
+ //* 41. <retNextArg>      -> eps// TODO WTF
 
       // TODO define variables for idName and token->data
       genVarDef(token->data, symtab->top->depth);
@@ -724,7 +733,7 @@ int pStatWithId(char *idName) {
 
       vypluj 0;
 
-    // -> = <expr>
+    // 29. <statWithId>      -> = <expr>
     }else if (strcmp(token->data, "=") == 0) {
     
       char *retVarName = NULL;
@@ -953,6 +962,7 @@ int pRetArgList() {
   LOG();
 
   // 39. <retArgList>      -> eps
+  vypluj 0;
   // TODO
 
   // 40. <retArgList>      -> <expr> <retNextArg>
