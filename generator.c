@@ -134,10 +134,6 @@ char *genTmpVarDef() {
  * v ifjcode bude názov a0
  */
 
-void genJumpIfFalse(char *labelName, char *varName){
-  // TODO JUMPIFNEQ to bool literal
-}
-
 void genUnconditionalJump(char *labelName){
   printf("JUMP %s\n", labelName);
 }
@@ -313,14 +309,79 @@ void genWrite(char *name, int frame) {
   }
 }
 
+char *genType(char *varName){
+  char *newVarName = genTmpVarDef();
+  printf("TYPE %s %s\n", newVarName, varName);
+  return newVarName;
+}
+
+
+void genConditionalJump(char *label, char *varName, bool condition){
+  /*
+   * The code (to jump if %result if a nil or false):
+   *
+   * %type = type(%result)
+   *
+   * if(%type == "nil") jump _exprIsFalse
+   * if(%type != "bool") jump _exprIsTrue
+   * # We know it is a boolean:
+   * if(%result == true) jump _exprIsTrue
+   * jump _exprIsFalse
+   *
+   * The rest depends on the 'condition' parameter in this function
+   */
+
+  char *falseLabelName = "exprIsFalse";
+  char *trueLabelName = "exprIsTrue";
+  char *noJumpLabelName = "noJump";
+
+  // typeVarName = type(varName)
+  char *typeVarName = genType(varName);
+
+  // if(typeVarName == "nil") jump falseLabelName
+  printf("JUMPIFEQ %s %s \"nil\"\n", falseLabelName, typeVarName);
+
+  // if(typeVarName != "bool") jump trueLabelName
+  printf("JUMPIFNEQ %s %s \"bool\"\n", trueLabelName, typeVarName);
+
+  // if(varName == false) jump falseLabelName
+  printf("JUMPIFEQ %s %s false\n", falseLabelName, varName);
+  
+  // trueLabelName:
+  genLabel(trueLabelName);
+
+  if(condition == true){
+    // jump label
+    printf("JUMP %s\n", label);
+  }else{
+    // jump noJumpLabelName:
+    printf("JUMP %s\n", noJumpLabelName);
+  }
+
+  // falseLabelName:
+  genLabel(falseLabelName);
+  
+  if(condition == false){
+    // jump label
+    printf("JUMP %s\n", label);
+  }else{
+    // jump noJumpLabelName:
+    printf("JUMP %s\n", noJumpLabelName);
+  }
+  
+  // noJumpLabelName:
+  genLabel(noJumpLabelName);
+
+}
+
 // Jump if the var is nil or false
 void genJumpIfFalse(char *label, char *varName) {
-  // TODO
+  genConditionalJump(label, varName, false);
 }
 
 // Jump if the var is true or not nil
 void genJumpIfTrue(char *label, char *varName) {
-  // TODO
+  genConditionalJump(label, varName, true);
 }
 
 void genLabel(char *labelName) {
