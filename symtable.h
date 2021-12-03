@@ -34,6 +34,15 @@ int STPush(STStack *stack) ForceRetUse;
 void STPop(STStack *stack);
 
 /**
+ * @brief Sets name parameter of STStackElem on IFJcode21 generated name
+ * 
+ * @param stack 
+ * @param key 
+ * @param name 
+ */
+void STSetName(STStack *stack, char *key, char *name);
+
+/**
  * @brief Insert a new element to the symbol table (at the top of the stack)
  *
  * @param stack - symbol table (stack)

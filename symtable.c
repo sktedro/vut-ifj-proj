@@ -146,6 +146,21 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
 }
 
 /**
+ * @brief Sets name parameter of STStackElem on IFJcode21 generated name
+ * 
+ * @param stack 
+ * @param key 
+ * @param name 
+ */
+void STSetName(STStack *stack, char *key, char *name) {
+  STElem *data = STFind(stack, key);
+
+  if(data) {
+    data->name = name;
+  }
+}
+
+/**
  * @brief Appends a data type of a paramter of a function
  *
  * @param stack - symbol table

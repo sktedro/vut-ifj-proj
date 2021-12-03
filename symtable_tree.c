@@ -32,8 +32,8 @@ int newSTTreeNode(STTreeNode **node, char *key) {
   GCMalloc((*node)->data, sizeof(STElem));
 
   // Copy key
-  GCMalloc((*node)->data->name, (strlen(key) + 1) * sizeof(char));
-  memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
+  GCMalloc((*node)->data->name, 25 * sizeof(char));
+  //memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
 
   // Init other data
   (*node)->data->isVariable = true;

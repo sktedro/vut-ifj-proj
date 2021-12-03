@@ -11,7 +11,7 @@ extern int ret;
 
 /**
  * @brief Allocate a new stack, initialize it and return it
- *
+ *genVarAssign
  * @param stack: destination pointer
  *
  * @return 0 if successful, errcode otherwise

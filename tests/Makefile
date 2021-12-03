@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Wno-unused-result
+CFLAGS=-g -Wno-unused-result 
 
 
 LIBS=\

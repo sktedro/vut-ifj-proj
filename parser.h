@@ -227,8 +227,7 @@ int pNextType();
  * 55. <type>            -> string
  * 56. <type>            -> nil
  */
-int pTypeVar();
-int pTypeFun();
+int pType();
 
 /**
  * @brief

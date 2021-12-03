@@ -105,13 +105,12 @@ char *stringConvert(char *string) {
  * 
  * @return generated temporary variable 
  */
-char *genTmpVar() {
+char *genTmpVarName() {
   char *varName;
   GCMalloc(varName, sizeof(char) * 10);
   sprintf(varName, "%s%d", "%tmp", tmpCounter);
   tmpCounter++;
 
-  printf("DEFVAR LF@%s\n", varName);
   return varName;
 }
 
@@ -125,7 +124,7 @@ char *genLabelName() {
 }
 
 char *genTmpVarDef() {
-  return genTmpVar();
+  printf("DEFVAR LF@%s\n", genTmpVarName());
 }
 /**
  * identifikátor, frame number
@@ -315,10 +314,9 @@ char *genType(char *varName){
   return newVarName;
 }
 
-
 void genConditionalJump(char *label, char *varName, bool condition){
   /*
-   * The code (to jump if %result if a nil or false):
+   * The code (to jump conditionally):
    *
    * %type = type(%result)
    *
@@ -401,7 +399,6 @@ char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
   printf("ADD LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
-
 
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
   char *dest = genTmpVar();

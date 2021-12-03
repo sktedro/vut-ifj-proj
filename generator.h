@@ -10,7 +10,7 @@
 int digits(int value);
 char *genName(char *name, int frame);
 char *stringConvert(char *string);
-char *genTmpVar();
+char *genTmpVarName();
 char *genLabelName();
 char *genTmpVarDef();
 void genVarDef(char *name, int frame);

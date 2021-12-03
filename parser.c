@@ -25,7 +25,7 @@
  * pNextFnCallArg()     FULLY DONE (minor TODOs)
  * pFnCallArg()         FULLY DONE (hopefully) (TODO errcode)
  * pRet()               dependant on pType? - NOT DONE
- * pStat()
+ * pStat()              how to program the while cycle?
  * pStatWithId()
  * pNextAssign()
  * pFnArgList()
@@ -125,7 +125,7 @@ int pReq() {
  * @return int - 0 if success, else on error
  *
  * 04. <codeBody>        -> eps
- * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+ * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
  * 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
@@ -146,7 +146,7 @@ int pCodeBody() {
     return 0;
   }
 
-  // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> <ret> end <codeBody>
+  // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -172,10 +172,7 @@ int pCodeBody() {
     TryCall(pFnRet, fnName);
 
     // <stat>
-    TryCall(pStat);
-
-    // <ret>
-    TryCall(pRet);
+    TryCall(pStat, fnName);
 
     // end
     RequireToken(t_idOrKeyword, "end");
@@ -450,7 +447,6 @@ int pFnCallArg(char *fnName, int argCount) {
     STGetParamName(symtab, &paramName, fnName, argCount - 1);
     genVarDef(paramName, symtab->top->depth + 1);
     genVarAssign(paramName, symtab->top->depth + 1, dataType, token->data);*/
->>>>>>> 81c6ad7a36d78e1d696d1cb7da719c5c8d40d53a
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -484,7 +480,7 @@ int pFnCallArg(char *fnName, int argCount) {
  * 19. <ret>             -> eps // TODO asi pryč, možná  <retArgList> rovnou do <stat>
  * 20. <ret>             -> return <retArgList>
  */
-int pRet() {
+int pRet(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -516,7 +512,7 @@ int pRet() {
  * 26. <stat>            -> while <expr> do <stat> end <stat>
  * 27. <stat>            -> <ret> <stat>
  */
-int pStat() {
+int pStat(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -531,7 +527,7 @@ int pStat() {
     vypluj 0;
   }
 
-  // 24. <stat>            -> local <idList> : <type> <newIdAssign> <stat>
+  // -> local <idList> : <type> <newIdAssign> <stat>
   // Should be done - just finish the pType and TODO above it
   if (strcmp(token->data, "local") == 0) {
 
@@ -541,6 +537,7 @@ int pStat() {
     // Insert the new ID to the symtable
     STInsert(symtab, newVarName);
     STSetIsVariable(symtab, newVarName, true);
+    STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
     // Code gen variable definition
     genVarDef(newVarName, symtab->top->depth);
 
@@ -556,15 +553,9 @@ int pStat() {
     TryCall(pExpr, &exprResultVarName);
     // Code gen assign the exprResultVarName to newVarName 
     genMove(newVarName, exprResultVarName, symtab->top->depth);
-    
-    // <stat>
-    TryCall(pStat);
 
-    vypluj 0;
-  }
-
-  // 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
-  else if (strcmp(token->data, "if") == 0) {
+  // -> if <expr> then <stat> else <stat> end <stat>
+  } else if (strcmp(token->data, "if") == 0) {
     // Generate new label names for 'else' and 'end' (don't generate code yet)
     char *elseLabelName = genLabelName(), *endLabelName = genLabelName();
 
@@ -578,9 +569,9 @@ int pStat() {
     // Code gen conditional jump to the 'else' label name
     genJumpIfFalse(elseLabelName, exprResultVarName);
 
-    // <stat>
+    // <stat>                               
     TryCall(STPush, symtab);
-    TryCall(pStat);
+    TryCall(pStat, fnName);
     STPop(symtab);
 
     // Code gen unconditional jump to the 'end' label name
@@ -594,7 +585,7 @@ int pStat() {
 
     // <stat>
     TryCall(STPush, symtab);
-    TryCall(pStat);
+    TryCall(pStat, fnName);
     STPop(symtab);
 
     // end
@@ -603,14 +594,8 @@ int pStat() {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-    // <stat>
-    TryCall(pStat);
-
-    return 0;
-  }
-
-  // 26. <stat>            -> while <expr> do <stat> end <stat>
-  else if (strcmp(token->data, "while") == 0) {
+  // -> while <expr> do <stat> end <stat>
+  } else if (strcmp(token->data, "while") == 0) {
     // Generate new label names (don't generate code yet)
     char *whileLabelName = genLabelName();
     char *startLabelName = genLabelName();
@@ -643,7 +628,7 @@ int pStat() {
 
     // <stat>
     TryCall(STPush, symtab);
-    TryCall(pStat);
+    TryCall(pStat, fnName);
     STPop(symtab);
 
     // end
@@ -655,53 +640,29 @@ int pStat() {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-    vypluj 0;
-
-  } else if(strcmp(token->data, "return") == 0) {
-    TryCall(pExpr, NULL); // TODO NAHRADIŤ NULL
-    vypluj 0;
-
-  } else if(strcmp(token->data, "end") == 0) {
-
-    printToken(token);
-
+  // -> <ret> <stat> // todo this FUJ
+  // TODO TODO TO DO WHAT TO DO?
+  } else if (strcmp(token->data, "return")) {
     TryCall(stashToken, &token);
-    vypluj 0;
-  }
+    TryCall(pRet, fnName);
 
-  // 23. <stat>            -> [id] <statWithId> <stat> - built in write function call
-   else if (strcmp(token->data, "write") == 0) {
-    TryCall(pFnCall, "write");
-    TryCall(pStat);
-    vypluj 0;
-    // TODO other built in functions call?
-  }
-
-   // 23. <stat>            -> [id] <statWithId> <stat> - other
-  else if (STFind(symtab, token->data)) { // could be any id
+  // -> [id] <statWithId> <stat> - other
+  } else if (STFind(symtab, token->data)) { // could be any id
     fprintf(stderr, "<stat>            -> [id] <statWithId> <stat>\n");
     // TODO generate something
 
     // <statWithId>
     TryCall(pStatWithId, token->data);
 
-    // <stat>
-    vypluj pStat();
-  }
-
-  // 27. <stat>            -> <ret> <stat> // todo this FUJ
-  else if (strcmp(token->data, "return")) {
-    TryCall(stashToken, &token);
-    TryCall(pRet);
-    vypluj pStat();
-  }
-
   // -> eps
-  else {
+  } else {
     TryCall(stashToken, &token);
     token = NULL;
     vypluj 0;
   }
+
+  // <stat>
+  vypluj pStat(fnName);
 }
 
 
@@ -718,6 +679,8 @@ int pStatWithId(char *idName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
+
+  // TODO write function
 
   // 30. <statWithId>      -> <fnCall>
   if(STFind(symtab, idName) 
@@ -932,6 +895,7 @@ int pFnArgList() {
   // [id]
   genVarDef(token->data, symtab->top->depth);
   TryCall(STInsert, symtab, token->data);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
 
   // :
   RequireTokenType(t_colon);
@@ -972,6 +936,7 @@ int pNextFnArg() {
   printToken(token);
 
   TryCall(STInsert, symtab, token->data);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
   element->data = token->data;
   genVarDef(token->data, symtab->top->depth);
   // :
@@ -1159,17 +1124,8 @@ int pNextType(char *fnName) {
  * 55. <type>            -> string
  * 56. <type>            -> nil
  */
-int pTypeVar() {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-  scanner(&token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
-  /* RequireTokenType(t_idOrKeyword); */
 
-  vypluj 0;
-}
-
-int pTypeFun() {
+int pType() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -1266,6 +1222,7 @@ int pNextId() {
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetFnDefined(symtab, token->data, false);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
 
   // <nextId>
   vypluj pNextId();
@@ -1743,6 +1700,7 @@ int newFunctionDefinition(char *fnName) {
     TryCall(STInsert, symtab, fnName);
     STSetIsVariable(symtab, fnName, false);
     STSetFnDefined(symtab, fnName, true);
+    STSetName(symtab, fnName, genLabelName());
   }
   vypluj 0;
 }
@@ -1764,6 +1722,7 @@ int newFunctionDeclaration(char *fnName) {
     TryCall(STInsert, symtab, fnName);
     STSetIsVariable(symtab, fnName, false);
     STSetFnDefined(symtab, fnName, false);
+    STSetName(symtab, fnName, genLabelName());
   }
   vypluj 0;
 }
