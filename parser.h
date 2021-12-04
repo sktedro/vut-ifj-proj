@@ -228,13 +228,13 @@ int pNextType();
  * 55. <type>            -> string
  * 56. <type>            -> nil
  */
-int pType();
+int pType(char *fnName, char *varName, bool isFnCalled);
 
 //pomocné premenné k pType
 
-int typeFunDeclaration();
-int typeFunCall();
-int typeVar();
+int typeFnDeclaration(char *fnName);
+int typeFnCall(char *fnName);
+int typeVar(char *varName);
 
 /**
  * @brief

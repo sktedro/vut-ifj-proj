@@ -172,9 +172,18 @@ int pCodeBody() {
     // <stat>
     TryCall(pStat, fnName);
 
-    // end
-    RequireToken(t_idOrKeyword, "end");
+    TryCall(scanner, &token);
+    printToken(token);
 
+    if(strcmp(token->data, "end") != 0) {
+      vypluj err(1);
+    }
+
+    genFnDefRet();
+
+    // TODO asi RequireToken nefunguje po stash token alebo netuším prečo to neberie end - alex
+    //RequireToken(t_idOrKeyword, "end");
+    fprintf(stderr, "HAHAHA\n");
     // <codeBody>
     TryCall(pCodeBody);
   }
@@ -219,8 +228,20 @@ int pCodeBody() {
       vypluj err(SYNTAX_ERR);
     }
 
+    // not working right now bc alex is working on pType() :)
     // <fnCall>
-    TryCall(pFnCall, token->data);
+    //TryCall(pFnCall, token->data);
+
+    //Delete this, this just bypass fnCall
+    //---------------------------------------
+    TryCall(scanner, &token);
+    printToken(token);
+
+    while(token->type != t_rightParen) {
+      TryCall(scanner, &token);
+      printToken(token);
+    }
+    //---------------------------------------
 
     // <codeBody>
     TryCall(pCodeBody);
@@ -250,20 +271,22 @@ int pFnCall(char *fnName) {
   } else {
 
     RequireTokenType(t_leftParen);
-
-    
     
     STElem *tmp = STFind(symtab, fnName);
-    
-    while(token->type != t_rightParen) {
+    // TO CONTINUE WE NEED TO HAVE pType() -> Alex started working on pType() again
+    printf("Type buff %d\n", *(tmp->fnParamTypesBuf->data));
+    printf("Name buff %s\n", *(tmp->fnParamNamesBuf->data));
+    /*while(token->type != t_rightParen) {
       TryCall(scanner, &token);
 
       if(token->type != t_rightParen) {
         
+        
+
       }
 
 
-    }
+    }*/
 
     vypluj 0;
   }
@@ -412,7 +435,7 @@ int pFnRet(char *fnName) {
   (void)typeCount; // TODO remove
   // <type>
   // TODO dependant on pType
-  TryCall(pType);
+  TryCall(pType, fnName, NULL, false);
 
   // <nextType>
   // TODO pass the typeCount, too
@@ -675,7 +698,7 @@ int pStat(char *fnName) {
 
     // <type>
     // TODO set data type (in the following function, I suppose)
-    TryCall(pType);
+    TryCall(pType, NULL, newVarName, false);
     
     // <newIdAssign>
     TryCall(pNewIdAssign);
@@ -1034,16 +1057,16 @@ int pFnArgList(char *fnName) {
   int paramCount = 1;
 
   // TODO toto odkomentovať ak to je správne
-  // TryCall(STInsert, symtab, token->data);
-  // STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
-
+  TryCall(STInsert, symtab, token->data);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  element->data = token->data;
   // :
   RequireTokenType(t_colon);
 
   // <type>
   // Append the data type of the parameter to the symtab
   // TODO pType under construction
-  TryCall(pType);
+  TryCall(pType, NULL, element->data, false);
 
   // <nextFnArg>
   vypluj pNextFnArg(fnName, paramCount);
@@ -1085,17 +1108,17 @@ int pNextFnArg(char *fnName, int paramCount) {
   STAppendParamName(symtab, fnName, token->data);
 
   // TODO uncomment if it is correct
-  // TryCall(STInsert, symtab, token->data);
-  // STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
-  // element->data = token->data;
-  // genVarDef(STGetName(symtab, token->data));
+  TryCall(STInsert, symtab, token->data);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  element->data = token->data;
+  genVarDef(STGetName(symtab, token->data));
 
   // :
   RequireTokenType(t_colon);
 
   // <type>
   // TODO dependant on pType
-  TryCall(pType, &token);
+  TryCall(pType, NULL, element->data, false);
 
   // <nextFnArg>
   vypluj pNextFnArg(fnName, paramCount);
@@ -1276,33 +1299,96 @@ int pNextType(char *fnName) {
  * 56. <type>            -> nil
  */
 
-int pType() { //TODO vstupné parametre
+int pType(char *fnName, char *varName, bool isFnCalled) {
   fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "VAR NAME = %s\n", varName);
   LOG();
-  Token *token = NULL;
-  TryCall(scanner, &token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
-  /* RequireTokenType(t_idOrKeyword); */
+  //Token *token = NULL;
+  //TryCall(scanner, &token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
 
-  //TODO podmienky ktorú pomocnú funkciu treba volať
+  // TODO this is sus pType() in calling fn ??????????? - alex
+  // when fn is called to be sure all input 
+  if(isFnCalled) {
 
-  int typeFunDeclaration();
-  int typeFunCall();
-  int typeVar();
+    if(fnName == NULL) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
+    TryCall(typeFnCall, fnName);
+
+  } else if(varName != NULL) {
+
+    TryCall(typeVar, varName);
+
+    vypluj 0;
+  } else if(fnName != NULL) {
+    
+    TryCall(typeFnDeclaration, fnName);
+
+  } else {
+    fprintf(stderr, "pType intern ERROR\n");
+    vypluj err(1); // TODO ADD ERR CODE
+  }
 
   vypluj 0;
 }
 
-int typeFunDeclaration(){
-  
+int typeFnDeclaration(char *fnName){
+  fprintf(stderr, "TYPE DEF FN-----------------------------------------------\n");
+  fprintf(stderr, "varname : %s \n", fnName);
+
+  Token *token;
+  STElem *fnElement = STFind(symtab, fnName);
+
+  if(fnElement == NULL) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(scanner, &token);
+
+  if(isDataType(token->data) == false) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(intBufAppend, fnElement->fnRetTypesBuf, getDataTypeFromString(token->data));
+
   return 0;
 }
 
-int typeFunCall(){
+int typeFnCall(char *fnName){
   
+  // find STElem by fnName
+    STElem *tmp = STFind(symtab, fnName);
+
+    // fn is not defined
+    if(tmp == NULL || tmp->fnDefined == false) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
   return 0;
 }
 
-int typeVar(){
+int typeVar(char *varName){
+  fprintf(stderr, "TYPEVAR-----------------------------------------------\n");
+  fprintf(stderr, "varname : %s \n", varName);
+
+  Token *token;
+  STElem *varElement = STFind(symtab, varName);
+
+  
+
+  // if variable is not variable or doesnt exist
+  if(varElement == NULL) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(scanner, &token);
+  
+  if(isDataType(token->data) == false) {
+    vypluj err(1); // TODO change err code
+  }
+
+  varElement->varDataType = getDataTypeFromString(token->data);
 
   return 0;
 }

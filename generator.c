@@ -140,7 +140,7 @@ void genUnconditionalJump(char *labelName){
 }
 
 void genVarDef(char *name) {
-  printf("DEFV;AR LF@%s\n", name);
+  printf("DEFVAR LF@%s\n", name);
 }
 
 int genPassParam(char *varInLF, char *varInTF, int frameOfLF){
@@ -294,9 +294,12 @@ void genFnCall(char *fnName) {
 
 void genFnDef(char *name) {
   printf("LABEL %s0\n", name);
+  printf("\n");
 }
 
 void genFnDefRet() {
+  printf("\n");
+  printf("POPFRAME\n");
   printf("RETURN\n");
 }
 
