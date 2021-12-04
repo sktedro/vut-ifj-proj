@@ -267,7 +267,7 @@ int pFnCall(char *fnName) {
   STElem *fnParam;
   int paramCnt = 0;
 
-  TryCall(pFnCallArgList);
+  TryCall(pFnCallArgList, fnName);
 
   RequireTokenType(t_rightParen);
   /*
@@ -425,7 +425,7 @@ int pFnCallArgList(char *fnName) {
     // Amount of arguments doesn't match
     if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
       LOG("Param amount doesn't match\n");
-      vypluj err(SYNTAX_ERR); // TODO errcode
+      vypluj err(SYNTAX_ERR);
     }
     
      // Stash the token
@@ -444,7 +444,7 @@ int pFnCallArgList(char *fnName) {
 
   // <nextFnCallArg>
   TryCall(pNextFnCallArg, fnName, argCount);
-
+  vypluj 0;
 }
 
 /**
@@ -489,7 +489,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
     // Amount of arguments doesn't match
     if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
       LOG("Param amount doesn't match\n");
-      vypluj err(SYNTAX_ERR); // TODO errcode
+      vypluj err(SYNTAX_ERR);
     }
 
     TryCall(stashToken, &token);
@@ -567,7 +567,7 @@ int pFnCallArg(char *fnName, int argCount) {
   // A parameter data type doesn't match
   if(STGetParamType(symtab, fnName, argCount -1) != dataType){
     LOG("Param data type doesn't match\n");
-    vypluj err(SYNTAX_ERR); // TODO errcode
+    vypluj err(SYNTAX_ERR);
   }
 
   vypluj 0;
@@ -866,6 +866,7 @@ int pNextAssign() {
   char *varName = STGetName(symtab, token->data);
   char *retVarName;
   TryCall(pExpr, &retVarName);
+  printf("SDSADAD\n");
   genMove(varName, retVarName, symtab->top->depth);
 
   // ','
@@ -903,7 +904,6 @@ int pFnArgList(char *fnName) {
   STAppendParamName(symtab, fnName, token->data);
   int paramCount = 1;
 
-  // TODO toto odkomentovať ak to je správne
   TryCall(STInsert, symtab, token->data);
   STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
   element->data = token->data;
