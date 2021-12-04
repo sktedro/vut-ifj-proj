@@ -1,8 +1,13 @@
 require "ifj21"
 
-function main()
+function main(x : integer)
     local a : integer = nil
     local b : string = "bla"
 end
 
-main()
+function test()
+    local t : integer = 10
+    main(t)
+end
+
+test()

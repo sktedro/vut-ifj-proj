@@ -230,17 +230,17 @@ int pCodeBody() {
 
     // not working right now bc alex is working on pType() :)
     // <fnCall>
-    //TryCall(pFnCall, token->data);
+    TryCall(pFnCall, token->data);
 
     //Delete this, this just bypass fnCall
     //---------------------------------------
-    TryCall(scanner, &token);
+    /*TryCall(scanner, &token);
     printToken(token);
 
     while(token->type != t_rightParen) {
       TryCall(scanner, &token);
       printToken(token);
-    }
+    }*/
     //---------------------------------------
 
     // <codeBody>
@@ -272,21 +272,42 @@ int pFnCall(char *fnName) {
 
     RequireTokenType(t_leftParen);
     
-    STElem *tmp = STFind(symtab, fnName);
-    // TO CONTINUE WE NEED TO HAVE pType() -> Alex started working on pType() again
-    printf("Type buff %d\n", *(tmp->fnParamTypesBuf->data));
-    printf("Name buff %s\n", *(tmp->fnParamNamesBuf->data));
-    /*while(token->type != t_rightParen) {
+    STElem *fnElement = STFind(symtab, fnName);
+    STElem *fnParam;
+    int paramCnt = 0;
+    
+    while(token->type != t_rightParen) {
       TryCall(scanner, &token);
 
       if(token->type != t_rightParen) {
         
-        
+        // if token is not a keyword and is [ID] -> it will be variable
+        if(token->type == t_idOrKeyword && isKeyword(token) == false) {
+          
+          // find in ST variable
+          fnParam = STFind(symtab, token->data);
+          
+          // if variable is not in ST or it is not a variable -> throw error
+          if(fnParam == NULL || fnParam->isVariable == false) {
+            vypluj err(1); // TODO add code err
+          } 
 
+          // NETUŠÍM PREČO NEJDE NIČ S BUFFEROM
+
+          /*if(fnElement->fnParamTypesBuf->data == NULL) {
+            printf("je to nULL\n");
+          }
+
+          printf("TU\n");
+          printf("ID JE : %d\n", fnElement->fnParamTypesBuf->data);*/
+
+        }
+        
+        
       }
 
 
-    }*/
+    }
 
     vypluj 0;
   }
@@ -391,18 +412,18 @@ int pFnCall(char *fnName) {
   genFnCallInit();*/
 
   // (
-  RequireTokenType(t_leftParen);
+  //RequireTokenType(t_leftParen);
 
   // <fnCallArgList>
-  TryCall(pFnCallArgList, fnName);
+  //TryCall(pFnCallArgList, fnName);
   
   // )
-  RequireTokenType(t_rightParen);
+  //RequireTokenType(t_rightParen);
 
   // Code gen: call the function
-  genFnCall(fnName);
+  //genFnCall(fnName);
 
-  vypluj 0;
+  //vypluj 0;
 }
 
 /**
