@@ -150,7 +150,7 @@ int pNextAssign();
  *  TODO ADD MORE CFG RULES FOR ALL FUNCTIONS
  * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
  */
-int pBuiltInFunctions();
+int builtInFunctions();
 
 /**
  * @brief
@@ -218,6 +218,15 @@ int pTypeList();
  */
 int pNextType();
 
+
+int pFnParamTypeList(char *fnName);
+
+int pNextParamType(char *fnName);
+
+int pFnRetTypeList(char *fnName);
+
+int nextRetType(char *fnName);
+
 /**
  * @brief
  *
@@ -228,12 +237,11 @@ int pNextType();
  * 55. <type>            -> string
  * 56. <type>            -> nil
  */
-int pType(char *fnName, char *varName, bool isFnCalled);
-
-//pomocné premenné k pType
+// NOT IN USE, THIS WILL BE DELETED 
+//int pType(char *fnName, char *varName, bool isFnCalled);
 
 int typeFnDeclaration(char *fnName);
-int typeFnCall(char *fnName, char *varName);
+int typeFnCall(char *fnName);
 int typeVar(char *varName);
 
 /**

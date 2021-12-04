@@ -6,7 +6,6 @@
  *
  * --------------------------------------------------
  * TOP PRIORITY
- * ---- Rozdeliť pType a rozdeliť asi aj pNextType
  * TODO když dostaneme EOF (token == NULL) někde random uprostřed pravidla
  * WE NEED MORE STATES FOR BUILT IN FUNCTIONS
  * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
@@ -17,27 +16,29 @@
  * --------------------------------------------------
  * Function             State
  * --------------------------------------------------
- * pStart()             FULLY DONE
- * pReq()               FULLY DONE
- * pCodeBody()          seems like done
- * pFnCall()            Built in functions! Other than that, it's done
- * pFnRet()             
- * pFnCallArgList()     FULLY DONE (minor TODOs)
- * pNextFnCallArg()     FULLY DONE (minor TODOs)
- * pFnCallArg()         FULLY DONE (hopefully) (TODO errcode)
- * pRet()               dependant on pType? - NOT DONE
- * pStat()              how to program the while cycle?
- * pStatWithId()        might work
- * pNextAssign()        might work
- * pFnArgList()         might work but dependant on pType
- * pNextFnArg()         might work but dependant on pType
- * pRetArgList()        
- * pRetNextArg()        
- * pTypeList()          
- * pNextType()          FUCK, too (will probably need to be divided as pType)
- * pType()              FUCK
- * pExpr()              could work
- * -----------------------------------------------------------------------
+ * pStart             FULLY DONE
+ * pReq               FULLY DONE
+ * pCodeBody          seems like done
+ * pFnCall            Built in functions! Other than that, it's done
+ * pFnCallArgList     FULLY DONE (minor TODOs)
+ * pNextFnCallArg     FULLY DONE (minor TODOs)
+ * pFnCallArg         FULLY DONE (hopefully) (TODO errcode)
+ * pStat              how to program the while cycle?
+ * pStatWithId        might work
+ * pNextAssign        might work
+ * pFnArgList         might work but dependant on type
+ * pNextFnArg         might work but dependant on type
+ * pRetArgList        
+ * pRetNextArg        
+ * pFnParamTypeList 
+ * pNextParamType   
+ * pFnRetTypeList   
+ * pNextRetType     
+ * pNewIdAssign
+ * pExpr              could work
+
+
+* -----------------------------------------------------------------------
  */
 
 #ifndef PARSER_C
@@ -113,20 +114,14 @@ int pReq() {
   vypluj 0;
 }
 
-/*
- *
- * TODO:
- *
- */
-
 /**
  * @brief Rule for <codebody> string
  *
  * @return int - 0 if success, else on error
  *
  * 04. <codeBody>        -> eps
- * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
- * 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+ * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+ * 06. <codeBody>        -> global [id] : function ( <fnParamTypeList> ) <fnRetTypeList> <codeBody>
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
 int pCodeBody() {
@@ -140,12 +135,12 @@ int pCodeBody() {
   if(token && token->type != t_idOrKeyword){
     vypluj err(SYNTAX_ERR);
 
-  // 04. <codeBody>        -> eps
+  // -> eps
   } else if(!token) {
     return 0;
   }
 
-  // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
+  // -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -166,8 +161,7 @@ int pCodeBody() {
     // )
     RequireTokenType(t_rightParen);
 
-    // <fnRet>
-    TryCall(pFnRet, fnName);
+    // <TODO>
 
     // <stat>
     TryCall(pStat, fnName);
@@ -188,7 +182,7 @@ int pCodeBody() {
     TryCall(pCodeBody);
   }
 
-  // 06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+  // -> global [id] : function ( <fnParamTypeList> ) <fnRetTypeList> <codeBody>
   else if(strcmp(token->data, "global") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -207,19 +201,18 @@ int pCodeBody() {
     RequireTokenType(t_leftParen);
 
     // <typeList>
-    TryCall(pTypeList, fnName);
-
+    //TryCall(pTypeList, fnName);
+    // TODO REDONE
     // )
     RequireTokenType(t_rightParen);
 
-    // <fnRet>
-    TryCall(pFnRet, fnName);
+    // <TODO>
 
     // <codeBody>
     TryCall(pCodeBody);
   }
 
-  // 07. <codeBody>        -> [id] <fnCall> <codeBody>
+  // -> [id] <fnCall> <codeBody>
   else if(token->type == t_idOrKeyword) {
 
     // The function name must be in the symtab, must be a function
@@ -228,7 +221,6 @@ int pCodeBody() {
       vypluj err(SYNTAX_ERR);
     }
 
-    // not working right now bc alex is working on pType() :)
     // <fnCall>
     TryCall(pFnCall, token->data);
 
@@ -259,14 +251,14 @@ int pCodeBody() {
  * @return error code
  *
  * 09. <fnCall>          -> ( <fnCallArgList> )
- */
+*/
 int pFnCall(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
   if(isBuiltInFunction(fnName)) {
-    TryCall(pBuiltInFunctions, fnName);
+    TryCall(builtInFunctions, fnName);
     vypluj 0;
   } else {
 
@@ -282,27 +274,8 @@ int pFnCall(char *fnName) {
       if(token->type != t_rightParen) {
         
         // if token is not a keyword and is [ID] -> it will be variable
-        if(token->type == t_idOrKeyword && isKeyword(token) == false) {
-          
-          // find in ST variable
-          fnParam = STFind(symtab, token->data);
-          
-          // if variable is not in ST or it is not a variable -> throw error
-          if(fnParam == NULL || fnParam->isVariable == false) {
-            vypluj err(1); // TODO add code err
-          } 
-
-          // NETUŠÍM PREČO NEJDE NIČ S BUFFEROM
-
-          if(fnElement->fnParamTypesBuf->data == NULL) {
-            printf("je to nULL\n");
-          }
-
-          printf("TU\n");
-          printf("ID JE : %d\n", *fnElement->fnParamTypesBuf->data);
-
-        }
         
+        // IDK      
         
       }
 
@@ -425,54 +398,13 @@ int pFnCall(char *fnName) {
 
   //vypluj 0;
 }
-
-/**
- * @brief 
- * 
- *
- * 10. <fnRet>           -> eps
- * 11. <fnRet>           -> : <type> <nextType>
- * @return error code
- */
-int pFnRet(char *fnName) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-  TryCall(scanner, &token);
-  printToken(token);
-
-  // 10. <fnRet>           -> eps
-  // :
-  if (token->type != t_colon) {
-    LOG("Function with no return values\n");
-    TryCall(stashToken, &token);
-    vypluj 0;
-  }
-
-  // 11. <fnRet>           -> : <type> <nextType>
-
-  int typeCount = 1;
-  (void)typeCount; // TODO remove
-  // <type>
-  // TODO dependant on pType
-  TryCall(pType, fnName, NULL, false);
-
-  // <nextType>
-  // TODO pass the typeCount, too
-  TryCall(pNextType, fnName);
-
-  return 0;
-}
-
-
 /**
  * @brief
  *
  * @return error code
  *
- * 12. <fnCallArgList>   -> eps
- * 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+ * 10. <fnCallArgList>   -> eps
+ * 11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
  */
 int pFnCallArgList(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -486,7 +418,7 @@ int pFnCallArgList(char *fnName) {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 12. <fnCallArgList>   -> eps
+  // -> eps
   if(token->type == t_rightParen) {
     LOG("-> eps");
 
@@ -501,8 +433,8 @@ int pFnCallArgList(char *fnName) {
      TryCall(stashToken, &token);
      LOG("BAF");
   } 
-  
-  // 13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+
+  // -> <fnCallArg> <nextFnCallArg>
   else{
     LOG("-> <fnCallArg> <nextFnCallArg>\n");
     argCount++;
@@ -523,8 +455,8 @@ int pFnCallArgList(char *fnName) {
  *
  * @return error code
  *
- * 14. <nextFnCallArg>   -> eps
- * 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+ * 12. <nextFnCallArg>   -> eps
+ * 13. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
  */
 int pNextFnCallArg(char *fnName, int argCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -535,7 +467,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
   printToken(token);
 
   
-  // 15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+  // -> , <fnCallArg> <nextFnCallArg>
   // ,
   if(token->type == t_comma) {
     argCount++;
@@ -546,7 +478,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
     // <nextFnCallArg>
     TryCall(pNextFnCallArg, fnName,argCount);
 
-  // 14. <nextFnCallArg>   -> eps
+  // -> , <fnCallArg> <nextFnCallArg>
   }else{
 
     STElem *fn = STFind(symtab, fnName);
@@ -574,8 +506,8 @@ int pNextFnCallArg(char *fnName, int argCount) {
  *
  * @return error code
  *
- * 16. <fnCallArg>       -> [id]
- * 17. <fnCallArg>       -> [literal]
+ * 14. <fnCallArg>       -> [id]
+ * 15. <fnCallArg>       -> [literal]
  */
 int pFnCallArg(char *fnName, int argCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -594,7 +526,7 @@ int pFnCallArg(char *fnName, int argCount) {
 
   int dataType = -1;
 
-  // -> [id] (a variable)
+  // -> [id]
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     LOG("-> [id]\n");
     dataType = STGetVarDataType(symtab, token->data);
@@ -602,7 +534,7 @@ int pFnCallArg(char *fnName, int argCount) {
     char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
     genPassParam(paramName, token->data, symtab->top->depth);
 
-    // -> [literal]
+  // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
       token->type == t_sciNum || token->type == t_str) {
     LOG("-> [literal]\n");
@@ -649,41 +581,12 @@ int pFnCallArg(char *fnName, int argCount) {
  *
  * @return error code
  *
- * 19. <ret>             -> eps // TODO asi pryč, možná  <retArgList> rovnou do <stat>
- * 20. <ret>             -> return <retArgList>
- */
-/*
-int pRet(char *fnName) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-  TryCall(scanner, &token);
-  printToken(token);
-
-  // -> eps
-  if(strcmp(token->data, "return") != 0) {
-    TryCall(stashToken, &token);
-    vypluj 0;
-  }
-
-  // <retArgList>
-  TryCall(pRetArgList);
-    
-  vypluj 0;
-}*/
-
-/**
- * @brief
- *
- * @return error code
- *
- * 22. <stat>            -> eps
- * 23. <stat>            -> [id] <statWithId> <stat>
- * 24. <stat>            -> local [id] : <type> <newIdAssign> <stat>
- * 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
- * 26. <stat>            -> while <expr> do <stat> end <stat>
- * 27. <stat>            -> return <retArgList> <stat> 
+ * 17. <stat>            -> eps
+ * 18. <stat>            -> [id] <statWithId> <stat>
+ * 19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
+ * 20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+ * 21. <stat>            -> while <expr> do <stat> end <stat>
+ * 22. <stat>            -> return <retArgList> <stat> 
  */
 int pStat(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -693,14 +596,14 @@ int pStat(char *fnName) {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 22. <stat>            -> eps
+  // -> eps
   if (token->type != t_idOrKeyword) {
     fprintf(stderr, " <stat>            -> eps\n");
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 24. <stat>            -> local [id] : <type> <newIdAssign> <stat>
+  // -> local [id] : <type> <newIdAssign> <stat>
   // Should be done - just finish the pType and TODO above it
   if (strcmp(token->data, "local") == 0) {
     fprintf(stderr, "-> local [id] : <type> <newIdAssign> <stat>\n");
@@ -719,12 +622,12 @@ int pStat(char *fnName) {
 
     // <type>
     // TODO set data type (in the following function, I suppose)
-    TryCall(pType, NULL, newVarName, false);
+    TryCall(typeVar, newVarName);
     
     // <newIdAssign>
     TryCall(pNewIdAssign);
 
-  // 25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+  // -> if <expr> then <stat> else <stat> end <stat>
   } else if (strcmp(token->data, "if") == 0) {
     fprintf(stderr, "-> if <expr> then <stat> else <stat> end <stat>\n");
     // Generate new label names for 'else' and 'end' (don't generate code yet)
@@ -765,7 +668,7 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-  // 26. <stat>            -> while <expr> do <stat> end <stat>
+  // -> while <expr> do <stat> end <stat>
   } else if (strcmp(token->data, "while") == 0) {
     fprintf(stderr, "-> while <expr> do <stat> end <stat>\n");
     // Generate new label names (don't generate code yet)
@@ -812,7 +715,7 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-  // 27. <stat>            -> return <retArgList> <stat>
+  // -> return <retArgList> <stat>
   } else if (strcmp(token->data, "return") == 0) {
     LOG("-> return <retArgList> <stat>\n");
     printToken(token);
@@ -823,7 +726,7 @@ int pStat(char *fnName) {
       vypluj 0;
     }
 
-  // -> [id] <statWithId> <stat> - other
+  // [id] <statWithId> <stat> - other
   } else if (STFind(symtab, token->data)) { // A function or a variable
     LOG("<stat>            -> [id] <statWithId> <stat>\n");
     // <statWithId>
@@ -847,16 +750,16 @@ int pStat(char *fnName) {
  *
  * @return error code
  *
- * 28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
- * 29. <statWithId>      -> = <expr>
- * 30. <statWithId>      -> <fnCall>
+ * 23. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+ * 24. <statWithId>      -> = <expr>
+ * 25. <statWithId>      -> <fnCall>
  */
 int pStatWithId(char *idName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
-  // 30. <statWithId>      -> <fnCall>
+  // -> <fnCall>
   if(STFind(symtab, idName) 
       && !STGetIsVariable(symtab, idName) 
       && STGetFnDefined(symtab, idName)){
@@ -874,7 +777,7 @@ int pStatWithId(char *idName) {
       vypluj err(SYNTAX_ERR);
     }
 
-    // 29. <statWithId>      -> = <expr>
+    // -> = <expr>
     if (token->type == t_assignment) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
@@ -883,7 +786,7 @@ int pStatWithId(char *idName) {
       //genVarAssign(idName, -1, retVarName); TODO commented cus segfault
     }
     
-    // 28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+    // -> , [id] <nextAssign> <expr> , <expr>
     // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
      else if (token->type == t_comma) {
@@ -931,8 +834,8 @@ int pStatWithId(char *idName) {
  *
  * @return error code
  *
- * 31. <nextAssign>  -> , [id] <nextAssign> <expr> ,
- * 32. <nextAssign>  -> =
+ * 26. <nextAssign>      -> , [id] <nextAssign> <expr> ,
+ * 27. <nextAssign>      -> =
  */
 int pNextAssign() {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -942,12 +845,12 @@ int pNextAssign() {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 32. <nextAssign>  -> =
+  // -> =
   if (token->type == t_assignment) {
     vypluj 0;
   }
 
-  // 31. <nextAssign>  -> , [id] <nextAssign> <expr> ,
+  // -> , [id] <nextAssign> <expr> ,
   if(token->type != t_comma) {
     vypluj err(SYNTAX_ERR);
   }
@@ -976,85 +879,12 @@ int pNextAssign() {
 }
 
 /**
- * NOT USED TODO USE IS
- *
- * @brief Function for built in functions
- *
- * @return error code
- *  TODO ADD MORE CFG RULES FOR ALL FUNCTIONS
- * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
- */
-int pBuiltInFunctions(char *fnName) {
- //* 41. <retNextArg>      -> eps
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-
-  if (strcmp(fnName, "reads") == 0) {
-    
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-    vypluj 0;
-  } else if (strcmp(fnName, "readi") == 0) {
-    //TODO
-
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-  } else if (strcmp(fnName, "readn") == 0) {
-    //TODO
-
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-  } else if (strcmp(fnName, "write") == 0) {
-    //TODO
-    RequireTokenType(t_leftParen);
-
-    while (token->type != t_rightParen) {
-      TryCall(scanner, &token);
-      
-      if(token->type != t_rightParen) {
-        genWrite(token, symtab->top->depth);
-      }
-    }
-  } else if (strcmp(fnName, "substr") == 0) {
-    //TODO
-
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-  } else if (strcmp(fnName, "ord") == 0) {
-    //TODO
-
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-  } else if (strcmp(fnName, "chr") == 0) {
-    //TODO
-
-    while (token->type != t_rightParen) {
-      ret = scanner(&token);
-      CondReturn;
-    }
-  }
-  vypluj 0;
-}
-
-/**
  * @brief
  *
  * @return error code
  *
- * 34. <fnArgList>       -> eps
- * 35. <fnArgList>       -> [id] : <type> <nextFnArg>
+ * 29. <fnArgList>       -> eps
+ * 30. <fnArgList>       -> [id] : [type] <nextFnArg>
  */
 int pFnArgList(char *fnName) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -1064,13 +894,13 @@ int pFnArgList(char *fnName) {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 34. <fnArgList>       -> eps
+  // -> eps
   if(token->type != t_idOrKeyword || isKeyword(token)) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 35. <fnArgList>       -> [id] : <type> <nextFnArg>
+  // -> [id] : [type] <nextFnArg>
 
   // [id]
   // Append the name of the new parameter to the symtable
@@ -1087,8 +917,8 @@ int pFnArgList(char *fnName) {
   // <type>
   // Append the data type of the parameter to the symtab
   // TODO pType under construction
-  TryCall(pType, fnName, element->data, true);
-
+  TryCall(typeFnCall, fnName);
+  
   // <nextFnArg>
   vypluj pNextFnArg(fnName, paramCount);
 }
@@ -1098,8 +928,8 @@ int pFnArgList(char *fnName) {
  *
  * @return error code
  *
- * 36. <nextFnArg>       -> eps
- * 37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+ * 31. <nextFnArg>       -> eps
+ * 32. <nextFnArg>       -> , [id] : [type] <nextFnArg>
  */
 int pNextFnArg(char *fnName, int paramCount) {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -1110,13 +940,13 @@ int pNextFnArg(char *fnName, int paramCount) {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 36. <nextFnArg>       -> eps
+  // -> eps
   if (token->type != t_comma) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+  // -> , [id] : [type] <nextFnArg>
 
   // [id]
   // Must be an ID
@@ -1139,7 +969,7 @@ int pNextFnArg(char *fnName, int paramCount) {
 
   // <type>
   // TODO dependant on pType
-  TryCall(pType, NULL, element->data, false);
+  TryCall(typeVar, element->data);
 
   // <nextFnArg>
   vypluj pNextFnArg(fnName, paramCount);
@@ -1150,18 +980,18 @@ int pNextFnArg(char *fnName, int paramCount) {
  *
  * @return error code
  *
- * 39. <retArgList>      -> eps
- * 40. <retArgList>      -> <expr> <retNextArg>
+ * 34. <retArgList>      -> eps
+ * 35. <retArgList>      -> <expr> <retNextArg>
  */
 int pRetArgList() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
-  // 39. <retArgList>      -> eps
+  // -> eps
   vypluj 0;
   // TODO
 
-  // 40. <retArgList>      -> <expr> <retNextArg>
+  // -> <expr> <retNextArg>
   // <expr>
   // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
@@ -1209,8 +1039,8 @@ bool isExpressionParser(Token token) {
  *
  * @return error code
  *
- * 41. <retNextArg>      -> eps
- * 42. <retNextArg>      -> , <expr> <retNextArg>
+ * 36. <retNextArg>      -> eps
+ * 37. <retNextArg>      -> , <expr> <retNextArg>
  */
 int pRetNextArg() {
   fprintf(stderr, "-----------------------------------------------------------\n");
@@ -1221,13 +1051,13 @@ int pRetNextArg() {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 41. <retNextArg>      -> eps
+  // -> eps
   if (token->type != t_comma) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 42. <retNextArg>      -> , <expr> <retNextArg>
+  // -> , <expr> <retNextArg>
   // <expr>
   // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
@@ -1238,295 +1068,109 @@ int pRetNextArg() {
 }
 
 /**
- * @brief
  *
- * @return error code
  *
- * 44. <typeList>        -> eps
- * 45. <typeList>        -> integer <nextType>
- * 46. <typeList>        -> number <nextType>
- * 47. <typeList>        -> string <nextType>
- * 48. <typeList>        -> nil <nextType>
+ * 39. <fnParamTypeList> -> eps
+ * 40. <fnParamTypeList> -> [type] <nextParamType>
  */
-int pTypeList(char *fnName) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
+int pFnParamTypeList(char *fnName){ //J
   Token *token = NULL;
 
   TryCall(scanner, &token);
-  printToken(token);
+  
+  //eps
+  if(isDataType(token->data) == false){
+    TryCall(stashToken, &token);
+    vypluj 0;
+  }
 
-  // integer/number/string/nil
-  if(isDataType(token->data)) {
-    int dataType = getDataTypeFromString(token->data);
-    TryCall(STAppendParamType, symtab, fnName, dataType);
+  TryCall(stashToken, &token);
+  // [type]
+  TryCall(typeFnDeclaration, fnName);
 
-    // <nextType>
-    TryCall(pNextType, fnName);
+  //<nextParamType>
+  vypluj pNextParamType(fnName);
+}
+
+/**
+ *
+ *
+ * 41. <nextParamType>   -> eps
+ * 42. <nextParamType>   -> , [type] <nextParamType>
+ */
+int pNextParamType(char *fnName) { //J
+
+  Token *token = NULL;
+
+  TryCall(scanner, &token);
+
+  //eps
+  if(token->type != t_comma){
+    TryCall(stashToken, &token);
+    vypluj 0;
+  }
+  
+  TryCall(typeFnCall, fnName);
+  
+  vypluj pNextParamType(fnName);
+}
+
+/**
+ *
+ *
+ * 44. <fnRetTypeList>   -> eps 
+ * 45. <fnRetTypeList>   -> : [type] <nextRetType>
+ */
+int pFnRetTypeList(char *fnName) {
+  Token *token;
+
+  TryCall(scanner, &token);
+
+  if(token->type != t_colon) {
+    TryCall(stashToken, &token);
+    vypluj 0;
+  }
+  
+  TryCall(typeFnDeclaration, fnName);
+
+  TryCall(nextRetType, fnName);
+
+  vypluj 0;
+
+}
+
+/**
+ *
+ *
+ * 46. <nextRetType>     -> eps
+ * 47. <nextRetType>     -> , [type] <nextRetType>
+ */
+int nextRetType(char *fnName) {
+  Token *token;
+
+  TryCall(scanner, &token);
 
   // eps
-  }else{
-    TryCall(stashToken, &token);
-  }
-
-  vypluj 0;
-}
-
-/**
- * @brief
- *
- * @return error code
- *
- * 50. <nextType>        -> eps
- * 51. <nextType>        -> , <type> <nextType>
- */
-int pNextType(char *fnName) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-  TryCall(scanner, &token);
-  printToken(token);
-
-  // 51. <nextType>        -> , <type> <nextType>
-  // ,
-  if(token->type == t_comma){
-
-    // <type>
-    // TODO we're not calling pType here, btw. According to CFG, we should
-    RequireTokenType(t_idOrKeyword);
-    int dataType = getDataTypeFromString(token->data);
-    TryCall(STAppendParamType, symtab, token->data, dataType);
-
-    // <nextType>
-    TryCall(pNextType, fnName);
-
-  // 50. <nextType>        -> eps
-  }else{
-    TryCall(stashToken, &token);
-  }
-
-  vypluj 0;
-}
-
-/**
- * @brief TODO what do we do in this function? I guess the cfg itself is wrong
- *
- * @return error code
- *
- * 53. <type>            -> integer
- * 54. <type>            -> number
- * 55. <type>            -> string
- * 56. <type>            -> nil
- */
-
-int pType(char *fnName, char *varName, bool isFnCalled) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  fprintf(stderr, "VAR NAME = %s\n", varName);
-  LOG();
-  //Token *token = NULL;
-  //TryCall(scanner, &token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
-
-  // TODO this is sus pType() in calling fn ??????????? - alex
-  // when fn is called to be sure all input 
-  if(isFnCalled) {
-
-    if(fnName == NULL || varName == NULL) {
-      vypluj err(1); // TODO ADD ERR CODE
-    }
-
-    TryCall(typeFnCall, fnName, varName);
-
-  } else if(varName != NULL) {
-
-    TryCall(typeVar, varName);
-
-    vypluj 0;
-  } else if(fnName != NULL) {
-    
-    TryCall(typeFnDeclaration, fnName);
-
-  } else {
-    fprintf(stderr, "pType intern ERROR\n");
-    vypluj err(1); // TODO ADD ERR CODE
-  }
-
-  vypluj 0;
-}
-
-int typeFnDeclaration(char *fnName){
-  fprintf(stderr, "TYPE DEF FN-----------------------------------------------\n");
-  fprintf(stderr, "varname : %s \n", fnName);
-
-  Token *token;
-  STElem *fnElement = STFind(symtab, fnName);
-
-  if(fnElement == NULL) {
-    vypluj err(1); // TODO add err code
-  }
-
-  TryCall(scanner, &token);
-
-  if(isDataType(token->data) == false) {
-    vypluj err(1); // TODO add err code
-  }
-
-  TryCall(intBufAppend, fnElement->fnRetTypesBuf, getDataTypeFromString(token->data));
-
-  return 0;
-}
-
-int typeFnCall(char *fnName, char *varName){
-  
-  // find STElem by fnName
-    STElem *tmp = STFind(symtab, fnName);
-    Token *token;
-    // fn is not defined
-    if(tmp == NULL || tmp->fnDefined == false) {
-      vypluj err(1); // TODO ADD ERR CODE
-    }
-
-    TryCall(scanner, &token);
-    printToken(token);
-
-    if(isDataType(token->data) == false) {
-      vypluj err(1); // TODO ADD ERR CODE
-    }
-
-    TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
-    
-  return 0;
-}
-
-int typeVar(char *varName){
-  fprintf(stderr, "TYPEVAR-----------------------------------------------\n");
-  fprintf(stderr, "varname : %s \n", varName);
-
-  Token *token;
-  STElem *varElement = STFind(symtab, varName);
-
-
-  // if variable is not variable or doesnt exist
-  if(varElement == NULL) {
-    vypluj err(1); // TODO add err code
-  }
-
-  TryCall(scanner, &token);
-  
-  if(isDataType(token->data) == false) {
-    vypluj err(1); // TODO change err code
-  }
-
-  varElement->varDataType = getDataTypeFromString(token->data);
-
-  return 0;
-}
-
-/**
- * @brief
- *
- * @return error code
- *
- * 58. <idList>          -> [id] <nextId> - variable declaration
- */
- /*
-int pIdList() {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-  // [id]
-  TryCall(scanner, &token);
-  printToken(token);
-
-  if (token->type != t_idOrKeyword || isKeyword(token)) {
-    vypluj err(SYNTAX_ERR);
-  }
-
-  // TODO toto je nedobre:
-  if (STFind(symtab, token->data)) {
-    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
-      fprintf(stderr, "warning: declaring a variable again\n");
-      element->data = token->data;
-      genVarDef(STGetName(symtab, token->data)); // already declared, should be just an assignment, is this correct?? TODO
-    } else { // can't function call here
-      vypluj err(SYNTAX_ERR);
-    }
-
-  }
-
-  // Declare a new variable
-  TryCall(STInsert, symtab, token->data);
-  STSetIsVariable(symtab, token->data, true);
-  STSetFnDefined(symtab, token->data, false);
-  strcpy(element->data, token->data);
-
-  // <nextId>
-  TryCall(pNextId);
-
-  return 0;
-}
-*/
-
-
-/**
- * @brief
- *
- * @return error code
- *
- * 59. <nextId>          -> eps
- * 60. <nextId>          -> , [id] <nextId>
- */
- /*
-int pNextId() {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
-  Token *token = NULL;
-
-  // ,
-  TryCall(scanner, &token);
-  printToken(token);
-
-  // 59. <nextId>          -> eps
-  if (token->type != t_comma) {
+  if(token->type != t_comma) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 60. <nextId>          -> , [id] <nextId>
-  TryCall(scanner, &token);
-  printToken(token);
+  TryCall(typeFnDeclaration, fnName);
 
-  // [id]
-  if (STFind(symtab, token->data)) {
-    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
-      fprintf(stderr, "warning: declaring a variable again\n");
-      genVarDef(STGetName(symtab, token->data)); // already declared, shoud be just an assignment, is this correct?? TODO
-    } else { // -> eps - TODO WHAT??
-      TryCall(stashToken, &token);
-      vypluj 0;
-    }
-  }
+  TryCall(nextRetType, fnName);
 
-  // declaring a new variable
-  TryCall(STInsert, symtab, token->data);
-  STSetIsVariable(symtab, token->data, true);
-  STSetFnDefined(symtab, token->data, false);
-  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  vypluj 0;
 
-  // <nextId>
-  vypluj pNextId();
 }
-*/
-
 
 /**
  * @brief
  *
  * @return error code
  *
- * 62. <newIdAssign>     -> eps
- * 63. <newIdAssign>     -> = <expr>
+ * 49. <newIdAssign>     -> eps
+ * 50. <newIdAssign>     -> = <expr>
  */
  
 int pNewIdAssign() {
@@ -1537,73 +1181,20 @@ int pNewIdAssign() {
   TryCall(scanner, &token);
   printToken(token);
 
-  // 62. <newIdAssign>     -> eps
+  // -> eps
   // =
   if (!(token->type == t_assignment && !strcmp(token->data, "="))) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // 63. <newIdAssign>     -> = <exprList>
+  // -> = <exprList>
   // <expr>
   // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
   vypluj pExpr(&retVarName);
 }
 
-int pStringFunctions(char *varName) {
-  Token *token = NULL;
-
-  TryCall(scanner, &token);
-  printToken(token);
-
-  if(strcmp(token->data, "substr") == 0) {
-
-    RequireTokenType(t_leftParen);
-
-    TryCall(scanner, &token);
-    Token *string = NULL;
-    double i;
-    double j;
-    char *endPtr;
-
-    if(token->type != t_str || token->type != t_idOrKeyword) {
-      vypluj err(1); // TODO CHANGE ERR CODE
-    }
-
-    string = token;
-
-    TryCall(scanner, &token);
-
-    if(token->type != t_int || token->type != t_num) {
-      vypluj err(1); // TODO CHANGE ERR CODE
-    }
-
-    i = strtod(token->data, &endPtr);
-
-
-    TryCall(scanner, &token);
-
-    if(token->type != t_int || token->type != t_num) {
-      vypluj err(1); // TODO CHANGE ERR CODE
-    }
-
-    j = strtod(token->data, &endPtr);
-
-
-    RequireTokenType(t_rightParen);
-
-    genSubstrFunction(varName, string, i, j, symtab->top->depth);
-
-    vypluj 0;
-
-  }
-
-  vypluj err(1);
-
-}
-
-//-----------------------------------
 /**
  * @brief
  *
@@ -1873,6 +1464,398 @@ int newFunctionDeclaration(char *fnName) {
   }
   vypluj 0;
 }
+
+/**
+ * NOT USED TODO USE IS
+ *
+ * @brief Function for built in functions
+ *
+ * @return error code
+ *  TODO ADD MORE CFG RULES FOR ALL FUNCTIONS
+ * TODO ADD IT TO CFG !!!!!!!!!!!!!!!!
+ */
+int builtInFunctions(char *fnName) {
+ //* 41. <retNextArg>      -> eps
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+
+  if (strcmp(fnName, "reads") == 0) {
+    
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+    vypluj 0;
+  } else if (strcmp(fnName, "readi") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+  } else if (strcmp(fnName, "readn") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+  } else if (strcmp(fnName, "write") == 0) {
+    //TODO
+    RequireTokenType(t_leftParen);
+
+    while (token->type != t_rightParen) {
+      TryCall(scanner, &token);
+      
+      if(token->type != t_rightParen) {
+        genWrite(token, symtab->top->depth);
+      }
+    }
+  } else if (strcmp(fnName, "substr") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+  } else if (strcmp(fnName, "ord") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+  } else if (strcmp(fnName, "chr") == 0) {
+    //TODO
+
+    while (token->type != t_rightParen) {
+      ret = scanner(&token);
+      CondReturn;
+    }
+  }
+  vypluj 0;
+}
+
+int typeFnDeclaration(char *fnName){
+  fprintf(stderr, "TYPE DEF FN-----------------------------------------------\n");
+  fprintf(stderr, "varname : %s \n", fnName);
+
+  Token *token;
+  STElem *fnElement = STFind(symtab, fnName);
+
+  if(fnElement == NULL) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(scanner, &token);
+
+  if(isDataType(token->data) == false) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(intBufAppend, fnElement->fnRetTypesBuf, getDataTypeFromString(token->data));
+
+  return 0;
+}
+
+int typeFnCall(char *fnName){
+  
+  // find STElem by fnName
+    STElem *tmp = STFind(symtab, fnName);
+    Token *token;
+    // fn is not defined
+    if(tmp == NULL || tmp->fnDefined == false) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
+    TryCall(scanner, &token);
+    printToken(token);
+
+    if(isDataType(token->data) == false) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
+    TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
+    
+  return 0;
+}
+
+int typeVar(char *varName){
+  fprintf(stderr, "TYPEVAR-----------------------------------------------\n");
+  fprintf(stderr, "varname : %s \n", varName);
+
+  Token *token;
+  STElem *varElement = STFind(symtab, varName);
+
+
+  // if variable is not variable or doesnt exist
+  if(varElement == NULL) {
+    vypluj err(1); // TODO add err code
+  }
+
+  TryCall(scanner, &token);
+  
+  if(isDataType(token->data) == false) {
+    vypluj err(1); // TODO change err code
+  }
+
+  varElement->varDataType = getDataTypeFromString(token->data);
+
+  return 0;
+}
+
+int stringFunctions(char *varName) {
+  Token *token = NULL;
+
+  TryCall(scanner, &token);
+  printToken(token);
+
+  if(strcmp(token->data, "substr") == 0) {
+
+    RequireTokenType(t_leftParen);
+
+    TryCall(scanner, &token);
+    Token *string = NULL;
+    double i;
+    double j;
+    char *endPtr;
+
+    if(token->type != t_str || token->type != t_idOrKeyword) {
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    string = token;
+
+    TryCall(scanner, &token);
+
+    if(token->type != t_int || token->type != t_num) {
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    i = strtod(token->data, &endPtr);
+
+
+    TryCall(scanner, &token);
+
+    if(token->type != t_int || token->type != t_num) {
+      vypluj err(1); // TODO CHANGE ERR CODE
+    }
+
+    j = strtod(token->data, &endPtr);
+
+
+    RequireTokenType(t_rightParen);
+
+    genSubstrFunction(varName, string, i, j, symtab->top->depth);
+
+    vypluj 0;
+
+  }
+
+  vypluj err(1);
+
+}
+
+/*
+ * FUNCTIONS TO REMOVE since CFG changed (but code might be useful)
+
+int pFnRet(char *fnName) {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+  TryCall(scanner, &token);
+  printToken(token);
+
+  // 10. <fnRet>           -> eps
+  // :
+  if (token->type != t_colon) {
+    LOG("Function with no return values\n");
+    TryCall(stashToken, &token);
+    vypluj 0;
+  }
+
+  // 11. <fnRet>           -> : <type> <nextType>
+
+  int typeCount = 1;
+  (void)typeCount; // TODO remove
+  // <type>
+  // TODO dependant on pType
+  TryCall(pType, fnName, NULL, false);
+
+  // <nextType>
+  // TODO pass the typeCount, too
+  TryCall(pNextType, fnName);
+
+  return 0;
+}
+
+int pTypeList(char *fnName) {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+  TryCall(scanner, &token);
+  printToken(token);
+
+  // integer/number/string/nil
+  if(isDataType(token->data)) {
+    int dataType = getDataTypeFromString(token->data);
+    TryCall(STAppendParamType, symtab, fnName, dataType);
+
+    // <nextType>
+    TryCall(pNextType, fnName);
+
+  // eps
+  }else{
+    TryCall(stashToken, &token);
+  }
+
+  vypluj 0;
+}
+
+int pNextType(char *fnName) {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+  TryCall(scanner, &token);
+  printToken(token);
+
+  // 51. <nextType>        -> , <type> <nextType>
+  // ,
+  if(token->type == t_comma){
+
+    // <type>
+    // TODO we're not calling pType here, btw. According to CFG, we should
+    RequireTokenType(t_idOrKeyword);
+    int dataType = getDataTypeFromString(token->data);
+    TryCall(STAppendParamType, symtab, token->data, dataType);
+
+    // <nextType>
+    TryCall(pNextType, fnName);
+
+  // 50. <nextType>        -> eps
+  }else{
+    TryCall(stashToken, &token);
+  }
+
+  vypluj 0;
+}
+
+int pType(char *fnName, char *varName, bool isFnCalled) {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  fprintf(stderr, "VAR NAME = %s\n", varName);
+  LOG();
+  //Token *token = NULL;
+  //TryCall(scanner, &token); // TOHLE JEN ABY SE DALO DÁL DEBUGOVAT
+
+  // TODO this is sus pType() in calling fn ??????????? - alex
+  // when fn is called to be sure all input 
+  if(isFnCalled) {
+
+    if(fnName == NULL || varName == NULL) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
+    TryCall(typeFnCall, fnName, varName);
+
+  } else if(varName != NULL) {
+
+    TryCall(typeVar, varName);
+
+    vypluj 0;
+  } else if(fnName != NULL) {
+    
+    TryCall(typeFnDeclaration, fnName);
+
+  } else {
+    fprintf(stderr, "pType intern ERROR\n");
+    vypluj err(1); // TODO ADD ERR CODE
+  }
+
+  vypluj 0;
+}
+
+int pIdList() {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+  // [id]
+  TryCall(scanner, &token);
+  printToken(token);
+
+  if (token->type != t_idOrKeyword || isKeyword(token)) {
+    vypluj err(SYNTAX_ERR);
+  }
+
+  // TODO toto je nedobre:
+  if (STFind(symtab, token->data)) {
+    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
+      fprintf(stderr, "warning: declaring a variable again\n");
+      element->data = token->data;
+      genVarDef(STGetName(symtab, token->data)); // already declared, should be just an assignment, is this correct?? TODO
+    } else { // can't function call here
+      vypluj err(SYNTAX_ERR);
+    }
+
+  }
+
+  // Declare a new variable
+  TryCall(STInsert, symtab, token->data);
+  STSetIsVariable(symtab, token->data, true);
+  STSetFnDefined(symtab, token->data, false);
+  strcpy(element->data, token->data);
+
+  // <nextId>
+  TryCall(pNextId);
+
+  return 0;
+}
+
+int pNextId() {
+  fprintf(stderr, "-----------------------------------------------------------\n");
+  LOG();
+  Token *token = NULL;
+
+  // ,
+  TryCall(scanner, &token);
+  printToken(token);
+
+  // 59. <nextId>          -> eps
+  if (token->type != t_comma) {
+    TryCall(stashToken, &token);
+    vypluj 0;
+  }
+
+  // 60. <nextId>          -> , [id] <nextId>
+  TryCall(scanner, &token);
+  printToken(token);
+
+  // [id]
+  if (STFind(symtab, token->data)) {
+    if(STGetIsVariable(symtab, token->data)) { // redeclaring a variable, the user deserves a slap
+      fprintf(stderr, "warning: declaring a variable again\n");
+      genVarDef(STGetName(symtab, token->data)); // already declared, shoud be just an assignment, is this correct?? TODO
+    } else { // -> eps - TODO WHAT??
+      TryCall(stashToken, &token);
+      vypluj 0;
+    }
+  }
+
+  // declaring a new variable
+  TryCall(STInsert, symtab, token->data);
+  STSetIsVariable(symtab, token->data, true);
+  STSetFnDefined(symtab, token->data, false);
+  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+
+  // <nextId>
+  vypluj pNextId();
+}
+*/
 
 #endif
 /* end of file parser.c */
