@@ -308,7 +308,7 @@ void genWrite(Token *token, int frame) {
   char *tmp = genTmpVarDef();
   char *string;
 
-  fprintf(stderr, "WRIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIITE\n");
+  //fprintf(stderr, "WRIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIITE\n");
 
   if(token->type == t_str) {
     string = stringConvert(token->data);
