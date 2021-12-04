@@ -2,66 +2,59 @@
 02. <req>             -> "ifj21"
 03. 
 04. <codeBody>        -> eps
-05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRet> <stat> end <codeBody>
-06. <codeBody>        -> global [id] : function ( <typeList> ) <fnRet> <codeBody>
+05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+06. <codeBody>        -> global [id] : function ( <fnParamTypeList> ) <fnRetTypeList> <codeBody>
 07. <codeBody>        -> [id] <fnCall> <codeBody>
 08. 
 09. <fnCall>          -> ( <fnCallArgList> )
-10. <fnRet>           -> eps
-11. <fnRet>           -> : <type> <nextType>
-12. <fnCallArgList>   -> eps
-13. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
-14. <nextFnCallArg>   -> eps
-15. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
-16. <fnCallArg>       -> [id]
-17. <fnCallArg>       -> [literal]
-18. 
-19. 
-20. 
-21. 
-22. <stat>            -> eps
-23. <stat>            -> [id] <statWithId> <stat>
-24. <stat>            -> local [id] : <type> <newIdAssign> <stat>
-25. <stat>            -> if <expr> then <stat> else <stat> end <stat>
-26. <stat>            -> while <expr> do <stat> end <stat>
-27. <stat>            -> return <retArgList> <stat> 
-28. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
-29. <statWithId>      -> = <expr>
-30. <statWithId>      -> <fnCall>
-31. <nextAssign>      -> , [id] <nextAssign> <expr> ,
-32. <nextAssign>      -> =
+10. <fnCallArgList>   -> eps
+11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+12. <nextFnCallArg>   -> eps
+13. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+14. <fnCallArg>       -> [id]
+15. <fnCallArg>       -> [literal]
+16. 
+17. <stat>            -> eps
+18. <stat>            -> [id] <statWithId> <stat>
+19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
+20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+21. <stat>            -> while <expr> do <stat> end <stat>
+22. <stat>            -> return <retArgList> <stat> 
+23. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+24. <statWithId>      -> = <expr>
+25. <statWithId>      -> <fnCall>
+26. <nextAssign>      -> , [id] <nextAssign> <expr> ,
+27. <nextAssign>      -> =
+28. 
+29. <fnArgList>       -> eps
+30. <fnArgList>       -> [id] : [type] <nextFnArg>
+31. <nextFnArg>       -> eps
+32. <nextFnArg>       -> , [id] : [type] <nextFnArg>
 33. 
-34. <fnArgList>       -> eps
-35. <fnArgList>       -> [id] : <type> <nextFnArg>
-36. <nextFnArg>       -> eps
-37. <nextFnArg>       -> , [id] : <type> <nextFnArg>
+34. <retArgList>      -> eps
+35. <retArgList>      -> <expr> <retNextArg>
+36. <retNextArg>      -> eps
+37. <retNextArg>      -> , <expr> <retNextArg>
 38. 
-39. <retArgList>      -> eps
-40. <retArgList>      -> <expr> <retNextArg>
-41. <retNextArg>      -> eps
-42. <retNextArg>      -> , <expr> <retNextArg>
+39. <fnParamTypeList> -> eps
+40. <fnParamTypeList> -> [type] <nextParamType>
+41. <nextParamType>   -> eps
+42. <nextParamType>   -> , [type] <nextParamType>
 43. 
-44. <typeList>        -> eps
-45. <typeList>        -> integer <nextType>
-46. <typeList>        -> number <nextType>
-47. <typeList>        -> string <nextType>
-48. <typeList>        -> nil <nextType>
-49. 
-50. <nextType>        -> eps
-51. <nextType>        -> , <type> <nextType>
+44. <fnRetTypeList>   -> eps 
+45. <fnRetTypeList>   -> : [type] <nextRetType>
+46. <nextRetType>     -> eps
+47. <nextRetType>     -> , [type] <nextRetType>
+48. 
+49. <newIdAssign>     -> eps
+50. <newIdAssign>     -> = <expr>
+51. 
 52. 
-53. <type>            -> integer
-54. <type>            -> number
-55. <type>            -> string
-56. <type>            -> nil
+53. 
+54. 
+55. 
+56. 
 57. 
 58. 
 59. 
 60. 
-61. 
-62. <newIdAssign>     -> eps
-63. <newIdAssign>     -> = <expr>
-64. 
-65. 
-66. 
-67. 
