@@ -170,13 +170,13 @@ int pCodeBody() {
     printToken(token);
 
     if(strcmp(token->data, "end") != 0) {
-      vypluj err(1);
+      vypluj err(SYNTAX_ERR);
     }
 
     genFnDefRet();
 
-    // TODO asi RequireToken nefunguje po stash token alebo netuším prečo to neberie end - alex
-    //RequireToken(t_idOrKeyword, "end");
+    // end
+    RequireToken(t_idOrKeyword, "end");
     // <codeBody>
     TryCall(pCodeBody);
   }
