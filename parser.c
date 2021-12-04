@@ -294,12 +294,12 @@ int pFnCall(char *fnName) {
 
           // NETUŠÍM PREČO NEJDE NIČ S BUFFEROM
 
-          /*if(fnElement->fnParamTypesBuf->data == NULL) {
+          if(fnElement->fnParamTypesBuf->data == NULL) {
             printf("je to nULL\n");
           }
 
           printf("TU\n");
-          printf("ID JE : %d\n", fnElement->fnParamTypesBuf->data);*/
+          printf("ID JE : %d\n", *fnElement->fnParamTypesBuf->data);
 
         }
         
@@ -1087,7 +1087,7 @@ int pFnArgList(char *fnName) {
   // <type>
   // Append the data type of the parameter to the symtab
   // TODO pType under construction
-  TryCall(pType, NULL, element->data, false);
+  TryCall(pType, fnName, element->data, true);
 
   // <nextFnArg>
   vypluj pNextFnArg(fnName, paramCount);
@@ -1331,11 +1331,11 @@ int pType(char *fnName, char *varName, bool isFnCalled) {
   // when fn is called to be sure all input 
   if(isFnCalled) {
 
-    if(fnName == NULL) {
+    if(fnName == NULL || varName == NULL) {
       vypluj err(1); // TODO ADD ERR CODE
     }
 
-    TryCall(typeFnCall, fnName);
+    TryCall(typeFnCall, fnName, varName);
 
   } else if(varName != NULL) {
 
@@ -1376,16 +1376,25 @@ int typeFnDeclaration(char *fnName){
   return 0;
 }
 
-int typeFnCall(char *fnName){
+int typeFnCall(char *fnName, char *varName){
   
   // find STElem by fnName
     STElem *tmp = STFind(symtab, fnName);
-
+    Token *token;
     // fn is not defined
     if(tmp == NULL || tmp->fnDefined == false) {
       vypluj err(1); // TODO ADD ERR CODE
     }
 
+    TryCall(scanner, &token);
+    printToken(token);
+
+    if(isDataType(token->data) == false) {
+      vypluj err(1); // TODO ADD ERR CODE
+    }
+
+    TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
+    
   return 0;
 }
 
@@ -1396,7 +1405,6 @@ int typeVar(char *varName){
   Token *token;
   STElem *varElement = STFind(symtab, varName);
 
-  
 
   // if variable is not variable or doesnt exist
   if(varElement == NULL) {
@@ -1839,6 +1847,7 @@ int newFunctionDefinition(char *fnName) {
     STSetIsVariable(symtab, fnName, false);
     STSetFnDefined(symtab, fnName, true);
     STSetName(symtab, fnName, genLabelName());
+    
   }
   vypluj 0;
 }

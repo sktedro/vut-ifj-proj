@@ -1,13 +1,13 @@
 require "ifj21"
 
-function main(x : integer)
+function main(x : integer, y : integer)
     local a : integer = nil
     local b : string = "bla"
 end
 
 function test()
     local t : integer = 10
-    main(t)
+    main(t, t)
 end
 
 test()

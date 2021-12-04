@@ -233,7 +233,7 @@ int pType(char *fnName, char *varName, bool isFnCalled);
 //pomocné premenné k pType
 
 int typeFnDeclaration(char *fnName);
-int typeFnCall(char *fnName);
+int typeFnCall(char *fnName, char *varName);
 int typeVar(char *varName);
 
 /**
