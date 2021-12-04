@@ -82,7 +82,7 @@ int pStart() {
   initElement();
 
   // require
-  RequireToken(t_idOrKeyword, require);
+  RequireToken(t_idOrKeyword, "require");
 
   // <req>
   TryCall(pReq);
@@ -90,7 +90,7 @@ int pStart() {
   // <codeBody>
   TryCall(pCodeBody);
 
-  return 0;
+  vypluj 0;
 }
 
 /**
@@ -106,7 +106,7 @@ int pReq() {
   Token *token = NULL;
 
   // "ifj21"
-  RequireToken(t_str, ifj21);
+  RequireToken(t_str, "ifj21");
 
   // Generate code
   genStart();
@@ -137,7 +137,7 @@ int pCodeBody() {
 
   // -> eps
   } else if(!token) {
-    return 0;
+    vypluj 0;
   }
 
   // -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
@@ -177,7 +177,6 @@ int pCodeBody() {
 
     // TODO asi RequireToken nefunguje po stash token alebo netuším prečo to neberie end - alex
     //RequireToken(t_idOrKeyword, "end");
-    fprintf(stderr, "HAHAHA\n");
     // <codeBody>
     TryCall(pCodeBody);
   }
@@ -430,23 +429,22 @@ int pFnCallArgList(char *fnName) {
     }
     
      // Stash the token
-     TryCall(stashToken, &token);
+     vypluj stashToken(&token);
   } 
 
   // -> <fnCallArg> <nextFnCallArg>
-  else{
-    LOG("-> <fnCallArg> <nextFnCallArg>\n");
-    argCount++;
 
-    TryCall(stashToken, &token); // cause we didn't actually process the first arg
+  LOG("-> <fnCallArg> <nextFnCallArg>\n");
+  argCount++;
 
-    // <fnCallArg>
-    TryCall(pFnCallArg, fnName, argCount);
+  TryCall(stashToken, &token); // cause we didn't actually process the first arg
 
-    // <nextFnCallArg>
-    TryCall(pNextFnCallArg, fnName, argCount);
-  }
-  vypluj 0;
+  // <fnCallArg>
+  TryCall(pFnCallArg, fnName, argCount);
+
+  // <nextFnCallArg>
+  TryCall(pNextFnCallArg, fnName, argCount);
+
 }
 
 /**
@@ -485,7 +483,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
     // TODO remove this later
     /*if(!fn || !fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
       LOG("Special error\n");
-      return 1;
+      vypluj 1;
     }*/
 
     // Amount of arguments doesn't match
@@ -497,7 +495,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
     TryCall(stashToken, &token);
   }
 
-  return 0;
+  vypluj 0;
 }
 
 /**
@@ -520,7 +518,7 @@ int pFnCallArg(char *fnName, int argCount) {
   // TODO remove this later
   /*if(!fn){
     LOG("Special error\n");
-    return 1;
+    vypluj 1;
   }*/
 
   int dataType = -1;
@@ -562,7 +560,7 @@ int pFnCallArg(char *fnName, int argCount) {
   // TODO remove this later
   /*if(!fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
     LOG("Special error\n");
-    return 1;
+    vypluj 1;
 
   }*/
 
@@ -638,7 +636,6 @@ int pStat(char *fnName) {
 
     // then
     RequireToken(t_idOrKeyword, "then");
-
     // Code gen conditional jump to the 'else' label name
     genJumpIfFalse(elseLabelName, exprResultVarName);
 
@@ -824,7 +821,7 @@ int pStatWithId(char *idName) {
       vypluj err(SYNTAX_ERR);
     }
   }
-  return 0;
+  vypluj 0;
 }
 
 //TODO not working, not sure if CFG is right
@@ -951,7 +948,7 @@ int pNextFnArg(char *fnName, int paramCount) {
   // Must be an ID
   RequireTokenType(t_idOrKeyword);
   if(isKeyword(token)){
-    return err(SYNTAX_ERR);
+    vypluj err(SYNTAX_ERR);
   }
   paramCount++;
   // Append the name of the new parameter to the symtable
@@ -1213,16 +1210,16 @@ int pExpr(char **retVarName) {
   if(STFind(symtab, token->data) 
       && !STGetIsVariable(symtab, token->data)
       && STGetFnDefined(symtab, token->data)) {
-
     TryCall(pFnCall, token->data);
     
 
-  } else if(isKeyword(token) && strcmp(token->data, "nil")) {
-    TryCall(stashToken, &token);
-
+  } else if(token->type == t_idOrKeyword && strcmp(token->data, "nil") == 0) {
+    //vypluj stashToken(&token); TODO why stash?
+    vypluj 0;
   } else {
     TryCall(parseExpression, symtab, token, &varName);
-    LOG("Result is stored in %s\n", varName);
+    LOG("Result is stored in %s", varName);
+    fprintf(stderr, "--calling precedence analysis--\n\n");
   }
   vypluj 0;
 }
@@ -1414,7 +1411,7 @@ bool isKeyword(Token *token) {
       vypluj true;
     }
   }
-  return false;
+  vypluj false;
 }
 
 /**
@@ -1547,7 +1544,7 @@ int typeFnDeclaration(char *fnName){
 
   TryCall(intBufAppend, fnElement->fnRetTypesBuf, getDataTypeFromString(token->data));
 
-  return 0;
+  vypluj 0;
 }
 
 int typeFnCall(char *fnName){
@@ -1569,7 +1566,7 @@ int typeFnCall(char *fnName){
 
     TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
     
-  return 0;
+  vypluj 0;
 }
 
 int typeVar(char *varName){
@@ -1593,7 +1590,7 @@ int typeVar(char *varName){
 
   varElement->varDataType = getDataTypeFromString(token->data);
 
-  return 0;
+  vypluj 0;
 }
 
 int stringFunctions(char *varName) {

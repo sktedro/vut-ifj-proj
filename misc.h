@@ -78,25 +78,27 @@
 // Get a new token and if the type doesn't match, throw a syntax err
 #define RequireTokenType(tokenType)                                            \
   TryCall(scanner, &token);                                                    \
+  printToken(token);                                                           \
   if(!token){                                                                  \
     return 0;                                                                  \
   }                                                                            \
   if(token->type != tokenType) {                                               \
     vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-  printToken(token);
+  }
+
 
 // Get a new token and if the type or data don't match, throw a syntax err
 #define RequireToken(tokenType, tokenData)                                     \
   TryCall(scanner, &token);                                                    \
+  printToken(token);                                                           \
   if(!token){                                                                  \
-    return err(SYNTAX_ERR);                                                    \
-  }                                                                            \
-  if(token->type != tokenType                                                  \
-      || strcmp(token->data, #tokenData) != 0) {                               \
+    fprintf(stderr, "NULL\n");                                                 \
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
-  printToken(token);
+  if(token->type != tokenType                                                  \
+      || strcmp(token->data, tokenData) != 0) {                               \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }                                                                            \
 
 // Precedence analysis: call a rule function and if it returned an error code
 // (not -1), return it
