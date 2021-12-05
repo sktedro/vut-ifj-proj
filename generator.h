@@ -6,6 +6,7 @@
 #define GENERATOR_H
 
 #include "misc.h"
+#include "assignment.h"
 
 int digits(int value);
 char *genName(char *name, int frame);
@@ -47,6 +48,19 @@ int genMove(char *dest, char *src, int frame);
 void genJumpIfFalse(char *label, char *varName);
 int genPassParam(char *varInLF, char *varInTF, int frameOfLF);
 void genUnconditionalJump(char *labelName);
+
+// --------------------------------------------------------------------------------
+// FUNCTIONS FOR MULTIPLE ASSIGMENT
+void genExprLabel(char *name);
+void genExprJump(char *label);
+char *getExprLabelName(int num);
+char *getExprEndName();
+void genExprFirst(AssignElement *element);
+void genExpr(AssignElement *element);
+void genExprSecond(AssignElement *element);
+void genExprLast(AssignElement *element);
+void genExprEnd(AssignElement *element);
+// --------------------------------------------------------------------------------
 
 #endif
 /* end of file generator.c */

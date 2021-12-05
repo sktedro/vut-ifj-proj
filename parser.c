@@ -50,6 +50,9 @@
 extern int ret;
 
 STStack *symtab;
+AssignElement *assignmentElement;
+int assigmentCounter = 0;
+int assigmentGeneratedCounter = 0;
 
 // SStackElem stuff, just ignore TODO move somewhere?
 SStackElem *element;
@@ -80,6 +83,7 @@ int pStart() {
   LOG();
   Token *token = NULL;
   initElement();
+  AListInit(&assignmentElement);
 
   // require
   RequireToken(t_idOrKeyword, "require");
@@ -786,7 +790,15 @@ int pStatWithId(char *idName) {
     // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
      else if (token->type == t_comma) {
-
+      
+      if(AListGetLength(assignmentElement) == 0) {
+        assignmentElement->name = STGetName(symtab, idName);
+        assignmentElement->end = getExprEndName();
+        assignmentElement->first = true;
+        assignmentElement->label = getExprLabelName(assigmentCounter);
+        assignmentElement->next = NULL;
+        assigmentCounter++;
+      }
       // [id]
       RequireTokenType(t_idOrKeyword);
       if (!STFind(symtab, token->data) 
@@ -798,6 +810,9 @@ int pStatWithId(char *idName) {
       char *id1Var = STGetName(symtab, idName);
       char *id2Var = STGetName(symtab, token->data);
 
+
+      AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
+      assigmentCounter++;
       // <nextAssign>
       // Check and generate more assignments if there are some
       TryCall(pNextAssign);
@@ -858,15 +873,25 @@ int pNextAssign() {
     vypluj err(SYNTAX_ERR);
   }
 
+  AListAdd(&assignmentElement, STGetName(symtab, token->data), getExprLabelName(assigmentCounter), false, NULL);
+  assigmentCounter++;
+
   // <nextAssign>
   TryCall(pNextAssign);
 
   // <expr>
   // Evaluate the expression and MOVE from the retVarName to varName
-  char *varName = STGetName(symtab, token->data);
+  /*char *varName = STGetName(symtab, token->data);*/
+
+  if(assigmentGeneratedCounter == 0) {
+    genExprFirst(assignmentElement);
+  }
+
+  char *varName = AListGetElementByIndex(assignmentElement, assigmentGeneratedCounter)->name;
   char *retVarName;
+  printf("DSDA %s\n",varName);
   TryCall(pExpr, &retVarName);
-  printf("SDSADAD\n");
+  printf("WE BACK\n");
   genMove(varName, retVarName, symtab->top->depth);
 
   // ','

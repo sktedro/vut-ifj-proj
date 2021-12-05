@@ -14,7 +14,8 @@ symbol_stack.c \
 symtable.c \
 symtable_stack.c \
 symtable_tree.c \
-token.c
+token.c \
+assignment.c
 # why is parser not included as a lib, you might ask? Cause if you include it,
 # the compiler won't compile but throw a thousand errors instead :)))
 
