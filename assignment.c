@@ -96,6 +96,14 @@ AssignElement *AListGetElementByIndex(AssignElement *element, int index) {
 
 }
 
+void AListClear(AssignElement **element) {
+  (*element)->next = NULL;
+  (*element)->end = NULL;
+  (*element)->generated = false;
+  (*element)->name = NULL;
+  (*element)->label = NULL;
+}
+
 AssignElement *AListGetLast(AssignElement *element) {
   AssignElement *tmp = element;
 

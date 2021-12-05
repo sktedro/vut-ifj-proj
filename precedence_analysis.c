@@ -204,7 +204,7 @@ int iRule(SStack *symstack, SStackElem *op) {
       char *newName = genTmpVarDef();
       //TryCall(genVarAssign, newName, op->dataType, op->data);
       // TODO change this
-      TryCall(genVarAssign, newName, op->dataType, op->data);
+      TryCall(genVarAssign, newName, op->dataType, op->data, "LF");
       op->data = newName;
       op->isId = true;
     }
@@ -581,7 +581,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       (*newSymbol)->isId = false;
       (*newSymbol)->dataType = dt_nil;
 
-      // If it is an ID (and not a nil)
+      // If it is a variable (and not a nil)
     } else if (STFind(symtab, token->data)) {
       (*newSymbol)->isId = true;
       (*newSymbol)->dataType = STGetVarDataType(symtab, token->data);
@@ -591,8 +591,10 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       return err(ID_DEF_ERR);
     }
 
-    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(token->data) + 1));
-    memcpy((*newSymbol)->data, token->data, strlen(token->data) + 1);
+    // Get the variables name (in ifjcode21) from the symbol table
+    char *varName = STGetName(symtab, token->data);
+    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(varName) + 1));
+    memcpy((*newSymbol)->data, varName, strlen(varName) + 1);
     break;
 
   // A literal (integer, number, string)

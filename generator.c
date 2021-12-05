@@ -16,6 +16,7 @@ extern GarbageCollector garbageCollector;
 
 int tmpCounter = 0;
 int labelCounter = 0;
+int paramCnt = 0;
 
 // --------------------------------------------------------------------------------
 // VARIABLES FOR MULTIPLE ASSIGMENT
@@ -135,6 +136,15 @@ char *genLabelName() {
   return varName;
 }
 
+char *genParamName() {
+  char *tmp;
+  GCMalloc(tmp, sizeof(char) * 100);
+  
+  sprintf(tmp, "$%d\n", paramCnt);
+  paramCnt++;
+  return tmp;
+}
+
 char *genTmpVarDef() {
   char *name = genTmpVarName();
   printf("DEFVAR LF@%s\n", name);
@@ -151,35 +161,34 @@ void genUnconditionalJump(char *labelName){
   printf("JUMP %s\n", labelName);
 }
 
-void genVarDef(char *name) {
+void genVarDefLF(char *name) {
   printf("DEFVAR LF@%s\n", name);
 }
 
-int genPassParam(char *varInLF, char *varInTF, int frameOfLF){
-  varInTF = genName(varInTF, frameOfLF + 1);
-  varInLF = genName(varInLF, frameOfLF);
+void genVarDefTF(char *name) {
+  printf("DEFVAR TF@%s\n", name);
+}
+
+int genPassParam(char *varInLF, char *varInTF){
   printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   return 0;
 }
 
-int genReturn(char *varInTF, char *varInLF, int frameOfTF){
-  varInTF = genName(varInTF, frameOfTF);
-  varInLF = genName(varInLF, frameOfTF - 1);
+int genReturn(char *varInTF, char *varInLF){
   printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
   return 0;
 }
 
-int genMove(char *dest, char *src, int frame){
-  dest = genName(dest, frame);
-  src = genName(src, frame);
+int genMove(char *dest, char *src){
   printf("MOVE LF@%s LF@%s\n", dest, src);
   return 0;
 }
 
+
 /**
  * identifikátor, dátový typ, priradzovaná hodnota
  */
-int genVarAssign(char *name, int dataType, char *assignValue) {
+int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;
@@ -189,7 +198,7 @@ int genVarAssign(char *name, int dataType, char *assignValue) {
     if(tolptr[0]){
       return err(SYNTAX_ERR); // TODO spravny errcode?
     }
-    printf("MOVE LF@%s int@%d\n", name, val);
+    printf("MOVE %s@%s int@%d\n",frame, name, val);
   
   } else if(dataType == dt_number) {
     // Convert to double and check if the conversion was successful
@@ -199,26 +208,26 @@ int genVarAssign(char *name, int dataType, char *assignValue) {
     if(todptr[0]){
       return err(SYNTAX_ERR); // TODO spravny errcode?
     }
-    printf("MOVE LF@%s float@%a\n", name, val);
+    printf("MOVE %s@%s float@%a\n",frame, name, val);
   
   } else if(dataType == dt_string) {
-    printf("MOVE LF@%s string@%s\n", name, assignValue);
+    printf("MOVE %s@%s string@%s\n",frame, name, assignValue);
   
   } else if(strcmp(assignValue, "nil") == 0) {
-    printf("MOVE LF@%s nil@nil\n", name);
+    printf("MOVE %s@%s nil@nil\n",frame, name);
   
   } else if(strcmp(assignValue, "readi") == 0) {
-    printf("READ LF@%s int\n", name);
+    printf("READ %s@%s int\n",frame, name);
   
   } else if(strcmp(assignValue, "readn") == 0) {
-    printf("READ LF@%s float\n", name);
+    printf("READ %s@%s float\n",frame, name);
   
   } else if(strcmp(assignValue, "reads") == 0) {
-    printf("READ LF@%s string\n", name);
+    printf("READ %s@%s string\n",frame, name);
   
   } else if(dataType == -1) {
     // TODO change TF to LF if expression variable is in local frame
-    printf("MOVE LF@%s TF@%s", name, assignValue);
+    printf("MOVE %s@%s TF@%s",frame, name, assignValue);
   } else {
     return 1; // TODO errcode?
   }
@@ -294,13 +303,12 @@ int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
 
 // Create a TF
 void genFnCallInit(){
-  printf("CREATEFRAME\n");
+  printf("\nCREATEFRAME\n");
 }
 
 // After TF is created and all parameters are moved, push the TF to the stack
 // and call the function
 void genFnCall(char *fnName) {
-  printf("PUSHFRAME\n");
   printf("CALL %s0\n", fnName);
 }
 
@@ -320,18 +328,16 @@ void genWrite(Token *token, int frame) {
   char *tmp = genTmpVarDef();
   char *string;
 
-  //fprintf(stderr, "WRIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIITE\n");
-
   if(token->type == t_str) {
     string = stringConvert(token->data);
     token->data = string;
   }
 
   if(frame == 0) {  
-    genVarAssign(tmp, token->type, token->data);
+    genVarAssign(tmp, token->type, token->data,"LF");
     printf("WRITE GF@%s\n", tmp);
   } else {
-    genVarAssign(tmp, token->type, token->data);
+    genVarAssign(tmp, token->type, token->data, "LF");
     printf("WRITE LF@%s\n", tmp);
   }
 }

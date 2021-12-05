@@ -63,40 +63,47 @@
     }                                                                          \
   } while (0)
 
-// TODO
+#define ruleFnInit                                                             \
+  fprintf(stderr, "--------------------------------------------------\n");     \
+  LOG();                                                                       \
+  Token *token = NULL;                                                         \
+  (void)token
+
+#define getToken                                                               \
+  ret = scanner(&token);                                                       \
+  if(ret){                                                                     \
+    return err(ret);                                                           \
+  }                                                                            \
+  if(!token){                                                                  \
+    LOG("TOKEN FETCHED IS NULL\n");                                            \
+    return err(SYNTAX_ERR);                                                    \
+  }                                                                            \
+  printToken(token);
+
+// TODO? Just ignore this for now
 #define RequireKeyword(str1, str2)                                             \
   if(!strEq(str1, str2)) {                                                     \
     vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
+  }                                                                            
 
-// TODO
+// TODO? Just ignore this for now
 #define ForbidKeyword(str1, str2)                                              \
   if(strEq(str1, str2)) {                                                      \
     vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
+  }                                                                            
 
 // Get a new token and if the type doesn't match, throw a syntax err
 #define RequireTokenType(tokenType)                                            \
-  TryCall(scanner, &token);                                                    \
-  printToken(token);                                                           \
-  if(!token){                                                                  \
-    return 0;                                                                  \
-  }                                                                            \
+  getToken;                                                                    \
   if(token->type != tokenType) {                                               \
     vypluj err(SYNTAX_ERR);                                                    \
   }
 
-
 // Get a new token and if the type or data don't match, throw a syntax err
 #define RequireToken(tokenType, tokenData)                                     \
-  TryCall(scanner, &token);                                                    \
-  printToken(token);                                                           \
-  if(!token){                                                                  \
-    fprintf(stderr, "NULL\n");                                                 \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            \
+  getToken;                                                                    \
   if(token->type != tokenType                                                  \
-      || strcmp(token->data, tokenData) != 0) {                               \
+      || strcmp(token->data, tokenData) != 0) {                                \
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 

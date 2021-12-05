@@ -18,8 +18,9 @@ void genConditionalJump(char *label, char *varName, bool condition);
 void genUnconditionalJump(char *labelName);
 void genJumpIfFalse(char *label, char *varName);
 void genJumpIfTrue(char *label, char *varName);
-void genVarDef(char *name);
-int genVarAssign(char *name, int dataType, char *assignValue);
+void genVarDefLF(char *name);
+void genVarDefTF(char *name);
+int genVarAssign(char *name, int dataType, char *assignValue, char *frame);
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2);
@@ -43,10 +44,11 @@ char *genEqual(SStackElem *element1, SStackElem *element2);
 char *genNot(SStackElem *src);
 void genLabel(char *labelName);
 void genStart();
-int genPassParam(char *varInLF, char *varInTF, int frameOfLF);
-int genMove(char *dest, char *src, int frame);
+int genPassParam(char *varInLF, char *varInTF);
+int genMove(char *dest, char *src);
 void genJumpIfFalse(char *label, char *varName);
-int genPassParam(char *varInLF, char *varInTF, int frameOfLF);
+char *genParamName();
+int genPassParam(char *varInLF, char *varInTF);
 void genUnconditionalJump(char *labelName);
 
 // --------------------------------------------------------------------------------

@@ -183,8 +183,6 @@ int pNextFnArg();
  */
 int pRetArgList();
 
-bool isExpressionParser(Token token);
-
 /**
  * @brief
  *
@@ -222,11 +220,11 @@ int pNextType();
 
 int pFnParamTypeList(char *fnName);
 
-int pNextParamType(char *fnName);
+int pNextParamType(char *fnName, int paramCount);
 
 int pFnRetTypeList(char *fnName);
 
-int nextRetType(char *fnName);
+int pNextRetType(char *fnName);
 
 /**
  * @brief
@@ -242,7 +240,7 @@ int nextRetType(char *fnName);
 //int pType(char *fnName, char *varName, bool isFnCalled);
 
 int typeFnDeclaration(char *fnName);
-int typeFnCall(char *fnName);
+int typeFnCall(char *fnName, int counter);
 int typeVar(char *varName);
 
 /**

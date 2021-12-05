@@ -37,15 +37,19 @@ int stringBufInit(StringBuffer **buf) {
  */
 int stringBufAppend(StringBuffer *buf, char *str) {
 
-  if(buf){
-    if (buf->len + 1 == buf->size) {
-      GCRealloc(buf->data, 2 * buf->size * sizeof(char *));
-      buf->size *= 2;
-    }
-    GCMalloc(buf->data[buf->len], sizeof(char) * (strlen(str) + 1));
-    memcpy(buf->data[buf->len], str, strlen(str) + 1);
-    (buf->len)++;
+  if(!buf) {
+    stringBufInit(&buf);
+  } 
+    
+  if (buf->len + 1 == buf->size) {
+    GCRealloc(buf->data, 2 * buf->size * sizeof(char *));
+    buf->size *= 2;
   }
+  
+  GCMalloc(buf->data[buf->len], sizeof(char) * (strlen(str) + 1));
+  memcpy(buf->data[buf->len], str, strlen(str) + 1);
+  (buf->len)++;
+  
   return 0;
 }
 

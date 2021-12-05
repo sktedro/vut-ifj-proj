@@ -120,7 +120,7 @@ int err(int errCode) {
     } else if (errCode == INTERN_ERR) {
       fprintf(stderr, "Internal error "); //TODO
     }else{
-      fprintf(stderr, "Unknown error ");
+      fprintf(stderr, "Unknown error (code %d) ", errCode);
     }
     fprintf(stderr, "at (around) line %d.\n", LOCCount);
     errMessageWritten = true;

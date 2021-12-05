@@ -11,6 +11,7 @@ int AListGetLength(AssignElement *element);
 AssignElement *AListGetElementByIndex(AssignElement *element, int index);
 AssignElement *AListGetLast(AssignElement *element);
 void AListGenerate(AssignElement *element);
+void AListClear(AssignElement **element);
 
 #endif
 /* end of file assignment.h */

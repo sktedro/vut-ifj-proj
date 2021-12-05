@@ -192,10 +192,8 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
   }
   if (data) {
     if (!data->fnParamTypesBuf) {
-      LOG("WE ARE GOING TO INIT INT BUFF\n");
       TryCall(intBufInit, &(data->fnParamTypesBuf));
     }
-    fprintf(stderr, "INT BUFF APPEND: %d\n", paramType);
     TryCall(intBufAppend, data->fnParamTypesBuf, paramType);
   }
   return 0;
@@ -217,10 +215,8 @@ int STAppendParamName(STStack *stack, char *key, char *paramName) {
   }
   if (data) {
     if (!data->fnParamNamesBuf) {
-      printf("WE ARE GOING TO INIT STRING BUFF\n");
       TryCall(stringBufInit, &(data->fnParamNamesBuf));
     }
-    printf("STRING BUFF APPEND: %s\n", paramName);
     TryCall(stringBufAppend, data->fnParamNamesBuf, paramName);
   }
   return 0;
@@ -347,6 +343,7 @@ int STGetParamType(STStack *stack, char *key, int index) {
   if (data && data->fnParamTypesBuf && data->fnParamTypesBuf->len > index) {
     return data->fnParamTypesBuf->data[index];
   }
+  LOG("AAA %d\n", data->fnParamTypesBuf->len);
   return -1;
 }
 
