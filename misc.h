@@ -323,6 +323,17 @@ typedef struct {
   int ptrsUsed;
 } GarbageCollector;
 
+// for multiple assignment element
+typedef struct assignmentElement {
+  char *name;    // id string
+  char *label; // id value
+  bool first;
+  bool generated;
+  char *end;
+  struct assignmentElement *prev; 
+  struct assignmentElement *next;
+} AssignElement;
+
 /*
  * Miscellaneous functions
  */

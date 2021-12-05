@@ -17,6 +17,18 @@ extern GarbageCollector garbageCollector;
 int tmpCounter = 0;
 int labelCounter = 0;
 
+// --------------------------------------------------------------------------------
+// VARIABLES FOR MULTIPLE ASSIGMENT
+
+int exprLabelCnt = 0;
+int exprEndCnt = 0;
+
+
+// --------------------------------------------------------------------------------
+
+
+
+
 int digits(int value) {
 
   if(value == 0) {
@@ -487,6 +499,100 @@ char *genNot(SStackElem *src) {
   printf("NOT LF@%s LF@%s\n", tmp, src->data);
   return tmp;
 }
+
+// --------------------------------------------------------------------------------
+// FUNCTIONS FOR MULTIPLE ASSIGMENT
+
+void genExprLabel(char *name) {
+  printf("LABEL %s\n", name);
+}
+
+void genExprJump(char *label) {
+  printf("JUMP %s\n", label);
+}
+
+char *getExprLabelName(int num) {
+  char *tmp;
+  GCMalloc(tmp, sizeof(char) * 30);
+  sprintf(tmp, "%cEXPR%d", labelPrefix, exprEndCnt);
+
+  exprLabelCnt++;
+
+  return tmp;
+}
+
+char *getExprEndName() {
+  char *tmp;
+  GCMalloc(tmp, sizeof(char) * 30);
+  sprintf(tmp, "%cEXPREND%d", labelPrefix, exprEndCnt);
+
+  exprEndCnt++;
+
+  return tmp;
+}
+
+void genExprFirst(AssignElement *element) {
+  AssignElement *tmp = AListGetLast(element);
+
+  genExprJump(tmp->label);
+  genExprLabel(element->label);
+
+  element->generated = true;
+}
+
+void genExprLast(AssignElement *element) {
+  AssignElement *tmp = AListGetLast(element);
+
+  genExprJump(element->label);
+  genExprLabel(tmp->label);
+
+  tmp->generated = true;
+}
+
+void genExprSecond(AssignElement *element) {
+
+  genExprJump(element->end);
+  genExprLabel(element->next->label);
+
+  element->next->generated = true;
+
+}
+
+void genExpr(AssignElement *element) {
+
+  genExprJump(element->prev->prev->label);
+  genExprLabel(element->label);
+  element->generated = true;
+}
+
+void genExprEnd(AssignElement *element) {
+  AssignElement *last = AListGetLast(element);
+
+  genExprJump(last->prev->label);
+  genExprLabel(element->end);
+  
+}
+/*
+a, b, c = a+10, b+10, c+10
+
+
+jump treti
+prvy:
+    ADD A A 10
+jump end
+druhy:
+    ADD B B 10
+    jump prvy
+treti:
+    ADD C C 10
+jump druhy
+
+end:
+
+*/
+
+// --------------------------------------------------------------------------------
+
 
 /*
  * MOV
