@@ -5,10 +5,10 @@ function main() --Hlavni telo programu
 	local vysl : integer
 	write("Zadejte cislo pro vypocet faktorialu\n")
 	a = readi()
-	if nil then
-		write("a je nil\n")
-		return else end
-	if nil then
+	write("a je nil\n")
+	return else end
+	
+	if a < 0 then
 		write("Faktorial nelze spocitat\n")
 	else
 		vysl = 1

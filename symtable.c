@@ -192,10 +192,10 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
   }
   if (data) {
     if (!data->fnParamTypesBuf) {
-      printf("WE ARE GOING TO INIT INT BUFF\n");
+      LOG("WE ARE GOING TO INIT INT BUFF\n");
       TryCall(intBufInit, &(data->fnParamTypesBuf));
     }
-    printf("INT BUFF APPEND: %d\n", paramType);
+    fprintf(stderr, "INT BUFF APPEND: %d\n", paramType);
     TryCall(intBufAppend, data->fnParamTypesBuf, paramType);
   }
   return 0;

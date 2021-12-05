@@ -1020,7 +1020,6 @@ int pRetArgList(char *fnName) {
     argsCount = fn->fnRetTypesBuf->len;
   }
 
-  argsCount = 1; //TODO DELETE
   // 34. <retArgList>      -> eps
   // 35. <retArgList>      -> <expr> <retNextArg>
 
@@ -1272,6 +1271,8 @@ int pExpr(char **retVarName) {
     //vypluj stashToken(&token); TODO why stash?
     vypluj 0;
   } else {
+    STElem *tmp = STFind(symtab, "x");
+    fprintf(stderr, "NAME: %s  TYPE: %d\n\n", tmp->name, tmp->varDataType);
     fprintf(stderr, "--calling precedence analysis--\n\n");
     TryCall(parseExpression, symtab, token, &varName);
     LOG("Result is stored in %s", varName);
@@ -1619,23 +1620,22 @@ int typeFnDeclaration(char *fnName){
 int typeFnCall(char *fnName){
   
   // find STElem by fnName
-    STElem *tmp = STFind(symtab, fnName);
-    Token *token;
-    // fn is not defined
-    if(tmp == NULL || tmp->fnDefined == false) {
-      vypluj err(-1); // TODO ADD ERR CODE
-    }
+  STElem *tmp = STFind(symtab, fnName);
+  Token *token;
+  // fn is not defined
+  if(tmp == NULL || tmp->fnDefined == false) {
+    vypluj err(INTERN_ERR); // TODO ADD ERR CODE
+  }
 
-    TryCall(scanner, &token);
-    printToken(token);
+  TryCall(scanner, &token);
+  printToken(token);
 
-    if(isDataType(token->data) == false) {
-      vypluj err(-1); // TODO ADD ERR CODE
-    }
+  if(isDataType(token->data) == false) {
+    vypluj err(SYNTAX_ERR); // TODO ADD ERR CODE
+  }
 
-    TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
-    
-  vypluj 0;
+  // TODO not working
+  vypluj STAppendParamType(symtab, fnName, getDataTypeFromString(token->data));
 }
 
 int typeVar(char *varName){
