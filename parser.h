@@ -48,12 +48,12 @@ int pExpr();
  */
 int builtInFunctions();
 int typeFnDeclaration(char *fnName);
-int typeFnCall(char *fnName, int counter);
+int fnDefinitionParamType(char *fnName, int counter);
 int typeVar(char *varName);
 int createParamVariables(char *fnName);
-int setVarDataType(char *varName);
-int globalParamTypes(char *fnName, Token *token);
-int setFnRetDataType(char *fnName);
+int varDataType(char *varName);
+int fnDeclarationParamType(char *fnName, Token *token);
+int fnRetDataType(char *fnName);
 
 /**
  * @brief Check if a string represents a data type

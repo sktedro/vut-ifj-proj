@@ -164,9 +164,9 @@ int pCodeBody() {
     // <fnRetTypeList>
     TryCall(pFnRetTypeList, fnName);
     
-    
     // Generate definitions of parameter variables of this function
     createParamVariables(fnName);
+
     // <stat>
     TryCall(pStat, fnName);
 
@@ -621,7 +621,7 @@ int pStat(char *fnName) {
     
     // [type]
     // TODO set data type (in the following function, I suppose)
-    TryCall(setVarDataType, newVarName);
+    TryCall(varDataType, newVarName);
     
     // <newIdAssign>
     TryCall(pNewIdAssign);
@@ -950,7 +950,7 @@ int pFnDefinitionParamTypeList(char *fnName) {
   // [type]
   // Append the data type of the parameter to the symtab
   STElem *tmp = STFind(symtab, fnName);
-  TryCall(typeFnCall, fnName, paramCount);
+  TryCall(fnDefinitionParamType, fnName, paramCount);
 
   // TODO remove, just debugging
   if(!tmp->fnParamTypesBuf){
@@ -1007,7 +1007,7 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   RequireTokenType(t_colon);
 
   // [type]
-  TryCall(typeFnCall, fnName, paramCount);
+  TryCall(fnDefinitionParamType, fnName, paramCount);
 
   // <nextFnDefinitionParamType>
   vypluj pNextFnDefinitionParamType(fnName, paramCount);
@@ -1109,7 +1109,7 @@ int pFnDeclarationParamTypeList(char *fnName) {
   int paramCount = 1;
   
   // [type]
-  TryCall(globalParamTypes, fnName, token);
+  TryCall(fnDeclarationParamType, fnName, token);
 
   // tu musíme ocheckovať či token neni prava zatvorka alebo čo, idk
 
@@ -1142,7 +1142,9 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
   paramCount++;
 
   LOG();
-  TryCall(typeFnCall, fnName, paramCount); // TODO might be wrong?
+  /** TryCall(fnDefinitionParamType, fnName, paramCount); // Commented since tedro thinks
+   * it's wrong. He also appended the next line*/
+  TryCall(fnDeclarationParamType, fnName, token);
   
   LOG();
   TryCall(pNextFnDeclarationParamType, fnName, paramCount);
@@ -1168,7 +1170,7 @@ int pFnRetTypeList(char *fnName) {
     vypluj 0;
   }
   // 45. <fnRetTypeList>   -> : [type] <pNextRetType>
-  TryCall(setFnRetDataType, fnName);
+  TryCall(fnRetDataType, fnName);
 
   TryCall(pNextRetType, fnName);
 
@@ -1195,7 +1197,7 @@ int pNextRetType(char *fnName) {
     vypluj 0;
   }
 
-  TryCall(setFnRetDataType, fnName);
+  TryCall(fnRetDataType, fnName);
 
   TryCall(pNextRetType, fnName);
 
@@ -1542,7 +1544,7 @@ int builtInFunctions(char *fnName) {
  * @param fnName
  * @return
  */
-int setFnRetDataType(char *fnName){
+int fnRetDataType(char *fnName){
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG("fnName: %s", fnName);
 
@@ -1574,7 +1576,7 @@ int setFnRetDataType(char *fnName){
   vypluj 0;
 }
 
-int globalParamTypes(char *fnName, Token *token) {
+int fnDeclarationParamType(char *fnName, Token *token) {
   STElem *element = STFind(symtab, fnName);
 
   //check if fn is in ST
@@ -1590,7 +1592,9 @@ int globalParamTypes(char *fnName, Token *token) {
 /**
  * TODO comment
 */
-int typeFnCall(char *fnName, int paramCount){
+int fnDefinitionParamType(char *fnName, int paramCount){
+  // TODO check this function. Seems odd to me. Is this really what it should
+  // do?
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
@@ -1622,7 +1626,7 @@ int typeFnCall(char *fnName, int paramCount){
   return 0;
 }
 
-int setVarDataType(char *varName){
+int varDataType(char *varName){
   fprintf(stderr, "TYPEVAR-----------------------------------------------\n");
   fprintf(stderr, "varname : %s \n", varName);
 
