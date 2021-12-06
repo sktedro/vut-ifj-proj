@@ -1,53 +1,53 @@
-01. <start>           -> require <req> <codeBody>
-02. <req>             -> "ifj21"
+01. <start>                      -> require <req> <codeBody>
+02. <req>                        -> "ifj21"
 03. 
-04. <codeBody>        -> eps
-05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
-06. <codeBody>        -> global [id] : function ( <fnParamTypeList> ) <fnRetTypeList> <codeBody>
-07. <codeBody>        -> [id] <fnCall> <codeBody>
+04. <codeBody>                   -> eps
+05. <codeBody>                   -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+06. <codeBody>                   -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
+07. <codeBody>                   -> [id] <fnCall> <codeBody>
 08. 
-09. <fnCall>          -> ( <fnCallArgList> )
-10. <fnCallArgList>   -> eps
-11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
-12. <nextFnCallArg>   -> eps
-13. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
-14. <fnCallArg>       -> [id]
-15. <fnCallArg>       -> [literal]
+09. <fnCall>                     -> ( <fnCallArgList> )
+10. <fnCallArgList>              -> eps
+11. <fnCallArgList>              -> <fnCallArg> <nextFnCallArg>
+12. <nextFnCallArg>              -> eps
+13. <nextFnCallArg>              -> , <fnCallArg> <nextFnCallArg>
+14. <fnCallArg>                  -> [id]
+15. <fnCallArg>                  -> [literal]
 16. 
-17. <stat>            -> eps
-18. <stat>            -> [id] <statWithId> <stat>
-19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
-20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
-21. <stat>            -> while <expr> do <stat> end <stat>
-22. <stat>            -> return <retArgList> <stat> 
-23. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
-24. <statWithId>      -> = <expr>
-25. <statWithId>      -> <fnCall>
-26. <nextAssign>      -> , [id] <nextAssign> <expr> ,
-27. <nextAssign>      -> =
+17. <stat>                       -> eps
+18. <stat>                       -> [id] <statWithId> <stat>
+19. <stat>                       -> local [id] : [type] <newIdAssign> <stat>
+20. <stat>                       -> if <expr> then <stat> else <stat> end <stat>
+21. <stat>                       -> while <expr> do <stat> end <stat>
+22. <stat>                       -> return <retArgList> <stat> 
+23. <statWithId>                 -> , [id] <nextAssign> <expr> , <expr>
+24. <statWithId>                 -> = <expr>
+25. <statWithId>                 -> <fnCall>
+26. <nextAssign>                 -> , [id] <nextAssign> <expr> ,
+27. <nextAssign>                 -> =
 28. 
-29. <fnArgList>       -> eps
-30. <fnArgList>       -> [id] : [type] <nextFnArg>
-31. <nextFnArg>       -> eps
-32. <nextFnArg>       -> , [id] : [type] <nextFnArg>
+29. <fnArgList>                  -> eps
+30. <fnArgList>                  -> [id] : [type] <nextFnArg>
+31. <nextFnArg>                  -> eps
+32. <nextFnArg>                  -> , [id] : [type] <nextFnArg>
 33. 
-34. <retArgList>      -> eps
-35. <retArgList>      -> <expr> <retNextArg>
-36. <retNextArg>      -> eps
-37. <retNextArg>      -> , <expr> <retNextArg>
+34. <retArgList>                 -> eps
+35. <retArgList>                 -> <expr> <retNextArg>
+36. <retNextArg>                 -> eps
+37. <retNextArg>                 -> , <expr> <retNextArg>
 38. 
-39. <fnParamTypeList> -> eps
-40. <fnParamTypeList> -> [type] <nextParamType>
-41. <nextParamType>   -> eps
-42. <nextParamType>   -> , [type] <nextParamType>
+39. <fnDeclarationParamTypeList> -> eps
+40. <fnDeclarationParamTypeList> -> [type] <nextDeclarationParamType>
+41. <nextDeclarationParamType>   -> eps
+42. <nextDeclarationParamType>   -> , [type] <nextParamType>
 43. 
-44. <fnRetTypeList>   -> eps 
-45. <fnRetTypeList>   -> : [type] <nextRetType>
-46. <nextRetType>     -> eps
-47. <nextRetType>     -> , [type] <nextRetType>
+44. <fnRetTypeList>              -> eps 
+45. <fnRetTypeList>              -> : [type] <nextRetType>
+46. <nextRetType>                -> eps
+47. <nextRetType>                -> , [type] <nextRetType>
 48. 
-49. <newIdAssign>     -> eps
-50. <newIdAssign>     -> = <expr>
+49. <newIdAssign>                -> eps
+50. <newIdAssign>                -> = <expr>
 51. 
 52. 
 53. 

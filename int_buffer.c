@@ -33,22 +33,16 @@ int intBufInit(IntBuffer **buf) {
  * @return 0 if successful, errcode otherwise
  */
 int intBufAppend(IntBuffer *buf, int i) {
-
-  if(!buf) {
-    TryCall(intBufInit, &buf);
+  if(buf) {
+    if (buf->len + 1 == buf->size) {
+      GCRealloc(buf->data, 2 * buf->size * sizeof(int));
+      buf->size *= 2;
+    }
+    buf->data[buf->len] = i;
+    (buf->len)++;
+    return 0;
   } 
-  
-  if (buf->len + 1 == buf->size) {
-    GCRealloc(buf->data, 2 * buf->size * sizeof(int));
-    buf->size *= 2;
-  }
-  
-  LOG("AAA: %d\n", buf->data[0]);
-  buf->data[buf->len] = i;
-  LOG("BBB: %d\n", buf->data[0]);
-  (buf->len)++;
-  return 0;
-  
+  return err(INTERN_ERR);
 }
 
 /**

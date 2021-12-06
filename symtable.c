@@ -343,7 +343,6 @@ int STGetParamType(STStack *stack, char *key, int index) {
   if (data && data->fnParamTypesBuf && data->fnParamTypesBuf->len > index) {
     return data->fnParamTypesBuf->data[index];
   }
-  LOG("AAA %d\n", data->fnParamTypesBuf->len);
   return -1;
 }
 

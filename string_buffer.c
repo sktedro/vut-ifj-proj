@@ -36,11 +36,9 @@ int stringBufInit(StringBuffer **buf) {
  * @return 0 if successful, errcode otherwise
  */
 int stringBufAppend(StringBuffer *buf, char *str) {
-
   if(!buf) {
-    stringBufInit(&buf);
+    return err(INTERN_ERR);
   } 
-    
   if (buf->len + 1 == buf->size) {
     GCRealloc(buf->data, 2 * buf->size * sizeof(char *));
     buf->size *= 2;

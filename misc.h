@@ -63,13 +63,13 @@
     }                                                                          \
   } while (0)
 
-#define ruleFnInit                                                             \
+#define RuleFnInit                                                             \
   fprintf(stderr, "--------------------------------------------------\n");     \
   LOG();                                                                       \
   Token *token = NULL;                                                         \
   (void)token
 
-#define getToken                                                               \
+#define GetToken                                                               \
   ret = scanner(&token);                                                       \
   if(ret){                                                                     \
     return err(ret);                                                           \
@@ -94,14 +94,14 @@
 
 // Get a new token and if the type doesn't match, throw a syntax err
 #define RequireTokenType(tokenType)                                            \
-  getToken;                                                                    \
+  GetToken;                                                                    \
   if(token->type != tokenType) {                                               \
     vypluj err(SYNTAX_ERR);                                                    \
   }
 
 // Get a new token and if the type or data don't match, throw a syntax err
 #define RequireToken(tokenType, tokenData)                                     \
-  getToken;                                                                    \
+  GetToken;                                                                    \
   if(token->type != tokenType                                                  \
       || strcmp(token->data, tokenData) != 0) {                                \
     vypluj err(SYNTAX_ERR);                                                    \

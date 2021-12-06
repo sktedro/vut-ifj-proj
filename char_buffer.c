@@ -45,8 +45,9 @@ int charBufAppend(CharBuffer *buf, char c) {
     buf->data[buf->len] = c;
     (buf->len)++;
     buf->data[buf->len] = '\0';
+    return 0;
   }
-  return 0;
+  return err(INTERN_ERR);
 }
 
 /**
@@ -67,8 +68,10 @@ void charBufPop(CharBuffer *buf) {
  * @param buf: pointer to the buffer that is to be cleared
  */
 void charBufClear(CharBuffer *buf) {
-  buf->data[0] = '\0';
-  buf->len = 0;
+  if(buf && buf->data){
+    buf->data[0] = '\0';
+    buf->len = 0;
+  }
 }
 
 /**
@@ -81,15 +84,13 @@ void charBufClear(CharBuffer *buf) {
  * @return 0 if successful, errcode otherwise
  */
 int charBufAppendString(char *orig, CharBuffer **buffer) {
-  if (*buffer == NULL) {
-    TryCall(charBufInit, buffer);
+  if (orig || buffer || *buffer) {
+    for (unsigned int i = 0; i < strlen(orig); i++) {
+      TryCall(charBufAppend, *buffer, orig[i]);
+    }
+    return 0;
   }
-
-  for (unsigned int i = 0; i < strlen(orig); i++) {
-    TryCall(charBufAppend, *buffer, orig[i]);
-  }
-
-  return 0;
+  return err(INTERN_ERR);
 }
 
 #endif

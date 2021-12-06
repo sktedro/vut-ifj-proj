@@ -14,7 +14,9 @@ LIBS=\
 ../generator.c \
 ../symtable_stack.c \
 ../symtable_tree.c \
-../token.c
+../token.c \
+../assignment.c \
+../string_buffer.c
 
 
 .PHONY: none

@@ -6,6 +6,7 @@
 #define SYMTABLE_TREE
 
 #include "int_buffer.h"
+#include "string_buffer.h"
 #include "misc.h"
 
 /**
