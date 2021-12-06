@@ -580,21 +580,23 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
     if (strEq(token->data, "nil")) {
       (*newSymbol)->isId = false;
       (*newSymbol)->dataType = dt_nil;
+      GCMalloc((*newSymbol)->data, sizeof(char) * (strlen("nil") + 1));
+      snprintf((*newSymbol)->data, strlen("nil") + 1, "nil");
 
       // If it is a variable (and not a nil)
     } else if (STFind(symtab, token->data)) {
       (*newSymbol)->isId = true;
       (*newSymbol)->dataType = STGetVarDataType(symtab, token->data);
+      // Get the variables name (in ifjcode21) from the symbol table
+      char *varName = STGetName(symtab, token->data);
+      GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(varName) + 1));
+      memcpy((*newSymbol)->data, varName, strlen(varName) + 1);
 
       // The ID does not exist!
     } else {
       return err(ID_DEF_ERR);
     }
 
-    // Get the variables name (in ifjcode21) from the symbol table
-    char *varName = STGetName(symtab, token->data);
-    GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(varName) + 1));
-    memcpy((*newSymbol)->data, varName, strlen(varName) + 1);
     break;
 
   // A literal (integer, number, string)

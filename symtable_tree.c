@@ -14,10 +14,11 @@ extern int ret;
  *
  * @param node: destination pointer
  * @param key key of the new node
+ * @param frame: number of the frame in which the variable is
  *
  * @return 0 if successful, errcode otherwise
  */
-int newSTTreeNode(STTreeNode **node, char *key) {
+int newSTTreeNode(STTreeNode **node, char *key, int frame) {
   GCMalloc(*node, sizeof(STTreeNode));
 
   // Init children
@@ -31,9 +32,8 @@ int newSTTreeNode(STTreeNode **node, char *key) {
   // Init data
   GCMalloc((*node)->data, sizeof(STElem));
 
-  // Copy key
-  GCMalloc((*node)->data->name, 25 * sizeof(char));
-  //memcpy((*node)->data->name, key, (strlen(key) + 1) * sizeof(char));
+  // Set the name (generate a name for the ifjcode21 variable)
+  (*node)->data->name = genName(key, frame);
 
   // Init other data
   (*node)->data->isVariable = true;
@@ -55,18 +55,19 @@ int newSTTreeNode(STTreeNode **node, char *key) {
  * 
  * @param root node of the tree
  * @param name name (and key) of the new node
+ * @param frame: number of the frame in which the variable is
  *
  * @return 0 if successful, errcode otherwise
  */
-int treeInsert(STTreeNode **root, char *key) {
+int treeInsert(STTreeNode **root, char *key, int frame) {
   if (!(*root)) {
-    TryCall(newSTTreeNode, root, key);
+    TryCall(newSTTreeNode, root, key, frame);
     vypluj 0;
   }
   if (strcmp(key, (*root)->key) < 0) {
-    TryCall(treeInsert, &((*root)->leftChild), key);
+    TryCall(treeInsert, &((*root)->leftChild), key, frame);
   } else if (strcmp(key, (*root)->key) > 0) {
-    TryCall(treeInsert, &((*root)->rightChild), key);
+    TryCall(treeInsert, &((*root)->rightChild), key, frame);
   } else {
     fprintf(stderr, "Warning: inserting a key into a binary tree that is already there. Nothing will be changed.\n");
   }

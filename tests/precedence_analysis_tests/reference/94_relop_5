@@ -2,7 +2,7 @@ Testing: Token type is '0' and data 'varInt1'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 nil@nil
 DEFVAR LF@%tmp1
-EQ LF@%tmp1 LF@varInt1 LF@%tmp0
+EQ LF@%tmp1 LF@varInt1_0 LF@%tmp0
 DEFVAR LF@%tmp2
 NOT LF@%tmp2 LF@%tmp1
 Testing: Expression result is in: %tmp2

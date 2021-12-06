@@ -36,7 +36,7 @@ int main(){
 
 
   // Push one element and test all functions
-  treeInsert(&tree1, "abc");
+  treeInsert(&tree1, "abc", 0);
   STStackPush(stack, tree1, 0);
   if(stack->top->depth != 0 || stack->top->table != tree1){
     printf("Element pushed is not on the stack\n");
@@ -68,7 +68,7 @@ int main(){
 
 
   // Push one element and test all functions again
-  treeInsert(&tree1, "abc");
+  treeInsert(&tree1, "abc", 0);
   STStackPush(stack, tree1, 0);
   if(stack->top->depth != 0 || stack->top->table != tree1){
     printf("Element pushed is not on the stack\n");
@@ -96,8 +96,8 @@ int main(){
 
   // Insert two elements and test all functions
   STStackInit(&stack);
-  treeInsert(&tree1, "abc");
-  treeInsert(&tree2, "def");
+  treeInsert(&tree1, "abc", 0);
+  treeInsert(&tree2, "def", 0);
   STStackPush(stack, tree1, 0);
   STStackPush(stack, tree2, 1);
   if(STStackTop(stack)->table != tree2){
@@ -118,9 +118,9 @@ int main(){
 
   // Insert three elements and test all functions
   STStackInit(&stack);
-  treeInsert(&tree1, "abc");
-  treeInsert(&tree2, "def");
-  treeInsert(&tree3, "ghi");
+  treeInsert(&tree1, "abc", 0);
+  treeInsert(&tree2, "def", 0);
+  treeInsert(&tree3, "ghi", 0);
   STStackPush(stack, tree1, 0);
   STStackPush(stack, tree2, 1);
   STStackPush(stack, tree3, 2);

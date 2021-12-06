@@ -2,6 +2,6 @@ Testing: Token type is '0' and data 'varNum1'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 float@0x1p+0
 DEFVAR LF@%tmp1
-EQ LF@%tmp1 LF@varNum1 LF@%tmp0
+EQ LF@%tmp1 LF@varNum1_0 LF@%tmp0
 Testing: Expression result is in: %tmp1
 Testing: Precedence analysis returned 0

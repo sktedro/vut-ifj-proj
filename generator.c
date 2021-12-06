@@ -27,23 +27,6 @@ int exprEndCnt = 0;
 
 // --------------------------------------------------------------------------------
 
-
-
-
-int digits(int value) {
-
-  if(value == 0) {
-    return 1;
-  }
-
-  int result = 0;
-  while( value != 0 ) {
-    value /= 10;
-    result++;
-  }
-  return result;
-}
-
 // TODO %s ain't enough to reference a variable. Don't we need '?F@'
 // everywhere?
 
@@ -57,8 +40,8 @@ char *genName(char *name, int frame) {
 
   if(name[0] != '%') {
     char *frameNum;
-    GCMalloc(frameNum, sizeof(char) * (digits(frame) + 1));
-    sprintf(frameNum, "%d", frame);
+    GCMalloc(frameNum, sizeof(char) * (countDigits(frame) + 2));
+    sprintf(frameNum, "_%d", frame);
     char *newName;
     GCMalloc(newName, sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
     memcpy(newName, name, strlen(name));
@@ -95,7 +78,7 @@ char *stringConvert(char *string) {
         arr1[0] = '\0';
         arr2[0] = '\0';
         asciiValue = (int) string[i];
-        digitsTmp = digits(asciiValue);
+        digitsTmp = countDigits(asciiValue);
         
         arr1[0] = '\\';
         if(digitsTmp == 2) {

@@ -3,6 +3,6 @@ Testing: Token type is '0' and data 'varInt1'
 DEFVAR LF@%tmp0
 MOVE LF@%tmp0 int@2
 DEFVAR LF@%tmp1
-MUL LF@%tmp1 LF@varInt2 LF@%tmp0
+MUL LF@%tmp1 LF@varInt2_0 LF@%tmp0
 Testing: Expression result is in: (null)
 Testing: Precedence analysis returned 2

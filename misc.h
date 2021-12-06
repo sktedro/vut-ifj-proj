@@ -374,6 +374,8 @@ int getDataTypeFromString(char *str);
  */
 bool isIFJ21Keyword(Token *token);
 
+int countDigits(int value);
+
 /**
  * @brief Writes an error message to stdout and returns back the error code
  *

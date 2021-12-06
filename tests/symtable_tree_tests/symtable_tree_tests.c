@@ -16,7 +16,7 @@ void insert(char c){
   c2[0] = c;
   c2[1] = '\0';
   printf("Inserting '%s'\n", c2);
-  treeInsert(&tree, c2);
+  treeInsert(&tree, c2, 0);
 }
 
 void testFind(char *str){

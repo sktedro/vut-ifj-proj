@@ -7,6 +7,7 @@
 
 #include "int_buffer.h"
 #include "string_buffer.h"
+#include "generator.h"
 #include "misc.h"
 
 /**
@@ -14,10 +15,11 @@
  *
  * @param node: destination pointer
  * @param key key of the new node
+ * @param frame: number of the frame in which the variable is
  *
  * @return 0 if successful, errcode otherwise
  */
-int newSTTreeNode(STTreeNode **node, char *key) ForceRetUse;
+int newSTTreeNode(STTreeNode **node, char *key, int frame) ForceRetUse;
 
 /**
  * @brief Creates and inserts a new node to the tree, placing it accordingly to
@@ -25,10 +27,11 @@ int newSTTreeNode(STTreeNode **node, char *key) ForceRetUse;
  *
  * @param root node of the tree
  * @param name name (and key) of the new node
+ * @param frame: number of the frame in which the variable is
  *
  * @return 0 if successful, errcode otherwise
  */
-int treeInsert(STTreeNode **root, char *key) ForceRetUse;
+int treeInsert(STTreeNode **root, char *key, int frame) ForceRetUse;
 
 /**
  * @brief Replaces the target node with the rightmost node from the given

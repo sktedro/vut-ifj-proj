@@ -1,6 +1,6 @@
 Testing: Token type is '8' and data '('
 DEFVAR LF@%tmp0
-MUL LF@%tmp0 LF@varInt1 LF@varInt2
+MUL LF@%tmp0 LF@varInt1_0 LF@varInt2_0
 DEFVAR LF@%tmp1
 MOVE LF@%tmp1 int@1
 DEFVAR LF@%tmp2
@@ -12,7 +12,7 @@ MOVE LF@%tmp4 int@2
 DEFVAR LF@%tmp5
 SUB LF@%tmp5 LF@%tmp3 LF@%tmp4
 DEFVAR LF@%tmp6
-STRLEN LF@%tmp6 LF@varStr1
+STRLEN LF@%tmp6 LF@varStr1_0
 DEFVAR LF@%tmp7
 ADD LF@%tmp7 LF@%tmp5 LF@%tmp6
 DEFVAR LF@%tmp8
@@ -22,9 +22,9 @@ INT2FLOAT LF@%tmp9 LF@%tmp7
 DEFVAR LF@%tmp10
 DIV LF@%tmp10 LF@%tmp8 LF@%tmp9
 DEFVAR LF@%tmp11
-FLOAT2INT LF@%tmp11 LF@varNum1
+FLOAT2INT LF@%tmp11 LF@varNum1_0
 DEFVAR LF@%tmp12
-IDIV LF@%tmp12 LF@%tmp11 LF@varInt3
+IDIV LF@%tmp12 LF@%tmp11 LF@varInt3_0
 DEFVAR LF@%tmp13
 MOVE LF@%tmp13 int@2
 DEFVAR LF@%tmp14

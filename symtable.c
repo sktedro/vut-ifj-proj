@@ -58,7 +58,7 @@ void STPop(STStack *stack) {
  */
 int STInsert(STStack *stack, char *key) {
   STStackElem *frame = STStackTop(stack);
-  TryCall(treeInsert, &(frame->table), key);
+  TryCall(treeInsert, &(frame->table), key, stack->top->depth);
   return 0;
 }
 
@@ -161,11 +161,13 @@ void STSetName(STStack *stack, char *key, char *name) {
 }
 
 /**
- * @brief Returns name of STElement
+ * TODO make it return int and use a destptr
+ * @brief Returns name of STElement in ifjcode21
  * 
  * @param stack 
  * @param key 
- * @return char* 
+ *
+ * @return char*
  */
 char *STGetName(STStack *stack, char *key) {
   STElem *data = STFind(stack, key);
