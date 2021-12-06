@@ -1253,8 +1253,10 @@ int pExpr(char **retVarName) {
     
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
-    // TODO Code gen define a var, assign nil to it and return the name in
-    // retVarName
+    // Code gen define a var, assign nil and return the name in retVarName
+    *retVarName = genTmpVarDef();
+    // TODO what to insert as the last param? (char *frame)
+    genVarAssign(*retVarName, dt_nil, "nil", "TODO"); 
 
   } else if(strEq(token->data, "else")) {
     vypluj stashToken(&token); 
