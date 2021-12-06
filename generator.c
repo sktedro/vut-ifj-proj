@@ -172,6 +172,8 @@ int genMove(char *dest, char *src){
  * identifikátor, dátový typ, priradzovaná hodnota
  */
 int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
+
+
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;

@@ -1638,7 +1638,7 @@ int varDataType(char *varName){
 
   // if variable is not variable or doesnt exist
   if(varElement == NULL) {
-    vypluj err(-1); // TODO add err code
+    vypluj err(ID_DEF_ERR);
   }
 
   GetToken;
