@@ -1039,7 +1039,6 @@ int pRetArgList(char *fnName) {
   // 34. <retArgList>      -> eps
   // 35. <retArgList>      -> <expr> <retNextArg>
 
-  fprintf(stderr, "argdCount : %d\n", argsCount);
   for(int i = 0; i < argsCount + 1; i++) { //TODO please end my depression and suffering
     //zpracuj expression
     if(i != 0) {
@@ -1252,20 +1251,21 @@ int pExpr(char **retVarName) {
  
     TryCall(pFnCall, token->data);
     
-  } else if(token->type == t_idOrKeyword && strcmp(token->data, "nil") == 0) {
-    //vypluj stashToken(&token); TODO why stash?
-    vypluj 0;
+  // If it is a nil
+  } else if(strEq(token->data, "nil")) {
+    // TODO Code gen define a var, assign nil to it and return the name in
+    // retVarName
+
+  } else if(strEq(token->data, "else")) {
+    vypluj stashToken(&token); 
+
+  // A keyword
   } else if(token->type == t_idOrKeyword && isKeyword(token)) {
     vypluj err(SYNTAX_ERR);
+
+  // An expression
   } else {
-
-    
-    STElem *tmp = STFind(symtab, "x");
-    fprintf(stderr, "NAME: %s  TYPE: %d\n\n", tmp->name, tmp->varDataType);
-    fprintf(stderr, "--calling precedence analysis--\n\n");
     TryCall(parseExpression, symtab, token, &varName);
-    LOG("Result is stored in %s", varName);
-
   }
   vypluj 0;
 }
