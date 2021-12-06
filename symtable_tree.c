@@ -43,9 +43,9 @@ int newSTTreeNode(STTreeNode **node, char *key) {
   (*node)->data->fnParamTypesBuf = NULL;
   (*node)->data->fnParamNamesBuf = NULL;
   (*node)->data->fnRetTypesBuf = NULL;
-  intBufInit(&((*node)->data->fnParamTypesBuf));
-  stringBufInit(&((*node)->data->fnParamNamesBuf));
-  intBufInit(&((*node)->data->fnRetTypesBuf));
+  TryCall(intBufInit, &((*node)->data->fnParamTypesBuf));
+  TryCall(stringBufInit, &((*node)->data->fnParamNamesBuf));
+  TryCall(intBufInit, &((*node)->data->fnRetTypesBuf));
   vypluj 0;
 }
 

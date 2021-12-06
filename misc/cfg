@@ -2,7 +2,7 @@
 02. <req>                        -> "ifj21"
 03. 
 04. <codeBody>                   -> eps
-05. <codeBody>                   -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+05. <codeBody>                   -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
 06. <codeBody>                   -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
 07. <codeBody>                   -> [id] <fnCall> <codeBody>
 08. 
@@ -26,10 +26,10 @@
 26. <nextAssign>                 -> , [id] <nextAssign> <expr> ,
 27. <nextAssign>                 -> =
 28. 
-29. <fnArgList>                  -> eps
-30. <fnArgList>                  -> [id] : [type] <nextFnArg>
-31. <nextFnArg>                  -> eps
-32. <nextFnArg>                  -> , [id] : [type] <nextFnArg>
+29. <fnDefinitionParamTypeList>  -> eps
+30. <fnDefinitionParamTypeList>  -> [id] : [type] <nextFnDefinitionParamType>
+31. <nextFnDefinitionParamType>  -> eps
+32. <nextFnDefinitionParamType>  -> , [id] : [type] <nextFnDefinitionParamType>
 33. 
 34. <retArgList>                 -> eps
 35. <retArgList>                 -> <expr> <retNextArg>
@@ -37,9 +37,9 @@
 37. <retNextArg>                 -> , <expr> <retNextArg>
 38. 
 39. <fnDeclarationParamTypeList> -> eps
-40. <fnDeclarationParamTypeList> -> [type] <nextDeclarationParamType>
-41. <nextDeclarationParamType>   -> eps
-42. <nextDeclarationParamType>   -> , [type] <nextParamType>
+40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
+41. <nextFnDeclarationParamType> -> eps
+42. <nextFnDeclarationParamType> -> , [type] <nextFnDeclarationParamType>
 43. 
 44. <fnRetTypeList>              -> eps 
 45. <fnRetTypeList>              -> : [type] <nextRetType>

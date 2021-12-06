@@ -14,7 +14,7 @@
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufInit(StringBuffer **buf);
+int stringBufInit(StringBuffer **buf) ForceRetUse;
 
 /**
  * @brief Append a new string to the buffer
@@ -24,7 +24,7 @@ int stringBufInit(StringBuffer **buf);
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufAppend(StringBuffer *buf, char *str);
+int stringBufAppend(StringBuffer *buf, char *str) ForceRetUse;
 
 #endif
 /* end of file string_buffer.h */

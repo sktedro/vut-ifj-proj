@@ -26,12 +26,12 @@
  * pStat              how to program the while cycle?
  * pStatWithId        might work
  * pNextAssign        might work
- * pFnArgList         might work but dependant on type
- * pNextFnArg         might work but dependant on type
+ * pFnDefinitionParamTypeList         might work but dependant on type
+ * pNextFnDefinitionParamType         might work but dependant on type
  * pRetArgList        
  * pRetNextArg        
  * pFnDeclarationParamTypeList 
- * pNextDeclarationParamType   
+ * pNextFnDeclarationParamType   
  * pFnRetTypeList   
  * pNextRetType     
  * pNewIdAssign
@@ -122,7 +122,7 @@ int pReq() {
  * @return int - 0 if success, else on error
  *
  * 04. <codeBody>        -> eps
- * 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+ * 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
  * 06. <codeBody>        -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
  */
@@ -140,7 +140,7 @@ int pCodeBody() {
     vypluj 0;
   }
 
-  // 05. <codeBody>        -> function [id] ( <fnArgList> ) <fnRetTypeList> <stat> end <codeBody>
+  // 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -155,8 +155,8 @@ int pCodeBody() {
     // (
     RequireTokenType(t_leftParen);
 
-    // <fnArgList>
-    TryCall(pFnArgList, fnName);
+    // <fnDefinitionParamTypeList>
+    TryCall(pFnDefinitionParamTypeList, fnName);
 
     // )
     RequireTokenType(t_rightParen);
@@ -912,10 +912,10 @@ int pNextAssign() {
  *
  * @return error code
  *
- * 29. <fnArgList>       -> eps
- * 30. <fnArgList>       -> [id] : [type] <nextFnArg>
+ * 29. <fnDefinitionParamTypeList>       -> eps
+ * 30. <fnDefinitionParamTypeList>       -> [id] : [type] <nextFnDefinitionParamType>
  */
-int pFnArgList(char *fnName) {
+int pFnDefinitionParamTypeList(char *fnName) {
   RuleFnInit;
   int paramCount = 0;
 
@@ -929,7 +929,7 @@ int pFnArgList(char *fnName) {
     vypluj 0;
   }
 
-  // -> [id] : [type] <nextFnArg>
+  // -> [id] : [type] <nextFnDefinitionParamType>
 
   // [id]
   // Append the name of the new parameter to the symtable
@@ -960,8 +960,8 @@ int pFnArgList(char *fnName) {
     LOG("type: %d\n", STGetParamType(symtab, fnName, 0));
   }
   
-  // <nextFnArg>
-  vypluj pNextFnArg(fnName, paramCount);
+  // <nextFnDefinitionParamType>
+  vypluj pNextFnDefinitionParamType(fnName, paramCount);
 }
 
 /**
@@ -969,10 +969,10 @@ int pFnArgList(char *fnName) {
  *
  * @return error code
  *
- * 31. <nextFnArg>       -> eps
- * 32. <nextFnArg>       -> , [id] : [type] <nextFnArg>
+ * 31. <nextFnDefinitionParamType>       -> eps
+ * 32. <nextFnDefinitionParamType>       -> , [id] : [type] <nextFnDefinitionParamType>
  */
-int pNextFnArg(char *fnName, int paramCount) {
+int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   RuleFnInit;
 
   // ,
@@ -985,7 +985,7 @@ int pNextFnArg(char *fnName, int paramCount) {
     vypluj 0;
   }
 
-  // -> , [id] : [type] <nextFnArg>
+  // -> , [id] : [type] <nextFnDefinitionParamType>
 
   // [id]
   // Must be an ID
@@ -1009,8 +1009,8 @@ int pNextFnArg(char *fnName, int paramCount) {
   // [type]
   TryCall(typeFnCall, fnName, paramCount);
 
-  // <nextFnArg>
-  vypluj pNextFnArg(fnName, paramCount);
+  // <nextFnDefinitionParamType>
+  vypluj pNextFnDefinitionParamType(fnName, paramCount);
 }
 
 /**
@@ -1089,7 +1089,7 @@ int pRetNextArg() {
  *
  *
  * 39. <fnDeclarationParamTypeList> -> eps
- * 40. <fnDeclarationParamTypeList> -> [type] <nextDeclarationParamType>
+ * 40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
  */
 int pFnDeclarationParamTypeList(char *fnName) {
   RuleFnInit;
@@ -1104,8 +1104,8 @@ int pFnDeclarationParamTypeList(char *fnName) {
     vypluj 0;
   }
 
-  // 40. <fnDeclarationParamTypeList> -> [type] <nextDeclarationParamType>
-  LOG("-> [type] <nextDeclarationParamType>");
+  // 40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
+  LOG("-> [type] <nextFnDeclarationParamType>");
   int paramCount = 1;
   
   // [type]
@@ -1113,8 +1113,8 @@ int pFnDeclarationParamTypeList(char *fnName) {
 
   // tu musíme ocheckovať či token neni prava zatvorka alebo čo, idk
 
-  // <nextDeclarationParamType>
-  TryCall(pNextDeclarationParamType, fnName, paramCount);
+  // <nextFnDeclarationParamType>
+  TryCall(pNextFnDeclarationParamType, fnName, paramCount);
 
   return 0;
 }
@@ -1122,15 +1122,15 @@ int pFnDeclarationParamTypeList(char *fnName) {
 /**
  *
  *
- * 41. <nextDeclarationParamType>   -> eps
- * 42. <nextDeclarationParamType>   -> , [type] <nextParamType>
+ * 41. <nextFnDeclarationParamType>   -> eps
+ * 42. <nextFnDeclarationParamType>   -> , [type] <nextFnDeclarationParamType>
  */
-int pNextDeclarationParamType(char *fnName, int paramCount) {
+int pNextFnDeclarationParamType(char *fnName, int paramCount) {
   RuleFnInit;
 
   GetToken;
 
-  // 41. <nextDeclarationParamType>   -> eps
+  // 41. <nextFnDeclarationParamType>   -> eps
   if(token->type != t_comma){
     printToken(token);
     LOG("eps");
@@ -1138,14 +1138,14 @@ int pNextDeclarationParamType(char *fnName, int paramCount) {
     vypluj 0;
   }
 
-  // 42. <nextDeclarationParamType>   -> , [type] <nextParamType>
+  // 42. <nextFnDeclarationParamType>   -> , [type] <nextFnDeclarationParamType>
   paramCount++;
 
   LOG();
   TryCall(typeFnCall, fnName, paramCount); // TODO might be wrong?
   
   LOG();
-  TryCall(pNextDeclarationParamType, fnName, paramCount);
+  TryCall(pNextFnDeclarationParamType, fnName, paramCount);
 
   LOG();
   return 0;
