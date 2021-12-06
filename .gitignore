@@ -1,4 +1,6 @@
 vgcore*
+.vscode
+*.save
 automake
 *.swp
 build/
