@@ -34,7 +34,6 @@ OUTPUTDIR=./build
 all:
 	mkdir -p $(OUTPUTDIR)
 	$(CC) $(MAIN) $(LIBS) -o $(OUTPUTDIR)/main $(CFLAGS)
-	# $(CC) $(MAIN) $(LIBS) -o main $(CFLAGS)
 
 
 .PHONY: run

@@ -594,7 +594,8 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
       (*newSymbol)->isId = true;
       (*newSymbol)->dataType = STGetVarDataType(symtab, token->data);
       // Get the variables name (in ifjcode21) from the symbol table
-      char *varName = STGetName(symtab, token->data);
+      char *varName;
+      TryCall(STGetName, symtab, &varName, token->data);
       GCMalloc((*newSymbol)->data, sizeof(char) * (strlen(varName) + 1));
       memcpy((*newSymbol)->data, varName, strlen(varName) + 1);
 

@@ -41,7 +41,7 @@ void STPop(STStack *stack);
  * @param key 
  * @param name 
  */
-int STSetName(STStack *stack, char *key, char *name);
+int STSetName(STStack *stack, char *key, char *name) ForceRetUse;
 
 /**
  * @brief Returns name of STElement
@@ -50,7 +50,7 @@ int STSetName(STStack *stack, char *key, char *name);
  * @param key 
  * @return char* 
  */
-char *STGetName(STStack *stack, char *key);
+int STGetName(STStack *stack, char **destPtr, char *key) ForceRetUse;
 
 /**
  * @brief Insert a new element to the symbol table (at the top of the stack)
@@ -60,7 +60,7 @@ char *STGetName(STStack *stack, char *key);
  *
  * @return 0 if successful, errcode otherwise
  */
-int STInsert(STStack *stack, char *key) ForceRetUse;
+int STInsert(STStack *stack, char *key) ForceRetUse ForceRetUse;
 
 /**
  * @brief Finds element in tree by key and return its data as a pointer
@@ -80,7 +80,7 @@ STElem *STFind(STStack *stack, char *key);
  * @param key (name) of the symbol table element
  * @param val boolean - true if it is a variable, false if it is a function
  */
-void STSetIsVariable(STStack *stack, char *key, bool val);
+int STSetIsVariable(STStack *stack, char *key, bool val) ForceRetUse;
 
 /**
  * @brief Set data type of a variable in a symbol table
@@ -89,7 +89,7 @@ void STSetIsVariable(STStack *stack, char *key, bool val);
  * @param key (name) of the symbol table element
  * @param type - data type the element represents
  */
-void STSetVarDataType(STStack *stack, char *key, int type);
+int STSetVarDataType(STStack *stack, char *key, int type) ForceRetUse;
 
 /**
  * @brief Set address of a variable in a symbol table
@@ -98,7 +98,7 @@ void STSetVarDataType(STStack *stack, char *key, int type);
  * @param key (name) of the symbol table element
  * @param address - new address of the element
  */
-void STSetVarAddress(STStack *stack, char *key, int address);
+int STSetVarAddress(STStack *stack, char *key, int address) ForceRetUse;
 
 /**
  * @brief Use to mark a function as defined
@@ -107,7 +107,7 @@ void STSetVarAddress(STStack *stack, char *key, int address);
  * @param key (name) of the symbol table element
  * @param fnDefined - boolean value to be written to STElem->fnDefined
  */
-void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
+int STSetFnDefined(STStack *stack, char *key, bool fnDefined) ForceRetUse;
 
 /**
  * @brief Use to mark a function as declared 
@@ -116,7 +116,7 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
  * @param key (name) of the symbol table element
  * @param fnDeclared - boolean value to be written to STElem->fnDeclared
  */
-void STSetFnDeclared(STStack *stack, char *key, bool fnDeclared);
+int STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) ForceRetUse;
 
 /**
  * @brief Appends a data type of a paramter of a function
@@ -138,7 +138,7 @@ int STAppendParamType(STStack *stack, char *key, int paramType) ForceRetUse;
  *
  * @return 0 if successful, errcode otherwise
  */
-int STAppendParamName(STStack *stack, char *key, char *paramName);
+int STAppendParamName(STStack *stack, char *key, char *paramName) ForceRetUse;
 
 /**
  * @brief Appends a data type of a return value of a function
@@ -246,7 +246,7 @@ int STGetRetType(STStack *stack, char *key, int index);
  *
  * @return 0 if successful, errcode otherwise
  */
-int STGetParamName(STStack *stack, char **destPtr, char *key, int index);
+int STGetParamName(STStack *stack, char **destPtr, char *key, int index) ForceRetUse;
 
 #endif
 /* end of file symtable.h */

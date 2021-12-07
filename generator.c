@@ -156,7 +156,6 @@ char *stringConvert(char *string) {
   char *newString;
   GCMalloc(newString, sizeof(char) * (strlen(string)*3));
   int asciiValue = 0;
-  int digitsTmp = 0;
   int k = 0;
   
   for(int i=0; i<(int) strlen(string); i++) {
@@ -164,23 +163,11 @@ char *stringConvert(char *string) {
     if((*string >= 'a' && *string <= 'z') || (*string >= 'A' && *string <= 'Z') || (*string >= '0' && *string <= '9')) {
         newString[k] = string[i];
     } else {
-        char arr1[5];
-        char arr2[5];
-
-        arr1[0] = '\0';
-        arr2[0] = '\0';
         asciiValue = (int) string[i];
-        digitsTmp = countDigits(asciiValue);
-        
-        arr1[0] = '\\';
-        if(digitsTmp == 2) {
-          arr1[1] = 0;
-        }
-
-        sprintf(arr2, "%d", asciiValue);
-        strcat(arr1, arr2);
-        strcat(newString, arr1);
-        k +=4;
+        char arr[5];
+        sprintf(arr, "\\%03d", asciiValue);
+        strcat(newString, arr);
+        k += 4;
     }
   }
   return newString;
@@ -283,10 +270,10 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
     printf("MOVE %s@%s float@%a\n",frame, name, val);
   
   } else if(dataType == dt_string) {
-    printf("MOVE %s@%s string@%s\n",frame, name, assignValue);
+    printf("MOVE %s@%s string@%s\n",frame, name, stringConvert(assignValue));
   
   } else if(strcmp(assignValue, "nil") == 0) {
-    printf("MOVE %s@%s nil@nil\n",frame, name);
+    printf("MOVE %s@%s nil@nil\n", frame, name);
   
   } else if(strcmp(assignValue, "readi") == 0) {
     printf("READ %s@%s int\n",frame, name);
@@ -298,10 +285,9 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
     printf("READ %s@%s string\n",frame, name);
   
   } else if(dataType == -1) {
-    // TODO change TF to LF if expression variable is in local frame
-    printf("MOVE %s@%s TF@%s",frame, name, assignValue);
+    printf("MOVE %s@%s %s@%s\n",frame, name, frame, assignValue);
   } else {
-    return ERR(-1); // TODO errcode??? huh
+    return ERR(INTERN_ERR);
   }
 
   return 0;
@@ -309,7 +295,7 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
 
 char *genType(char *varName){
   char *newVarName = genTmpVarDef();
-  printf("TYPE %s %s\n", newVarName, varName);
+  printf("TYPE LF@%s LF@%s\n", newVarName, varName);
   return newVarName;
 }
 
@@ -392,13 +378,13 @@ void genConditionalJump(char *label, char *varName, bool condition){
   char *typeVarName = genType(varName);
 
   // if(typeVarName == "nil") jump falseLabelName
-  printf("JUMPIFEQ %s %s \"nil\"\n", falseLabelName, typeVarName);
+  printf("JUMPIFEQ %s LF@%s string@nil\n", falseLabelName, typeVarName);
 
   // if(typeVarName != "bool") jump trueLabelName
-  printf("JUMPIFNEQ %s %s \"bool\"\n", trueLabelName, typeVarName);
+  printf("JUMPIFNEQ %s LF@%s string@bool\n", trueLabelName, typeVarName);
 
   // if(varName == false) jump falseLabelName
-  printf("JUMPIFEQ %s %s false\n", falseLabelName, varName);
+  printf("JUMPIFEQ %s LF@%s bool@false\n", falseLabelName, varName);
   
   // trueLabelName:
   genLabel(trueLabelName);
@@ -543,7 +529,7 @@ void genWrite(char *name) {
     * writeCount++;
     */
   // tedro: nestačí to takto?
-  printf("WRITE %s\n", name);
+  printf("WRITE TF@%s\n", name);
 }
 
 int genReadFunction(char *varName, char *builtInFnName) {

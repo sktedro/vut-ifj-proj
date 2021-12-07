@@ -140,7 +140,7 @@ int pCodeBody() {
     // labels
     char *fnBypassLabelName = genLabelName();
     char *varDefStart = genLabelName();
-    char *fnCodeStart = genLabelName();
+    char *varDefJumpBack = genLabelName();
     char *varDefBypass = genLabelName();
 
     // Code gen Create an unconditional jump behind the function
@@ -154,6 +154,14 @@ int pCodeBody() {
     TryCall(newFunctionDefinition, fnName);
     genFnDef(fnName);
 
+    // generate an unconditional jump to definitions
+    genComment("Jumping to variable declaration");
+    genUnconditionalJump(varDefStart);
+   
+    // start of fn body code
+    genComment("Jump back here from declarations");
+    genLabel(varDefJumpBack);
+    
     // (
     RequireTokenType(t_leftParen);
 
@@ -170,14 +178,6 @@ int pCodeBody() {
     createParamVariables(fnName);
     // TODO
 
-    // generate an unconditional jump to definitions
-    genComment("Jumping to variable declaration");
-    genUnconditionalJump(varDefStart);
-
-    // start of fn body code
-    genComment("Function body starts here");
-    genLabel(fnCodeStart);
-
     // <stat>
     TryCall(pStat, fnName);
 
@@ -193,8 +193,8 @@ int pCodeBody() {
     for(int i = 0; i < varDefBuff->len; i++) {
       genVarDefLF(varDefBuff->data[i]);
     }
-    genComment("jump to fn body code start");
-    genUnconditionalJump(fnCodeStart);
+    genComment("Jump from var declarations");
+    genUnconditionalJump(varDefJumpBack);
 
     // end of function label
     genComment("Skip variable declaration");
@@ -205,9 +205,10 @@ int pCodeBody() {
     genReturnInstruction();
 
     // Code gen Create a label here, behind the function
-    genLabel(fnBypassLabelName);
+   
     genComment2("Function definition done");
-
+    genLabel(fnBypassLabelName);
+    
     // <codeBody>
     TryCall(pCodeBody);
   }
@@ -281,31 +282,40 @@ int pFnCall(char *fnName) {
 
   // (
   RequireTokenType(t_leftParen);
-  
-  genComment("Calling a function");
 
-  genFnCallInit();
+  if(strEq(fnName, "write")){
+    genComment("Calling write functions");
+    resetParamCounter();
+    genFnCallInit();
+    TryCall(pFnCallArgList, fnName);
+    //genPopframe();
 
-  genComment("Processing function call arguments");
-  resetParamCounter();
-  TryCall(pFnCallArgList, fnName);
-  genComment2("Processing function call arguments done");
+  }else{
+    genComment("Calling a function");
+
+    genFnCallInit();
+
+    genComment("Processing function call arguments");
+    resetParamCounter();
+    TryCall(pFnCallArgList, fnName);
+    genComment2("Processing function call arguments done");
+
+    // Get the function element from the symtable
+    STElem *fnElement = STFind(symtab, fnName);
+    if(!fnElement){
+      return ERR(SYNTAX_ERR);
+    }
+
+    genFnCall(fnName);
+    retVarCounter = 0;
+    resetParamCounter();
+    assigmentCounter = 0;
+    assigmentGeneratedCounter = 0;
+  }
 
   // )
   RequireTokenType(t_rightParen);
-  
-  // Get the function element from the symtable
-  STElem *fnElement = STFind(symtab, fnName);
-  if(!fnElement){
-    return ERR(SYNTAX_ERR);
-  }
-
-  genFnCall(fnName);
-  retVarCounter = 0;
-  resetParamCounter();
-  assigmentCounter = 0;
-  assigmentGeneratedCounter = 0;
-
+    
   vypluj 0;
 }
 
@@ -412,11 +422,10 @@ int pFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
 
   GetToken;
-
-  // STElem *fn = STFind(symtab, fnName); TODO UNUSED VARIABLE
-
   int dataType = -1;
+  char *paramName = genParamVarName();
 
+  // Pass a parameter to the function
   // -> [id]
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     LOG("-> [id]\n");
@@ -425,10 +434,10 @@ int pFnCallArg(char *fnName, int argCount) {
     //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
     // TODO shouldn't we use this?
 
-    char *paramVarName = genParamVarName();
-    char *varName = STGetName(symtab, token->data);
-    genVarDefTF(paramVarName);
-    genPassParam(paramVarName, varName);
+    char *varName = NULL;
+    TryCall(STGetName, symtab, &varName, token->data);
+    genVarDefTF(paramName);
+    genPassParam(paramName, varName);
 
   // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -442,30 +451,24 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_string;
     }
 
-    char *name = genParamVarName();
-    genVarDefTF(name);
-    genAssignLiteral(name, dataType, token->data, "TF");
+    genVarDefTF(paramName);
+    genAssignLiteral(paramName, dataType, token->data, "TF");
 
   } else {
-    LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
     if(token->type == t_idOrKeyword) {
       vypluj ERR(ID_DEF_ERR);
     }
-    LOG("Function call argument is not an ID nor literal");
     vypluj ERR(SYNTAX_ERR);
   }
 
   // 'Write' built in function
   if(strEq(fnName, "write")){
-    writeFunction(token, dataType);
-  }
+    genWrite(paramName);
 
   // A parameter data type doesn't match
-  if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
-    if(!strEq(fnName, "write")){
-      LOG("Param data type doesn't match\n");
-      vypluj ERR(SYNTAX_ERR);
-    }
+  }else if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
+    LOG("Param data type doesn't match\n");
+    vypluj ERR(SYNTAX_ERR);
   }
 
   vypluj 0;
@@ -506,10 +509,12 @@ int pStat(char *fnName) {
     // Insert the new ID to the symtable
     char *newVarName = token->data;
     TryCall(STInsert, symtab, newVarName);
-    STSetIsVariable(symtab, newVarName, true);
-    STSetName(symtab, newVarName, genVarName(token->data, symtab->top->depth));
+    TryCall(STSetIsVariable, symtab, newVarName, true);
+    TryCall(STSetName, symtab, newVarName, genVarName(token->data, symtab->top->depth));
     // Code gen variable definition
-    TryCall(condAppendToStringBuff, STGetName(symtab, newVarName));
+    char *name;
+    TryCall(STGetName, symtab, &name, newVarName);
+    TryCall(condAppendToStringBuff, name);
 
     // :
     RequireTokenType(t_colon);
@@ -646,7 +651,7 @@ int pStat(char *fnName) {
     LOG("<stat>            -> [id] <statWithId> <stat>\n");
     // TODO kopnite Alexa ak na to ešte nespravil funkciu
     if(assignmentElement->name == NULL) {
-      assignmentElement->name = STGetName(symtab, token->data);
+      TryCall(STGetName, symtab, &assignmentElement->name, token->data);
       assignmentElement->first = true;
       assignmentElement->label = getExprLabelName(0);
       assignmentElement->prev = NULL;
@@ -715,14 +720,15 @@ int pStatWithId(char *idName) {
     // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
      else if (token->type == t_comma) {
-      
+      //AListDebugPrint(assignmentElement);
       if(AListGetLength(assignmentElement) == 0) {
-        assignmentElement->name = STGetName(symtab, idName);
+        TryCall(STGetName, symtab, &assignmentElement->name, idName);
         assignmentElement->end = getExprEndName();
         assignmentElement->first = true;
         assignmentElement->label = getExprLabelName(assigmentCounter);
         assignmentElement->next = NULL;
         assigmentCounter++;
+        //AListDebugPrint(assignmentElement);
       }
       // [id]
       RequireTokenType(t_idOrKeyword);
@@ -732,8 +738,9 @@ int pStatWithId(char *idName) {
       }
 
       // Get their names (in the generated code)
-      char *id1Var = STGetName(symtab, idName);
-      char *id2Var = STGetName(symtab, token->data);
+      char *id1Var, *id2Var; 
+      TryCall(STGetName, symtab, &id1Var, idName);
+      TryCall(STGetName, symtab, &id2Var, token->data);
 
 
       AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
@@ -745,16 +752,28 @@ int pStatWithId(char *idName) {
       // <expr>
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
+      AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName);
-      genAssignLiteral(id2Var, -1, retVarName, "LF");
 
+      if(retVarName == NULL) {
+        vypluj err(SYNTAX_ERR);
+      }
+      
+      genAssignLiteral(id2Var, -1, retVarName, "LF");
+      //alex
       // ,
       RequireTokenType(t_comma);
 
       // <expr>
       // Call the shift-reduce parser and assign the result to id1Var
       retVarName = NULL;
+      AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName);
+
+      if(retVarName == NULL) {
+        vypluj err(SYNTAX_ERR);
+      }
+
       genAssignLiteral(id1Var, -1, retVarName, "LF");
 
     }else{
@@ -795,7 +814,9 @@ int pNextAssign() {
     vypluj ERR(SYNTAX_ERR);
   }
 
-  AListAdd(&assignmentElement, STGetName(symtab, token->data), getExprLabelName(assigmentCounter), false, NULL);
+  char *name;
+  TryCall(STGetName, symtab, &name, token->data);
+  AListAdd(&assignmentElement, name, getExprLabelName(assigmentCounter), false, NULL);
   assigmentCounter++;
 
   // <nextAssign>
@@ -812,6 +833,10 @@ int pNextAssign() {
   char *varName = AListGetElementByIndex(assignmentElement, assigmentGeneratedCounter)->name;
   char *retVarName;
   TryCall(pExpr, &retVarName);
+  
+  if(retVarName == NULL) {
+    vypluj err(SYNTAX_ERR);
+  }
   LOG("WE BACK");
   genMove(varName, retVarName);
 
@@ -849,10 +874,10 @@ int pFnDefinitionParamTypeList(char *fnName) {
 
   // [id]
   // Append the name of the new parameter to the symtable
-  STAppendParamName(symtab, fnName, token->data);
+  TryCall(STAppendParamName, symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
-  STSetIsVariable(symtab, token->data, true);
-  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
+  TryCall(STSetIsVariable, symtab, token->data, true);
+  TryCall(STSetName, symtab, token->data, genVarName(token->data, symtab->top->depth));
   paramCount++;
 
   // :
@@ -898,10 +923,10 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   RequireIDToken(token);
   paramCount++;
   // Append the name of the new parameter to the symtable
-  STAppendParamName(symtab, fnName, token->data);
+  TryCall(STAppendParamName, symtab, fnName, token->data);
 
   TryCall(STInsert, symtab, token->data);
-  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
+  TryCall(STSetName, symtab, token->data, genVarName(token->data, symtab->top->depth));
   // TODO uncomment if it is correct
   // genVarDef(STGetName(symtab, token->data));
 
@@ -1106,10 +1131,8 @@ int pFnRetTypeList(char *fnName) {
  * 47. <pNextRetType>     -> , [type] <nextRetType>
  */
 int pNextRetType(char *fnName) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
-  LOG();
+  RuleFnInit;
 
-  Token *token;
   GetToken;
 
   // eps
@@ -1235,7 +1258,6 @@ int condAppendToStringBuff(char *name) {
  * @return true if the string represents a data type
  */
 bool isDataType(char *data) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
   if (   strcmp(data, "string") == 0
@@ -1256,7 +1278,6 @@ bool isDataType(char *data) {
  * @return false otherwise
  */
 bool isReadFunction(char *data) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
   if(    strcmp(data, "readi") == 0 
@@ -1344,9 +1365,9 @@ int newFunctionDefinition(char *fnName) {
   } else {
     LOG("Adding to the symtable (definition)");
     TryCall(STInsert, symtab, fnName);
-    STSetIsVariable(symtab, fnName, false);
-    STSetFnDefined(symtab, fnName, true);
-    STSetName(symtab, fnName, genLabelName());
+    TryCall(STSetIsVariable, symtab, fnName, false);
+    TryCall(STSetFnDefined, symtab, fnName, true);
+    TryCall(STSetName, symtab, fnName, genLabelName());
     
   }
   vypluj 0;
@@ -1367,9 +1388,9 @@ int newFunctionDeclaration(char *fnName) {
   } else {
     LOG("Adding declaration of %s (function) to the symtable", fnName);
     TryCall(STInsert, symtab, fnName);
-    STSetIsVariable(symtab, fnName, false);
-    STSetFnDeclared(symtab, fnName, true);
-    STSetName(symtab, fnName, genLabelName());
+    TryCall(STSetIsVariable, symtab, fnName, false);
+    TryCall(STSetFnDeclared, symtab, fnName, true);
+    TryCall(STSetName, symtab, fnName, genLabelName());
   }
   vypluj 0;
 }
@@ -1392,12 +1413,12 @@ bool isLiteral(Token *token) {
  *  
  */
 int writeFunction(Token *token, int dataType) {
-  fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
   // TODO alex pozri či môže byť - tedro
   char *varName;
   
+  // Parametre sme passli v predchádzajúcej funkcii tak tu toto netreba, či?
   if(isLiteral(token)) {
     varName = genTmpVarDef();
     genAssignLiteral(varName, dataType, token->data, "TODO");
@@ -1405,12 +1426,9 @@ int writeFunction(Token *token, int dataType) {
     if(!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
       vypluj ERR(SYNTAX_ERR); // TODO check if good err code
     }
-    varName = STGetName(symtab, token->data);
+    TryCall(STGetName, symtab, &varName, token->data);
   }
 
-  // TODO Namiesto generovania WRITE potrebujeme toto passnuť ako argument do 
-  // write funkcie
-  // Ale ako budeme vo write funkcii vedieť, koľko parametrov máme??
   genWrite(varName);
 
   vypluj 0;
@@ -1422,7 +1440,6 @@ int writeFunction(Token *token, int dataType) {
  * @return
  */
 int fnRetDataType(char *fnName){
-  fprintf(stderr, "-----------------------------------------------------------\n");
   LOG("fnName: %s", fnName);
 
   Token *token = NULL;
@@ -1472,7 +1489,6 @@ int fnDeclarationParamType(char *fnName, char *data) {
  * TODO comment
 */
 int fnDefinitionParamType(char *fnName, int paramCount){
-  fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
@@ -1501,15 +1517,12 @@ int fnDefinitionParamType(char *fnName, int paramCount){
   // Set the data type of the variable we created for passing the param
   char *varName;
   TryCall(STGetParamName, symtab, &varName, fnName, paramCount - 1);
-  STSetVarDataType(symtab, varName, dataType);
+  TryCall(STSetVarDataType, symtab, varName, dataType);
 
   return 0;
 }
 
 int varDataType(char *varName){
-  fprintf(stderr, "TYPEVAR-----------------------------------------------\n");
-  fprintf(stderr, "varname : %s \n", varName);
-
   Token *token;
   STElem *varElement = STFind(symtab, varName);
 
@@ -1597,12 +1610,9 @@ int createParamVariables(char *fnName){
   
   for(int i = 0; i < paramCount; i++){
     char *paramName;
-    STGetParamName(symtab, &paramName, fnName, i);
-    if(!paramName){
-      vypluj ERR(SYNTAX_ERR);
-    }
+    TryCall(STGetParamName, symtab, &paramName, fnName, i);
     STElem *paramVar = STFind(symtab, paramName);
-    genVarDefLF(paramVar->name);
+    TryCall(condAppendToStringBuff, paramVar->name);
 
     // Assign parameters to the defined variables
     genMove(paramVar->name, genParamVarName());

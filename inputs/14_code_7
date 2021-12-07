@@ -1,14 +1,14 @@
 require "ifj21"
 
-global g : function (integer, integer) : integer, string
+-- global print : function (integer, string, number) : integer, string
 
-function f(x : integer)
-    local i: integer = 5
-    g(x, i)
+function f(i : integer)
+    write(i)
 end
 
-function g(x : integer, i: integer) : integer, string
-    return x, "huhu"
-end
+--function print(i : integer, s: string, n: number) : integer, string
+--    write(i, s, n)
+    -- return x, "huhu"
+--end
 
 f(10)

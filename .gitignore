@@ -1,4 +1,5 @@
 vgcore*
+tmp*
 .vscode
 *.save
 automake

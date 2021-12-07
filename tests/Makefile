@@ -3,20 +3,21 @@ CFLAGS=-g -Wno-unused-result
 
 
 LIBS=\
+../assignment.c \
+../built_in_functions.c \
 ../char_buffer.c \
+../generator.c \
 ../int_buffer.c \
 ../misc.c \
 ../parser.c \
 ../precedence_analysis.c \
 ../scanner.c \
+../string_buffer.c \
 ../symbol_stack.c \
 ../symtable.c \
-../generator.c \
 ../symtable_stack.c \
 ../symtable_tree.c \
-../token.c \
-../assignment.c \
-../string_buffer.c
+../token.c
 
 
 .PHONY: none

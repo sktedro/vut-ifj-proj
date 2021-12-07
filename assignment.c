@@ -11,11 +11,6 @@ int AListInit(AssignElement **element) {
   GCMalloc((*element)->name, sizeof(char) * 30);
   GCMalloc((*element)->label, sizeof(char) * 30);
   GCMalloc((*element)->end, sizeof(char) * 30);
-  // toto netreba. GCMalloc checkuje či sa podarilo alokovať
-  // TODO Komentár vymazať po prečítaní alexom
-  // if (!(*element)) {
-  //   return ERR(INTERN_ERR);
-  // }
   
   (*element)->next = NULL;
   (*element)->prev = NULL;
@@ -56,6 +51,61 @@ int AListGetLength(AssignElement *element) {
   }
 
   return cnt;
+}
+
+char *printBool(bool val) {
+  char *data;
+  GCMalloc(data, sizeof(char) * 10);
+
+  if(val == true) {
+    strcpy(data, "true");
+    return data;
+  } else if(val == false) {
+    strcpy(data, "false");
+    return data;
+  }
+  vypluj NULL;
+}
+
+char *printIfNUll(AssignElement *element) {
+  char *data;
+
+  GCMalloc(data, sizeof(char) * 10);
+
+  if(element == NULL) {
+      strcpy(data, "(NULL)");
+  } else {
+      strcpy(data, "exists");
+  }
+
+  vypluj data;
+}
+
+void AListPrintElement(AssignElement *element, int num) {
+  printf("Element %d name : %s\n", num, element->name);
+  printf("Element %d label : %s\n", num, element->label);
+  printf("Element %d is generated : %s\n", num, printBool(element->generated));
+  printf("Element %d is first : %s\n",num, printBool(element->first));
+  printf("Element %d has next : %s\n",num, printIfNUll(element->next));
+  printf("Element %d has previous : %s\n",num, printIfNUll(element->prev));
+}
+
+void AListDebugPrint(AssignElement *element) {
+  AssignElement *tmp = element;
+  int cnt = 0;
+
+  if(tmp == NULL) {
+    printf("AList is NULL\n");
+    printf("AList len in %d\n", cnt);
+  } else {
+
+    while(tmp != NULL) {
+      cnt++;
+      AListPrintElement(tmp, cnt);
+      tmp = tmp->next;
+    }
+  }
+  printf("-----------DONE-------------\n");
 }
 
 AssignElement *AListGetElementByIndex(AssignElement *element, int index) {

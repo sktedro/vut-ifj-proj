@@ -107,6 +107,7 @@ LABEL _STR$ERROR_                                                            \n\
 LABEL _STR$RET_                                                              \n\
     POPFRAME                                                                 \n\
     RETURN                                                                   \n\
+                                                                             \n\
 ";
 
 char *ord = "                                                                \n\
@@ -150,6 +151,7 @@ LABEL *ordEnd                                                                \n\
   DEFVAR LF@!ret_0                                                           \n\
   MOVE LF@!ret_0 TF@result                                                   \n\
   RETURN                                                                     \n\
+                                                                             \n\
 ";
 
 char *chr = "                                                                \n\
@@ -190,6 +192,7 @@ LABEL _CHR$RET_                                                              \n\
                                                                              \n\
   POPFRAME                                                                   \n\
   RETURN                                                                     \n\
+                                                                             \n\
 ";
 
 #endif
