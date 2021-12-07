@@ -141,10 +141,14 @@ int pCodeBody() {
   if(strcmp(token->data, "function") == 0) {
     genComment("New function definition");
 
-    // Code gen Create an unconditional jump behind the function
+    // labels
     char *fnBypassLabelName = genLabelName();
+    char *varDefStart = genLabelName();
+    char *fnCodeStart = genLabelName();
+    char *varDefBypass = genLabelName();
+
+    // Code gen Create an unconditional jump behind the function
     genUnconditionalJump(fnBypassLabelName);
-    
 
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -152,17 +156,7 @@ int pCodeBody() {
 
     // Define the new function (in the symtable)
     TryCall(newFunctionDefinition, fnName);
-
-    // generate an unconditional jump to definitions
-    char *varDefStart = genLabelName();
-    char *fnCodeStart = genLabelName();
-    genComment("Jumping to variable declaration");
-    genUnconditionalJump(varDefStart);
-
-    // Generate code
     genFnDef(fnName);
-    genComment("Function body starts here");
-    genLabel(fnCodeStart);
 
     // (
     RequireTokenType(t_leftParen);
@@ -177,10 +171,16 @@ int pCodeBody() {
     TryCall(pFnRetTypeList, fnName);
 
     // Generate definitions of parameter variables of this function
-    char *varDefBypass = genLabelName();
-    genUnconditionalJump(varDefBypass);
     createParamVariables(fnName);
     // TODO
+
+    // generate an unconditional jump to definitions
+    genComment("Jumping to variable declaration");
+    genUnconditionalJump(varDefStart);
+
+    // start of fn body code
+    genComment("Function body starts here");
+    genLabel(fnCodeStart);
 
     // <stat>
     TryCall(pStat, fnName);
@@ -188,12 +188,19 @@ int pCodeBody() {
     // end
     RequireToken(t_idOrKeyword, "end");
 
+    // jump past the declarations
+    genUnconditionalJump(varDefBypass);
+
     // generate all declarations and jump back
     genComment("Variable declarations");
+    genLabel(varDefStart);
     for(int i = 0; i < varDefBuff->len; i++) {
       genVarDefLF(varDefBuff->data[i]);
     }
+    genComment("jump to fn body code start");
+    genUnconditionalJump(fnCodeStart);
 
+    // end of function label
     genComment("Skip variable declaration");
     genLabel(varDefBypass);
 
@@ -203,7 +210,6 @@ int pCodeBody() {
 
     // Code gen Create a label here, behind the function
     genLabel(fnBypassLabelName);
-
     genComment2("Function definition done");
 
     // <codeBody>

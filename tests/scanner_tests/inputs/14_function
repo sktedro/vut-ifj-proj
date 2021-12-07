@@ -1,0 +1,12 @@
+require "ifj21"
+global g : function (integer) : integer
+
+function f(x : integer) : integer
+	if x > 0then return x-1
+	else
+		write("calling g with ", x)
+		local a : integer = 5
+		local a : string = "huhu"
+		return a
+	end
+end
