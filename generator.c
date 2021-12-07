@@ -530,6 +530,128 @@ int genMove(char *dest, char *src){
 }
 
 // --------------------------------------------------------------------------------
+// FUNCTIONS FOR generating built in functions
+
+void genSubStrFnDef() {
+
+  printf("\nLABEL _$SUBSTR_\n");
+
+  printf("\nPUSHFRAME\n");
+
+  printf("\nDEFVAR LF@$$STRRET\n");
+  printf("MOVE LF@$$STRRET string@\n");
+
+  printf("\nDEFVAR LF@$$STRPAR1\n");
+  printf("MOVE LF@LF@$$STRPAR1 LF@$$STRPARAM1\n");
+  
+  printf("\nDEFVAR LF@LF@$$STRPAR2\n");
+  printf("MOVE LF@LF@$$STRPAR2 LF@$$STRPARAM2\n");
+
+  printf("\nDEFVAR LF@LF@$$STRPAR3\n");
+  printf("MOVE LF@LF@$$STRPAR3 LF@$$STRPARAM3\n");
+
+  printf("\nJUMPIFEQ _STR$ERROR_ LF@$$STRPAR1 nil@nil\n");
+  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR2 nil@nil\n");
+  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR3 nil@nil\n");
+
+  printf("\nDEFVAR LF@$$STRHELP\n");
+  printf("MOVE LF@LF@LF@$$STRHELP nil@nil\n");
+
+  printf("\nDEFVAR LF@$$STRLEN\n");
+  printf("MOVE LF@LF@LF@$$STRLEN LF@$$STRPAR1\n");
+
+  printf("\n# if (param3 < param2)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRPAR2\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param2 < 1)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR2 int@1\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param2 > len(param1))\n");
+  printf("GT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRLEN\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param3 < 1)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR3 int@1\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param3 > len(param1))\n");
+  printf("GT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRLEN\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n#---------------------------------\n");
+
+  printf("\nDEFVAR LF@$$STRINDEX\n");
+  printf("MOVE LF@$$STRINDEX int@0\n");
+
+  printf("DEFVAR LF@$$STRTMP\n");
+  printf("ADD LF@$$STRPAR3 LF@$$STRPAR3 int@1\n");
+
+  printf("\nLABEL _STR$WHILE_\n");
+
+  printf("\n# if (param2 < param3)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRPAR3\n");
+  printf("JUMPIFEQ _STR$RET_ LF@$$STRHELP bool@false\n");
+
+  printf("\nGETCHAR LF@$$STRTMP LF@$$STRPAR1 LF@$$STRPAR2\n");
+  printf("CONCAT LF@$$STRRET LF@$$STRRET LF@$$STRTMP\n");
+
+  printf("\nADD LF@$$STRINDEX LF@$$STRINDEX int@1\n");
+  printf("ADD LF@$$STRPAR2 LF@$$STRPAR2 int@1\n");
+
+  printf("\nJUMP _STR$WHILE_\n");
+
+  printf("\nJUMP _STR$RET_\n");
+
+  printf("\nLABEL _STR$EMPTY_\n");
+  printf("MOVE LF@$$STRRET string@\n");
+  printf("JUMP _STR$RET_\n");
+
+  printf("\nLABEL _STR$ERROR_\n");
+  printf("EXIT int@57\n");
+
+  printf("\nLABEL _STR$RET_\n");
+  printf("POPFRAME\n");
+  printf("RETURN\n");
+}
+
+int genSubStrFnParamVar(char *varName, int param) {
+  
+  if(param == 1) {
+    printf("\nCREATEFRAME\n");
+  } else if(param < 1 || param > 3) {
+    vypluj err(INTERN_ERR);
+  }
+  
+  printf("DEFVAR TF@$$STRPARAM%d\n", param);
+
+  printf("MOVE TF@$$STRPARAM%d LF@%s\n",param ,varName);
+  vypluj 0;
+}
+
+int genSubStrFnParamLiteral(Token *token, int param) {
+  
+  if(param == 1) {
+    printf("\nCREATEFRAME\n");
+  } else if(param < 1 || param > 3) {
+    vypluj err(INTERN_ERR);
+  }
+  
+  printf("DEFVAR TF@$$STRPARAM%d\n", param);
+  printf("MOVE TF@$$STRPARAM%d %s@%s\n", param, getDataTypeFromInt(token), token->data);
+  vypluj 0;
+}
+
+void genSubStrFnCall() {
+  printf("CALL _$SUBSTR_\n");
+}
+
+void genSubStrFnRet(char *varName) {
+  printf("MOVE LF@%s TF@$$STRRET\n", varName);
+}
+
+// --------------------------------------------------------------------------------
 // FUNCTIONS FOR MULTIPLE ASSIGMENT
 
 void genExprLabel(char *name) {
