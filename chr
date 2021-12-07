@@ -8,6 +8,8 @@ function chr(i : integer) : string
   return string.char(i)
 end
 
+//almost done?
+
 
 .IFJcode21
 
@@ -15,7 +17,7 @@ LABEL _CHR_
 
 PUSHFRAME
 
-     DEFVAR LF@%STR%RET_
+    DEFVAR LF@%STR%RET_
     MOVE LF@%STR%RET_ nil@nil
 
     DEFVAR LF@%STR%PAR1_
@@ -23,9 +25,15 @@ PUSHFRAME
 
     JUMPIFEQ _ERROR_ LF@%STR%PAR1_ nil@nil #(if i == nil)
 
-    GT _VAR PAR1_ 255 #if i > 255
+    GT LF@_VAR LF@PAR1_ int@255 #if i > 255
 
-    LT _VAR PAR1_ 0 #if i < 0
+    JUMPIFEQ _RETNIL_ LF@_VAR string@TRUE
+
+    LT LF@_VAR LF@PAR1_ int@0 #if i < 0
+
+    JUMPIFEQ _RETNIL_ LF@_VAR string@TRUE
+
+    STRI2INT LF@_VAR2 (retazec neviem aky) LF@PAR1_ #string.char(i)
 
 LABEL _RET_
     POPFRAME
@@ -33,6 +41,9 @@ LABEL _RET_
 
 LABEL _ERROR_
     EXIT int@57
+
+LABEL _RETNIL_
+    RETURN #ret nil
 
 CALL _CHR_
 

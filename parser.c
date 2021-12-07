@@ -255,12 +255,11 @@ int pCodeBody() {
 int pFnCall(char *fnName) {
   RuleFnInit;
 
-  if(strEq(fnName, "write")) {
-    vypluj writeFunction(fnName);
-  }
-
   // (
   RequireTokenType(t_leftParen);
+
+ 
+  
   
   genFnCallInit();
 
@@ -318,6 +317,10 @@ int pFnCallArgList(char *fnName) {
      // Stash the token
      vypluj stashToken(&token);
   } 
+
+  /*if(isBuiltInFunction("write")){
+    writeFunction(token);
+  }*/ //idk či to je dobre ale tu niekde to má asi byť 
 
   // -> <fnCallArg> <nextFnCallArg>
 
@@ -1339,13 +1342,13 @@ bool isLiteral(Token *token) {
  * 09. <fnCall>          -> ( <fnCallArgList> )
  *  
  */
-int writeFunction() {
+int writeFunction(Token *token) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
-  Token *token = NULL;
 
   // (
   RequireTokenType(t_leftParen);
+
   
   // <fnCallArgList> but somehow special for write
   GetToken;
@@ -1353,7 +1356,7 @@ int writeFunction() {
   STElem *element;
   // char *name; TODO UNUSED VARIABLE
 
-  while (token->type != t_rightParen) { // TODO alex tvrdí že to nakódí
+  // TODO alex tvrdí že to nakódí
   
   if(isLiteral(token)) {
     genWriteLiteral(token, "LF");
@@ -1368,7 +1371,8 @@ int writeFunction() {
   }
 
   GetToken;
-  } 
+  
+
   vypluj 0;
 }
 

@@ -1,0 +1,108 @@
+.IFJcode21
+
+JUMP     next
+
+LABEL _SUBSTR_
+
+    PUSHFRAME
+
+    DEFVAR LF@%STR%RET_
+    MOVE LF@%STR%RET_ string@
+
+    DEFVAR LF@%STR%PAR1_
+    MOVE LF@%STR%PAR1_ LF@%STRPARAM1%
+
+    DEFVAR LF@%STR%PAR2_
+    MOVE LF@%STR%PAR2_ LF@%STRPARAM2%
+
+    DEFVAR LF@%STR%PAR3_
+    MOVE LF@%STR%PAR3_ LF@%STRPARAM3%
+
+    JUMPIFEQ _ERROR_ LF@%STR%PAR1_ nil@nil
+    JUMPIFEQ _ERROR_ LF@%STR%PAR2_ nil@nil
+    JUMPIFEQ _ERROR_ LF@%STR%PAR3_ nil@nil
+
+    DEFVAR LF@%STR%HELP1
+    MOVE LF@%STR%HELP1 nil@nil
+
+    DEFVAR LF@%STR%HELP2
+    MOVE LF@%STR%HELP2 nil@nil
+
+    DEFVAR LF@%len
+    STRLEN LF@%len LF@%STR%PAR1_
+
+    # if (param3 < param2)
+    LT LF@%STR%HELP1 LF@%STR%PAR3_ LF@%STR%PAR2_
+    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    
+    # if (param2 < 1)
+    LT LF@%STR%HELP1 LF@%STR%PAR2_ int@1
+    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    
+
+    # if (param2 > len(param1))
+    GT LF@%STR%HELP1 LF@%STR%PAR2_ LF@%len
+    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+
+    # if (param3 < 1)
+    LT LF@%STR%HELP1 LF@%STR%PAR3_ int@1
+    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+
+    # if (param3 > len(param1))
+    GT LF@%STR%HELP1 LF@%STR%PAR3_ LF@%len
+    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+
+    #---------------------------------
+    DEFVAR LF@index
+    MOVE LF@index int@0
+    
+    DEFVAR LF@TMP
+    ADD LF@%STR%PAR3_ LF@%STR%PAR3_ int@1
+    LABEL _WHILE_
+        # if (param2 < param3)
+        LT LF@%STR%HELP1 LF@%STR%PAR2_ LF@%STR%PAR3_
+        JUMPIFEQ _RET_ LF@%STR%HELP1 bool@false
+
+        GETCHAR LF@TMP LF@%STR%PAR1_ LF@%STR%PAR2_      
+        CONCAT LF@%STR%RET_ LF@%STR%RET_ LF@TMP
+        
+        ADD LF@index LF@index int@1
+        ADD LF@%STR%PAR2_ LF@%STR%PAR2_ int@1
+
+    JUMP _WHILE_
+    
+    JUMP _RET_
+
+LABEL _empty_
+    MOVE LF@%STR%RET_ string@
+    JUMP _RET_
+
+LABEL _ERROR_
+    EXIT int@57
+
+LABEL _RET_
+    POPFRAME
+    RETURN
+#----------------------------------------------------------------
+LABEL next
+
+CREATEFRAME
+
+DEFVAR TF@%STRPARAM1%
+MOVE TF@%STRPARAM1% string@abcdefgh
+
+DEFVAR TF@%STRPARAM2%
+MOVE TF@%STRPARAM2% int@1
+
+DEFVAR TF@%STRPARAM3%
+MOVE TF@%STRPARAM3% int@2
+
+CALL _SUBSTR_
+
+DEFVAR GF@vysledok
+MOVE GF@vysledok TF@%STR%RET_
+WRITE GF@vysledok
+
+
+
+
