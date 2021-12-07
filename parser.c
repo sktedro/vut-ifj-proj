@@ -80,6 +80,8 @@ int pStart() {
   // <req>
   TryCall(pReq);
 
+  genBuiltInFunctions();
+
   // <codeBody>
   TryCall(pCodeBody);
 
@@ -138,6 +140,7 @@ int pCodeBody() {
     // Code gen Create an unconditional jump behind the function
     char *fnBypassLabelName = genLabelName();
     genUnconditionalJump(fnBypassLabelName);
+    
 
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -164,9 +167,6 @@ int pCodeBody() {
     // Generate definitions of parameter variables of this function
     createParamVariables(fnName);
 
-    genPushFrame();
-    // TODO PUSHFRAME HERE?
-
     // <stat>
     TryCall(pStat, fnName);
 
@@ -188,8 +188,6 @@ int pCodeBody() {
 
   // 06. <codeBody>        -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
   else if(strcmp(token->data, "global") == 0) {
-
-    genComment("New function declaration");
 
     // [id]
     RequireTokenType(t_idOrKeyword);
@@ -215,8 +213,6 @@ int pCodeBody() {
 
     // <fnRetTypeList>
     TryCall(pFnRetTypeList, fnName);
-
-    genComment2("Function declaration done");
 
     // <codeBody>
     TryCall(pCodeBody);
@@ -260,6 +256,8 @@ int pFnCall(char *fnName) {
   // (
   RequireTokenType(t_leftParen);
   
+  genComment("Calling a function");
+
   genFnCallInit();
 
   genComment("Processing function call arguments");
@@ -1584,6 +1582,7 @@ int declareVariable(){
   // a string buffer and at the end of the program we define all variables??
   return 0;
 }
+
 
 #endif
 /* end of file parser.c */

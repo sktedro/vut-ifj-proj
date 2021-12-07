@@ -3,6 +3,8 @@ CFLAGS=-Wall -Wextra -std=c99 -g -Wno-unused-parameter
 
 MAIN=main.c
 LIBS=\
+assignment.c \
+built_in_functions.c \
 char_buffer.c \
 generator.c \
 int_buffer.c \
@@ -14,8 +16,7 @@ symbol_stack.c \
 symtable.c \
 symtable_stack.c \
 symtable_tree.c \
-token.c \
-assignment.c
+token.c
 # why is parser not included as a lib, you might ask? Cause if you include it,
 # the compiler won't compile but throw a thousand errors instead :)))
 

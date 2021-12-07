@@ -8,35 +8,56 @@
 #   return string.byte(s, i)
 # end
 
+  # .ifjcode21
+  # CREATEFRAME
+  # PUSHFRAME
+
+LABEL ord0
   PUSHFRAME
 
-# TODO check if s or i is nil. If so, return 8. But how do I do that?
+  DEFVAR LF@result
 
-# Return nil if strlen(s) > i
+# Check if the input string or the input integer equals nil
+  JUMPIFEQ *ord_err LF@$param_0 nil@nil
+  JUMPIFEQ *ord_err LF@$param_1 nil@nil
+
+# Return nil if !(strlen(s) > i)
   DEFVAR LF@len
   DEFVAR LF@strlenGTi
   STRLEN LF@len LF@$param_0
   GT LF@strlenGTi LF@len LF@$param_1
-  JUMPIFEQ retnil LF@strlenGTi bool@true
+  JUMPIFEQ *retnil LF@strlenGTi bool@false
 
-# Return nil if !(i > 0)
-  DEFVAR LF@iGT0
-  GT LF@iGT0 LF@$param_1 int@0
-  JUMPIFEQ retnil LF@iGT0 bool@false
+# Return nil if i < 0
+  DEFVAR LF@iLT0
+  LT LF@iLT0 LF@$param_1 int@0
+  JUMPIFEQ *retnil LF@iLT0 bool@true
 
 # Get the result and return
-  DEFVAR LF@result
-  STR2INT LF@result LF@$param_0 LF@$param_1
-  POPFRAME
-  MOVE LF@!ret_0 TF@result
-  JUMP ordEnd
+  STRI2INT LF@result LF@$param_0 LF@$param_1
+  JUMP *ordEnd
+
+# Exit with err
+LABEL *ord_err
+  EXIT int@8
 
 # Return nil
-LABEL retnil
-  POPFRAME
-  MOVE LF@!ret_0 nil@nil
-  JUMP ordEnd
+LABEL *retnil
+  MOVE LF@result nil@nil
+  JUMP *ordEnd
 
 # Function end
-LABEL ordEnd
+LABEL *ordEnd
+  POPFRAME
+  DEFVAR LF@!ret_0
+  MOVE LF@!ret_0 TF@result
   RETURN
+
+  # CREATEFRAME
+  # DEFVAR TF@$param_0
+  # DEFVAR TF@$param_1
+  # MOVE TF@$param_0 string@abc
+  # MOVE TF@$param_1 int@0
+  # CALL ord0
+  # WRITE LF@!ret_0
+  # POPFRAME

@@ -10,7 +10,16 @@
 extern int ret;
 extern GarbageCollector garbageCollector;
 
-char *labelPrefix = "_label_";
+extern char *reads;
+extern char *readi;
+extern char *readn;
+extern char *write;
+extern char *tointeger;
+extern char *substr;
+extern char *ord;
+extern char *chr;
+
+char *labelPrefix = "*label_";
 char *varPrefix = "%var_";
 char *tmpVarPrefix = "?tmpvar_";
 char *paramPrefix = "$param_";
@@ -316,6 +325,7 @@ void genFnCall(char *fnName) {
 
 void genFnDef(char *name) {
   printf("LABEL %s0\n\n", name);
+  printf("PUSHFRAME\n");
 }
 
 // Create a TF
@@ -580,6 +590,15 @@ int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
 // --------------------------------------------------------------------------------
 // FUNCTIONS FOR generating built in functions
 
+void genBuiltInFunctions(){
+  genUnconditionalJump("*built_in_functions_bypass");
+  // TODO add built in functions when they are done
+  printf("%s\n", substr);
+  printf("%s\n", ord);
+  genLabel("*built_in_functions_bypass");
+  printf("\n# END OF BUILT IN FUNCTIONS DEFINITIONS\n");
+}
+
 void genSubStrFnDef() {
 
   printf("\nLABEL _$SUBSTR_\n");
@@ -657,7 +676,7 @@ void genSubStrFnDef() {
   printf("JUMP _STR$RET_\n");
 
   printf("\nLABEL _STR$ERROR_\n");
-  printf("EXIT int@57\n");
+  printf("EXIT int@8\n");
 
   printf("\nLABEL _STR$RET_\n");
   printf("POPFRAME\n");

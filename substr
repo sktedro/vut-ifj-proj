@@ -1,5 +1,3 @@
-.IFJcode21
-
 JUMP _STR$NEXT_
 
 LABEL _$SUBSTR_
@@ -75,7 +73,7 @@ LABEL _STR$EMPTY_
     JUMP _STR$RET_
 
 LABEL _STR$ERROR_
-    EXIT int@57
+    EXIT int@8
 
 LABEL _STR$RET_
     POPFRAME
@@ -99,7 +97,3 @@ CALL _$SUBSTR_
 DEFVAR GF@vysledok
 MOVE GF@vysledok TF@$$STRRET
 WRITE GF@vysledok
-
-
-
-

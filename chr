@@ -1,52 +1,56 @@
 .IFJcode21
 
-JUMP prec
+JUMP _CHR$NEXT_
 
-LABEL _CHR_
+LABEL _$CHR_
+  PUSHFRAME
 
-PUSHFRAME
+  DEFVAR LF@$$CHRRET
+  MOVE LF@$$CHRRET string@
 
-    DEFVAR LF@%STR%RET_
-    MOVE LF@%STR%RET_ nil@nil
+  DEFVAR LF@$$CHRPAR1
+  MOVE LF@$$CHRPAR1 LF@$$CHRPARAM1
 
-    DEFVAR LF@%STR%PAR1_
-    #i : integer
-    MOVE LF@%STR%PAR1_ LF@%STRPARAM1%
+  DEFVAR LF@$$CHRHELP
 
-    DEFVAR LF@_VAR
+  JUMPIFEQ _CHR$ERROR_ LF@$$CHRPAR1 nil@nil
 
-    #if i == nil
-    JUMPIFEQ _ERROR_ LF@%STR%PAR1_ nil@nil
+  # if (param1 < 0)
+  LT LF@$$CHRHELP LF@$$CHRPAR1 int@0
+  JUMPIFEQ _CHR$NILL_ LF@$$CHRHELP bool@true
 
-    #if i > 255
-    GT LF@_VAR LF@%STR%PAR1_ int@255 
+  # if (param1 > 255)
+  GT LF@$$CHRHELP LF@$$CHRPAR1 int@255
+  JUMPIFEQ _CHR$NILL_ LF@$$CHRHELP bool@true
 
-    JUMPIFEQ _RETNIL_ LF@_VAR bool@TRUE
+  INT2CHAR LF@$$CHRRET LF@$$CHRPAR1
 
-    #if i < 0
-    LT LF@_VAR LF@%STR%PAR1_ int@0 
+JUMP _CHR$RET_
 
-    JUMPIFEQ _RETNIL_ LF@_VAR bool@TRUE
 
-    INT2CHAR LF@_VAR LF@%STR%PAR1_ #string.char(i)
-    MOVE LF@%STR%RET_ LF@_VAR
+LABEL _CHR$NILL_
+MOVE LF@$$CHRRET nil@nil
+JUMP _CHR$RET_
 
-    RETURN #ret string
+LABEL _CHR$ERROR_
+  EXIT int@8
 
-LABEL _ERROR_
-    EXIT int@57
+LABEL _CHR$RET_
 
-LABEL _RETNIL_
-  MOVE LF@%STR%RET_ nil@nil
-  RETURN #ret nil
+  POPFRAME
+  RETURN
 
-LABEL prec
+#---------------------------------------------------
+LABEL _CHR$NEXT_
 
 CREATEFRAME
 
-DEFVAR TF@%STRPARAM1%
-MOVE TF@%STRPARAM1% int@256
+DEFVAR TF@$$CHRPARAM1
+MOVE TF@$$CHRPARAM1 nil@nil
 
-CALL _CHR_
+CALL _$CHR_ 
 
-WRITE TF@%STR%RET_
+DEFVAR GF@vysledok
+MOVE GF@vysledok TF@$$CHRRET
+WRITE GF@vysledok
+
