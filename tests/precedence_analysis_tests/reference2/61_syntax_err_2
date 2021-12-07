@@ -1,6 +1,0 @@
-ERROR: Syntax error at (around) line 3.
-Testing: Token type is '10' and data '..'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 string@abc
-Testing: Expression result is in: (null)
-Testing: Precedence analysis returned 2

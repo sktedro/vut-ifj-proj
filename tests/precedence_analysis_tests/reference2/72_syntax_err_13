@@ -1,4 +1,0 @@
-ERROR: Syntax error at (around) line 1.
-Testing: Token type is '0' and data 'end'
-Testing: Expression result is in: (null)
-Testing: Precedence analysis returned 2

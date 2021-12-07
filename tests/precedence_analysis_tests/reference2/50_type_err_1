@@ -1,8 +1,0 @@
-ERROR: Data types of operands in an expression are not compatible at (around) line 3.
-Testing: Token type is '1' and data '1'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 int@1
-DEFVAR LF@%tmp1
-MOVE LF@%tmp1 nil@nil
-Testing: Expression result is in: (null)
-Testing: Precedence analysis returned 6
