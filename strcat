@@ -1,106 +1,103 @@
 .IFJcode21
 
-JUMP     next
+JUMP _STR$NEXT_
 
-LABEL _SUBSTR_
+LABEL _$SUBSTR_
 
     PUSHFRAME
 
-    DEFVAR LF@%STR%RET_
-    MOVE LF@%STR%RET_ string@
+    DEFVAR LF@$$STRRET
+    MOVE LF@$$STRRET string@
 
-    DEFVAR LF@%STR%PAR1_
-    MOVE LF@%STR%PAR1_ LF@%STRPARAM1%
+    DEFVAR LF@$$STRPAR1
+    MOVE LF@$$STRPAR1 LF@$$STRPARAM1
 
-    DEFVAR LF@%STR%PAR2_
-    MOVE LF@%STR%PAR2_ LF@%STRPARAM2%
+    DEFVAR LF@$$STRPAR2
+    MOVE LF@$$STRPAR2 LF@$$STRPARAM2
 
-    DEFVAR LF@%STR%PAR3_
-    MOVE LF@%STR%PAR3_ LF@%STRPARAM3%
+    DEFVAR LF@$$STRPAR3
+    MOVE LF@$$STRPAR3 LF@$$STRPARAM3
 
-    JUMPIFEQ _ERROR_ LF@%STR%PAR1_ nil@nil
-    JUMPIFEQ _ERROR_ LF@%STR%PAR2_ nil@nil
-    JUMPIFEQ _ERROR_ LF@%STR%PAR3_ nil@nil
+    JUMPIFEQ _STR$ERROR_ LF@$$STRPAR1 nil@nil
+    JUMPIFEQ _STR$ERROR_ LF@$$STRPAR2 nil@nil
+    JUMPIFEQ _STR$ERROR_ LF@$$STRPAR3 nil@nil
 
-    DEFVAR LF@%STR%HELP1
-    MOVE LF@%STR%HELP1 nil@nil
+    DEFVAR LF@$$STRHELP
+    MOVE LF@$$STRHELP nil@nil
 
-    DEFVAR LF@%STR%HELP2
-    MOVE LF@%STR%HELP2 nil@nil
-
-    DEFVAR LF@%len
-    STRLEN LF@%len LF@%STR%PAR1_
+    DEFVAR LF@$$STRLEN
+    STRLEN LF@$$STRLEN LF@$$STRPAR1
 
     # if (param3 < param2)
-    LT LF@%STR%HELP1 LF@%STR%PAR3_ LF@%STR%PAR2_
-    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    LT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRPAR2
+    JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true
     
     # if (param2 < 1)
-    LT LF@%STR%HELP1 LF@%STR%PAR2_ int@1
-    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    LT LF@$$STRHELP LF@$$STRPAR2 int@1
+    JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true
     
 
     # if (param2 > len(param1))
-    GT LF@%STR%HELP1 LF@%STR%PAR2_ LF@%len
-    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    GT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRLEN
+    JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true
 
     # if (param3 < 1)
-    LT LF@%STR%HELP1 LF@%STR%PAR3_ int@1
-    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    LT LF@$$STRHELP LF@$$STRPAR3 int@1
+    JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true
 
     # if (param3 > len(param1))
-    GT LF@%STR%HELP1 LF@%STR%PAR3_ LF@%len
-    JUMPIFEQ _empty_ LF@%STR%HELP1 bool@true
+    GT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRLEN
+    JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true
 
     #---------------------------------
-    DEFVAR LF@index
-    MOVE LF@index int@0
+    DEFVAR LF@$$STRINDEX
+    MOVE LF@$$STRINDEX int@0
     
-    DEFVAR LF@TMP
-    ADD LF@%STR%PAR3_ LF@%STR%PAR3_ int@1
-    LABEL _WHILE_
+    DEFVAR LF@$$STRTMP
+    ADD LF@$$STRPAR3 LF@$$STRPAR3 int@1
+    LABEL _STR$WHILE_
         # if (param2 < param3)
-        LT LF@%STR%HELP1 LF@%STR%PAR2_ LF@%STR%PAR3_
-        JUMPIFEQ _RET_ LF@%STR%HELP1 bool@false
+        LT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRPAR3
+        JUMPIFEQ _STR$RET_ LF@$$STRHELP bool@false
 
-        GETCHAR LF@TMP LF@%STR%PAR1_ LF@%STR%PAR2_      
-        CONCAT LF@%STR%RET_ LF@%STR%RET_ LF@TMP
+        GETCHAR LF@$$STRTMP LF@$$STRPAR1 LF@$$STRPAR2      
+        CONCAT LF@$$STRRET LF@$$STRRET LF@$$STRTMP
         
-        ADD LF@index LF@index int@1
-        ADD LF@%STR%PAR2_ LF@%STR%PAR2_ int@1
+        ADD LF@$$STRINDEX LF@$$STRINDEX int@1
+        ADD LF@$$STRPAR2 LF@$$STRPAR2 int@1
 
-    JUMP _WHILE_
+    JUMP _STR$WHILE_
     
-    JUMP _RET_
+    JUMP _STR$RET_
 
-LABEL _empty_
-    MOVE LF@%STR%RET_ string@
-    JUMP _RET_
+LABEL _STR$EMPTY_
+    MOVE LF@$$STRRET string@
+    JUMP _STR$RET_
 
-LABEL _ERROR_
+LABEL _STR$ERROR_
     EXIT int@57
 
-LABEL _RET_
+LABEL _STR$RET_
     POPFRAME
     RETURN
 #----------------------------------------------------------------
-LABEL next
+LABEL _STR$NEXT_
 
 CREATEFRAME
 
-DEFVAR TF@%STRPARAM1%
-MOVE TF@%STRPARAM1% string@abcdefgh
+DEFVAR TF@$$STRPARAM1
+MOVE TF@$$STRPARAM1 string@abcdefgh
 
-DEFVAR TF@%STRPARAM2%
-MOVE TF@%STRPARAM2% int@1
+DEFVAR TF@$$STRPARAM2
+MOVE TF@$$STRPARAM2 int@1
 
-DEFVAR TF@%STRPARAM3%
-MOVE TF@%STRPARAM3% int@2
+DEFVAR TF@$$STRPARAM3
+MOVE TF@$$STRPARAM3 int@2
 
-CALL _SUBSTR_
+CALL _$SUBSTR_
 
 DEFVAR GF@vysledok
-MOVE GF@vysledok TF@%STR%RET_
+MOVE GF@vysledok TF@$$STRRET
 WRITE GF@vysledok
 
 
