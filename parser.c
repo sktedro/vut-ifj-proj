@@ -649,15 +649,16 @@ int pStat(char *fnName) {
   // 22. <stat>            [id] <statWithId> <stat>
   } else if (STFind(symtab, token->data)) { // A function or a variable
     LOG("<stat>            -> [id] <statWithId> <stat>\n");
-    // TODO kopnite Alexa ak na to ešte nespravil funkciu
+
     if(assignmentElement->name == NULL) {
       TryCall(STGetName, symtab, &assignmentElement->name, token->data);
       assignmentElement->first = true;
-      assignmentElement->label = getExprLabelName(0);
+      assignmentElement->label = getExprLabelName(assigmentCounter);
       assignmentElement->prev = NULL;
       assignmentElement->next = NULL;
       assignmentElement->end = getExprEndName();
       assignmentElement->generated = false;
+      assigmentCounter++;
     }
 
     // <statWithId>
@@ -712,8 +713,11 @@ int pStatWithId(char *idName) {
       LOG("bvwincml");
       TryCall(pExpr, &retVarName);
       LOG("HAHA");
+      char *varName;
+      TryCall(STGetName, symtab, &varName, idName);
+      genMove(varName, retVarName);
       
-      //genAssignLiteral(idName, -1, retVarName); TODO commented cus segfault
+      // genAssignLiteral(idName, -1, retVarName); 
     }
     
     // -> , [id] <nextAssign> <expr> , <expr>
@@ -756,10 +760,11 @@ int pStatWithId(char *idName) {
       TryCall(pExpr, &retVarName);
 
       if(retVarName == NULL) {
-        vypluj err(SYNTAX_ERR);
+        vypluj ERR(SYNTAX_ERR);
       }
       
       genAssignLiteral(id2Var, -1, retVarName, "LF");
+
       //alex
       // ,
       RequireTokenType(t_comma);
@@ -771,7 +776,7 @@ int pStatWithId(char *idName) {
       TryCall(pExpr, &retVarName);
 
       if(retVarName == NULL) {
-        vypluj err(SYNTAX_ERR);
+        vypluj ERR(SYNTAX_ERR);
       }
 
       genAssignLiteral(id1Var, -1, retVarName, "LF");
@@ -1221,6 +1226,7 @@ int pExpr(char **retVarName) {
   // An expression
   } else {
     TryCall(parseExpression, symtab, token, retVarName);
+    LOG("Expr result is in %s", *retVarName);
     // An expression is required but the precedence analysis didn't find any
     if(!(*retVarName)){
       return ERR(SYNTAX_ERR);

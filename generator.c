@@ -171,22 +171,23 @@ char *stringConvert(char *string) {
     } else if(string[i] == '\\'){
       i++;
       if(string[i] == 'b'){
-        newString[k] = '\b';
+        string[i] = '\b';
       }else if(string[i] == 'e'){
-        newString[k] = '\e';
+        string[i] = '\e';
       }else if(string[i] == 'n'){
-        newString[k] = '\n';
+        string[i] = '\n';
       }else if(string[i] == 'r'){
-        newString[k] = '\r';
+        string[i] = '\r';
       }else if(string[i] == 't'){
-        newString[k] = '\t';
+        string[i] = '\t';
       }else if(string[i] == 'v'){
-        newString[k] = '\v';
+        string[i] = '\v';
       }else if(string[i] == '\\'){
-        newString[k] = '\\';
+        string[i] = '\\';
       }else {
-        newString[k] = string[i];
+        string[k] = string[i];
       }
+      i--;
       k++;
 
     }else {
@@ -198,6 +199,7 @@ char *stringConvert(char *string) {
       k += 4;
     }
   }
+  newString[k] = '\0';
   return newString;
 }
 
