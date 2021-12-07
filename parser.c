@@ -483,7 +483,6 @@ int pFnCallArg(char *fnName, int argCount) {
   // A parameter data type doesn't match
   }else if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
     LOG("Param data type doesn't match\n");
-    if(dataType
     vypluj ERR(SYNTAX_ERR);
   }
 
