@@ -8,9 +8,10 @@
 #include "misc.h"
 #include "assignment.h"
 #include "parser.h"
-
+void resetParamCounter();
+void resetRetCounter();
 int digits(int value);
-char *genName(char *name, int frame);
+char *genVarName(char *name, int frame);
 char *stringConvert(char *string);
 char *getDataTypeFromInt(Token *token);
 char *genTmpVarName();
@@ -22,7 +23,7 @@ void genJumpIfFalse(char *label, char *varName);
 void genJumpIfTrue(char *label, char *varName);
 void genVarDefLF(char *name);
 void genVarDefTF(char *name);
-int genVarAssign(char *name, int dataType, char *assignValue, char *frame);
+int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame);
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2);
@@ -42,8 +43,9 @@ void genPopframe();
 void genReturnInstruction();
 void genComment(char *comment);
 void genComment2(char *comment);
-void genWriteVariable(char *name, char *frame);
-void genWriteLiteral(Token *token, char *frame);
+// void genWriteVariable(char *name, char *frame);
+// void genWriteLiteral(Token *token, char *frame);
+void genWrite(char *name);
 char *genLower(SStackElem *element1, SStackElem *element2);
 char *genGreater(SStackElem *element1, SStackElem *element2);
 char *genEqual(SStackElem *element1, SStackElem *element2);
@@ -53,8 +55,8 @@ void genStart();
 int genPassParam(char *varInLF, char *varInTF);
 int genMove(char *dest, char *src);
 void genJumpIfFalse(char *label, char *varName);
-char *genParamName();
-char *genRetName();
+char *genParamVarName();
+char *genRetVarName();
 int genReturn(char *varInLF, char *varInTF);
 void genUnconditionalJump(char *labelName);
 

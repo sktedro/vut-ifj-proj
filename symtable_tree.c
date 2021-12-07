@@ -33,7 +33,7 @@ int newSTTreeNode(STTreeNode **node, char *key, int frame) {
   GCMalloc((*node)->data, sizeof(STElem));
 
   // Set the name (generate a name for the ifjcode21 variable)
-  (*node)->data->name = genName(key, frame);
+  (*node)->data->name = genVarName(key, frame);
 
   // Init other data
   (*node)->data->isVariable = true;

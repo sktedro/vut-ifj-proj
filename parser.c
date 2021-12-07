@@ -54,13 +54,12 @@ AssignElement *assignmentElement;
 int assigmentCounter = 0;
 int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
-int paramhelpCounter = 0;
 
 // TODO macro RequireIDToken - == t_idOrKeyword && !isIFJ21Keyword
 
 /*
  *
- * Rules
+ * Rules 
  *
  */
 
@@ -264,6 +263,7 @@ int pFnCall(char *fnName) {
   genFnCallInit();
 
   genComment("Processing function call arguments");
+  resetParamCounter();
   TryCall(pFnCallArgList, fnName);
   genComment2("Processing function call arguments done");
 
@@ -278,7 +278,7 @@ int pFnCall(char *fnName) {
 
   genFnCall(fnName);
   retVarCounter = 0;
-  paramhelpCounter = 0;
+  resetParamCounter();
   assigmentCounter = 0;
   assigmentGeneratedCounter = 0;
 
@@ -307,20 +307,18 @@ int pFnCallArgList(char *fnName) {
   if(token->type == t_rightParen) {
     LOG("-> eps");
 
-    STElem *fn = STFind(symtab, fnName);
-    // Amount of arguments doesn't match
-    if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
-      LOG("Param amount doesn't match\n");
-      vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      STElem *fn = STFind(symtab, fnName);
+      // Amount of arguments doesn't match
+      if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
+        LOG("Param amount doesn't match\n");
+        vypluj ERR(SYNTAX_ERR);
+      }
     }
     
-     // Stash the token
-     vypluj stashToken(&token);
+    // Stash the token
+    vypluj stashToken(&token);
   } 
-
-  /*if(isBuiltInFunction("write")){
-    writeFunction(token);
-  }*/ //idk či to je dobre ale tu niekde to má asi byť 
 
   // -> <fnCallArg> <nextFnCallArg>
 
@@ -349,7 +347,6 @@ int pNextFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
   
   // -> , <fnCallArg> <nextFnCallArg>
   // ,
@@ -362,15 +359,15 @@ int pNextFnCallArg(char *fnName, int argCount) {
     // <nextFnCallArg>
     TryCall(pNextFnCallArg, fnName,argCount);
 
-  // -> , <fnCallArg> <nextFnCallArg>
+  // -> eps
   }else{
-
-    STElem *fn = STFind(symtab, fnName);
-
-    // Amount of arguments doesn't match
-    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
-      LOG("Param amount doesn't match\n");
-      vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      STElem *fn = STFind(symtab, fnName);
+      // Amount of arguments doesn't match
+      if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
+        LOG("Param amount doesn't match");
+        vypluj ERR(SYNTAX_ERR);
+      }
     }
 
     TryCall(stashToken, &token);
@@ -391,9 +388,8 @@ int pFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
 
-  STElem *fn = STFind(symtab, fnName);
+  // STElem *fn = STFind(symtab, fnName); TODO UNUSED VARIABLE
 
   int dataType = -1;
 
@@ -405,12 +401,10 @@ int pFnCallArg(char *fnName, int argCount) {
     //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
     // TODO shouldn't we use this?
 
-    char *name;
-    GCMalloc(name, sizeof(char) * 100);
-    sprintf(name, "$%d", paramhelpCounter);
-    genVarDefTF(name);
-    genPassParam(name, token->data);
-    paramhelpCounter++;
+    char *paramVarName = genParamVarName();
+    char *varName = STGetName(symtab, token->data);
+    genVarDefTF(paramVarName);
+    genPassParam(paramVarName, varName);
 
   // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -424,12 +418,9 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_string;
     }
 
-    char *name;
-    GCMalloc(name, sizeof(char) * 100);
-    sprintf(name, "$%d", paramhelpCounter);
+    char *name = genParamVarName();
     genVarDefTF(name);
-    genVarAssign(name, dataType, token->data, "TF");
-    paramhelpCounter++;
+    genAssignLiteral(name, dataType, token->data, "TF");
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
@@ -440,10 +431,17 @@ int pFnCallArg(char *fnName, int argCount) {
     vypluj ERR(SYNTAX_ERR);
   }
 
+  // 'Write' built in function
+  if(strEq(fnName, "write")){
+    writeFunction(token, dataType);
+  }
+
   // A parameter data type doesn't match
   if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
-    LOG("Param data type doesn't match\n");
-    vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      LOG("Param data type doesn't match\n");
+      vypluj ERR(SYNTAX_ERR);
+    }
   }
 
   vypluj 0;
@@ -488,7 +486,7 @@ int pStat(char *fnName) {
     // Insert the new ID to the symtable
     TryCall(STInsert, symtab, newVarName);
     STSetIsVariable(symtab, newVarName, true);
-    STSetName(symtab, newVarName, genName(token->data, symtab->top->depth));
+    STSetName(symtab, newVarName, genVarName(token->data, symtab->top->depth));
     // Code gen variable definition
     genVarDefLF(STGetName(symtab, newVarName));
 
@@ -624,6 +622,7 @@ int pStat(char *fnName) {
 
     // <statWithId>
     TryCall(pStatWithId, token->data);
+    LOG("HUHU");
 
   // -> eps
   } else {
@@ -670,9 +669,11 @@ int pStatWithId(char *idName) {
     if (token->type == t_assignment) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
+      LOG("bvwincml");
       TryCall(pExpr, &retVarName);
+      LOG("HAHA");
       
-      //genVarAssign(idName, -1, retVarName); TODO commented cus segfault
+      //genAssignLiteral(idName, -1, retVarName); TODO commented cus segfault
     }
     
     // -> , [id] <nextAssign> <expr> , <expr>
@@ -710,7 +711,7 @@ int pStatWithId(char *idName) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
-      genVarAssign(id2Var, -1, retVarName, "LF");
+      genAssignLiteral(id2Var, -1, retVarName, "LF");
 
       // ,
       RequireTokenType(t_comma);
@@ -719,7 +720,7 @@ int pStatWithId(char *idName) {
       // Call the shift-reduce parser and assign the result to id1Var
       retVarName = NULL;
       TryCall(pExpr, &retVarName);
-      genVarAssign(id1Var, -1, retVarName, "LF");
+      genAssignLiteral(id1Var, -1, retVarName, "LF");
 
     }else{
       vypluj ERR(SYNTAX_ERR);
@@ -776,7 +777,7 @@ int pNextAssign() {
   char *varName = AListGetElementByIndex(assignmentElement, assigmentGeneratedCounter)->name;
   char *retVarName;
   TryCall(pExpr, &retVarName);
-  printf("WE BACK\n");
+  LOG("WE BACK");
   genMove(varName, retVarName);
 
   // ','
@@ -816,7 +817,7 @@ int pFnDefinitionParamTypeList(char *fnName) {
   STAppendParamName(symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
-  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
   paramCount++;
 
   // :
@@ -868,7 +869,7 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   STAppendParamName(symtab, fnName, token->data);
 
   TryCall(STInsert, symtab, token->data);
-  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
   // TODO uncomment if it is correct
   // genVarDef(STGetName(symtab, token->data));
 
@@ -918,7 +919,7 @@ int pRetArgList(char *fnName) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetName();
+  char *retArgName = genRetVarName();
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -968,7 +969,7 @@ int pRetNextArg(char *fnName, int argCount) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetName();
+  char *retArgName = genRetVarName();
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -1101,7 +1102,6 @@ int pNextRetType(char *fnName) {
  * 49. <newIdAssign>     -> eps
  * 50. <newIdAssign>     -> = <expr>
  */
- 
 int pNewIdAssign(char *varName) {
   RuleFnInit;
 
@@ -1144,18 +1144,17 @@ int pExpr(char **retVarName) {
 
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
-    && !STGetIsVariable(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
+    && !STGetIsVariable(symtab, token->data)) {
  
     genComment("Calling a function call inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
-    
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarDef();
     // TODO what to insert as the last param? (char *frame)
-    genVarAssign(*retVarName, dt_nil, "nil", "TODO"); 
+    genAssignLiteral(*retVarName, dt_nil, "nil", "TODO"); 
 
   } else if(strEq(token->data, "else")) {
     vypluj stashToken(&token); 
@@ -1254,7 +1253,7 @@ bool readFunction(Token *token) {
   }
   
   // TODO don't use that stupid global 'element'! Streľba do nohy
-  // TryCall(genVarAssign, STGetName(symtab, element->data), element->dataType, token->data, "LF");
+  // TryCall(genAssignLiteral, STGetName(symtab, element->data), element->dataType, token->data, "LF");
   vypluj true;
 }
 
@@ -1336,42 +1335,31 @@ bool isLiteral(Token *token) {
 }
 
 /**
- * @brief Function for built in functions
+ * @brief Function for the 'write' built in function
  *
  * @return error code
- * 09. <fnCall>          -> ( <fnCallArgList> )
  *  
  */
-int writeFunction(Token *token) {
+int writeFunction(Token *token, int dataType) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
-  // (
-  RequireTokenType(t_leftParen);
-
-  
-  // <fnCallArgList> but somehow special for write
-  GetToken;
-
-  STElem *element;
-  // char *name; TODO UNUSED VARIABLE
-
-  // TODO alex tvrdí že to nakódí
+  // TODO alex pozri či môže byť - tedro
+  char *varName;
   
   if(isLiteral(token)) {
-    genWriteLiteral(token, "LF");
+    varName = genTmpVarDef();
+    genAssignLiteral(varName, dataType, token->data, "TODO");
   } else {
-    element = STFind(symtab, token->data);
-
-    if(element == NULL) {
+    if(!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
       vypluj ERR(SYNTAX_ERR); // TODO check if good err code
     }
-    genWriteVariable(element->name, "LF");
-        
+    varName = STGetName(symtab, token->data);
   }
 
-  GetToken;
-  
+  // TODO Namiesto generovania WRITE potrebujeme toto passnuť ako argument do 
+  // write funkcie
+  genWrite(varName);
 
   vypluj 0;
 }
@@ -1565,7 +1553,7 @@ int createParamVariables(char *fnName){
     genVarDefLF(paramVar->name);
 
     // Assign parameters to the defined variables
-    genMove(paramVar->name, genParamName());
+    genMove(paramVar->name, genParamVarName());
   }
   vypluj 0;
 }

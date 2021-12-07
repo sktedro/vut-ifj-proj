@@ -354,6 +354,13 @@ typedef struct assignmentElement {
   struct assignmentElement *next;
 } AssignElement;
 
+/* do not remove until var redefinition is solved
+typedef struct varDefStackStruct {
+  StringBuffer *data;
+  struct varDefStackStruct *next;
+} VarDefStack;
+*/
+
 /*
  * Miscellaneous functions
  */
