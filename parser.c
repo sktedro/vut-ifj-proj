@@ -54,6 +54,9 @@ AssignElement *assignmentElement;
 int assigmentCounter = 0;
 int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
+StringBuffer *varDefBuff = NULL;
+
+
 
 // TODO macro RequireIDToken - == t_idOrKeyword && !isIFJ21Keyword
 
@@ -72,6 +75,7 @@ int retVarCounter = 0;
  */
 int pStart() {
   RuleFnInit;
+  TryCall(stringBufInit, &varDefBuff);
   AListInit(&assignmentElement);
 
   // require
@@ -132,9 +136,9 @@ int pCodeBody() {
     vypluj 0;
   }
 
-  // 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
+  // 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> )
+  //                          <fnRetTypeList> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
-
     genComment("New function definition");
 
     // Code gen Create an unconditional jump behind the function
@@ -149,8 +153,16 @@ int pCodeBody() {
     // Define the new function (in the symtable)
     TryCall(newFunctionDefinition, fnName);
 
+    // generate an unconditional jump to definitions
+    char *varDefStart = genLabelName();
+    char *fnCodeStart = genLabelName();
+    genComment("Jumping to variable declaration");
+    genUnconditionalJump(varDefStart);
+
     // Generate code
     genFnDef(fnName);
+    genComment("Function body starts here");
+    genLabel(fnCodeStart);
 
     // (
     RequireTokenType(t_leftParen);
@@ -165,13 +177,25 @@ int pCodeBody() {
     TryCall(pFnRetTypeList, fnName);
 
     // Generate definitions of parameter variables of this function
+    char *varDefBypass = genLabelName();
+    genUnconditionalJump(varDefBypass);
     createParamVariables(fnName);
+    // TODO
 
     // <stat>
     TryCall(pStat, fnName);
 
     // end
     RequireToken(t_idOrKeyword, "end");
+
+    // generate all declarations and jump back
+    genComment("Variable declarations");
+    for(int i = 0; i < varDefBuff->len; i++) {
+      genVarDefLF(varDefBuff->data[i]);
+    }
+
+    genComment("Skip variable declaration");
+    genLabel(varDefBypass);
 
     // Return from the function
     genPopframe();
@@ -463,30 +487,30 @@ int pStat(char *fnName) {
   GetToken;
   printToken(token);
 
-  // -> eps
+  // 17. <stat>            -> eps
   if (token->type != t_idOrKeyword || (token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
     fprintf(stderr, " <stat>            -> eps\n");
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-  // -> local [id] : <type> <newIdAssign> <stat>
+  // 19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
   if (strcmp(token->data, "local") == 0) {
-
     fprintf(stderr, "-> local [id] : <type> <newIdAssign> <stat>\n");
+
     // [id]
     RequireTokenType(t_idOrKeyword);
     if(isIFJ21Keyword(token)) {
       vypluj ERR(SYNTAX_ERR);
     }
 
-    char *newVarName = token->data;
     // Insert the new ID to the symtable
+    char *newVarName = token->data;
     TryCall(STInsert, symtab, newVarName);
     STSetIsVariable(symtab, newVarName, true);
     STSetName(symtab, newVarName, genVarName(token->data, symtab->top->depth));
     // Code gen variable definition
-    genVarDefLF(STGetName(symtab, newVarName));
+    TryCall(condAppendToStringBuff, STGetName(symtab, newVarName));
 
     // :
     RequireTokenType(t_colon);
@@ -497,7 +521,7 @@ int pStat(char *fnName) {
     // <newIdAssign>
     TryCall(pNewIdAssign, newVarName);
 
-  // -> if <expr> then <stat> else <stat> end <stat>
+  // 20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
   } else if (strcmp(token->data, "if") == 0) {
     fprintf(stderr, "-> if <expr> then <stat> else <stat> end <stat>\n");
     // Generate new label names for 'else' and 'end' (don't generate code yet)
@@ -537,7 +561,7 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-  // -> while <expr> do <stat> end <stat>
+    // 21. <stat>            -> while <expr> do <stat> end <stat>
   } else if (strcmp(token->data, "while") == 0) {
     fprintf(stderr, "-> while <expr> do <stat> end <stat>\n");
     // Generate new label names (don't generate code yet)
@@ -584,7 +608,7 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
-  // -> return <retArgList> <stat>
+  // 22. <stat>            -> return <retArgList> <stat>
   } else if (strcmp(token->data, "return") == 0) {
     LOG("-> return <retArgList> <stat>\n");
 
@@ -618,10 +642,9 @@ int pStat(char *fnName) {
 
     genComment2("Return done");
 
-  // [id] <statWithId> <stat> 
+  // 22. <stat>            [id] <statWithId> <stat>
   } else if (STFind(symtab, token->data)) { // A function or a variable
     LOG("<stat>            -> [id] <statWithId> <stat>\n");
-  
     // TODO kopnite Alexa ak na to ešte nespravil funkciu
     if(assignmentElement->name == NULL) {
       assignmentElement->name = STGetName(symtab, token->data);
@@ -1192,6 +1215,21 @@ int pExpr(char **retVarName) {
  * HELPER FUNCTIONS
  *
  */
+
+/**
+ * @brief appends to the string buffer unless the string is already there
+ *
+ * @return err code
+ */
+int condAppendToStringBuff(char *name) {
+  for(int i = 0; i < varDefBuff->len; i++) {
+    if(strcmp(name, varDefBuff->data[i]) == 0) {
+      vypluj 0;
+    }
+  }
+  TryCall(stringBufAppend, varDefBuff, name)
+  vypluj 0;
+}
 
 /**
  * @brief Check if a string represents a data type
