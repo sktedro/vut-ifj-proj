@@ -54,7 +54,7 @@ int createParamVariables(char *fnName);
 int varDataType(char *varName);
 int fnDeclarationParamType(char *fnName, char* data);
 int fnRetDataType(char *fnName);
-
+int condAppendToStringBuff(char *name);
 /**
  * @brief Check if a string represents a data type
  *
