@@ -8,7 +8,8 @@
 #include "misc.h"
 #include "assignment.h"
 #include "parser.h"
-
+void resetParamCounter();
+void resetRetCounter();
 int digits(int value);
 char *genVarName(char *name, int frame);
 char *stringConvert(char *string);

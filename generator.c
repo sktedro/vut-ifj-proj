@@ -19,9 +19,13 @@ char *fnPrefix = "&fn_";
 
 int tmpCounter = 0;
 int labelCounter = 0;
-int paramCnt = 0;
-int retCnt = 0;
+int paramCounter = 0;
+int retCounter = 0;
 int writeCount = 0;
+
+/* do not remove until var redefinition is solved
+VarDefStack *varDefStack = NULL;
+*/
 
 // ----------------------------------------------------------------------------
 // VARIABLES FOR MULTIPLE ASSIGMENT
@@ -30,6 +34,25 @@ int exprLabelCnt = 0;
 int exprEndCnt = 0;
 
 // ----------------------------------------------------------------------------
+
+/*
+ * Functions to help generate the definitions of variables
+ */
+
+/* do not remove until var redefinition is solved
+int varDefStackInit(){
+  GCMalloc(varDefStack, sizeof(VarDefStack));
+}
+
+int varDefStackPush(){
+  GCMalloc(varDefStack->next, sizeof(VarDefStack));
+}
+
+void defineBufferedVars(){
+  // def all vars in the string buffer in the vardef buffer top
+  // Pop the vardef buffer top
+}
+*/
 
 /*
  * Generating names for variables and labels
@@ -69,8 +92,8 @@ char *genTmpVarName() {
 char *genRetVarName() {
   char *retName;
   GCMalloc(retName, sizeof(char) * 10);
-  sprintf(retName, "%s%d", retPrefix, retCnt);
-  retCnt++;
+  sprintf(retName, "%s%d", retPrefix, retCounter);
+  retCounter++;
   return retName;
 }
 char *genLabelName() {
@@ -84,10 +107,8 @@ char *genLabelName() {
 char *genParamVarName() {
   char *tmp;
   GCMalloc(tmp, sizeof(char) * 100);
-  sprintf(tmp, "%s%d", paramPrefix, paramCnt);
-  /** paramCnt++; */ // TODO niekedy to nechceme inkrementovať...
-  // Teda možno hej, ale v parseri po argumentoch fn call aj po parametroch vo
-  // funkcii treba asi paramCnt vynulovať
+  sprintf(tmp, "%s%d", paramPrefix, paramCounter);
+  paramCounter++;
   return tmp;
 }
 
@@ -165,6 +186,10 @@ char *stringConvert(char *string) {
  * Misc
  */
 
+void genStart() {
+  printf(".IFJcode21\n\n");
+}
+
 void genComment(char *comment){
   printf("\n# %s\n", comment);
 }
@@ -173,8 +198,12 @@ void genComment2(char *comment){
   printf("# %s\n\n", comment);
 }
 
-void genStart() {
-  printf(".IFJcode21\n\n");
+void resetParamCounter(){
+  paramCounter = 0;
+}
+
+void resetRetCounter(){
+  retCounter = 0;
 }
 
 /*
@@ -210,7 +239,6 @@ int genReturn(char *varInLF, char *varInTF){
   return 0;
 }
 
-// TODO rename to genAssignLiteral
 int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
 
   if(dataType == dt_integer) {

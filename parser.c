@@ -54,7 +54,6 @@ AssignElement *assignmentElement;
 int assigmentCounter = 0;
 int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
-int paramhelpCounter = 0;
 
 // TODO macro RequireIDToken - == t_idOrKeyword && !isIFJ21Keyword
 
@@ -264,6 +263,7 @@ int pFnCall(char *fnName) {
   genFnCallInit();
 
   genComment("Processing function call arguments");
+  resetParamCounter();
   TryCall(pFnCallArgList, fnName);
   genComment2("Processing function call arguments done");
 
@@ -278,7 +278,7 @@ int pFnCall(char *fnName) {
 
   genFnCall(fnName);
   retVarCounter = 0;
-  paramhelpCounter = 0;
+  resetParamCounter();
   assigmentCounter = 0;
   assigmentGeneratedCounter = 0;
 
@@ -401,10 +401,10 @@ int pFnCallArg(char *fnName, int argCount) {
     //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
     // TODO shouldn't we use this?
 
-    char *name = genParamVarName();
-    genVarDefTF(name);
-    genPassParam(token->data, name);
-    paramhelpCounter++;
+    char *paramVarName = genParamVarName();
+    char *varName = STGetName(symtab, token->data);
+    genVarDefTF(paramVarName);
+    genPassParam(paramVarName, varName);
 
   // -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -421,7 +421,6 @@ int pFnCallArg(char *fnName, int argCount) {
     char *name = genParamVarName();
     genVarDefTF(name);
     genAssignLiteral(name, dataType, token->data, "TF");
-    paramhelpCounter++;
 
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
