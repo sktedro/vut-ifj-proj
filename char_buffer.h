@@ -41,15 +41,14 @@ void charBufPop(CharBuffer *buf);
 void charBufClear(CharBuffer *buf);
 
 /**
- * @brief Appends a string to an existing buffer or initialises a new buffer if the 
- * given pointer is null.
+ * @brief Appends a string to a buffer 
  * 
- * @param orig a string to append
  * @param buffer a pointer to a buffer
+ * @param str a string to append
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppendString(char *orig, CharBuffer **buffer);
+int charBufAppendString(CharBuffer *buffer, char *str);
 
 #endif
 /* end of file char_buffer.h */

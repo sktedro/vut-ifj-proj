@@ -154,57 +154,79 @@ char *getDataTypeFromInt(Token *token) {
  * @return ifj21code string
  */
 // todo is there a nicer and simpler way to do the escaped chars?
-char *stringConvert(char *string) {
-  char *newString;
-  GCMalloc(newString, sizeof(char) * (strlen(string)*4));
-  newString[0] = '\0';
-  int k = 0;
-  int stringLen = strlen(string);
+int stringConvert(char **destPtr, char *string) {
+  CharBuffer *newString;
+  CharBuffer *tempBuffer;
+  TryCall(charBufInit, &newString);
+  TryCall(charBufInit, &tempBuffer);
 
-  for(int i = 0; i < stringLen; i++) {
-
+  int i = 0;
+  while(string[i] != '\0'){
+    LOG("CHAR: %c", string[i]);
     // Basic characters
     if((string[i] >= 'a' && string[i] <= 'z') 
         || (string[i] >= 'A' && string[i] <= 'Z') 
         || (string[i] >= '0' && string[i] <= '9')) {
-      newString[k] = string[i];
-      k++;
+      TryCall(charBufAppend, newString, string[i]);
 
     // After a '\' we can get
     // Special characters: \n \t \" and \\ (backslash)
     // Escaped ascii value: \000 to \255
     } else if(string[i] == '\\'){
       i++;
+
+      // Special characters:
       if(string[i] == 'n'){
+        LOG("NEWLINE");
         string[i] = '\n';
+        continue;
       }else if(string[i] == 't'){
         string[i] = '\t';
+        continue;
       }else if(string[i] == '"'){
         string[i] = '"';
+        continue;
       }else if(string[i] == '\\'){
-        string[i] = '\\';
-      }else {
-        // backslash
-        newString[k] = '\\';
-        k++;
+        TryCall(charBufAppendString, newString, "\\092");
+        i++;
+        continue;
+      }
 
-        newString[k] = string[i];
+      // Escaped ascii value: \000 to \255
+      // Add the number digits to the tempBuffer
+      TryCall(charBufAppend, newString, '\\');
+      for(int j = 0; j < 3; j++){
+        if((int)strlen(string) < i){
+          return ERR(LEX_ERR);
+        }
+        TryCall(charBufAppend, tempBuffer, string[i]);
         i++;
       }
-      i--;
-      k++;
-
-    }else {
-      int asciiValue = (int) string[i];
-      char *arr = NULL;
-      GCMalloc(arr, sizeof(char) * 5);
-      sprintf(arr, "\\%03d", asciiValue);
-      strcat(newString, arr);
-      k += 4;
+      // Check if the value is a number below 255 (and above 0)
+      char *tolptr = NULL;
+      int ascii = strtol(tempBuffer->data, &tolptr, 10);
+      LOG("TOLOPTR: %s", tolptr);
+      if(tolptr[0] || ascii < 0 || ascii > 255){
+        return ERR(LEX_ERR);
+      }
+      // If the value is all right, append the temp data to the new string
+      TryCall(charBufAppendString, newString, tempBuffer->data);
+      // Clear the temp buffer
+      charBufClear(tempBuffer);
+      
+    // Other special character
+    } else {
+      char *escapedSeq = NULL;
+      GCMalloc(escapedSeq, sizeof(char) * 5);
+      sprintf(escapedSeq, "\\%03d", (int) string[i]);
+      LOG("got %s", escapedSeq);
+      TryCall(charBufAppendString, newString, escapedSeq);
     }
-    newString[k] = '\0';
+
+    i++;
   }
-  return newString;
+  *destPtr = newString->data;
+  return 0;
 }
 
 /*
@@ -304,7 +326,9 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
     printf("MOVE %s@%s float@%a\n",frame, name, val);
   
   } else if(dataType == dt_string) {
-    printf("MOVE %s@%s string@%s\n",frame, name, stringConvert(assignValue));
+    char *convertedString = NULL;
+    TryCall(stringConvert, &convertedString, assignValue);
+    printf("MOVE %s@%s string@%s\n",frame, name, convertedString);
   
   } else if(strcmp(assignValue, "nil") == 0) {
     printf("MOVE %s@%s nil@nil\n", frame, name);
@@ -384,7 +408,6 @@ void genJumpIfTrue(char *label, char *varName) {
 }
 
 void genLabel(char *labelName) {
-  printf("DSDSDSAD\n");
   printf("LABEL %s\n", labelName);
 }
 
@@ -532,12 +555,12 @@ char *genNot(SStackElem *src) {
  * Vypíše to literál nemazať
  * 
  */
-void genWriteLiteral(Token *token, char *frame) {
+int genWriteLiteral(Token *token, char *frame) {
   char *string;
   char *dataType = getDataTypeFromInt(token);
 
   if(token->type == t_str) {
-    string = stringConvert(token->data);
+    TryCall(stringConvert, &string, token->data);
 
     printf("\n");
     printf("DEFVAR %s@$W%d\n",frame, writeCount);
@@ -551,6 +574,7 @@ void genWriteLiteral(Token *token, char *frame) {
     printf("WRITE %s@W%d\n", frame, writeCount);
     writeCount++;
   }
+  return 0;
 }
 
 void genWrite(char *name) {
@@ -743,8 +767,7 @@ void genSubStrFnRet(char *varName) {
 // FUNCTIONS FOR MULTIPLE ASSIGMENT
 
 void genExprLabel(char *name) {
-  printf("sdddddddddddddddd\n");
-  printf("LABEL %s%s\n", labelPrefix, name);
+  printf("LABEL %s\n", name);
 }
 
 /*void genExprJump(char *label) {
@@ -773,10 +796,10 @@ char *getExprEndName() {
 
 void genExprFirst(AssignElement *element) {
   AssignElement *tmp = AListGetLast(element);
-
+  //AListDebugPrint(element);
+  
   genUnconditionalJump(tmp->label);
   genExprLabel(element->label);
-
   element->generated = true;
 }
 
@@ -790,7 +813,6 @@ void genExprLast(AssignElement *element) {
 }
 
 void genExprSecond(AssignElement *element) {
-
   genUnconditionalJump(element->end);
   genExprLabel(element->next->label);
 
@@ -799,7 +821,6 @@ void genExprSecond(AssignElement *element) {
 }
 
 void genExpr(AssignElement *element) {
-
   genUnconditionalJump(element->prev->prev->label);
   genExprLabel(element->label);
   element->generated = true;

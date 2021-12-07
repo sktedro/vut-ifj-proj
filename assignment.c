@@ -218,6 +218,58 @@ last:
 
 jump treti
 end:
+-----------------------------------------------------
+
+c = 3
+a,b = c, 20
+--
+a = 3
+b = 20
+--
+
+jump last
+label prvy
+  move a c
+
+jump end
+label last
+
+  move b 20
+jump prvy
+
+label end
+
+  DEFVAR LF@?tmpvar_0
+  MOVE LF@?tmpvar_0 int@3
+  MOVE LF@%var_c_1 LF@?tmpvar_0
+
+JUMP *label_EXPR1
+
+LABEL *label_EXPR0
+  MOVE LF@%var_b_1 LF@%var_c_1
+
+JUMP *label_EXPR0
+
+LABEL *label_EXPR1
+
+  DEFVAR LF@?tmpvar_1
+  MOVE LF@?tmpvar_1 int@20
+  MOVE LF@%var_a_1 LF@?tmpvar_1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 */
 
