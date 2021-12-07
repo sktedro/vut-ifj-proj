@@ -293,7 +293,7 @@ int pFnCall(char *fnName) {
     TryCall(pFnCallArgList, fnName);
     //genPopframe();
 
-  }else{
+  } else {
     genComment("Calling a function");
 
     genFnCallInit();
@@ -449,9 +449,9 @@ int pFnCallArg(char *fnName, int argCount) {
     LOG("-> [literal]\n");
     if(token->type == t_int){
       dataType = dt_integer;
-    }else if(token->type == t_num || token->type == t_sciNum){
+    } else if(token->type == t_num || token->type == t_sciNum){
       dataType = dt_number;
-    }else if(token->type == t_str){
+    } else if(token->type == t_str){
       dataType = dt_string;
     } else if(token->type == t_idOrKeyword) {
       dataType = dt_nil;

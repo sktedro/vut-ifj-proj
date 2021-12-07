@@ -293,7 +293,14 @@ int genMoveToLF(char *dest, char *src){
 }
 
 int genPassParam(char *varInTF, char *varInLF){
+  char *isNil = genLabelName("isnil");
+  char *notNil = genLabelName("notnil");
+  printf("JUMPIFEQ %s LF@%s nil@nil\n", isNil, varInLF); // TODO use gen function?
   printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
+  genUnconditionalJump(notNil);
+  genLabel(isNil);
+  printf("MOVE TF@%s string@nil\n", varInTF);
+  genLabel(notNil);
   return 0;
 }
 
