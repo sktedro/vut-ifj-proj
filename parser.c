@@ -429,7 +429,7 @@ int pFnCallArg(char *fnName, int argCount) {
   char *paramName = genParamVarName("");
 
   // Pass a parameter to the function
-  // -> [id]
+  // 14. <fnCallArg>       -> [id]
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
     LOG("-> [id]\n");
     dataType = STGetVarDataType(symtab, token->data);
@@ -442,9 +442,10 @@ int pFnCallArg(char *fnName, int argCount) {
     genVarDefTF(paramName);
     genPassParam(paramName, varName);
 
-  // -> [literal]
+  // 15. <fnCallArg>       -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
-      token->type == t_sciNum || token->type == t_str) {
+      token->type == t_sciNum || token->type == t_str ||
+      (token->type == t_idOrKeyword && strcmp(token->data, "nil") == 0)) {
     LOG("-> [literal]\n");
     if(token->type == t_int){
       dataType = dt_integer;
@@ -452,6 +453,8 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_number;
     }else if(token->type == t_str){
       dataType = dt_string;
+    } else if(token->type == t_idOrKeyword) {
+      dataType = dt_nil;
     }
 
     genVarDefTF(paramName);

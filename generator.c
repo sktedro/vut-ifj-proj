@@ -303,8 +303,9 @@ int genReturn(char *varInLF, char *varInTF){
 }
 
 int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
-
-  if(dataType == dt_integer) {
+  if(dataType == dt_nil) {
+    printf("MOVE %s@%s string@nil\n",frame, name);
+  } else if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;
     int val = (int)strtol(assignValue, &tolptr, 10);
@@ -559,9 +560,14 @@ int genWriteLiteral(Token *token, char *frame) {
   char *string;
   char *dataType = getDataTypeFromInt(token);
 
-  if(token->type == t_str) {
-    TryCall(stringConvert, &string, token->data);
-
+  if(strcmp(token->data, "nil") == 0) {
+    printf("\n");
+    printf("DEFVAR %s@$W%d\n",frame, writeCount);
+    printf("MOVE %s@$W%d string@nil\n",frame, writeCount);
+    printf("WRITE %s@$W%d\n", frame, writeCount);
+    writeCount++;
+  } else if(token->type == t_str) {
+    string = stringConvert(token->data);
     printf("\n");
     printf("DEFVAR %s@$W%d\n",frame, writeCount);
     printf("MOVE %s@$W%d %s@%s\n",frame, writeCount, dataType, string);
@@ -588,6 +594,7 @@ void genWrite(char *name) {
     * writeCount++;
     */
   // tedro: nestačí to takto?
+  LOG("ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg\n");
   printf("WRITE TF@%s\n", name);
 }
 
