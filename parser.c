@@ -135,6 +135,7 @@ int pCodeBody() {
   // 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> )
   //                          <fnRetTypeList> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
+
     genComment("New function definition");
 
     // labels
@@ -179,7 +180,9 @@ int pCodeBody() {
     // TODO
 
     // <stat>
+    TryCall(STPush, symtab);
     TryCall(pStat, fnName);
+    STPop(symtab);
 
     // end
     RequireToken(t_idOrKeyword, "end");
@@ -710,20 +713,15 @@ int pStatWithId(char *idName) {
     if (token->type == t_assignment) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
-      LOG("bvwincml");
       TryCall(pExpr, &retVarName);
-      LOG("HAHA");
       char *varName;
       TryCall(STGetName, symtab, &varName, idName);
       genMove(varName, retVarName);
-      
-      // genAssignLiteral(idName, -1, retVarName); 
-    }
     
     // -> , [id] <nextAssign> <expr> , <expr>
     // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
-     else if (token->type == t_comma) {
+    } else if (token->type == t_comma) {
       //AListDebugPrint(assignmentElement);
       if(AListGetLength(assignmentElement) == 0) {
         TryCall(STGetName, symtab, &assignmentElement->name, idName);
@@ -749,6 +747,7 @@ int pStatWithId(char *idName) {
 
       AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
       assigmentCounter++;
+      //AListDebugPrint(assignmentElement);
       // <nextAssign>
       // Check and generate more assignments if there are some
       TryCall(pNextAssign);
@@ -823,6 +822,7 @@ int pNextAssign() {
   TryCall(STGetName, symtab, &name, token->data);
   AListAdd(&assignmentElement, name, getExprLabelName(assigmentCounter), false, NULL);
   assigmentCounter++;
+  //AListDebugPrint(assignmentElement);
 
   // <nextAssign>
   TryCall(pNextAssign);
@@ -1329,9 +1329,6 @@ bool readFunction(Token *token) {
     TryCall(stashToken, &token);
     vypluj false;
   }
-  
-  // TODO don't use that stupid global 'element'! Streľba do nohy
-  // TryCall(genAssignLiteral, STGetName(symtab, element->data), element->dataType, token->data, "LF");
   vypluj true;
 }
 
@@ -1410,34 +1407,6 @@ bool isLiteral(Token *token) {
     vypluj true;
   }
   vypluj false;
-}
-
-/**
- * @brief Function for the 'write' built in function
- *
- * @return error code
- *  
- */
-int writeFunction(Token *token, int dataType) {
-  LOG();
-
-  // TODO alex pozri či môže byť - tedro
-  char *varName;
-  
-  // Parametre sme passli v predchádzajúcej funkcii tak tu toto netreba, či?
-  if(isLiteral(token)) {
-    varName = genTmpVarDef();
-    genAssignLiteral(varName, dataType, token->data, "TODO");
-  } else {
-    if(!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
-      vypluj ERR(SYNTAX_ERR); // TODO check if good err code
-    }
-    TryCall(STGetName, symtab, &varName, token->data);
-  }
-
-  genWrite(varName);
-
-  vypluj 0;
 }
 
 /**

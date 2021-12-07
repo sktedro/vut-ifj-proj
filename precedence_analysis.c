@@ -208,8 +208,7 @@ int iRule(SStack *symstack, SStackElem *op) {
     // If it is literal, save it into a variable and assign it a value
     if (!op->isId) {
       char *newName = genTmpVarDef();
-      //TryCall(genAssignLiteral, newName, op->dataType, op->data);
-      // TODO change this
+      // TODO change this and check the data types
       TryCall(genAssignLiteral, newName, op->dataType, op->data, "LF");
       op->data = newName;
       op->isId = true;

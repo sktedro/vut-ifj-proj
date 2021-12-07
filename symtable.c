@@ -59,6 +59,10 @@ void STPop(STStack *stack) {
  * @return 0 if successful, errcode otherwise
  */
 int STInsert(STStack *stack, char *key) {
+  if(STFind(stack, key) && STFind(stack, key)->isVariable == false){
+    // There is a function with that name already in the symtab!!
+    return ERR(ID_DEF_ERR);
+  }
   STStackElem *frame = STStackTop(stack);
   TryCall(treeInsert, &(frame->table), key, stack->top->depth);
   return 0;

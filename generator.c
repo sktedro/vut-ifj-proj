@@ -153,39 +153,43 @@ char *getDataTypeFromInt(Token *token) {
  * @param ifj21 string 
  * @return ifj21code string
  */
+// todo is there a nicer and simpler way to do the escaped chars?
 char *stringConvert(char *string) {
   char *newString;
   GCMalloc(newString, sizeof(char) * (strlen(string)*4));
+  newString[0] = '\0';
   int k = 0;
   int stringLen = strlen(string);
 
   for(int i = 0; i < stringLen; i++) {
-    newString[k] = '\0';
 
+    // Basic characters
     if((string[i] >= 'a' && string[i] <= 'z') 
         || (string[i] >= 'A' && string[i] <= 'Z') 
         || (string[i] >= '0' && string[i] <= '9')) {
       newString[k] = string[i];
       k++;
 
+    // After a '\' we can get
+    // Special characters: \n \t \" and \\ (backslash)
+    // Escaped ascii value: \000 to \255
     } else if(string[i] == '\\'){
       i++;
-      if(string[i] == 'b'){
-        string[i] = '\b';
-      }else if(string[i] == 'e'){
-        string[i] = '\e';
-      }else if(string[i] == 'n'){
+      if(string[i] == 'n'){
         string[i] = '\n';
-      }else if(string[i] == 'r'){
-        string[i] = '\r';
       }else if(string[i] == 't'){
         string[i] = '\t';
-      }else if(string[i] == 'v'){
-        string[i] = '\v';
+      }else if(string[i] == '"'){
+        string[i] = '"';
       }else if(string[i] == '\\'){
         string[i] = '\\';
       }else {
-        string[k] = string[i];
+        // backslash
+        newString[k] = '\\';
+        k++;
+
+        newString[k] = string[i];
+        i++;
       }
       i--;
       k++;
@@ -198,8 +202,8 @@ char *stringConvert(char *string) {
       strcat(newString, arr);
       k += 4;
     }
+    newString[k] = '\0';
   }
-  newString[k] = '\0';
   return newString;
 }
 
@@ -380,6 +384,7 @@ void genJumpIfTrue(char *label, char *varName) {
 }
 
 void genLabel(char *labelName) {
+  printf("DSDSDSAD\n");
   printf("LABEL %s\n", labelName);
 }
 
@@ -738,6 +743,7 @@ void genSubStrFnRet(char *varName) {
 // FUNCTIONS FOR MULTIPLE ASSIGMENT
 
 void genExprLabel(char *name) {
+  printf("sdddddddddddddddd\n");
   printf("LABEL %s%s\n", labelPrefix, name);
 }
 
