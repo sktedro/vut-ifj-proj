@@ -567,7 +567,7 @@ int genWriteLiteral(Token *token, char *frame) {
     printf("WRITE %s@$W%d\n", frame, writeCount);
     writeCount++;
   } else if(token->type == t_str) {
-    string = stringConvert(token->data);
+    stringConvert(&string, token->data);
     printf("\n");
     printf("DEFVAR %s@$W%d\n",frame, writeCount);
     printf("MOVE %s@$W%d %s@%s\n",frame, writeCount, dataType, string);
