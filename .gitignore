@@ -12,3 +12,4 @@ tests/*/outputs/
 cmake-build-debug/
 CMakeLists.txt
 *.zip
+ic21int

@@ -1,15 +1,15 @@
 Testing: Token type is '0' and data 'varInt1'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 int@2
-DEFVAR LF@%tmp1
-INT2FLOAT LF@%tmp1 LF@varInt2_0
-DEFVAR LF@%tmp2
-INT2FLOAT LF@%tmp2 LF@%tmp0
-DEFVAR LF@%tmp3
-DIV LF@%tmp3 LF@%tmp1 LF@%tmp2
-DEFVAR LF@%tmp4
-INT2FLOAT LF@%tmp4 LF@varInt1_0
-DEFVAR LF@%tmp5
-ADD LF@%tmp5 LF@%tmp4 LF@%tmp3
-Testing: Expression result is in: %tmp5
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 int@2
+DEFVAR LF@?tmpvar_1
+INT2FLOAT LF@?tmpvar_1 LF@varInt2_0
+DEFVAR LF@?tmpvar_2
+INT2FLOAT LF@?tmpvar_2 LF@?tmpvar_0
+DEFVAR LF@?tmpvar_3
+DIV LF@?tmpvar_3 LF@?tmpvar_1 LF@?tmpvar_2
+DEFVAR LF@?tmpvar_4
+INT2FLOAT LF@?tmpvar_4 LF@varInt1_0
+DEFVAR LF@?tmpvar_5
+ADD LF@?tmpvar_5 LF@?tmpvar_4 LF@?tmpvar_3
+Testing: Expression result is in: ?tmpvar_5
 Testing: Precedence analysis returned 0

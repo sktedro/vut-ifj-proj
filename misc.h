@@ -90,18 +90,6 @@
   }                                                                            \
   printToken(token);
 
-// TODO? Just ignore this for now
-#define RequireKeyword(str1, str2)                                             \
-  if(!strEq(str1, str2)) {                                                     \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            
-
-// TODO? Just ignore this for now
-#define ForbidKeyword(str1, str2)                                              \
-  if(strEq(str1, str2)) {                                                      \
-    vypluj err(SYNTAX_ERR);                                                    \
-  }                                                                            
-
 // Get a new token and if the type doesn't match, throw a syntax err
 #define RequireTokenType(tokenType)                                            \
   GetToken;                                                                    \

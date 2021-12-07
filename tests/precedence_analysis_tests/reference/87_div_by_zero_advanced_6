@@ -1,22 +1,22 @@
 ERROR: Division by zero error at (around) line 3.
 Testing: Token type is '1' and data '1'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 int@1
-DEFVAR LF@%tmp1
-MOVE LF@%tmp1 int@1
-DEFVAR LF@%tmp2
-MOVE LF@%tmp2 int@0
-DEFVAR LF@%tmp3
-MOVE LF@%tmp3 int@0
-DEFVAR LF@%tmp4
-ADD LF@%tmp4 LF@%tmp2 LF@%tmp3
-DEFVAR LF@%tmp5
-MOVE LF@%tmp5 int@1
-DEFVAR LF@%tmp6
-MUL LF@%tmp6 LF@%tmp4 LF@%tmp5
-DEFVAR LF@%tmp7
-INT2FLOAT LF@%tmp7 LF@%tmp1
-DEFVAR LF@%tmp8
-INT2FLOAT LF@%tmp8 LF@%tmp6
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 int@1
+DEFVAR LF@?tmpvar_1
+MOVE LF@?tmpvar_1 int@1
+DEFVAR LF@?tmpvar_2
+MOVE LF@?tmpvar_2 int@0
+DEFVAR LF@?tmpvar_3
+MOVE LF@?tmpvar_3 int@0
+DEFVAR LF@?tmpvar_4
+ADD LF@?tmpvar_4 LF@?tmpvar_2 LF@?tmpvar_3
+DEFVAR LF@?tmpvar_5
+MOVE LF@?tmpvar_5 int@1
+DEFVAR LF@?tmpvar_6
+MUL LF@?tmpvar_6 LF@?tmpvar_4 LF@?tmpvar_5
+DEFVAR LF@?tmpvar_7
+INT2FLOAT LF@?tmpvar_7 LF@?tmpvar_1
+DEFVAR LF@?tmpvar_8
+INT2FLOAT LF@?tmpvar_8 LF@?tmpvar_6
 Testing: Expression result is in: (null)
 Testing: Precedence analysis returned 9

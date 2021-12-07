@@ -1,0 +1,42 @@
+# function ord(s : string, i : integer) : integer
+#   if s == nil or i == nil then
+#     error("ERROR 8: Unexpected nil value in the parameters.")
+#   end
+#   if i <= 0 or i > #s then
+#     return nil
+#   end
+#   return string.byte(s, i)
+# end
+
+  PUSHFRAME
+
+# TODO check if s or i is nil. If so, return 8. But how do I do that?
+
+# Return nil if strlen(s) > i
+  DEFVAR LF@len
+  DEFVAR LF@strlenGTi
+  STRLEN LF@len LF@$param_0
+  GT LF@strlenGTi LF@len LF@$param_1
+  JUMPIFEQ retnil LF@strlenGTi bool@true
+
+# Return nil if !(i > 0)
+  DEFVAR LF@iGT0
+  GT LF@iGT0 LF@$param_1 int@0
+  JUMPIFEQ retnil LF@iGT0 bool@false
+
+# Get the result and return
+  DEFVAR LF@result
+  STR2INT LF@result LF@$param_0 LF@$param_1
+  POPFRAME
+  MOVE LF@!ret_0 TF@result
+  JUMP ordEnd
+
+# Return nil
+LABEL retnil
+  POPFRAME
+  MOVE LF@!ret_0 nil@nil
+  JUMP ordEnd
+
+# Function end
+LABEL ordEnd
+  RETURN

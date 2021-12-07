@@ -1,49 +1,49 @@
 Testing: Token type is '8' and data '('
-DEFVAR LF@%tmp0
-MUL LF@%tmp0 LF@varInt1_0 LF@varInt2_0
-DEFVAR LF@%tmp1
-MOVE LF@%tmp1 int@1
-DEFVAR LF@%tmp2
-ADD LF@%tmp2 LF@%tmp0 LF@%tmp1
-DEFVAR LF@%tmp3
-MOVE LF@%tmp3 int@3
-DEFVAR LF@%tmp4
-MOVE LF@%tmp4 int@2
-DEFVAR LF@%tmp5
-SUB LF@%tmp5 LF@%tmp3 LF@%tmp4
-DEFVAR LF@%tmp6
-STRLEN LF@%tmp6 LF@varStr1_0
-DEFVAR LF@%tmp7
-ADD LF@%tmp7 LF@%tmp5 LF@%tmp6
-DEFVAR LF@%tmp8
-INT2FLOAT LF@%tmp8 LF@%tmp2
-DEFVAR LF@%tmp9
-INT2FLOAT LF@%tmp9 LF@%tmp7
-DEFVAR LF@%tmp10
-DIV LF@%tmp10 LF@%tmp8 LF@%tmp9
-DEFVAR LF@%tmp11
-FLOAT2INT LF@%tmp11 LF@varNum1_0
-DEFVAR LF@%tmp12
-IDIV LF@%tmp12 LF@%tmp11 LF@varInt3_0
-DEFVAR LF@%tmp13
-MOVE LF@%tmp13 int@2
-DEFVAR LF@%tmp14
-INT2FLOAT LF@%tmp14 LF@%tmp12
-DEFVAR LF@%tmp15
-INT2FLOAT LF@%tmp15 LF@%tmp13
-DEFVAR LF@%tmp16
-DIV LF@%tmp16 LF@%tmp14 LF@%tmp15
-DEFVAR LF@%tmp17
-MOVE LF@%tmp17 float@0x1.999999999999ap-5
-DEFVAR LF@%tmp18
-MOVE LF@%tmp18 int@1
-DEFVAR LF@%tmp19
-INT2FLOAT LF@%tmp19 LF@%tmp18
-DEFVAR LF@%tmp20
-DIV LF@%tmp20 LF@%tmp17 LF@%tmp19
-DEFVAR LF@%tmp21
-ADD LF@%tmp21 LF@%tmp16 LF@%tmp20
-DEFVAR LF@%tmp22
-MUL LF@%tmp22 LF@%tmp10 LF@%tmp21
-Testing: Expression result is in: %tmp22
+DEFVAR LF@?tmpvar_0
+MUL LF@?tmpvar_0 LF@varInt1_0 LF@varInt2_0
+DEFVAR LF@?tmpvar_1
+MOVE LF@?tmpvar_1 int@1
+DEFVAR LF@?tmpvar_2
+ADD LF@?tmpvar_2 LF@?tmpvar_0 LF@?tmpvar_1
+DEFVAR LF@?tmpvar_3
+MOVE LF@?tmpvar_3 int@3
+DEFVAR LF@?tmpvar_4
+MOVE LF@?tmpvar_4 int@2
+DEFVAR LF@?tmpvar_5
+SUB LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
+DEFVAR LF@?tmpvar_6
+STRLEN LF@?tmpvar_6 LF@varStr1_0
+DEFVAR LF@?tmpvar_7
+ADD LF@?tmpvar_7 LF@?tmpvar_5 LF@?tmpvar_6
+DEFVAR LF@?tmpvar_8
+INT2FLOAT LF@?tmpvar_8 LF@?tmpvar_2
+DEFVAR LF@?tmpvar_9
+INT2FLOAT LF@?tmpvar_9 LF@?tmpvar_7
+DEFVAR LF@?tmpvar_10
+DIV LF@?tmpvar_10 LF@?tmpvar_8 LF@?tmpvar_9
+DEFVAR LF@?tmpvar_11
+FLOAT2INT LF@?tmpvar_11 LF@varNum1_0
+DEFVAR LF@?tmpvar_12
+IDIV LF@?tmpvar_12 LF@?tmpvar_11 LF@varInt3_0
+DEFVAR LF@?tmpvar_13
+MOVE LF@?tmpvar_13 int@2
+DEFVAR LF@?tmpvar_14
+INT2FLOAT LF@?tmpvar_14 LF@?tmpvar_12
+DEFVAR LF@?tmpvar_15
+INT2FLOAT LF@?tmpvar_15 LF@?tmpvar_13
+DEFVAR LF@?tmpvar_16
+DIV LF@?tmpvar_16 LF@?tmpvar_14 LF@?tmpvar_15
+DEFVAR LF@?tmpvar_17
+MOVE LF@?tmpvar_17 float@0x1.999999999999ap-5
+DEFVAR LF@?tmpvar_18
+MOVE LF@?tmpvar_18 int@1
+DEFVAR LF@?tmpvar_19
+INT2FLOAT LF@?tmpvar_19 LF@?tmpvar_18
+DEFVAR LF@?tmpvar_20
+DIV LF@?tmpvar_20 LF@?tmpvar_17 LF@?tmpvar_19
+DEFVAR LF@?tmpvar_21
+ADD LF@?tmpvar_21 LF@?tmpvar_16 LF@?tmpvar_20
+DEFVAR LF@?tmpvar_22
+MUL LF@?tmpvar_22 LF@?tmpvar_10 LF@?tmpvar_21
+Testing: Expression result is in: ?tmpvar_22
 Testing: Precedence analysis returned 0

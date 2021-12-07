@@ -12,7 +12,7 @@ extern GarbageCollector garbageCollector;
 
 char *labelPrefix = "_label_";
 char *varPrefix = "%var_";
-char *tmpvarPrefix = "?tmpvar_";
+char *tmpVarPrefix = "?tmpvar_";
 char *paramPrefix = "$param_";
 char *retPrefix = "!ret_";
 char *fnPrefix = "&fn_";
@@ -62,15 +62,12 @@ void defineBufferedVars(){
  * @brief Generates unique name for variables in ifj21code
  */
 char *genVarName(char *name, int frame) {
-
+  // TODO do we need that if? I think it is redundant now
   if(name[0] != '%') {
-    char *frameNum;
-    GCMalloc(frameNum, sizeof(char) * (countDigits(frame) + 2));
-    sprintf(frameNum, "_%d", frame);
     char *newName;
-    GCMalloc(newName, sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
-    memcpy(newName, name, strlen(name));
-    memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
+    int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 1;
+    GCMalloc(newName, sizeof(char) * mallocLen);
+    sprintf(newName, "%s%s_%d", varPrefix, name, frame);
     return newName;
   }
   return name;
@@ -83,22 +80,25 @@ char *genVarName(char *name, int frame) {
  */
 char *genTmpVarName() {
   char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
-  sprintf(varName, "%s%d", tmpvarPrefix, tmpCounter);
+  int mallocLen = strlen(tmpVarPrefix) + countDigits(tmpCounter) + 1;
+  GCMalloc(varName, sizeof(char) * mallocLen);
+  sprintf(varName, "%s%d", tmpVarPrefix, tmpCounter);
   tmpCounter++;
   return varName;
 }
 
 char *genRetVarName() {
   char *retName;
-  GCMalloc(retName, sizeof(char) * 10);
+  int mallocLen = strlen(retPrefix) + countDigits(retCounter) + 1;
+  GCMalloc(retName, sizeof(char) * mallocLen);
   sprintf(retName, "%s%d", retPrefix, retCounter);
   retCounter++;
   return retName;
 }
 char *genLabelName() {
   char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
+  int mallocLen = strlen(labelPrefix) + countDigits(labelCounter) + 1;
+  GCMalloc(varName, sizeof(char) * mallocLen);
   sprintf(varName, "%s%d", labelPrefix, labelCounter);
   labelCounter++;
   return varName;
@@ -106,7 +106,8 @@ char *genLabelName() {
 
 char *genParamVarName() {
   char *tmp;
-  GCMalloc(tmp, sizeof(char) * 100);
+  int mallocLen = strlen(paramPrefix) + countDigits(paramCounter) + 1;
+  GCMalloc(tmp, sizeof(char) * mallocLen);
   sprintf(tmp, "%s%d", paramPrefix, paramCounter);
   paramCounter++;
   return tmp;
@@ -229,6 +230,16 @@ int genMove(char *dest, char *src){
   return 0;
 }
 
+int genMoveToTF(char *dest, char *src){
+  printf("MOVE TF@%s LF@%s\n", dest, src);
+  return 0;
+}
+
+int genMoveToLF(char *dest, char *src){
+  printf("MOVE LF@%s TF@%s\n", dest, src);
+  return 0;
+}
+
 int genPassParam(char *varInTF, char *varInLF){
   printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   return 0;
@@ -310,6 +321,9 @@ void genFnDef(char *name) {
 // Create a TF
 void genFnCallInit(){
   printf("CREATEFRAME\n");
+}
+
+void genPushFrame(){
   printf("PUSHFRAME\n");
 }
 
@@ -483,12 +497,10 @@ char *genNot(SStackElem *src) {
   return tmp;
 }
 
-
 /*
- * No idea what this is for. Maybe remove this?
- * tedro: yes, not mine
+ * Vypíše to literál nemazať
+ * 
  */
-
 void genWriteLiteral(Token *token, char *frame) {
   char *string;
   char *dataType = getDataTypeFromInt(token);
@@ -565,11 +577,130 @@ int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
   return 0;
 }
 
+// --------------------------------------------------------------------------------
+// FUNCTIONS FOR generating built in functions
 
+void genSubStrFnDef() {
 
-/*
- * Functions for the multiassignment
- */
+  printf("\nLABEL _$SUBSTR_\n");
+
+  printf("\nPUSHFRAME\n");
+
+  printf("\nDEFVAR LF@$$STRRET\n");
+  printf("MOVE LF@$$STRRET string@\n");
+
+  printf("\nDEFVAR LF@$$STRPAR1\n");
+  printf("MOVE LF@LF@$$STRPAR1 LF@$$STRPARAM1\n");
+  
+  printf("\nDEFVAR LF@LF@$$STRPAR2\n");
+  printf("MOVE LF@LF@$$STRPAR2 LF@$$STRPARAM2\n");
+
+  printf("\nDEFVAR LF@LF@$$STRPAR3\n");
+  printf("MOVE LF@LF@$$STRPAR3 LF@$$STRPARAM3\n");
+
+  printf("\nJUMPIFEQ _STR$ERROR_ LF@$$STRPAR1 nil@nil\n");
+  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR2 nil@nil\n");
+  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR3 nil@nil\n");
+
+  printf("\nDEFVAR LF@$$STRHELP\n");
+  printf("MOVE LF@LF@LF@$$STRHELP nil@nil\n");
+
+  printf("\nDEFVAR LF@$$STRLEN\n");
+  printf("MOVE LF@LF@LF@$$STRLEN LF@$$STRPAR1\n");
+
+  printf("\n# if (param3 < param2)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRPAR2\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param2 < 1)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR2 int@1\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param2 > len(param1))\n");
+  printf("GT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRLEN\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param3 < 1)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR3 int@1\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n# if (param3 > len(param1))\n");
+  printf("GT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRLEN\n");
+  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
+
+  printf("\n#---------------------------------\n");
+
+  printf("\nDEFVAR LF@$$STRINDEX\n");
+  printf("MOVE LF@$$STRINDEX int@0\n");
+
+  printf("DEFVAR LF@$$STRTMP\n");
+  printf("ADD LF@$$STRPAR3 LF@$$STRPAR3 int@1\n");
+
+  printf("\nLABEL _STR$WHILE_\n");
+
+  printf("\n# if (param2 < param3)\n");
+  printf("LT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRPAR3\n");
+  printf("JUMPIFEQ _STR$RET_ LF@$$STRHELP bool@false\n");
+
+  printf("\nGETCHAR LF@$$STRTMP LF@$$STRPAR1 LF@$$STRPAR2\n");
+  printf("CONCAT LF@$$STRRET LF@$$STRRET LF@$$STRTMP\n");
+
+  printf("\nADD LF@$$STRINDEX LF@$$STRINDEX int@1\n");
+  printf("ADD LF@$$STRPAR2 LF@$$STRPAR2 int@1\n");
+
+  printf("\nJUMP _STR$WHILE_\n");
+
+  printf("\nJUMP _STR$RET_\n");
+
+  printf("\nLABEL _STR$EMPTY_\n");
+  printf("MOVE LF@$$STRRET string@\n");
+  printf("JUMP _STR$RET_\n");
+
+  printf("\nLABEL _STR$ERROR_\n");
+  printf("EXIT int@57\n");
+
+  printf("\nLABEL _STR$RET_\n");
+  printf("POPFRAME\n");
+  printf("RETURN\n");
+}
+
+int genSubStrFnParamVar(char *varName, int param) {
+  
+  if(param == 1) {
+    printf("\nCREATEFRAME\n");
+  } else if(param < 1 || param > 3) {
+    vypluj err(INTERN_ERR);
+  }
+  
+  printf("DEFVAR TF@$$STRPARAM%d\n", param);
+
+  printf("MOVE TF@$$STRPARAM%d LF@%s\n",param ,varName);
+  vypluj 0;
+}
+
+int genSubStrFnParamLiteral(Token *token, int param) {
+  
+  if(param == 1) {
+    printf("\nCREATEFRAME\n");
+  } else if(param < 1 || param > 3) {
+    vypluj err(INTERN_ERR);
+  }
+  
+  printf("DEFVAR TF@$$STRPARAM%d\n", param);
+  printf("MOVE TF@$$STRPARAM%d %s@%s\n", param, getDataTypeFromInt(token), token->data);
+  vypluj 0;
+}
+
+void genSubStrFnCall() {
+  printf("CALL _$SUBSTR_\n");
+}
+
+void genSubStrFnRet(char *varName) {
+  printf("MOVE LF@%s TF@$$STRRET\n", varName);
+}
+
+// --------------------------------------------------------------------------------
+// FUNCTIONS FOR MULTIPLE ASSIGMENT
 
 void genExprLabel(char *name) {
   printf("LABEL %s%s\n", labelPrefix, name);
