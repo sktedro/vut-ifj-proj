@@ -347,7 +347,6 @@ int pNextFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
   
   // -> , <fnCallArg> <nextFnCallArg>
   // ,
@@ -390,7 +389,7 @@ int pFnCallArg(char *fnName, int argCount) {
 
   GetToken;
 
-  STElem *fn = STFind(symtab, fnName);
+  // STElem *fn = STFind(symtab, fnName); TODO UNUSED VARIABLE
 
   int dataType = -1;
 
@@ -624,6 +623,7 @@ int pStat(char *fnName) {
 
     // <statWithId>
     TryCall(pStatWithId, token->data);
+    LOG("HUHU");
 
   // -> eps
   } else {
@@ -670,7 +670,9 @@ int pStatWithId(char *idName) {
     if (token->type == t_assignment) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
+      LOG("bvwincml");
       TryCall(pExpr, &retVarName);
+      LOG("HAHA");
       
       //genVarAssign(idName, -1, retVarName); TODO commented cus segfault
     }
@@ -776,7 +778,7 @@ int pNextAssign() {
   char *varName = AListGetElementByIndex(assignmentElement, assigmentGeneratedCounter)->name;
   char *retVarName;
   TryCall(pExpr, &retVarName);
-  printf("WE BACK\n");
+  LOG("WE BACK");
   genMove(varName, retVarName);
 
   // ','
@@ -1101,7 +1103,6 @@ int pNextRetType(char *fnName) {
  * 49. <newIdAssign>     -> eps
  * 50. <newIdAssign>     -> = <expr>
  */
- 
 int pNewIdAssign(char *varName) {
   RuleFnInit;
 
@@ -1144,12 +1145,11 @@ int pExpr(char **retVarName) {
 
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
-    && !STGetIsVariable(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
+    && !STGetIsVariable(symtab, token->data)) {
  
     genComment("Calling a function call inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
-    
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
