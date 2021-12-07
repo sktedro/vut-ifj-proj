@@ -2,8 +2,9 @@ require "ifj21"
 
 function main()
     local a : integer
-    
-    a = readi()
+    local b : integer
+
+    a, b = 10, 20
 end
 
 main()

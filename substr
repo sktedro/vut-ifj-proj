@@ -1,4 +1,6 @@
-JUMP _STR$NEXT_
+# .ifjcode21
+
+#JUMP _STR$NEXT_
 
 LABEL _$SUBSTR_
 
@@ -79,21 +81,21 @@ LABEL _STR$RET_
     POPFRAME
     RETURN
 #----------------------------------------------------------------
-LABEL _STR$NEXT_
+#LABEL _STR$NEXT_
 
-CREATEFRAME
+#CREATEFRAME
 
-DEFVAR TF@$$STRPARAM1
-MOVE TF@$$STRPARAM1 string@abcdefgh
+#DEFVAR TF@$$STRPARAM1
+#MOVE TF@$$STRPARAM1 string@abcdefgh
 
-DEFVAR TF@$$STRPARAM2
-MOVE TF@$$STRPARAM2 int@1
+#DEFVAR TF@$$STRPARAM2
+#MOVE TF@$$STRPARAM2 int@1
 
-DEFVAR TF@$$STRPARAM3
-MOVE TF@$$STRPARAM3 int@2
+#DEFVAR TF@$$STRPARAM3
+#MOVE TF@$$STRPARAM3 int@2
 
-CALL _$SUBSTR_
+#CALL _$SUBSTR_
 
-DEFVAR GF@vysledok
-MOVE GF@vysledok TF@$$STRRET
-WRITE GF@vysledok
+#DEFVAR GF@vysledok
+#MOVE GF@vysledok TF@$$STRRET
+#WRITE GF@vysledok

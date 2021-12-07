@@ -41,7 +41,7 @@ void STPop(STStack *stack);
  * @param key 
  * @param name 
  */
-void STSetName(STStack *stack, char *key, char *name);
+int STSetName(STStack *stack, char *key, char *name);
 
 /**
  * @brief Returns name of STElement

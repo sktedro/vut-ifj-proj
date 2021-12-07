@@ -1,6 +1,4 @@
-.IFJcode21
-
-JUMP _CHR$NEXT_
+# .ifjcode21
 
 LABEL _$CHR_
   PUSHFRAME
@@ -41,16 +39,16 @@ LABEL _CHR$RET_
   RETURN
 
 #---------------------------------------------------
-LABEL _CHR$NEXT_
+# LABEL _CHR$NEXT_
 
-CREATEFRAME
-
-DEFVAR TF@$$CHRPARAM1
-MOVE TF@$$CHRPARAM1 nil@nil
-
-CALL _$CHR_ 
-
-DEFVAR GF@vysledok
-MOVE GF@vysledok TF@$$CHRRET
-WRITE GF@vysledok
+# CREATEFRAME
+# 
+# DEFVAR TF@$$CHRPARAM1
+# MOVE TF@$$CHRPARAM1 nil@nil
+# 
+# CALL _$CHR_ 
+# 
+# DEFVAR GF@vysledok
+# MOVE GF@vysledok TF@$$CHRRET
+# WRITE GF@vysledok
 

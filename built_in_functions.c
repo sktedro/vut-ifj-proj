@@ -5,7 +5,7 @@
 /*
  * Formatting using vim macros:
  * Configure the macro:
- *   q p $ 1 0 0 a [space] [esc] 7 8 | D a \ n \ [esc] j
+ *   q p $ 1 0 0 a [space] [esc] 7 8 | D a \ n \ [esc] j q
  * To run, paste the code, set cursor on the first code line and while X is the 
  *   amount of lines, type "X@p"
  */
@@ -29,8 +29,6 @@ char *tointeger = "                                                          \n\
 ";
 
 char *substr = "                                                             \n\
-JUMP _STR$NEXT_                                                              \n\
-                                                                             \n\
 LABEL _$SUBSTR_                                                              \n\
                                                                              \n\
     PUSHFRAME                                                                \n\
@@ -109,25 +107,6 @@ LABEL _STR$ERROR_                                                            \n\
 LABEL _STR$RET_                                                              \n\
     POPFRAME                                                                 \n\
     RETURN                                                                   \n\
-#----------------------------------------------------------------            \n\
-LABEL _STR$NEXT_                                                             \n\
-                                                                             \n\
-CREATEFRAME                                                                  \n\
-                                                                             \n\
-DEFVAR TF@$$STRPARAM1                                                        \n\
-MOVE TF@$$STRPARAM1 string@abcdefgh                                          \n\
-                                                                             \n\
-DEFVAR TF@$$STRPARAM2                                                        \n\
-MOVE TF@$$STRPARAM2 int@1                                                    \n\
-                                                                             \n\
-DEFVAR TF@$$STRPARAM3                                                        \n\
-MOVE TF@$$STRPARAM3 int@2                                                    \n\
-                                                                             \n\
-CALL _$SUBSTR_                                                               \n\
-                                                                             \n\
-DEFVAR GF@vysledok                                                           \n\
-MOVE GF@vysledok TF@$$STRRET                                                 \n\
-WRITE GF@vysledok                                                            \n\
 ";
 
 char *ord = "                                                                \n\
@@ -174,6 +153,43 @@ LABEL *ordEnd                                                                \n\
 ";
 
 char *chr = "                                                                \n\
+LABEL _$CHR_                                                                 \n\
+  PUSHFRAME                                                                  \n\
+                                                                             \n\
+  DEFVAR LF@$$CHRRET                                                         \n\
+  MOVE LF@$$CHRRET string@                                                   \n\
+                                                                             \n\
+  DEFVAR LF@$$CHRPAR1                                                        \n\
+  MOVE LF@$$CHRPAR1 LF@$$CHRPARAM1                                           \n\
+                                                                             \n\
+  DEFVAR LF@$$CHRHELP                                                        \n\
+                                                                             \n\
+  JUMPIFEQ _CHR$ERROR_ LF@$$CHRPAR1 nil@nil                                  \n\
+                                                                             \n\
+  # if (param1 < 0)                                                          \n\
+  LT LF@$$CHRHELP LF@$$CHRPAR1 int@0                                         \n\
+  JUMPIFEQ _CHR$NILL_ LF@$$CHRHELP bool@true                                 \n\
+                                                                             \n\
+  # if (param1 > 255)                                                        \n\
+  GT LF@$$CHRHELP LF@$$CHRPAR1 int@255                                       \n\
+  JUMPIFEQ _CHR$NILL_ LF@$$CHRHELP bool@true                                 \n\
+                                                                             \n\
+  INT2CHAR LF@$$CHRRET LF@$$CHRPAR1                                          \n\
+                                                                             \n\
+JUMP _CHR$RET_                                                               \n\
+                                                                             \n\
+                                                                             \n\
+LABEL _CHR$NILL_                                                             \n\
+MOVE LF@$$CHRRET nil@nil                                                     \n\
+JUMP _CHR$RET_                                                               \n\
+                                                                             \n\
+LABEL _CHR$ERROR_                                                            \n\
+  EXIT int@8                                                                 \n\
+                                                                             \n\
+LABEL _CHR$RET_                                                              \n\
+                                                                             \n\
+  POPFRAME                                                                   \n\
+  RETURN                                                                     \n\
 ";
 
 #endif

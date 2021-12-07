@@ -107,6 +107,14 @@
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 
+#define RequireIDToken(tok)                                                    \
+  GetToken;                                                                    \
+  if(tok->type != t_idOrKeyword                                                \
+      || isIFJ21Keyword(tok)) {                                                \
+    LOG("An unexpected token was received");                                   \
+    vypluj err(SYNTAX_ERR);                                                    \
+  }
+
 // Precedence analysis: call a rule function and if it returned an error code
 // (not -1), return it
 #define TRYRULE(FN, ...)                                                       \

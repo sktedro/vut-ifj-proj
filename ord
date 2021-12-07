@@ -12,7 +12,7 @@
   # CREATEFRAME
   # PUSHFRAME
 
-LABEL ord0
+LABEL _$ORD_
   PUSHFRAME
 
   DEFVAR LF@result
@@ -58,6 +58,6 @@ LABEL *ordEnd
   # DEFVAR TF@$param_1
   # MOVE TF@$param_0 string@abc
   # MOVE TF@$param_1 int@0
-  # CALL ord0
+  # CALL _$ORD_
   # WRITE LF@!ret_0
   # POPFRAME

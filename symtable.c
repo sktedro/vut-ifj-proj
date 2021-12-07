@@ -166,12 +166,15 @@ void STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) {
  * @param key 
  * @param name 
  */
-void STSetName(STStack *stack, char *key, char *name) {
+int STSetName(STStack *stack, char *key, char *name) {
   STElem *data = STFind(stack, key);
-
+  char *newName;
+  GCMalloc(newName, sizeof(char) * (strlen(name) + 1));
+  memcpy(newName, name, strlen(name) + 1);
   if(data) {
-    data->name = name;
+    data->name = newName;
   }
+  return 0;
 }
 
 /**

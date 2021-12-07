@@ -56,10 +56,6 @@ int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
 StringBuffer *varDefBuff = NULL;
 
-
-
-// TODO macro RequireIDToken - == t_idOrKeyword && !isIFJ21Keyword
-
 /*
  *
  * Rules 
@@ -505,10 +501,7 @@ int pStat(char *fnName) {
     fprintf(stderr, "-> local [id] : <type> <newIdAssign> <stat>\n");
 
     // [id]
-    RequireTokenType(t_idOrKeyword);
-    if(isIFJ21Keyword(token)) {
-      vypluj ERR(SYNTAX_ERR);
-    }
+    RequireIDToken(token);
 
     // Insert the new ID to the symtable
     char *newVarName = token->data;
@@ -902,10 +895,7 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   // Must be an ID, can't be a keyword
   // TODO môže byť param definovaný? Ak áno, musí byť premenná. Ak nie, nemôže 
   // byť definovaný (to treba ocheckovať)
-  RequireTokenType(t_idOrKeyword);
-  if(isIFJ21Keyword(token)){
-    vypluj ERR(SYNTAX_ERR);
-  }
+  RequireIDToken(token);
   paramCount++;
   // Append the name of the new parameter to the symtable
   STAppendParamName(symtab, fnName, token->data);

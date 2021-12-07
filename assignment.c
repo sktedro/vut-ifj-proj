@@ -8,25 +8,15 @@ extern int ret;
 int AListInit(AssignElement **element) {
 
   GCMalloc(*element, sizeof(AssignElement));
-  if (!(*element)) {
-    return ERR(INTERN_ERR);
-  }
-  
   GCMalloc((*element)->name, sizeof(char) * 30);
-  if (!(*element)->name) {
-    return ERR(INTERN_ERR);
-  }
-
   GCMalloc((*element)->label, sizeof(char) * 30);
-  if (!(*element)->label) {
-    return ERR(INTERN_ERR);
-  }
-
   GCMalloc((*element)->end, sizeof(char) * 30);
-  if (!(*element)->end) {
-    return ERR(INTERN_ERR);
-  }
-
+  // toto netreba. GCMalloc checkuje či sa podarilo alokovať
+  // TODO Komentár vymazať po prečítaní alexom
+  // if (!(*element)) {
+  //   return ERR(INTERN_ERR);
+  // }
+  
   (*element)->next = NULL;
   (*element)->prev = NULL;
   (*element)->first = true;
