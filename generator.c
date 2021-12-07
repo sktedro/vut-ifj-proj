@@ -32,15 +32,13 @@ int exprEndCnt = 0;
 // ----------------------------------------------------------------------------
 
 /*
- * Helper functions
+ * Generating names for variables and labels
  */
 
 /**
  * @brief Generates unique name for variables in ifj21code
- *
  */
-// TODO rename to getVarName
-char *genName(char *name, int frame) {
+char *genVarName(char *name, int frame) {
 
   if(name[0] != '%') {
     char *frameNum;
@@ -68,7 +66,7 @@ char *genTmpVarName() {
   return varName;
 }
 
-char *genRetName() {
+char *genRetVarName() {
   char *retName;
   GCMalloc(retName, sizeof(char) * 10);
   sprintf(retName, "%s%d", retPrefix, retCnt);
@@ -83,7 +81,7 @@ char *genLabelName() {
   return varName;
 }
 
-char *genParamName() {
+char *genParamVarName() {
   char *tmp;
   GCMalloc(tmp, sizeof(char) * 100);
   sprintf(tmp, "%s%d", paramPrefix, paramCnt);
@@ -92,17 +90,6 @@ char *genParamName() {
   // funkcii treba asi paramCnt vynulovať
   return tmp;
 }
-
-// TODO use this instead of hardcoding it in every printf
-// TODO toto sa nikde nepoužíva
-/*char *genVarName() {
-  //genVarDefLF(name); zakomentované lebo nešlo preloži
-  char *tmp;
-  GCMalloc(tmp, sizeof(char) * 100);
-  sprintf(tmp, "%s%d", varPrefix, retCnt);
-  retCnt++;
-  return tmp;
-} Alex vyrieši či treba alebo nie*/ 
 
 /*
  * Other helper functions
@@ -127,7 +114,6 @@ char *getDataTypeFromInt(Token *token) {
 
   vypluj tmp;
 }
-
 
 /**
  * @brief Converts ifj21 string to ifj21code string
@@ -170,7 +156,13 @@ char *stringConvert(char *string) {
 }
 
 /*
+ *
  * Code generation
+ *
+ */
+
+/*
+ * Misc
  */
 
 void genComment(char *comment){
@@ -186,7 +178,7 @@ void genStart() {
 }
 
 /*
- * Variable definition and assignment
+ * Operations with variables (def, assign, ...)
  */
 
 void genVarDefLF(char *name) {
@@ -203,8 +195,23 @@ char *genTmpVarDef() {
   return name;
 }
 
+int genMove(char *dest, char *src){
+  printf("MOVE LF@%s LF@%s\n", dest, src);
+  return 0;
+}
+
+int genPassParam(char *varInTF, char *varInLF){
+  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
+  return 0;
+}
+
+int genReturn(char *varInLF, char *varInTF){
+  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
+  return 0;
+}
+
 // TODO rename to genAssignLiteral
-int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
+int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
 
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
@@ -252,21 +259,10 @@ int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
   return 0;
 }
 
-
-// TODO swap the parameters here (next line)
-int genPassParam(char *varInLF, char *varInTF){
-  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
-  return 0;
-}
-
-int genReturn(char *varInLF, char *varInTF){
-  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
-  return 0;
-}
-
-int genMove(char *dest, char *src){
-  printf("MOVE LF@%s LF@%s\n", dest, src);
-  return 0;
+char *genType(char *varName){
+  char *newVarName = genTmpVarDef();
+  printf("TYPE %s %s\n", newVarName, varName);
+  return newVarName;
 }
 
 /*
@@ -296,53 +292,6 @@ void genPopframe() {
 void genReturnInstruction() {
   printf("RETURN\n");
 }
-
-
-
-void genWriteLiteral(Token *token, char *frame) {
-  char *string;
-  char *dataType = getDataTypeFromInt(token);
-
-  if(token->type == t_str) {
-    string = stringConvert(token->data);
-
-    printf("\n");
-    printf("DEFVAR %s@$W%d\n",frame, writeCount);
-    printf("MOVE %s@$W%d %s@%s\n",frame, writeCount, dataType, string);
-    printf("WRITE %s@$W%d\n", frame, writeCount);
-    writeCount++;
-  } else {
-    printf("\n");
-    printf("DEFVAR %s@W%d\n",frame, writeCount);
-    printf("MOVE %s@W%d %s@%s\n",frame, writeCount, dataType, token->data);
-    printf("WRITE %s@W%d\n", frame, writeCount);
-    writeCount++;
-  }
-
-}
-
-void genWrite(char *name) {
-/** void genWriteVariable(char *name, char *frame) { */
-  /**
-    * LOG("FRAME : %s", frame);
-    * printf("\n");
-    * printf("DEFVAR %s@$W%d\n", frame, writeCount);
-    * printf("MOVE %s@$W%d %s@%s\n", frame, writeCount, frame, name);
-    * printf("WRITE %s@$W%d\n", frame, writeCount);
-    * writeCount++;
-    */
-  // tedro: nestačí to takto?
-  printf("WRITE %s\n", name);
-}
-
-char *genType(char *varName){
-  char *newVarName = genTmpVarDef();
-  printf("TYPE %s %s\n", newVarName, varName);
-  return newVarName;
-}
-
-
-
 
 /*
  * Jumps and labels
@@ -508,8 +457,44 @@ char *genNot(SStackElem *src) {
 
 
 /*
- * No idea. Remove this??? TODO
+ * No idea what this is for. Maybe remove this?
+ * tedro: yes, not mine
  */
+
+void genWriteLiteral(Token *token, char *frame) {
+  char *string;
+  char *dataType = getDataTypeFromInt(token);
+
+  if(token->type == t_str) {
+    string = stringConvert(token->data);
+
+    printf("\n");
+    printf("DEFVAR %s@$W%d\n",frame, writeCount);
+    printf("MOVE %s@$W%d %s@%s\n",frame, writeCount, dataType, string);
+    printf("WRITE %s@$W%d\n", frame, writeCount);
+    writeCount++;
+  } else {
+    printf("\n");
+    printf("DEFVAR %s@W%d\n",frame, writeCount);
+    printf("MOVE %s@W%d %s@%s\n",frame, writeCount, dataType, token->data);
+    printf("WRITE %s@W%d\n", frame, writeCount);
+    writeCount++;
+  }
+}
+
+void genWrite(char *name) {
+/** void genWriteVariable(char *name, char *frame) { */
+  /**
+    * LOG("FRAME : %s", frame);
+    * printf("\n");
+    * printf("DEFVAR %s@$W%d\n", frame, writeCount);
+    * printf("MOVE %s@$W%d %s@%s\n", frame, writeCount, frame, name);
+    * printf("WRITE %s@$W%d\n", frame, writeCount);
+    * writeCount++;
+    */
+  // tedro: nestačí to takto?
+  printf("WRITE %s\n", name);
+}
 
 int genReadFunction(char *varName, char *builtInFnName) {
   

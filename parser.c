@@ -60,7 +60,7 @@ int paramhelpCounter = 0;
 
 /*
  *
- * Rules
+ * Rules 
  *
  */
 
@@ -401,9 +401,9 @@ int pFnCallArg(char *fnName, int argCount) {
     //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
     // TODO shouldn't we use this?
 
-    char *name = genParamName();
+    char *name = genParamVarName();
     genVarDefTF(name);
-    genPassParam(name, token->data);
+    genPassParam(token->data, name);
     paramhelpCounter++;
 
   // -> [literal]
@@ -418,9 +418,9 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_string;
     }
 
-    char *name = genParamName();
+    char *name = genParamVarName();
     genVarDefTF(name);
-    genVarAssign(name, dataType, token->data, "TF");
+    genAssignLiteral(name, dataType, token->data, "TF");
     paramhelpCounter++;
 
   } else {
@@ -487,7 +487,7 @@ int pStat(char *fnName) {
     // Insert the new ID to the symtable
     TryCall(STInsert, symtab, newVarName);
     STSetIsVariable(symtab, newVarName, true);
-    STSetName(symtab, newVarName, genName(token->data, symtab->top->depth));
+    STSetName(symtab, newVarName, genVarName(token->data, symtab->top->depth));
     // Code gen variable definition
     genVarDefLF(STGetName(symtab, newVarName));
 
@@ -674,7 +674,7 @@ int pStatWithId(char *idName) {
       TryCall(pExpr, &retVarName);
       LOG("HAHA");
       
-      //genVarAssign(idName, -1, retVarName); TODO commented cus segfault
+      //genAssignLiteral(idName, -1, retVarName); TODO commented cus segfault
     }
     
     // -> , [id] <nextAssign> <expr> , <expr>
@@ -712,7 +712,7 @@ int pStatWithId(char *idName) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
-      genVarAssign(id2Var, -1, retVarName, "LF");
+      genAssignLiteral(id2Var, -1, retVarName, "LF");
 
       // ,
       RequireTokenType(t_comma);
@@ -721,7 +721,7 @@ int pStatWithId(char *idName) {
       // Call the shift-reduce parser and assign the result to id1Var
       retVarName = NULL;
       TryCall(pExpr, &retVarName);
-      genVarAssign(id1Var, -1, retVarName, "LF");
+      genAssignLiteral(id1Var, -1, retVarName, "LF");
 
     }else{
       vypluj ERR(SYNTAX_ERR);
@@ -818,7 +818,7 @@ int pFnDefinitionParamTypeList(char *fnName) {
   STAppendParamName(symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
-  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
   paramCount++;
 
   // :
@@ -870,7 +870,7 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   STAppendParamName(symtab, fnName, token->data);
 
   TryCall(STInsert, symtab, token->data);
-  STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
+  STSetName(symtab, token->data, genVarName(token->data, symtab->top->depth));
   // TODO uncomment if it is correct
   // genVarDef(STGetName(symtab, token->data));
 
@@ -920,7 +920,7 @@ int pRetArgList(char *fnName) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetName();
+  char *retArgName = genRetVarName();
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -970,7 +970,7 @@ int pRetNextArg(char *fnName, int argCount) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetName();
+  char *retArgName = genRetVarName();
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -1155,7 +1155,7 @@ int pExpr(char **retVarName) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarDef();
     // TODO what to insert as the last param? (char *frame)
-    genVarAssign(*retVarName, dt_nil, "nil", "TODO"); 
+    genAssignLiteral(*retVarName, dt_nil, "nil", "TODO"); 
 
   } else if(strEq(token->data, "else")) {
     vypluj stashToken(&token); 
@@ -1254,7 +1254,7 @@ bool readFunction(Token *token) {
   }
   
   // TODO don't use that stupid global 'element'! Streľba do nohy
-  // TryCall(genVarAssign, STGetName(symtab, element->data), element->dataType, token->data, "LF");
+  // TryCall(genAssignLiteral, STGetName(symtab, element->data), element->dataType, token->data, "LF");
   vypluj true;
 }
 
@@ -1350,7 +1350,7 @@ int writeFunction(Token *token, int dataType) {
   
   if(isLiteral(token)) {
     varName = genTmpVarDef();
-    genVarAssign(varName, dataType, token->data, "TODO");
+    genAssignLiteral(varName, dataType, token->data, "TODO");
   } else {
     if(!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
       vypluj ERR(SYNTAX_ERR); // TODO check if good err code
@@ -1554,7 +1554,7 @@ int createParamVariables(char *fnName){
     genVarDefLF(paramVar->name);
 
     // Assign parameters to the defined variables
-    genMove(paramVar->name, genParamName());
+    genMove(paramVar->name, genParamVarName());
   }
   vypluj 0;
 }
