@@ -307,20 +307,18 @@ int pFnCallArgList(char *fnName) {
   if(token->type == t_rightParen) {
     LOG("-> eps");
 
-    STElem *fn = STFind(symtab, fnName);
-    // Amount of arguments doesn't match
-    if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
-      LOG("Param amount doesn't match\n");
-      vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      STElem *fn = STFind(symtab, fnName);
+      // Amount of arguments doesn't match
+      if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
+        LOG("Param amount doesn't match\n");
+        vypluj ERR(SYNTAX_ERR);
+      }
     }
     
-     // Stash the token
-     vypluj stashToken(&token);
+    // Stash the token
+    vypluj stashToken(&token);
   } 
-
-  /*if(isBuiltInFunction("write")){
-    writeFunction(token);
-  }*/ //idk či to je dobre ale tu niekde to má asi byť 
 
   // -> <fnCallArg> <nextFnCallArg>
 
@@ -362,15 +360,15 @@ int pNextFnCallArg(char *fnName, int argCount) {
     // <nextFnCallArg>
     TryCall(pNextFnCallArg, fnName,argCount);
 
-  // -> , <fnCallArg> <nextFnCallArg>
+  // -> eps
   }else{
-
-    STElem *fn = STFind(symtab, fnName);
-
-    // Amount of arguments doesn't match
-    if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
-      LOG("Param amount doesn't match\n");
-      vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      STElem *fn = STFind(symtab, fnName);
+      // Amount of arguments doesn't match
+      if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
+        LOG("Param amount doesn't match");
+        vypluj ERR(SYNTAX_ERR);
+      }
     }
 
     TryCall(stashToken, &token);
@@ -391,7 +389,6 @@ int pFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
 
   STElem *fn = STFind(symtab, fnName);
 
@@ -405,9 +402,7 @@ int pFnCallArg(char *fnName, int argCount) {
     //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
     // TODO shouldn't we use this?
 
-    char *name;
-    GCMalloc(name, sizeof(char) * 100);
-    sprintf(name, "$%d", paramhelpCounter);
+    char *name = genParamName();
     genVarDefTF(name);
     genPassParam(name, token->data);
     paramhelpCounter++;
@@ -424,9 +419,7 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_string;
     }
 
-    char *name;
-    GCMalloc(name, sizeof(char) * 100);
-    sprintf(name, "$%d", paramhelpCounter);
+    char *name = genParamName();
     genVarDefTF(name);
     genVarAssign(name, dataType, token->data, "TF");
     paramhelpCounter++;
@@ -440,10 +433,17 @@ int pFnCallArg(char *fnName, int argCount) {
     vypluj ERR(SYNTAX_ERR);
   }
 
+  // 'Write' built in function
+  if(strEq(fnName, "write")){
+    writeFunction(token, dataType);
+  }
+
   // A parameter data type doesn't match
   if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
-    LOG("Param data type doesn't match\n");
-    vypluj ERR(SYNTAX_ERR);
+    if(!strEq(fnName, "write")){
+      LOG("Param data type doesn't match\n");
+      vypluj ERR(SYNTAX_ERR);
+    }
   }
 
   vypluj 0;
@@ -1336,42 +1336,31 @@ bool isLiteral(Token *token) {
 }
 
 /**
- * @brief Function for built in functions
+ * @brief Function for the 'write' built in function
  *
  * @return error code
- * 09. <fnCall>          -> ( <fnCallArgList> )
  *  
  */
-int writeFunction(Token *token) {
+int writeFunction(Token *token, int dataType) {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
 
-  // (
-  RequireTokenType(t_leftParen);
-
-  
-  // <fnCallArgList> but somehow special for write
-  GetToken;
-
-  STElem *element;
-  // char *name; TODO UNUSED VARIABLE
-
-  // TODO alex tvrdí že to nakódí
+  // TODO alex pozri či môže byť - tedro
+  char *varName;
   
   if(isLiteral(token)) {
-    genWriteLiteral(token, "LF");
+    varName = genTmpVarDef();
+    genVarAssign(varName, dataType, token->data, "TODO");
   } else {
-    element = STFind(symtab, token->data);
-
-    if(element == NULL) {
+    if(!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
       vypluj ERR(SYNTAX_ERR); // TODO check if good err code
     }
-    genWriteVariable(element->name, "LF");
-        
+    varName = STGetName(symtab, token->data);
   }
 
-  GetToken;
-  
+  // TODO Namiesto generovania WRITE potrebujeme toto passnuť ako argument do 
+  // write funkcie
+  genWrite(varName);
 
   vypluj 0;
 }

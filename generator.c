@@ -7,14 +7,15 @@
 
 #include "generator.h"
 
+extern int ret;
+extern GarbageCollector garbageCollector;
+
 char *labelPrefix = "_label_";
 char *varPrefix = "%var_";
 char *tmpvarPrefix = "?tmpvar_";
+char *paramPrefix = "$param_";
 char *retPrefix = "!ret_";
 char *fnPrefix = "&fn_";
-
-extern int ret;
-extern GarbageCollector garbageCollector;
 
 int tmpCounter = 0;
 int labelCounter = 0;
@@ -22,23 +23,23 @@ int paramCnt = 0;
 int retCnt = 0;
 int writeCount = 0;
 
-// --------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // VARIABLES FOR MULTIPLE ASSIGMENT
 
 int exprLabelCnt = 0;
 int exprEndCnt = 0;
 
-// --------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// TODO %s ain't enough to reference a variable. Don't we need '?F@'
-// everywhere?
+/*
+ * Helper functions
+ */
 
 /**
  * @brief Generates unique name for variables in ifj21code
  *
- *
- *
- * */
+ */
+// TODO rename to getVarName
 char *genName(char *name, int frame) {
 
   if(name[0] != '%') {
@@ -49,12 +50,63 @@ char *genName(char *name, int frame) {
     GCMalloc(newName, sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
     memcpy(newName, name, strlen(name));
     memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
-
     return newName;
   }
-
   return name;
 }
+
+/**
+ * @brief Generates temporary variable for expression
+ * 
+ * @return generated temporary variable 
+ */
+char *genTmpVarName() {
+  char *varName;
+  GCMalloc(varName, sizeof(char) * 10);
+  sprintf(varName, "%s%d", tmpvarPrefix, tmpCounter);
+  tmpCounter++;
+  return varName;
+}
+
+char *genRetName() {
+  char *retName;
+  GCMalloc(retName, sizeof(char) * 10);
+  sprintf(retName, "%s%d", retPrefix, retCnt);
+  retCnt++;
+  return retName;
+}
+char *genLabelName() {
+  char *varName;
+  GCMalloc(varName, sizeof(char) * 10);
+  sprintf(varName, "%s%d", labelPrefix, labelCounter);
+  labelCounter++;
+  return varName;
+}
+
+char *genParamName() {
+  char *tmp;
+  GCMalloc(tmp, sizeof(char) * 100);
+  sprintf(tmp, "%s%d", paramPrefix, paramCnt);
+  /** paramCnt++; */ // TODO niekedy to nechceme inkrementovať...
+  // Teda možno hej, ale v parseri po argumentoch fn call aj po parametroch vo
+  // funkcii treba asi paramCnt vynulovať
+  return tmp;
+}
+
+// TODO use this instead of hardcoding it in every printf
+// TODO toto sa nikde nepoužíva
+/*char *genVarName() {
+  //genVarDefLF(name); zakomentované lebo nešlo preloži
+  char *tmp;
+  GCMalloc(tmp, sizeof(char) * 100);
+  sprintf(tmp, "%s%d", varPrefix, retCnt);
+  retCnt++;
+  return tmp;
+} Alex vyrieši či treba alebo nie*/ 
+
+/*
+ * Other helper functions
+ */
 
 char *getDataTypeFromInt(Token *token) {
   char *tmp;
@@ -76,12 +128,6 @@ char *getDataTypeFromInt(Token *token) {
   vypluj tmp;
 }
 
-void genComment(char *comment){
-  printf("\n# %s\n", comment);
-}
-void genComment2(char *comment){
-  printf("# %s\n\n", comment);
-}
 
 /**
  * @brief Converts ifj21 string to ifj21code string
@@ -123,57 +169,33 @@ char *stringConvert(char *string) {
   return newString;
 }
 
-
-/**
- * @brief Generates temporary variable for expression
- * 
- * @return generated temporary variable 
+/*
+ * Code generation
  */
-char *genTmpVarName() {
-  char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
-  sprintf(varName, "%s%d", tmpvarPrefix, tmpCounter);
-  tmpCounter++;
 
-  return varName;
+void genComment(char *comment){
+  printf("\n# %s\n", comment);
 }
 
-char *genRetName() {
-  char *retName;
-  GCMalloc(retName, sizeof(char) * 10);
-  sprintf(retName, "%s%d", retPrefix, retCnt);
-  retCnt++;
-  
-  return retName;
-}
-char *genLabelName() {
-  char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
-  sprintf(varName, "%s%d", labelPrefix, labelCounter);
-  labelCounter++;
-  
-  return varName;
+void genComment2(char *comment){
+  printf("# %s\n\n", comment);
 }
 
-char *genParamName() {
-  char *tmp;
-  GCMalloc(tmp, sizeof(char) * 100);
-  
-  sprintf(tmp, "%s%d", labelPrefix, paramCnt);
-  paramCnt++;
-  return tmp;
+void genStart() {
+  printf(".IFJcode21\n\n");
 }
 
-// TODO use this instead of hardcoding it in every printf
-// TODO toto sa nikde nepoužíva
-/*char *genVarName() {
-  //genVarDefLF(name); zakomentované lebo nešlo preloži
-  char *tmp;
-  GCMalloc(tmp, sizeof(char) * 100);
-  sprintf(tmp, "%s%d", varPrefix, retCnt);
-  retCnt++;
-  return tmp;
-} Alex vyrieši či treba alebo nie*/ 
+/*
+ * Variable definition and assignment
+ */
+
+void genVarDefLF(char *name) {
+  printf("DEFVAR LF@%s\n", name);
+}
+
+void genVarDefTF(char *name) {
+  printf("DEFVAR TF@%s\n", name);
+}
 
 char *genTmpVarDef() {
   char *name = genTmpVarName();
@@ -181,11 +203,8 @@ char *genTmpVarDef() {
   return name;
 }
 
-/**
- * identifikátor, dátový typ, priradzovaná hodnota
- */
+// TODO rename to genAssignLiteral
 int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
-
 
   if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
@@ -233,52 +252,26 @@ int genVarAssign(char *name, int dataType, char *assignValue, char *frame) {
   return 0;
 }
 
-int genReadFunction(char *varName, char *builtInFnName) {
-  
-  if(strcmp(builtInFnName, "readi") == 0) {
-    printf("READ LF@%s int\n", varName);
-  } else if(strcmp(builtInFnName, "readn") == 0) {
-    printf("READ LF@%s float\n", varName);
-  } else if(strcmp(builtInFnName, "reads") == 0) {
-    printf("READ LF@%s string\n", varName);
-  } else {
-    vypluj ERR(SYNTAX_ERR);
-  }
 
-  vypluj 0;
-}
-
-int genSubstrFunction(char *target, Token *string, double start, int end, int frame) {
-
-  /*printf("LABEL: $substr");
-
-  printf("PUSHFRAME");
-
-  printf("DEFVAR LF@$substrRET");
-  printf("MOVE LF@$substrRET nil@nil");
-
-  printf("DEFVAR LF@$in1");
-  printf("MOVE LF@$in1 $STRING");
-
-  printf("DEFVAR LF@$in2");
-  printf("MOVE LF@$in2 $START");
-
-  printf("DEFVAR LF@$in3");
-  printf("MOVE LF@$in3 $END");*/
-
+// TODO swap the parameters here (next line)
+int genPassParam(char *varInLF, char *varInTF){
+  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   return 0;
 }
 
-int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
-  
+int genReturn(char *varInLF, char *varInTF){
+  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
   return 0;
 }
 
-// Create a TF
-void genFnCallInit(){
-  printf("CREATEFRAME\n");
-  printf("PUSHFRAME\n");
+int genMove(char *dest, char *src){
+  printf("MOVE LF@%s LF@%s\n", dest, src);
+  return 0;
 }
+
+/*
+ * Functions and frame operations
+ */
 
 // After TF is created and all parameters are moved, push the TF to the stack
 // and call the function
@@ -290,6 +283,12 @@ void genFnDef(char *name) {
   printf("LABEL %s0\n\n", name);
 }
 
+// Create a TF
+void genFnCallInit(){
+  printf("CREATEFRAME\n");
+  printf("PUSHFRAME\n");
+}
+
 void genPopframe() {
   printf("POPFRAME\n");
 }
@@ -297,6 +296,8 @@ void genPopframe() {
 void genReturnInstruction() {
   printf("RETURN\n");
 }
+
+
 
 void genWriteLiteral(Token *token, char *frame) {
   char *string;
@@ -320,13 +321,18 @@ void genWriteLiteral(Token *token, char *frame) {
 
 }
 
-void genWriteVariable(char *name, char *frame) {
-  LOG("FRAME : %s", frame);
-  printf("\n");
-  printf("DEFVAR %s@$W%d\n", frame, writeCount);
-  printf("MOVE %s@$W%d %s@%s\n", frame, writeCount, frame, name);
-  printf("WRITE %s@$W%d\n", frame, writeCount);
-  writeCount++;
+void genWrite(char *name) {
+/** void genWriteVariable(char *name, char *frame) { */
+  /**
+    * LOG("FRAME : %s", frame);
+    * printf("\n");
+    * printf("DEFVAR %s@$W%d\n", frame, writeCount);
+    * printf("MOVE %s@$W%d %s@%s\n", frame, writeCount, frame, name);
+    * printf("WRITE %s@$W%d\n", frame, writeCount);
+    * writeCount++;
+    */
+  // tedro: nestačí to takto?
+  printf("WRITE %s\n", name);
 }
 
 char *genType(char *varName){
@@ -335,6 +341,32 @@ char *genType(char *varName){
   return newVarName;
 }
 
+
+
+
+/*
+ * Jumps and labels
+ */
+
+void genUnconditionalJump(char *labelName){
+  printf("JUMP %s\n", labelName);
+}
+
+// Jump if the var is nil or false
+void genJumpIfFalse(char *label, char *varName) {
+  genConditionalJump(label, varName, false);
+}
+
+// Jump if the var is true or not nil
+void genJumpIfTrue(char *label, char *varName) {
+  genConditionalJump(label, varName, true);
+}
+
+void genLabel(char *labelName) {
+  printf("LABEL %s\n", labelName);
+}
+
+// Basically an IF condition
 void genConditionalJump(char *label, char *varName, bool condition){
   /*
    * The code (to jump conditionally):
@@ -392,26 +424,8 @@ void genConditionalJump(char *label, char *varName, bool condition){
   genComment2("If condition done");
 }
 
-// Jump if the var is nil or false
-void genJumpIfFalse(char *label, char *varName) {
-  genConditionalJump(label, varName, false);
-}
-
-// Jump if the var is true or not nil
-void genJumpIfTrue(char *label, char *varName) {
-  genConditionalJump(label, varName, true);
-}
-
-void genLabel(char *labelName) {
-  printf("LABEL %s\n", labelName);
-}
-
-void genStart() {
-  printf(".IFJcode21\n\n");
-}
-
 /*
- * Functions that are to be called by the shift-reduce parser only
+ * Operations to be called by the shift-reduce parser
  */
 
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
@@ -492,45 +506,57 @@ char *genNot(SStackElem *src) {
   return tmp;
 }
 
-/**
- * identifikátor, frame number
- * a = 1
- * a je v globále
- * v ifjcode bude názov a0
+
+/*
+ * No idea. Remove this??? TODO
  */
 
- // --------------------------------------------------------------------------------
-// FUNCTIONS FOR.... TBD IDK
+int genReadFunction(char *varName, char *builtInFnName) {
+  
+  if(strcmp(builtInFnName, "readi") == 0) {
+    printf("READ LF@%s int\n", varName);
+  } else if(strcmp(builtInFnName, "readn") == 0) {
+    printf("READ LF@%s float\n", varName);
+  } else if(strcmp(builtInFnName, "reads") == 0) {
+    printf("READ LF@%s string\n", varName);
+  } else {
+    vypluj ERR(SYNTAX_ERR);
+  }
 
-void genUnconditionalJump(char *labelName){
-  printf("JUMP %s\n", labelName);
+  vypluj 0;
 }
 
-void genVarDefLF(char *name) {
-  printf("DEFVAR LF@%s\n", name);
-}
+int genSubstrFunction(char *target, Token *string, double start, int end, int frame) {
 
-void genVarDefTF(char *name) {
-  printf("DEFVAR TF@%s\n", name);
-}
+  /*printf("LABEL: $substr");
 
-int genPassParam(char *varInLF, char *varInTF){
-  printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
+  printf("PUSHFRAME");
+
+  printf("DEFVAR LF@$substrRET");
+  printf("MOVE LF@$substrRET nil@nil");
+
+  printf("DEFVAR LF@$in1");
+  printf("MOVE LF@$in1 $STRING");
+
+  printf("DEFVAR LF@$in2");
+  printf("MOVE LF@$in2 $START");
+
+  printf("DEFVAR LF@$in3");
+  printf("MOVE LF@$in3 $END");*/
+
   return 0;
 }
 
-int genReturn(char *varInLF, char *varInTF){
-  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
+int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
+  
   return 0;
 }
 
-int genMove(char *dest, char *src){
-  printf("MOVE LF@%s LF@%s\n", dest, src);
-  return 0;
-}
 
-// --------------------------------------------------------------------------------
-// FUNCTIONS FOR MULTIPLE ASSIGMENT
+
+/*
+ * Functions for the multiassignment
+ */
 
 void genExprLabel(char *name) {
   printf("LABEL %s%s\n", labelPrefix, name);
@@ -604,9 +630,9 @@ void genExprEnd(AssignElement *element) {
 
 
 
+
 /*
 a, b, c = a+10, b+10, c+10
-
 
 jump treti
 prvy:
@@ -622,66 +648,6 @@ jump druhy
 end:
 
 */
-
-// --------------------------------------------------------------------------------
-
-
-/*
- * MOV
- * CREATEFRAME
- * PUSHFRAME
- * POPFRAME
- * DEFVAR
- * CALL
- * RETURN
- *
- * PUSHS
- * POPS
- * CLEARS
- *
- * ADD y
- * SUB y
- * MUL y
- * DIV y
- * IDIV y
- * LT y
- * GT y
- * EQ y
- * LTS x
- * GTS x
- * EQS x
- * AND
- * OR
- * NOT
- * ANDS
- * ORS
- * NOTS
- * INT2FLOAT y
- * FLOAT2INT y
- * INT2CHAR y
- * STR2INT y
- *
- * READ
- * WRITE
- *
- * CONCAT y
- * STRLEN
- * GETCHAR
- * SETCHAR
- *
- * TYPE
- *
- * LABEL
- * JUMP
- * JUMIFEQ y
- * JUMPIFNEQ y
- * JUMPIFEQS y
- * JUMPIFNEQS y
- * EXIT
- *
- * BREAK x
- * DPRINT
- */
 
 #endif
 /* end of file generator.c */
