@@ -131,10 +131,12 @@
 #define GCMalloc(ptr, len)                                                     \
   ptr = malloc(len);                                                           \
   if(!ptr) {                                                                   \
+    LOG("Alloc failed\n");                                                     \
     /*TODO return err(INTERN_ERR);                                                    */\
   }                                                                            \
   ret = GCInsert((void*)ptr);                                                  \
   if(ret) {                                                                    \
+    LOG("Alloc failed\n");                                                     \
     /*TODO return err(ret);                                                           */\
   }
 
@@ -143,10 +145,12 @@
   GCDelete(ptr);                                                               \
   ptr = realloc(ptr, len);                                                     \
   if(!ptr) {                                                                   \
+    LOG("Alloc failed\n");                                                     \
     /*TODO return err(INTERN_ERR);                                                    */\
   }                                                                            \
   ret = GCInsert((void*)ptr);                                                  \
   if(ret) {                                                                    \
+    LOG("Alloc failed\n");                                                     \
     /*TODO return err(ret);                                                           */\
   }
 

@@ -138,10 +138,10 @@ int pCodeBody() {
     genComment("New function definition");
 
     // labels
-    char *fnBypassLabelName = genLabelName();
-    char *varDefStart = genLabelName();
-    char *varDefJumpBack = genLabelName();
-    char *varDefBypass = genLabelName();
+    char *fnBypassLabelName = genLabelName("");
+    char *varDefStart = genLabelName("");
+    char *varDefJumpBack = genLabelName("");
+    char *varDefBypass = genLabelName("");
 
     // Code gen Create an unconditional jump behind the function
     genUnconditionalJump(fnBypassLabelName);
@@ -423,7 +423,7 @@ int pFnCallArg(char *fnName, int argCount) {
 
   GetToken;
   int dataType = -1;
-  char *paramName = genParamVarName();
+  char *paramName = genParamVarName("");
 
   // Pass a parameter to the function
   // -> [id]
@@ -529,7 +529,7 @@ int pStat(char *fnName) {
   } else if (strcmp(token->data, "if") == 0) {
     fprintf(stderr, "-> if <expr> then <stat> else <stat> end <stat>\n");
     // Generate new label names for 'else' and 'end' (don't generate code yet)
-    char *elseLabelName = genLabelName(), *endLabelName = genLabelName();
+    char *elseLabelName = genLabelName("else"), *endLabelName = genLabelName("end");
 
     // <expr>
     char *exprResultVarName = NULL;
@@ -569,9 +569,9 @@ int pStat(char *fnName) {
   } else if (strcmp(token->data, "while") == 0) {
     fprintf(stderr, "-> while <expr> do <stat> end <stat>\n");
     // Generate new label names (don't generate code yet)
-    char *whileLabelName = genLabelName();
-    char *startLabelName = genLabelName();
-    char *endLabelName = genLabelName();
+    char *whileLabelName = genLabelName("");
+    char *startLabelName = genLabelName("");
+    char *endLabelName = genLabelName("");
 
     // Code gen 'start' label
     genLabel(startLabelName);
@@ -637,7 +637,7 @@ int pStat(char *fnName) {
     // TODO move all !ret vars from TF to LF now
     resetRetCounter();
     for(i = 0; i < retArgsCount; i++){
-      char *retVarName = genRetVarName();
+      char *retVarName = genRetVarName("");
       genMoveToLF(retVarName, retVarName);
     }
 
@@ -976,7 +976,7 @@ int pRetArgList(char *fnName) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetVarName();
+  char *retArgName = genRetVarName("");
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -1026,7 +1026,7 @@ int pRetNextArg(char *fnName, int argCount) {
 
   // Code gen Pass the return values down by one frame
   // Generate a new name where the return value will be written (in LF)
-  char *retArgName = genRetVarName();
+  char *retArgName = genRetVarName("");
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
@@ -1209,7 +1209,7 @@ int pExpr(char **retVarName) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarDef();
     // TODO what to insert as the last param? (char *frame)
-    genAssignLiteral(*retVarName, dt_nil, "nil", "TODO"); 
+    genAssignLiteral(*retVarName, dt_nil, "nil", "LF"); 
 
   } else if(strEq(token->data, "else")) {
     vypluj stashToken(&token); 
@@ -1367,7 +1367,7 @@ int newFunctionDefinition(char *fnName) {
     TryCall(STInsert, symtab, fnName);
     TryCall(STSetIsVariable, symtab, fnName, false);
     TryCall(STSetFnDefined, symtab, fnName, true);
-    TryCall(STSetName, symtab, fnName, genLabelName());
+    TryCall(STSetName, symtab, fnName, genLabelName(""));
     
   }
   vypluj 0;
@@ -1390,7 +1390,7 @@ int newFunctionDeclaration(char *fnName) {
     TryCall(STInsert, symtab, fnName);
     TryCall(STSetIsVariable, symtab, fnName, false);
     TryCall(STSetFnDeclared, symtab, fnName, true);
-    TryCall(STSetName, symtab, fnName, genLabelName());
+    TryCall(STSetName, symtab, fnName, genLabelName(""));
   }
   vypluj 0;
 }
@@ -1615,7 +1615,7 @@ int createParamVariables(char *fnName){
     TryCall(condAppendToStringBuff, paramVar->name);
 
     // Assign parameters to the defined variables
-    genMove(paramVar->name, genParamVarName());
+    genMove(paramVar->name, genParamVarName(""));
   }
   vypluj 0;
 }

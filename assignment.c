@@ -42,7 +42,7 @@ int AListGetLength(AssignElement *element) {
   int cnt = 0;
   AssignElement *tmp = element;
 
-  if(tmp != NULL) {
+  if(tmp != NULL && tmp->next != NULL) {
     cnt++;
     while (tmp->next != NULL) {
       tmp = tmp->next;

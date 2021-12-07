@@ -96,28 +96,29 @@ char *genTmpVarName() {
   return varName;
 }
 
-char *genRetVarName() {
+char *genRetVarName(char *baseName) {
   char *retName;
-  int mallocLen = strlen(retPrefix) + countDigits(retCounter) + 1;
+  int mallocLen = strlen(retPrefix) + strlen(baseName) + countDigits(retCounter) + 1;
   GCMalloc(retName, sizeof(char) * mallocLen);
   sprintf(retName, "%s%d", retPrefix, retCounter);
   retCounter++;
   return retName;
 }
-char *genLabelName() {
+
+char *genLabelName(char *baseName) {
   char *varName;
-  int mallocLen = strlen(labelPrefix) + countDigits(labelCounter) + 1;
+  int mallocLen = strlen(labelPrefix) + strlen(baseName) + countDigits(labelCounter) + 1;
   GCMalloc(varName, sizeof(char) * mallocLen);
-  sprintf(varName, "%s%d", labelPrefix, labelCounter);
+  sprintf(varName, "%s%s_%d", labelPrefix, baseName, labelCounter);
   labelCounter++;
   return varName;
 }
 
-char *genParamVarName() {
+char *genParamVarName(char *baseName) {
   char *tmp;
-  int mallocLen = strlen(paramPrefix) + countDigits(paramCounter) + 1;
+  int mallocLen = strlen(paramPrefix) + strlen(baseName) + countDigits(paramCounter) + 1;
   GCMalloc(tmp, sizeof(char) * mallocLen);
-  sprintf(tmp, "%s%d", paramPrefix, paramCounter);
+  sprintf(tmp, "%s%s_%d", paramPrefix, baseName, paramCounter);
   paramCounter++;
   return tmp;
 }
@@ -154,20 +155,47 @@ char *getDataTypeFromInt(Token *token) {
  */
 char *stringConvert(char *string) {
   char *newString;
-  GCMalloc(newString, sizeof(char) * (strlen(string)*3));
-  int asciiValue = 0;
+  GCMalloc(newString, sizeof(char) * (strlen(string)*4));
   int k = 0;
-  
-  for(int i=0; i<(int) strlen(string); i++) {
+  int stringLen = strlen(string);
 
-    if((*string >= 'a' && *string <= 'z') || (*string >= 'A' && *string <= 'Z') || (*string >= '0' && *string <= '9')) {
+  for(int i = 0; i < stringLen; i++) {
+    newString[k] = '\0';
+
+    if((string[i] >= 'a' && string[i] <= 'z') 
+        || (string[i] >= 'A' && string[i] <= 'Z') 
+        || (string[i] >= '0' && string[i] <= '9')) {
+      newString[k] = string[i];
+      k++;
+
+    } else if(string[i] == '\\'){
+      i++;
+      if(string[i] == 'b'){
+        newString[k] = '\b';
+      }else if(string[i] == 'e'){
+        newString[k] = '\e';
+      }else if(string[i] == 'n'){
+        newString[k] = '\n';
+      }else if(string[i] == 'r'){
+        newString[k] = '\r';
+      }else if(string[i] == 't'){
+        newString[k] = '\t';
+      }else if(string[i] == 'v'){
+        newString[k] = '\v';
+      }else if(string[i] == '\\'){
+        newString[k] = '\\';
+      }else {
         newString[k] = string[i];
-    } else {
-        asciiValue = (int) string[i];
-        char arr[5];
-        sprintf(arr, "\\%03d", asciiValue);
-        strcat(newString, arr);
-        k += 4;
+      }
+      k++;
+
+    }else {
+      int asciiValue = (int) string[i];
+      char *arr = NULL;
+      GCMalloc(arr, sizeof(char) * 5);
+      sprintf(arr, "\\%03d", asciiValue);
+      strcat(newString, arr);
+      k += 4;
     }
   }
   return newString;
@@ -370,9 +398,9 @@ void genConditionalJump(char *label, char *varName, bool condition){
    */
 
   genComment("If condition start");
-  char *falseLabelName = "exprIsFalse";
-  char *trueLabelName = "exprIsTrue";
-  char *noJumpLabelName = "noJump";
+  char *falseLabelName = genLabelName("exprIsFalse");
+  char *trueLabelName = genLabelName("exprIsTrue");
+  char *noJumpLabelName = genLabelName("noJump");
 
   // typeVarName = type(varName)
   char *typeVarName = genType(varName);
@@ -718,7 +746,7 @@ void genExprLabel(char *name) {
 char *getExprLabelName(int num) {
   char *tmp;
   GCMalloc(tmp, sizeof(char) * 30);
-  sprintf(tmp, "%sEXPR%d", labelPrefix, exprEndCnt);
+  sprintf(tmp, "%sEXPR%d", labelPrefix, exprLabelCnt);
 
   exprLabelCnt++;
 
