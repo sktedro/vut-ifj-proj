@@ -89,7 +89,9 @@ int pStart() {
 }
 
 /**
- * @brief Rule for <req>
+ * @brief 
+ * 
+ *
  *
  * @return error code
  *
@@ -99,7 +101,10 @@ int pReq() {
   RuleFnInit;
 
   // "ifj21"
-  RequireToken(t_str, "ifj21");
+  RequireTokenType(t_str);
+  if(!strEq(token->data, "ifj21")){
+    return ERR(OTHER_SEM_ERR);
+  }
 
   // Generate code
   genStart();
@@ -152,7 +157,7 @@ int pCodeBody() {
     char *fnName = token->data;
 
     // Define the new function (in the symtable)
-    TryCall(newFunctionDefinition, fnName);
+    TryCall(newFunctionDefinition, token);
     genFnDef(fnName);
 
     // generate an unconditional jump to definitions
@@ -256,6 +261,10 @@ int pCodeBody() {
     // The function name must be in the symtab, must be a function
     if(!STFind(symtab, token->data) || STGetIsVariable(symtab, token->data)){
       LOG("Calling an undeclared function or maybe it is not even a fn");
+      vypluj ERR(SYNTAX_ERR);
+    }
+    // The function must not have any return values
+    if(STGetRetType(symtab, token->data, 0) == -1){
       vypluj ERR(SYNTAX_ERR);
     }
 
@@ -474,6 +483,7 @@ int pFnCallArg(char *fnName, int argCount) {
   // A parameter data type doesn't match
   }else if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
     LOG("Param data type doesn't match\n");
+    if(dataType
     vypluj ERR(SYNTAX_ERR);
   }
 
@@ -1362,19 +1372,21 @@ bool isBuiltInFunction(char *data) {
  *
  * @return error code
  */
-int newFunctionDefinition(char *fnName) {
-  if (STFind(symtab, fnName) 
-      && !STGetIsVariable(symtab, fnName) 
-      && STGetFnDefined(symtab, fnName)) {
+int newFunctionDefinition(Token *token) {
+  if (STFind(symtab, token->data) 
+      && !STGetIsVariable(symtab, token->data) 
+      && STGetFnDefined(symtab, token->data)) {
     LOG("Function already defined");
     vypluj ERR(ID_DEF_ERR);
+  } else if (isIFJ21Keyword(token)){
+    LOG("Definition of a function with a keyword as a name");
+    vypluj ERR(SYNTAX_ERR);
   } else {
     LOG("Adding to the symtable (definition)");
-    TryCall(STInsert, symtab, fnName);
-    TryCall(STSetIsVariable, symtab, fnName, false);
-    TryCall(STSetFnDefined, symtab, fnName, true);
-    TryCall(STSetName, symtab, fnName, genLabelName(""));
-    
+    TryCall(STInsert, symtab, token->data);
+    TryCall(STSetIsVariable, symtab, token->data, false);
+    TryCall(STSetFnDefined, symtab, token->data, true);
+    TryCall(STSetName, symtab, token->data, genLabelName(""));
   }
   vypluj 0;
 }

@@ -106,7 +106,7 @@ bool isBuiltInFunction(char *data);
  *
  * @return error code
  */
-int newFunctionDefinition(char *fnName);
+int newFunctionDefinition(Token *token);
 
 /**
  * @brief If the function wasn't already declared, declare it (add it to the
