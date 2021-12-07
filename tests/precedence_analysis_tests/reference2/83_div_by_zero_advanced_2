@@ -1,0 +1,20 @@
+ERROR: Division by zero error at (around) line 3.
+Testing: Token type is '1' and data '1'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 int@1
+DEFVAR LF@%tmp1
+MOVE LF@%tmp1 int@0
+DEFVAR LF@%tmp2
+MOVE LF@%tmp2 int@0
+DEFVAR LF@%tmp3
+SUB LF@%tmp3 LF@%tmp1 LF@%tmp2
+DEFVAR LF@%tmp4
+MOVE LF@%tmp4 int@0
+DEFVAR LF@%tmp5
+ADD LF@%tmp5 LF@%tmp3 LF@%tmp4
+DEFVAR LF@%tmp6
+INT2FLOAT LF@%tmp6 LF@%tmp0
+DEFVAR LF@%tmp7
+INT2FLOAT LF@%tmp7 LF@%tmp5
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 9

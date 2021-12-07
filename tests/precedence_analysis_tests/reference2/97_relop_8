@@ -1,0 +1,15 @@
+Testing: Token type is '10' and data '#'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 string@abc
+DEFVAR LF@%tmp1
+STRLEN LF@%tmp1 LF@%tmp0
+DEFVAR LF@%tmp2
+MOVE LF@%tmp2 float@0x1.8p+1
+DEFVAR LF@%tmp3
+INT2FLOAT LF@%tmp3 LF@%tmp1
+DEFVAR LF@%tmp4
+GT LF@%tmp4 LF@%tmp3 LF@%tmp2
+DEFVAR LF@%tmp5
+NOT LF@%tmp5 LF@%tmp4
+Testing: Expression result is in: %tmp5
+Testing: Precedence analysis returned 0

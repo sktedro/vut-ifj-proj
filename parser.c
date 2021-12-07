@@ -164,6 +164,9 @@ int pCodeBody() {
     // Generate definitions of parameter variables of this function
     createParamVariables(fnName);
 
+    genPushFrame();
+    // TODO PUSHFRAME HERE?
+
     // <stat>
     TryCall(pStat, fnName);
 
@@ -256,9 +259,6 @@ int pFnCall(char *fnName) {
 
   // (
   RequireTokenType(t_leftParen);
-
- 
-  
   
   genFnCallInit();
 
@@ -592,12 +592,27 @@ int pStat(char *fnName) {
 
     genComment("Return encountered - returning");
 
-    // Code gen POPFRAME
-    genPopframe();
-
     // <retArgList>
     if(strcmp(token->data, "return") == 0) {
       TryCall(pRetArgList, fnName);
+    }
+
+    // Code gen POPFRAME
+    genPopframe();
+
+    
+    // Count how many return arguments we need
+    int retArgsCount = 0;
+    int i = 0;
+    while(STGetRetType(symtab, fnName, i) != -1){
+      retArgsCount ++;
+      i++;
+    }
+    // TODO move all !ret vars from TF to LF now
+    resetRetCounter();
+    for(i = 0; i < retArgsCount; i++){
+      char *retVarName = genRetVarName();
+      genMoveToLF(retVarName, retVarName);
     }
 
     // Code gen RETURN from the function
@@ -1146,7 +1161,7 @@ int pExpr(char **retVarName) {
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
  
-    genComment("Calling a function call inside a function");
+    genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
   // If it is a nil
@@ -1166,6 +1181,10 @@ int pExpr(char **retVarName) {
   // An expression
   } else {
     TryCall(parseExpression, symtab, token, retVarName);
+    // An expression is required but the precedence analysis didn't find any
+    if(!(*retVarName)){
+      return ERR(SYNTAX_ERR);
+    }
   }
   vypluj 0;
 }
@@ -1359,6 +1378,7 @@ int writeFunction(Token *token, int dataType) {
 
   // TODO Namiesto generovania WRITE potrebujeme toto passnuť ako argument do 
   // write funkcie
+  // Ale ako budeme vo write funkcii vedieť, koľko parametrov máme??
   genWrite(varName);
 
   vypluj 0;

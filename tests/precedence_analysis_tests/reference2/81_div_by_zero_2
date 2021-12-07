@@ -1,0 +1,10 @@
+ERROR: Division by zero error at (around) line 3.
+Testing: Token type is '0' and data 'varNum1'
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 float@0x0p+0
+DEFVAR LF@%tmp1
+FLOAT2INT LF@%tmp1 LF@varNum1_0
+DEFVAR LF@%tmp2
+FLOAT2INT LF@%tmp2 LF@%tmp0
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 9

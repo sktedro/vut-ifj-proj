@@ -1,0 +1,49 @@
+Testing: Token type is '8' and data '('
+DEFVAR LF@%tmp0
+MUL LF@%tmp0 LF@varInt1_0 LF@varInt2_0
+DEFVAR LF@%tmp1
+MOVE LF@%tmp1 int@1
+DEFVAR LF@%tmp2
+ADD LF@%tmp2 LF@%tmp0 LF@%tmp1
+DEFVAR LF@%tmp3
+MOVE LF@%tmp3 int@3
+DEFVAR LF@%tmp4
+MOVE LF@%tmp4 int@2
+DEFVAR LF@%tmp5
+SUB LF@%tmp5 LF@%tmp3 LF@%tmp4
+DEFVAR LF@%tmp6
+STRLEN LF@%tmp6 LF@varStr1_0
+DEFVAR LF@%tmp7
+ADD LF@%tmp7 LF@%tmp5 LF@%tmp6
+DEFVAR LF@%tmp8
+INT2FLOAT LF@%tmp8 LF@%tmp2
+DEFVAR LF@%tmp9
+INT2FLOAT LF@%tmp9 LF@%tmp7
+DEFVAR LF@%tmp10
+DIV LF@%tmp10 LF@%tmp8 LF@%tmp9
+DEFVAR LF@%tmp11
+FLOAT2INT LF@%tmp11 LF@varNum1_0
+DEFVAR LF@%tmp12
+IDIV LF@%tmp12 LF@%tmp11 LF@varInt3_0
+DEFVAR LF@%tmp13
+MOVE LF@%tmp13 int@2
+DEFVAR LF@%tmp14
+INT2FLOAT LF@%tmp14 LF@%tmp12
+DEFVAR LF@%tmp15
+INT2FLOAT LF@%tmp15 LF@%tmp13
+DEFVAR LF@%tmp16
+DIV LF@%tmp16 LF@%tmp14 LF@%tmp15
+DEFVAR LF@%tmp17
+MOVE LF@%tmp17 float@0x1.999999999999ap-5
+DEFVAR LF@%tmp18
+MOVE LF@%tmp18 int@1
+DEFVAR LF@%tmp19
+INT2FLOAT LF@%tmp19 LF@%tmp18
+DEFVAR LF@%tmp20
+DIV LF@%tmp20 LF@%tmp17 LF@%tmp19
+DEFVAR LF@%tmp21
+ADD LF@%tmp21 LF@%tmp16 LF@%tmp20
+DEFVAR LF@%tmp22
+MUL LF@%tmp22 LF@%tmp10 LF@%tmp21
+Testing: Expression result is in: %tmp22
+Testing: Precedence analysis returned 0

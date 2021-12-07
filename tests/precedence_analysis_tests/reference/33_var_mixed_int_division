@@ -1,7 +1,7 @@
 Testing: Token type is '0' and data 'varNum1'
-DEFVAR LF@%tmp0
-FLOAT2INT LF@%tmp0 LF@varNum1_0
-DEFVAR LF@%tmp1
-IDIV LF@%tmp1 LF@%tmp0 LF@varInt1_0
-Testing: Expression result is in: %tmp1
+DEFVAR LF@?tmpvar_0
+FLOAT2INT LF@?tmpvar_0 LF@varNum1_0
+DEFVAR LF@?tmpvar_1
+IDIV LF@?tmpvar_1 LF@?tmpvar_0 LF@varInt1_0
+Testing: Expression result is in: ?tmpvar_1
 Testing: Precedence analysis returned 0

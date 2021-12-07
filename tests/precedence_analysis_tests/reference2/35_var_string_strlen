@@ -1,0 +1,5 @@
+Testing: Token type is '10' and data '#'
+DEFVAR LF@%tmp0
+STRLEN LF@%tmp0 LF@varStr1_0
+Testing: Expression result is in: %tmp0
+Testing: Precedence analysis returned 0

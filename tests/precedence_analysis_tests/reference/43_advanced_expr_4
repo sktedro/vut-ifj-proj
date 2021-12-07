@@ -1,17 +1,17 @@
 Testing: Token type is '1' and data '3'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 int@3
-DEFVAR LF@%tmp1
-MOVE LF@%tmp1 float@0x1p+0
-DEFVAR LF@%tmp2
-FLOAT2INT LF@%tmp2 LF@%tmp1
-DEFVAR LF@%tmp3
-IDIV LF@%tmp3 LF@varInt2_0 LF@%tmp2
-DEFVAR LF@%tmp4
-MOVE LF@%tmp4 int@2
-DEFVAR LF@%tmp5
-ADD LF@%tmp5 LF@%tmp3 LF@%tmp4
-DEFVAR LF@%tmp6
-MUL LF@%tmp6 LF@%tmp0 LF@%tmp5
-Testing: Expression result is in: %tmp6
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 int@3
+DEFVAR LF@?tmpvar_1
+MOVE LF@?tmpvar_1 float@0x1p+0
+DEFVAR LF@?tmpvar_2
+FLOAT2INT LF@?tmpvar_2 LF@?tmpvar_1
+DEFVAR LF@?tmpvar_3
+IDIV LF@?tmpvar_3 LF@varInt2_0 LF@?tmpvar_2
+DEFVAR LF@?tmpvar_4
+MOVE LF@?tmpvar_4 int@2
+DEFVAR LF@?tmpvar_5
+ADD LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
+DEFVAR LF@?tmpvar_6
+MUL LF@?tmpvar_6 LF@?tmpvar_0 LF@?tmpvar_5
+Testing: Expression result is in: ?tmpvar_6
 Testing: Precedence analysis returned 0

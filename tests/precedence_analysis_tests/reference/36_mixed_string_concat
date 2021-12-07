@@ -1,7 +1,7 @@
 Testing: Token type is '0' and data 'varStr1'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 string@abc
-DEFVAR LF@%tmp1
-CONCAT LF@%tmp1 LF@varStr1_0 LF@%tmp0
-Testing: Expression result is in: %tmp1
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 string@abc
+DEFVAR LF@?tmpvar_1
+CONCAT LF@?tmpvar_1 LF@varStr1_0 LF@?tmpvar_0
+Testing: Expression result is in: ?tmpvar_1
 Testing: Precedence analysis returned 0

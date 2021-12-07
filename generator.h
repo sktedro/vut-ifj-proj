@@ -8,9 +8,13 @@
 #include "misc.h"
 #include "assignment.h"
 #include "parser.h"
+
+
+void genPushFrame();
+int genMoveToTF(char *dest, char *src);
+int genMoveToLF(char *dest, char *src);
 void resetParamCounter();
 void resetRetCounter();
-int digits(int value);
 char *genVarName(char *name, int frame);
 char *stringConvert(char *string);
 char *getDataTypeFromInt(Token *token);

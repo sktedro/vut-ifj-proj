@@ -1,0 +1,5 @@
+Testing: Token type is '8' and data '('
+DEFVAR LF@%tmp0
+MOVE LF@%tmp0 int@2
+Testing: Expression result is in: %tmp0
+Testing: Precedence analysis returned 0

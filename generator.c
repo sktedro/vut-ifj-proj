@@ -12,7 +12,7 @@ extern GarbageCollector garbageCollector;
 
 char *labelPrefix = "_label_";
 char *varPrefix = "%var_";
-char *tmpvarPrefix = "?tmpvar_";
+char *tmpVarPrefix = "?tmpvar_";
 char *paramPrefix = "$param_";
 char *retPrefix = "!ret_";
 char *fnPrefix = "&fn_";
@@ -62,15 +62,12 @@ void defineBufferedVars(){
  * @brief Generates unique name for variables in ifj21code
  */
 char *genVarName(char *name, int frame) {
-
+  // TODO do we need that if? I think it is redundant now
   if(name[0] != '%') {
-    char *frameNum;
-    GCMalloc(frameNum, sizeof(char) * (countDigits(frame) + 2));
-    sprintf(frameNum, "_%d", frame);
     char *newName;
-    GCMalloc(newName, sizeof(char) * (strlen(name) + strlen(frameNum) + 1));
-    memcpy(newName, name, strlen(name));
-    memcpy(&newName[strlen(name)], frameNum, strlen(frameNum) + 1);
+    int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 1;
+    GCMalloc(newName, sizeof(char) * mallocLen);
+    sprintf(newName, "%s%s_%d", varPrefix, name, frame);
     return newName;
   }
   return name;
@@ -83,22 +80,25 @@ char *genVarName(char *name, int frame) {
  */
 char *genTmpVarName() {
   char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
-  sprintf(varName, "%s%d", tmpvarPrefix, tmpCounter);
+  int mallocLen = strlen(tmpVarPrefix) + countDigits(tmpCounter) + 1;
+  GCMalloc(varName, sizeof(char) * mallocLen);
+  sprintf(varName, "%s%d", tmpVarPrefix, tmpCounter);
   tmpCounter++;
   return varName;
 }
 
 char *genRetVarName() {
   char *retName;
-  GCMalloc(retName, sizeof(char) * 10);
+  int mallocLen = strlen(retPrefix) + countDigits(retCounter) + 1;
+  GCMalloc(retName, sizeof(char) * mallocLen);
   sprintf(retName, "%s%d", retPrefix, retCounter);
   retCounter++;
   return retName;
 }
 char *genLabelName() {
   char *varName;
-  GCMalloc(varName, sizeof(char) * 10);
+  int mallocLen = strlen(labelPrefix) + countDigits(labelCounter) + 1;
+  GCMalloc(varName, sizeof(char) * mallocLen);
   sprintf(varName, "%s%d", labelPrefix, labelCounter);
   labelCounter++;
   return varName;
@@ -106,7 +106,8 @@ char *genLabelName() {
 
 char *genParamVarName() {
   char *tmp;
-  GCMalloc(tmp, sizeof(char) * 100);
+  int mallocLen = strlen(paramPrefix) + countDigits(paramCounter) + 1;
+  GCMalloc(tmp, sizeof(char) * mallocLen);
   sprintf(tmp, "%s%d", paramPrefix, paramCounter);
   paramCounter++;
   return tmp;
@@ -229,6 +230,16 @@ int genMove(char *dest, char *src){
   return 0;
 }
 
+int genMoveToTF(char *dest, char *src){
+  printf("MOVE TF@%s LF@%s\n", dest, src);
+  return 0;
+}
+
+int genMoveToLF(char *dest, char *src){
+  printf("MOVE LF@%s TF@%s\n", dest, src);
+  return 0;
+}
+
 int genPassParam(char *varInTF, char *varInLF){
   printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   return 0;
@@ -310,6 +321,9 @@ void genFnDef(char *name) {
 // Create a TF
 void genFnCallInit(){
   printf("CREATEFRAME\n");
+}
+
+void genPushFrame(){
   printf("PUSHFRAME\n");
 }
 
@@ -483,12 +497,10 @@ char *genNot(SStackElem *src) {
   return tmp;
 }
 
-
 /*
- * No idea what this is for. Maybe remove this?
- * tedro: yes, not mine
+ * Vypíše to literál nemazať
+ * 
  */
-
 void genWriteLiteral(Token *token, char *frame) {
   char *string;
   char *dataType = getDataTypeFromInt(token);

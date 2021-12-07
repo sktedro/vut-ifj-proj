@@ -1,15 +1,15 @@
 Testing: Token type is '0' and data 'varStr1'
-DEFVAR LF@%tmp0
-MOVE LF@%tmp0 string@abc
-DEFVAR LF@%tmp1
-MOVE LF@%tmp1 string@def
-DEFVAR LF@%tmp2
-CONCAT LF@%tmp2 LF@%tmp1 LF@varStr3_0
-DEFVAR LF@%tmp3
-CONCAT LF@%tmp3 LF@%tmp0 LF@%tmp2
-DEFVAR LF@%tmp4
-CONCAT LF@%tmp4 LF@varStr2_0 LF@%tmp3
-DEFVAR LF@%tmp5
-CONCAT LF@%tmp5 LF@varStr1_0 LF@%tmp4
-Testing: Expression result is in: %tmp5
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 string@abc
+DEFVAR LF@?tmpvar_1
+MOVE LF@?tmpvar_1 string@def
+DEFVAR LF@?tmpvar_2
+CONCAT LF@?tmpvar_2 LF@?tmpvar_1 LF@varStr3_0
+DEFVAR LF@?tmpvar_3
+CONCAT LF@?tmpvar_3 LF@?tmpvar_0 LF@?tmpvar_2
+DEFVAR LF@?tmpvar_4
+CONCAT LF@?tmpvar_4 LF@varStr2_0 LF@?tmpvar_3
+DEFVAR LF@?tmpvar_5
+CONCAT LF@?tmpvar_5 LF@varStr1_0 LF@?tmpvar_4
+Testing: Expression result is in: ?tmpvar_5
 Testing: Precedence analysis returned 0
