@@ -53,6 +53,12 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
   TryCall(precedenceAnalysisInit, symtab, &symstack, &token);
 
+  // If the token is not allowed to be a part of the expression => syntax err
+  if (isTokenAllowedInExpr(token) == false) {
+    TryCall(stashToken, &token);
+    return 0;
+  }
+
   // An actual symbol from the precedence table will be saved here
   char precTableSymbol = '\0';
 
@@ -110,7 +116,7 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
 
       // Syntax error
     } else if (precTableSymbol == '_') {
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
   }
 
@@ -231,12 +237,12 @@ int strLenRule(SStack *symstack, SStackElem *op1, SStackElem *op2) {
 
     // We received a '#' operator but no i after it
     if (op2->type != st_expr) {
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
 
     // The data type of the operand must be a string
     if (op2->dataType != dt_string) {
-      vypluj err(TYPE_EXPR_ERR);
+      vypluj ERR(TYPE_EXPR_ERR);
     }
 
     // Generate code
@@ -308,7 +314,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // Division by zero check (op3 can't be zero)
     if ((op2->op == pt_div || op2->op == pt_intDiv) && op3->isZero) {
-      return err(DIV_BY_ZERO_ERR);
+      return ERR(DIV_BY_ZERO_ERR);
     }
 
     // Result will have the same data type as op1 (and op3)
@@ -335,7 +341,7 @@ int arithmeticOperatorsRule(SStack *symstack, SStackElem *op1,
     } else if (op2->op == pt_concat) {
       newSymbolName = genBinaryOperationConcat(op1, op3);
     } else {
-      return err(SYNTAX_ERR);
+      return ERR(SYNTAX_ERR);
     }
 
     // Create a new symbol and push it to the symstack
@@ -374,7 +380,7 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
 
     // If one of the types is a boolean, it is a result of another rel op
     if (op1->dataType == dt_boolean || op3->dataType == dt_boolean) {
-      return err(SYNTAX_ERR);
+      return ERR(SYNTAX_ERR);
     }
 
     // If we have an integer and a number -> convert the int to num
@@ -388,14 +394,14 @@ int relationalOperatorsRule(SStack *symstack, SStackElem *op1,
     if (op1->dataType == dt_nil || op3->dataType == dt_nil) {
       // We can only compare by '==' or '~='
       if (!strEq(op2->data, "==") && !strEq(op2->data, "~=")) {
-        return err(NIL_ERR);
+        return ERR(NIL_ERR);
       }
 
       // If no operand is a nil
     } else {
       // The data types of operands must match now (we made sure they do)
       if (op1->dataType != op3->dataType) {
-        return err(TYPE_EXPR_ERR);
+        return ERR(TYPE_EXPR_ERR);
       }
     }
 
@@ -463,7 +469,7 @@ int getSymbolsForReduction(SStack *symstack, SStackElem **op1,
     *op3 = SStackPop(symstack);
   } else {
     // In case there is no op symbol or there are too many. Shouldn't happen
-    vypluj err(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
 
   // Pop the '<'
@@ -486,7 +492,7 @@ int ensureInteger(SStackElem *op) {
 
     // If it not a num and neither an integer, throw an error
   } else if (op->dataType != dt_integer) {
-    return err(TYPE_EXPR_ERR);
+    return ERR(TYPE_EXPR_ERR);
   }
 
   return 0;
@@ -507,7 +513,7 @@ int ensureNumber(SStackElem *op) {
 
     // If it not an int and neither a number, throw an error
   } else if (op->dataType != dt_number) {
-    return err(TYPE_EXPR_ERR);
+    return ERR(TYPE_EXPR_ERR);
   }
 
   return 0;
@@ -528,7 +534,7 @@ int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2,
   // Concatenation operation needs two strings
   if (op2->op == pt_concat && 
       (op1->dataType != dt_string || op3->dataType != dt_string)) {
-    return err(TYPE_EXPR_ERR);
+    return ERR(TYPE_EXPR_ERR);
 
     // If we're dividing with //, convert both operands to integers
   } else if (op2->op == pt_intDiv) {
@@ -548,7 +554,7 @@ int checkDataTypesOfBinOps(SStackElem *op1, SStackElem *op2,
 
     // Else, throw an error if types don't match
   } else if (op1->dataType != op3->dataType) {
-    return err(TYPE_EXPR_ERR);
+    return ERR(TYPE_EXPR_ERR);
   }
 
   return 0;
@@ -594,7 +600,7 @@ int parseToken(STStack *symtab, Token *token, SStackElem **newSymbol) {
 
       // The ID does not exist!
     } else {
-      return err(ID_DEF_ERR);
+      return ERR(ID_DEF_ERR);
     }
 
     break;
@@ -699,7 +705,7 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
     int dataType, char *data) {
   TryCall(allocateSymbol, newSymbol, type);
   if (!(*newSymbol)) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   (*newSymbol)->op = op;
   (*newSymbol)->isId = isId;
@@ -740,11 +746,6 @@ int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
   // Get a new token if it was not provided by the parser
   if (!(*token)) {
     TryCall(scanner, token);
-  }
-
-  // If the token is not allowed to be a part of the expression => syntax err
-  if (!isTokenAllowedInExpr(*token)) {
-    return err(SYNTAX_ERR);
   }
 
   return 0;

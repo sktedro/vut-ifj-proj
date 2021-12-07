@@ -101,13 +101,22 @@ void STSetVarDataType(STStack *stack, char *key, int type);
 void STSetVarAddress(STStack *stack, char *key, int address);
 
 /**
- * @brief Use to mark a function as defined or not
+ * @brief Use to mark a function as defined
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param fnDefined - boolean value to be written to STElem->fnDefined
  */
 void STSetFnDefined(STStack *stack, char *key, bool fnDefined);
+
+/**
+ * @brief Use to mark a function as declared 
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ * @param fnDeclared - boolean value to be written to STElem->fnDeclared
+ */
+void STSetFnDeclared(STStack *stack, char *key, bool fnDeclared);
 
 /**
  * @brief Appends a data type of a paramter of a function
@@ -192,6 +201,16 @@ int STGetVarAddress(STStack *stack, char *key);
  * @return true if the function was already defined
  */
 bool STGetFnDefined(STStack *stack, char *key);
+
+/**
+ * @brief Returns true if a function with name 'key' was already declared
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ *
+ * @return true if the function was already declared
+ */
+bool STGetFnDeclared(STStack *stack, char *key);
 
 /**
  * @brief returns a data type of a parameter of a function at index 'index'

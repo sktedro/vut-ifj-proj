@@ -6,7 +6,6 @@
  *
  * --------------------------------------------------
  * TOP PRIORITY
- * TODO když dostaneme EOF (token == NULL) někde random uprostřed pravidla
  * WE NEED MORE STATES FOR BUILT IN FUNCTIONS
  * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
  * --------------------------------------------------
@@ -16,16 +15,17 @@
  * --------------------------------------------------
  * Function             State
  * --------------------------------------------------
- * pStart             FULLY DONE
- * pReq               FULLY DONE
- * pCodeBody          seems like done
- * pFnCall            Built in functions! Other than that, it's done
- * pFnCallArgList     FULLY DONE (minor TODOs)
- * pNextFnCallArg     FULLY DONE (minor TODOs)
- * pFnCallArg         FULLY DONE (hopefully) (TODO errcode)
- * pStat              how to program the while cycle?
- * pStatWithId        might work
- * pNextAssign        might work
+ ****** OUTDATED (5.12.)
+ * pStart                             FULLY DONE
+ * pReq                               FULLY DONE
+ * pCodeBody                          seems like done
+ * pFnCall                            Built in functions! 
+ * pFnCallArgList                     FULLY DONE (minor TODOs)
+ * pNextFnCallArg                     FULLY DONE (minor TODOs)
+ * pFnCallArg                         FULLY DONE (hopefully) (TODO errcode)
+ * pStat                              how to program the while cycle?
+ * pStatWithId                        might work
+ * pNextAssign                        might work
  * pFnDefinitionParamTypeList         might work but dependant on type
  * pNextFnDefinitionParamType         might work but dependant on type
  * pRetArgList        
@@ -35,7 +35,7 @@
  * pFnRetTypeList   
  * pNextRetType     
  * pNewIdAssign
- * pExpr              could work
+ * pExpr                              could work
 
 
 * -----------------------------------------------------------------------
@@ -56,16 +56,7 @@ int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
 int paramhelpCounter = 0;
 
-// SStackElem stuff, just ignore TODO move somewhere?
-SStackElem *element;
-void cleanElement() {
-  element->next->data = NULL;
-  element->data = NULL;
-}
-void initElement() {
-  GCMalloc(element, sizeof(SStackElem));
-  GCMalloc(element->data, sizeof(char) * 100);
-}
+// TODO macro RequireIDToken - == t_idOrKeyword && !isIFJ21Keyword
 
 /*
  *
@@ -82,7 +73,6 @@ void initElement() {
  */
 int pStart() {
   RuleFnInit;
-  initElement();
   AListInit(&assignmentElement);
 
   // require
@@ -133,7 +123,8 @@ int pCodeBody() {
 
   // If it is not EOF, it has to be an ID or a keyword
   if(token && token->type != t_idOrKeyword){
-    vypluj err(SYNTAX_ERR);
+    LOG("An unexpected token in codeBody");
+    vypluj ERR(SYNTAX_ERR);
 
     // 04. <codeBody>        -> eps
   } else if(!token) {
@@ -142,6 +133,13 @@ int pCodeBody() {
 
   // 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
   if(strcmp(token->data, "function") == 0) {
+
+    genComment("New function definition");
+
+    // Code gen Create an unconditional jump behind the function
+    char *fnBypassLabelName = genLabelName();
+    genUnconditionalJump(fnBypassLabelName);
+
     // [id]
     RequireTokenType(t_idOrKeyword);
     char *fnName = token->data;
@@ -163,17 +161,24 @@ int pCodeBody() {
 
     // <fnRetTypeList>
     TryCall(pFnRetTypeList, fnName);
-    
+
     // Generate definitions of parameter variables of this function
     createParamVariables(fnName);
 
     // <stat>
     TryCall(pStat, fnName);
 
-    //end
+    // end
     RequireToken(t_idOrKeyword, "end");
 
-    genFnDefRet();
+    // Return from the function
+    genPopframe();
+    genReturnInstruction();
+
+    // Code gen Create a label here, behind the function
+    genLabel(fnBypassLabelName);
+
+    genComment2("Function definition done");
 
     // <codeBody>
     TryCall(pCodeBody);
@@ -181,6 +186,9 @@ int pCodeBody() {
 
   // 06. <codeBody>        -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
   else if(strcmp(token->data, "global") == 0) {
+
+    genComment("New function declaration");
+
     // [id]
     RequireTokenType(t_idOrKeyword);
     char *fnName = token->data;
@@ -199,14 +207,14 @@ int pCodeBody() {
 
     // <fnDeclarationParamTypeList>
     TryCall(pFnDeclarationParamTypeList, fnName);
-    LOG("HERE");
 
     // )
     RequireTokenType(t_rightParen);
-    LOG("HERE NOT");
 
     // <fnRetTypeList>
     TryCall(pFnRetTypeList, fnName);
+
+    genComment2("Function declaration done");
 
     // <codeBody>
     TryCall(pCodeBody);
@@ -214,21 +222,25 @@ int pCodeBody() {
 
   // 07. <codeBody>        -> [id] <fnCall> <codeBody>
   else if(token->type == t_idOrKeyword) {
-    printToken(token);
+
+    genComment("Calling a function from the global frame");
+
     // The function name must be in the symtab, must be a function
     if(!STFind(symtab, token->data) || STGetIsVariable(symtab, token->data)){
       LOG("Calling an undeclared function or maybe it is not even a fn");
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
 
     // <fnCall>
     TryCall(pFnCall, token->data);
 
+    genComment2("Function call from the global frame done");
+
     // <codeBody>
     TryCall(pCodeBody);
 
   } else {
-    vypluj err(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
 
   vypluj 0;
@@ -243,8 +255,8 @@ int pCodeBody() {
 int pFnCall(char *fnName) {
   RuleFnInit;
 
-  if(isBuiltInFunction(fnName)) {
-    vypluj builtInFunctions(fnName);
+  if(strEq(fnName, "write")) {
+    vypluj writeFunction(fnName);
   }
 
   // (
@@ -252,7 +264,9 @@ int pFnCall(char *fnName) {
   
   genFnCallInit();
 
+  genComment("Processing function call arguments");
   TryCall(pFnCallArgList, fnName);
+  genComment2("Processing function call arguments done");
 
   // )
   RequireTokenType(t_rightParen);
@@ -260,7 +274,7 @@ int pFnCall(char *fnName) {
   // Get the function element from the symtable
   STElem *fnElement = STFind(symtab, fnName);
   if(!fnElement){
-    return err(SYNTAX_ERR);
+    return ERR(SYNTAX_ERR);
   }
 
   genFnCall(fnName);
@@ -271,119 +285,6 @@ int pFnCall(char *fnName) {
 
   vypluj 0;
 }
-
-  /*
-  TODO toto je tu len presunuté z pExpr - všetko ohľadom volania funkcií sa handluje tu asi
-  */
-  // TODO read funkcie spraviť nejak normálne nie ako imbecil :peepoGiggle: - written by Tedro
-  /*if(isReadFunction(token->data)) {
-    // asi bude treba overiť či táto gen funkcie nenarazili na err
-    genReadFunction(STGetName(symtab, element->data), token->data);
-
-    RequireTokenType(t_leftParen);
-    RequireTokenType(t_rightParen);
-    vypluj 0;
-  } else if(isStringOperationFunction(token->data)) {
-    // ;
-    if(strcmp(token->data, "substr") == 0) {
-      Token *stringTMP;
-      Token *start;
-      Token *end;
-
-      GetToken;
-
-      RequireTokenType(t_leftParen);
-      
-      GetToken;
-      
-      if(token->type != t_str || token->type != t_idOrKeyword) {
-        vypluj err(1); // TODO ADD ERR CODE
-      }
-
-      stringTMP = token;
-
-      GetToken;
-      
-      if(token->type != t_str || token->type != t_idOrKeyword) {
-        vypluj err(1); // TODO ADD ERR CODE
-      }
-
-      start = token;
-
-      GetToken;
-      
-      if(token->type != t_str || token->type != t_idOrKeyword) {
-        vypluj err(1); // TODO ADD ERR CODE
-      }
-
-      end = token;
-
-      GetToken;
-      RequireTokenType(t_rightParen);
-
-      // CALL GEN SUBSTR CALL FUNSTION
-
-      vypluj 0;
-    
-    } else if(strcmp(token->data, "ord") == 0) {
-        Token *string;
-        Token *i;
-        
-        RequireTokenType(t_leftParen);
-        
-        GetToken;
-
-        if(token->type != t_str || token->type != t_idOrKeyword) {
-          vypluj err(1); //TODO ADD ERR
-        }
-
-        string = token;
-
-        GetToken;
-
-        if(token->type != t_int || token->type != t_num || token->type != t_idOrKeyword) {
-          vypluj err(1);
-        }
-
-        i = token;
-
-        RequireTokenType(t_rightParen);
-
-        //TODO CALL GEN ORD CALL FUNCTION
-
-    } else if(strcmp(token->data, "chr") == 0) {
-        Token *i;
-        RequireTokenType(t_leftParen);
-
-        GetToken;
-
-        i = token;
-        
-        RequireTokenType(t_rightParen);
-
-        // TODO ADD GEN CHR CALL FUNCTION
-
-    } else {
-        vypluj err(-1); // TODO INTERNAL ERROR
-  }
-  
-
-  // Code gen: create a temporary frame
-  genFnCallInit();*/
-
-  // (
-  //RequireTokenType(t_leftParen);
-
-  // <fnCallArgList>
-  //TryCall(pFnCallArgList, fnName);
-  
-  // )
-  //RequireTokenType(t_rightParen);
-
-  // Code gen: call the function
-  //genFnCall(fnName);
-
-  //vypluj 0;
 
 /**
  * @brief
@@ -411,7 +312,7 @@ int pFnCallArgList(char *fnName) {
     // Amount of arguments doesn't match
     if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
       LOG("Param amount doesn't match\n");
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
     
      // Stash the token
@@ -446,7 +347,6 @@ int pNextFnCallArg(char *fnName, int argCount) {
 
   GetToken;
   printToken(token);
-
   
   // -> , <fnCallArg> <nextFnCallArg>
   // ,
@@ -464,16 +364,10 @@ int pNextFnCallArg(char *fnName, int argCount) {
 
     STElem *fn = STFind(symtab, fnName);
 
-    // TODO remove this later
-    /*if(!fn || !fn->fnParamTypesBuf || !fn->fnParamTypesBuf->data){
-      LOG("Special error\n");
-      vypluj 1;
-    }*/
-
     // Amount of arguments doesn't match
     if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
       LOG("Param amount doesn't match\n");
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
 
     TryCall(stashToken, &token);
@@ -498,12 +392,6 @@ int pFnCallArg(char *fnName, int argCount) {
 
   STElem *fn = STFind(symtab, fnName);
 
-  // TODO remove this later
-  /*if(!fn){
-    LOG("Special error\n");
-    vypluj 1;
-  }*/
-
   int dataType = -1;
 
   // -> [id]
@@ -511,7 +399,8 @@ int pFnCallArg(char *fnName, int argCount) {
     LOG("-> [id]\n");
     dataType = STGetVarDataType(symtab, token->data);
     // Pass the parameter by MOVE TF@paramName LF@token->data
-    char *paramName = fn->fnParamNamesBuf->data[argCount - 1];
+    //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
+    // TODO shouldn't we use this?
 
     char *name;
     GCMalloc(name, sizeof(char) * 100);
@@ -539,33 +428,19 @@ int pFnCallArg(char *fnName, int argCount) {
     genVarAssign(name, dataType, token->data, "TF");
     paramhelpCounter++;
 
-
-    // Define it in TF (generate code) TODO commented cus segfault
-    /*char *paramName;
-    STGetParamName(symtab, &paramName, fnName, argCount - 1);
-    genVarDef(paramName, symtab->top->depth + 1);
-    genVarAssign(paramName, symtab->top->depth + 1, dataType, token->data);*/
-
   } else {
     LOG("NENI TO ANI PREMENNÁ A ANI LITERÁL\n");
     if(token->type == t_idOrKeyword) {
-      vypluj err(ID_DEF_ERR);
+      vypluj ERR(ID_DEF_ERR);
     }
-    vypluj err(SYNTAX_ERR);
+    LOG("Function call argument is not an ID nor literal");
+    vypluj ERR(SYNTAX_ERR);
   }
 
   // A parameter data type doesn't match
-  LOG("%s", fnName);
-  if(!STFind(symtab, fnName)){
-    LOG("fn NOT in symtab:\n");
-  }else{
-    LOG("fn IS in symtab:\n");
-  }
-  LOG("buffer len: %d\n", STFind(symtab, fnName)->fnParamTypesBuf->len);
   if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
-    LOG("%d\n", STGetParamType(symtab, fnName, argCount - 1));
     LOG("Param data type doesn't match\n");
-    vypluj err(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
 
   vypluj 0;
@@ -589,8 +464,6 @@ int pStat(char *fnName) {
   GetToken;
   printToken(token);
 
-  fprintf(stderr, "STAT STACK %d\n", symtab->top->depth);
-
   // -> eps
   if (token->type != t_idOrKeyword || (token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
     fprintf(stderr, " <stat>            -> eps\n");
@@ -599,13 +472,13 @@ int pStat(char *fnName) {
   }
 
   // -> local [id] : <type> <newIdAssign> <stat>
-  // Should be done - just finish the pType and TODO above it
   if (strcmp(token->data, "local") == 0) {
+
     fprintf(stderr, "-> local [id] : <type> <newIdAssign> <stat>\n");
     // [id]
     RequireTokenType(t_idOrKeyword);
-    if(isKeyword(token)) {
-      vypluj err(SYNTAX_ERR);
+    if(isIFJ21Keyword(token)) {
+      vypluj ERR(SYNTAX_ERR);
     }
 
     char *newVarName = token->data;
@@ -620,11 +493,10 @@ int pStat(char *fnName) {
     RequireTokenType(t_colon);
     
     // [type]
-    // TODO set data type (in the following function, I suppose)
     TryCall(varDataType, newVarName);
     
     // <newIdAssign>
-    TryCall(pNewIdAssign);
+    TryCall(pNewIdAssign, newVarName);
 
   // -> if <expr> then <stat> else <stat> end <stat>
   } else if (strcmp(token->data, "if") == 0) {
@@ -716,13 +588,21 @@ int pStat(char *fnName) {
   // -> return <retArgList> <stat>
   } else if (strcmp(token->data, "return") == 0) {
     LOG("-> return <retArgList> <stat>\n");
-    printToken(token);
+
+    genComment("Return encountered - returning");
+
+    // Code gen POPFRAME
+    genPopframe();
 
     // <retArgList>
     if(strcmp(token->data, "return") == 0) {
       TryCall(pRetArgList, fnName);
-      vypluj 0;
     }
+
+    // Code gen RETURN from the function
+    genReturnInstruction();
+
+    genComment2("Return done");
 
   // [id] <statWithId> <stat> 
   } else if (STFind(symtab, token->data)) { // A function or a variable
@@ -741,8 +621,6 @@ int pStat(char *fnName) {
 
     // <statWithId>
     TryCall(pStatWithId, token->data);
-
-    //genExprEnd(element); TODO alex říká nemaž jenom zakomentuj 
 
   // -> eps
   } else {
@@ -770,10 +648,8 @@ int pStatWithId(char *idName) {
 
   // -> <fnCall>
   if(STFind(symtab, idName) 
-      && !STGetIsVariable(symtab, idName) 
-      && STGetFnDefined(symtab, idName)){
+      && !STGetIsVariable(symtab, idName)){
     vypluj pFnCall(idName);
-    
 
   // Not a function call but an assignment
   }else{
@@ -784,7 +660,7 @@ int pStatWithId(char *idName) {
 
     // idName must be a variable
     if(!STFind(symtab, idName) || !STGetIsVariable(symtab, idName)){
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
 
     // -> = <expr>
@@ -813,7 +689,7 @@ int pStatWithId(char *idName) {
       RequireTokenType(t_idOrKeyword);
       if (!STFind(symtab, token->data) 
           || !STGetIsVariable(symtab, token->data)) {
-        vypluj err(SYNTAX_ERR);
+        vypluj ERR(SYNTAX_ERR);
       }
 
       // Get their names (in the generated code)
@@ -843,13 +719,12 @@ int pStatWithId(char *idName) {
       genVarAssign(id1Var, -1, retVarName, "LF");
 
     }else{
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
   }
   vypluj 0;
 }
 
-//TODO not working, not sure if CFG is right
 /**
  * @brief
  *
@@ -871,14 +746,14 @@ int pNextAssign() {
 
   // -> , [id] <nextAssign> <expr> ,
   if(token->type != t_comma) {
-    vypluj err(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
 
   // [id]
   // The next token must be a variable
   RequireTokenType(t_idOrKeyword);
   if (!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
-    vypluj err(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
 
   AListAdd(&assignmentElement, STGetName(symtab, token->data), getExprLabelName(assigmentCounter), false, NULL);
@@ -924,42 +799,30 @@ int pFnDefinitionParamTypeList(char *fnName) {
   printToken(token);
 
   // -> eps
-  if(token->type != t_idOrKeyword || isKeyword(token)) {
+  if(token->type != t_idOrKeyword || isIFJ21Keyword(token)) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
+  // TODO môže byť param definovaný? Ak áno, musí byť premenná. Ak nie, nemôže 
+  // byť definovaný (to treba ocheckovať)
 
   // -> [id] : [type] <nextFnDefinitionParamType>
 
   // [id]
   // Append the name of the new parameter to the symtable
-
   STAppendParamName(symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
   STSetIsVariable(symtab, token->data, true);
   STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
   paramCount++;
 
-  fprintf(stderr, "ARG STACK %d\n", symtab->top->depth);
-
-  element->data = token->data;
-
   // :
   RequireTokenType(t_colon);
 
   // [type]
   // Append the data type of the parameter to the symtab
-  STElem *tmp = STFind(symtab, fnName);
   TryCall(fnDefinitionParamType, fnName, paramCount);
 
-  // TODO remove, just debugging
-  if(!tmp->fnParamTypesBuf){
-    fprintf(stderr, "ParamTypesBuf = null\n");
-  }else{
-    LOG("typesbuf: %d\n", tmp->fnParamTypesBuf->data[0]);
-    LOG("type: %d\n", STGetParamType(symtab, fnName, 0));
-  }
-  
   // <nextFnDefinitionParamType>
   vypluj pNextFnDefinitionParamType(fnName, paramCount);
 }
@@ -981,6 +844,8 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
 
   // -> eps
   if (token->type != t_comma) {
+    // TODO check amount of data types (if there is x of them in declaration 
+    // and y of them in definition and x!=y -> err)
     TryCall(stashToken, &token);
     vypluj 0;
   }
@@ -988,25 +853,27 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   // -> , [id] : [type] <nextFnDefinitionParamType>
 
   // [id]
-  // Must be an ID
+  // Must be an ID, can't be a keyword
+  // TODO môže byť param definovaný? Ak áno, musí byť premenná. Ak nie, nemôže 
+  // byť definovaný (to treba ocheckovať)
   RequireTokenType(t_idOrKeyword);
-  if(isKeyword(token)){
-    vypluj err(SYNTAX_ERR);
+  if(isIFJ21Keyword(token)){
+    vypluj ERR(SYNTAX_ERR);
   }
   paramCount++;
   // Append the name of the new parameter to the symtable
   STAppendParamName(symtab, fnName, token->data);
 
-  // TODO uncomment if it is correct
   TryCall(STInsert, symtab, token->data);
   STSetName(symtab, token->data, genName(token->data, symtab->top->depth));
-  element->data = token->data;
-  //genVarDef(STGetName(symtab, token->data));
+  // TODO uncomment if it is correct
+  // genVarDef(STGetName(symtab, token->data));
 
   // :
   RequireTokenType(t_colon);
 
   // [type]
+  // Append the data type of the parameter to the symtab
   TryCall(fnDefinitionParamType, fnName, paramCount);
 
   // <nextFnDefinitionParamType>
@@ -1024,33 +891,39 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
 int pRetArgList(char *fnName) {
   RuleFnInit;
 
-  int argsCount;
   char *retVarName = NULL;
 
   STElem *fn = STFind(symtab, fnName);
 
-  if(!fn || !fn->fnRetTypesBuf){
-    argsCount = 0;
-  } else {
-    
-    argsCount = fn->fnRetTypesBuf->len;
-  }
+  TryCall(pExpr, &retVarName);
 
   // 34. <retArgList>      -> eps
-  // 35. <retArgList>      -> <expr> <retNextArg>
-
-  for(int i = 0; i < argsCount + 1; i++) { //TODO please end my depression and suffering
-    //zpracuj expression
-    if(i != 0) {
-      RequireTokenType(t_comma);
+  // If the pExpr gave us no retVarName, token wasn't an expression
+  if(!retVarName){
+    // But if the function needs more than zero parameters, it's a syntax err
+    if(fn->fnRetTypesBuf->len != 0){
+      LOG("A function requires some return arguments but we received 0");
+      return ERR(SYNTAX_ERR);
+    // Otherwise all is good
+    }else{
+      return 0;
     }
-    TryCall(pExpr, &retVarName);
-    // asi čárka mezi nima?? who knows TODO něco s pRetNextArg
-    
   }
-  vypluj 0;
 
-  // TODO semantic actions - use that retVarName - the result of the expr is there
+  // 35. <retArgList>      -> <expr> <retNextArg>
+  int argCount = 1;
+
+  // Code gen Pass the return values down by one frame
+  // Generate a new name where the return value will be written (in LF)
+  char *retArgName = genRetName();
+  // Define the retArgName
+  genVarDefLF(retArgName);
+  // Pass from TF (retArgName) to LF (retVarName)
+  genReturn(retArgName, retVarName);
+
+  TryCall(pRetNextArg, fnName, argCount);
+
+  vypluj 0;
 }
 
 /**
@@ -1061,27 +934,45 @@ int pRetArgList(char *fnName) {
  * 36. <retNextArg>      -> eps
  * 37. <retNextArg>      -> , <expr> <retNextArg>
  */
-int pRetNextArg() {
+int pRetNextArg(char *fnName, int argCount) {
   RuleFnInit;
 
-  // ','
   GetToken;
-  printToken(token);
 
   // -> eps
   if (token->type != t_comma) {
+    // Check if the amount of return arguments is right
+    if(argCount != STFind(symtab, fnName)->fnRetTypesBuf->len){
+      LOG("The amount of return arguments is not right");
+      return ERR(SYNTAX_ERR);
+    }
+    // Otherwise just stash that token (this is the end of the return stat)
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
   // -> , <expr> <retNextArg>
-  // <expr>
-  // TODO semantic actions - use that retVarName - the result of the expr is there
+  argCount++;
   char *retVarName = NULL;
+
+  // <expr>
   TryCall(pExpr, &retVarName);
+  if(!retVarName){
+    // No expr found after the comma!
+    LOG("An expression is required but none was received");
+    return ERR(SYNTAX_ERR);
+  }
+
+  // Code gen Pass the return values down by one frame
+  // Generate a new name where the return value will be written (in LF)
+  char *retArgName = genRetName();
+  // Define the retArgName
+  genVarDefLF(retArgName);
+  // Pass from TF (retArgName) to LF (retVarName)
+  genReturn(retArgName, retVarName);
 
   // <retNextArg>
-  vypluj pRetNextArg();
+  vypluj pRetNextArg(fnName, argCount);
 }
 
 /**
@@ -1096,9 +987,8 @@ int pFnDeclarationParamTypeList(char *fnName) {
   GetToken;
   printToken(token);
   
-  // 39. <fnDeclarationParamTypeList> -> eps // TODO nebude lepsi checknout zavorku?
+  // 39. <fnDeclarationParamTypeList> -> eps 
   if(token->type == t_rightParen) {
-    LOG("-> eps");
     TryCall(stashToken, &token);
     vypluj 0;
   }
@@ -1108,7 +998,7 @@ int pFnDeclarationParamTypeList(char *fnName) {
   int paramCount = 1;
   
   // [type]
-  TryCall(fnDeclarationParamType, fnName, token);
+  TryCall(fnDeclarationParamType, fnName, token->data);
 
   // tu musíme ocheckovať či token neni prava zatvorka alebo čo, idk
 
@@ -1131,8 +1021,6 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
 
   // 41. <nextFnDeclarationParamType>   -> eps
   if(token->type != t_comma){
-    printToken(token);
-    LOG("eps");
     TryCall(stashToken, &token);
     vypluj 0;
   }
@@ -1140,15 +1028,12 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
   // 42. <nextFnDeclarationParamType>   -> , [type] <nextFnDeclarationParamType>
   paramCount++;
 
-  LOG();
-  /** TryCall(fnDefinitionParamType, fnName, paramCount); // Commented since tedro thinks
-   * it's wrong. He also appended the next line*/
-  TryCall(fnDeclarationParamType, fnName, token);
+  GetToken;
+
+  TryCall(fnDeclarationParamType, fnName, token->data);
   
-  LOG();
   TryCall(pNextFnDeclarationParamType, fnName, paramCount);
 
-  LOG();
   return 0;
 }
 
@@ -1168,6 +1053,7 @@ int pFnRetTypeList(char *fnName) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
+
   // 45. <fnRetTypeList>   -> : [type] <pNextRetType>
   TryCall(fnRetDataType, fnName);
 
@@ -1213,7 +1099,7 @@ int pNextRetType(char *fnName) {
  * 50. <newIdAssign>     -> = <expr>
  */
  
-int pNewIdAssign() {
+int pNewIdAssign(char *varName) {
   RuleFnInit;
 
   GetToken;
@@ -1230,7 +1116,16 @@ int pNewIdAssign() {
   // <expr>
   // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
-  vypluj pExpr(&retVarName);
+  TryCall(pExpr, &retVarName);
+  
+  STElem *var = STFind(symtab, varName);
+  if(!var) {
+    vypluj ERR(SYNTAX_ERR);
+  }
+
+  genMove(var->name, retVarName);
+
+  vypluj 0;
 }
 
 /**
@@ -1244,12 +1139,13 @@ int pExpr(char **retVarName) {
   GetToken;
   printToken(token);
 
-  char *varName = NULL;
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data) && STGetFnDefined(symtab, token->data)) {
  
+    genComment("Calling a function call inside a function");
     TryCall(pFnCall, token->data);
+    genComment("Function call inside a function done");
     
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
@@ -1262,12 +1158,12 @@ int pExpr(char **retVarName) {
     vypluj stashToken(&token); 
 
   // A keyword
-  } else if(token->type == t_idOrKeyword && isKeyword(token)) {
-    vypluj err(SYNTAX_ERR);
+  } else if(token->type == t_idOrKeyword && isIFJ21Keyword(token)) {
+    vypluj ERR(SYNTAX_ERR);
 
   // An expression
   } else {
-    TryCall(parseExpression, symtab, token, &varName);
+    TryCall(parseExpression, symtab, token, retVarName);
   }
   vypluj 0;
 }
@@ -1354,29 +1250,9 @@ bool readFunction(Token *token) {
     vypluj false;
   }
   
-  TryCall(genVarAssign, STGetName(symtab, element->data), element->dataType, token->data, "LF");
+  // TODO don't use that stupid global 'element'! Streľba do nohy
+  // TryCall(genVarAssign, STGetName(symtab, element->data), element->dataType, token->data, "LF");
   vypluj true;
-}
-
-/** TODO do we ever use this?
- * @brief returns value of data type in IFJ21DataTypes
- *
- * @param string
- *
- * @return return value in range <0, 3> if it is in datastructure, else -1
- */
-int getDataTypeInt(char *data) {
-  if (strcmp(data, "integer") == 0) {
-    vypluj dt_integer;
-  } else if (strcmp(data, "number") == 0) {
-    vypluj dt_number;
-  } else if (strcmp(data, "string") == 0) {
-    vypluj dt_string;
-  } else if(strcmp(data, "nil")) {
-    vypluj dt_nil;
-  } else {
-    vypluj -1;
-  }
 }
 
 /**
@@ -1399,42 +1275,6 @@ bool isBuiltInFunction(char *data) {
 }
 
 /**
- * @brief Check if token is keyword
- *
- * @return if token is keyword return true, else false
- */
-bool isKeyword(Token *token) {
-  if (token->type == t_idOrKeyword) {
-    if (   strcmp(token->data, "do") == 0
-        || strcmp(token->data, "else") == 0
-        || strcmp(token->data, "end") == 0
-        || strcmp(token->data, "function") == 0
-        || strcmp(token->data, "global") == 0
-        || strcmp(token->data, "if") == 0
-        || strcmp(token->data, "integer") == 0
-        || strcmp(token->data, "local") == 0
-        || strcmp(token->data, "nil") == 0
-        || strcmp(token->data, "number") == 0
-        || strcmp(token->data, "require") == 0
-        || strcmp(token->data, "return") == 0
-        || strcmp(token->data, "string") == 0
-        || strcmp(token->data, "then") == 0
-        || strcmp(token->data, "while") == 0
-        || strcmp(token->data, "reads") == 0
-        || strcmp(token->data, "readi") == 0
-        || strcmp(token->data, "readn") == 0
-        || strcmp(token->data, "write") == 0
-        || strcmp(token->data, "tointeger") == 0
-        || strcmp(token->data, "substr") == 0
-        || strcmp(token->data, "ord") == 0
-        || strcmp(token->data, "chr") == 0){
-      vypluj true;
-    }
-  }
-  vypluj false;
-}
-
-/**
  * @brief If the function wasn't already defiend, define it (add it to the
  * symtable)
  *
@@ -1446,8 +1286,8 @@ int newFunctionDefinition(char *fnName) {
   if (STFind(symtab, fnName) 
       && !STGetIsVariable(symtab, fnName) 
       && STGetFnDefined(symtab, fnName)) {
-    LOG("Function already defiend");
-    vypluj err(ID_DEF_ERR);
+    LOG("Function already defined");
+    vypluj ERR(ID_DEF_ERR);
   } else {
     LOG("Adding to the symtable (definition)");
     TryCall(STInsert, symtab, fnName);
@@ -1470,74 +1310,65 @@ int newFunctionDefinition(char *fnName) {
 int newFunctionDeclaration(char *fnName) {
   if (STFind(symtab, fnName)) {
     LOG("Function already declared");
-    vypluj err(1); // TODO errcode (declaration when fn is already declared/defined)
+    vypluj ERR(1); // TODO errcode (declaration when fn is already declared/defined)
   } else {
     LOG("Adding declaration of %s (function) to the symtable", fnName);
     TryCall(STInsert, symtab, fnName);
     STSetIsVariable(symtab, fnName, false);
-    STSetFnDefined(symtab, fnName, false);
+    STSetFnDeclared(symtab, fnName, true);
     STSetName(symtab, fnName, genLabelName());
   }
   vypluj 0;
 }
 
+bool isLiteral(Token *token) {
+  if(token->type == t_str
+      || token->type == t_num
+      || token->type == t_sciNum
+      || token->type == t_int
+      || strEq(token->data, "nil")) {
+    vypluj true;
+  }
+  vypluj false;
+}
+
 /**
- *
  * @brief Function for built in functions
  *
  * @return error code
  * 09. <fnCall>          -> ( <fnCallArgList> )
  *  
  */
-int builtInFunctions(char *fnName) {
+int writeFunction() {
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
+
+  // (
+  RequireTokenType(t_leftParen);
+  
+  // <fnCallArgList> but somehow special for write
   GetToken;
 
-  if (strcmp(fnName, "reads") == 0) {
-    while (token->type != t_rightParen) {
-      GetToken;
-    }
+  STElem *element;
+  // char *name; TODO UNUSED VARIABLE
 
-  } else if (strcmp(fnName, "readi") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      GetToken;
-    }
+  while (token->type != t_rightParen) { // TODO alex tvrdí že to nakódí
+  
+  if(isLiteral(token)) {
+    genWriteLiteral(token, "LF");
+  } else {
+    element = STFind(symtab, token->data);
 
-  } else if (strcmp(fnName, "readn") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      GetToken;
+    if(element == NULL) {
+      vypluj ERR(SYNTAX_ERR); // TODO check if good err code
     }
-
-  } else if (strcmp(fnName, "write") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      GetToken;
-      
-      genWrite(token, symtab->top->depth);
-    }
-
-  } else if (strcmp(fnName, "substr") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      GetToken;
-    }
-
-  } else if (strcmp(fnName, "ord") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      GetToken;
-    }
-
-  } else if (strcmp(fnName, "chr") == 0) {
-    //TODO
-    while (token->type != t_rightParen) {
-      TryCall(scanner,&token);
-    }
+    genWriteVariable(element->name, "LF");
+        
   }
+
+  GetToken;
+  } 
   vypluj 0;
 }
 
@@ -1550,44 +1381,46 @@ int fnRetDataType(char *fnName){
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG("fnName: %s", fnName);
 
-  // TODO if there are already data types in the symbol table, (from 
-  // declaration), just check if they are consistent between the declaration
-  // and the definition
-
   Token *token = NULL;
-  STElem *fnElement = STFind(symtab, fnName);
 
-  if(fnElement == NULL) {
-    vypluj err(INTERN_ERR);
-  }
-
+  // Get the new data type
   GetToken;
-  printToken(token);
-
   if(isDataType(token->data) == false) {
-    vypluj err(SYNTAX_ERR);
+    LOG("A data type is required but we did not receive one");
+    vypluj ERR(SYNTAX_ERR);
   }
+  int dataType = getDataTypeFromString(token->data);
 
-  char *h;
-  GCMalloc(h, 100);
-  sprintf(h,"$ret%d", retVarCounter);
   retVarCounter++;
-  genVarDefLF(h);
-  TryCall(intBufAppend, fnElement->fnRetTypesBuf, getDataTypeFromString(token->data));
+
+  // If the function was declared and we're defining it, check if params match
+  if(STGetFnDeclared(symtab, fnName) && STGetFnDefined(symtab, fnName)){
+    int dataTypeInSymtab = STGetRetType(symtab, fnName, retVarCounter - 1);
+    // If they don't match -> err
+    if(dataTypeInSymtab != dataType){
+      LOG("Parameter types between fn decl and def don't match");
+      vypluj ERR(SYNTAX_ERR);
+    }
+
+  // Otherwise, append the new data type to the function in the symtab
+  }else{
+    TryCall(STAppendRetType, symtab, fnName, dataType);
+  }
 
   vypluj 0;
 }
 
-int fnDeclarationParamType(char *fnName, Token *token) {
-  STElem *element = STFind(symtab, fnName);
-
-  //check if fn is in ST
-  if(element == NULL) {
-    vypluj err(INTERN_ERR);
+int fnDeclarationParamType(char *fnName, char *data) {
+  STElem *fn = STFind(symtab, fnName);
+  // Check if fn is in ST
+  if(!fn) {
+    vypluj ERR(INTERN_ERR);
   }
 
-  //appends to data type of parameters stack new data type
-  TryCall(intBufAppend, element->fnParamTypesBuf, getDataTypeFromString(token->data));
+  // Append the data type to the function in the symtable
+  int dataType = getDataTypeFromString(data);
+  TryCall(STAppendParamType, symtab, fnName, dataType); 
+
   vypluj 0;
 }
 
@@ -1595,34 +1428,35 @@ int fnDeclarationParamType(char *fnName, Token *token) {
  * TODO comment
 */
 int fnDefinitionParamType(char *fnName, int paramCount){
-  // TODO check this function. Seems odd to me. Is this really what it should
-  // do?
   fprintf(stderr, "-----------------------------------------------------------\n");
   LOG();
   Token *token = NULL;
 
-  // find STElem by fnName
-  STElem *tmp = STFind(symtab, fnName);
-
-  // fn is not defined
-  if(tmp == NULL || tmp->fnDefined == false) {
-    vypluj err(INTERN_ERR);
-  }
-  
+  // Get the data type of the parameter
   GetToken;
-  printToken(token);
+  if(!isDataType(token->data)) {
+    LOG("A data type is required but we did not receive one");
+    vypluj ERR(SYNTAX_ERR);
+  }
+  int dataType = getDataTypeFromString(token->data);
 
-  if(isDataType(token->data) == false) {
-    vypluj err(SYNTAX_ERR);
+  // If the function was declared and we're definining it, check if params match
+  if(STGetFnDeclared(symtab, fnName) && STGetFnDefined(symtab, fnName)){
+    int dataTypeInSymtable = STGetParamType(symtab, fnName, paramCount - 1);
+    // If they don't match -> err
+    if(dataTypeInSymtable != dataType){
+      LOG("Parameter types between fn decl and def don't match");
+      return ERR(SYNTAX_ERR);
+    }
+
+  // Otherwise, append the new data type to the function in the symtab
+  }else{
+    TryCall(STAppendParamType, symtab, fnName, dataType);
   }
 
-  // Append the new data type to the function
-  TryCall(STAppendParamType, symtab, fnName, getDataTypeFromString(token->data));
-
-  // Set the data type of the new variable (parameter)
+  // Set the data type of the variable we created for passing the param
   char *varName;
   TryCall(STGetParamName, symtab, &varName, fnName, paramCount - 1);
-  int dataType = STGetParamType(symtab, fnName, paramCount - 1);
   STSetVarDataType(symtab, varName, dataType);
 
   return 0;
@@ -1635,16 +1469,15 @@ int varDataType(char *varName){
   Token *token;
   STElem *varElement = STFind(symtab, varName);
 
-
   // if variable is not variable or doesnt exist
   if(varElement == NULL) {
-    vypluj err(ID_DEF_ERR);
+    vypluj ERR(ID_DEF_ERR);
   }
 
   GetToken;
   
   if(isDataType(token->data) == false) {
-    vypluj err(-1); // TODO change err code
+    vypluj ERR(-1); // TODO change err code
   }
 
   varElement->varDataType = getDataTypeFromString(token->data);
@@ -1652,6 +1485,7 @@ int varDataType(char *varName){
   vypluj 0;
 }
 
+// TODO remove this???
 int stringFunctions(char *varName) {
   Token *token = NULL;
 
@@ -1669,7 +1503,7 @@ int stringFunctions(char *varName) {
     char *endPtr;
 
     if(token->type != t_str || token->type != t_idOrKeyword) {
-      vypluj err(-1); // TODO CHANGE ERR CODE
+      vypluj ERR(-1); // TODO CHANGE ERR CODE
     }
 
     string = token;
@@ -1677,7 +1511,7 @@ int stringFunctions(char *varName) {
     GetToken;
 
     if(token->type != t_int || token->type != t_num) {
-      vypluj err(-1); // TODO CHANGE ERR CODE
+      vypluj ERR(-1); // TODO CHANGE ERR CODE
     }
 
     i = strtod(token->data, &endPtr);
@@ -1686,7 +1520,7 @@ int stringFunctions(char *varName) {
     GetToken;
 
     if(token->type != t_int || token->type != t_num) {
-      vypluj err(-1); // TODO CHANGE ERR CODE
+      vypluj ERR(-1); // TODO CHANGE ERR CODE
     }
 
     j = strtod(token->data, &endPtr);
@@ -1700,7 +1534,7 @@ int stringFunctions(char *varName) {
 
   }
 
-  vypluj err(1);
+  vypluj ERR(1);
 
 }
 
@@ -1708,7 +1542,7 @@ int createParamVariables(char *fnName){
   // Get the function element from the symtable
   STElem *fnElement = STFind(symtab, fnName);
   if(!fnElement){
-    return err(SYNTAX_ERR);
+    return ERR(SYNTAX_ERR);
   }
   // Generate definitions of the parameter variables
   if(fnElement->fnParamNamesBuf == NULL) {
@@ -1721,7 +1555,7 @@ int createParamVariables(char *fnName){
     char *paramName;
     STGetParamName(symtab, &paramName, fnName, i);
     if(!paramName){
-      vypluj err(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
     }
     STElem *paramVar = STFind(symtab, paramName);
     genVarDefLF(paramVar->name);
@@ -1730,6 +1564,13 @@ int createParamVariables(char *fnName){
     genMove(paramVar->name, genParamName());
   }
   vypluj 0;
+}
+
+int declareVariable(){
+  // TODO declare all variables at the end of file? (instead of calling DEFVAR
+  // instantly, just call this function which saves the variable name to 
+  // a string buffer and at the end of the program we define all variables??
+  return 0;
 }
 
 #endif

@@ -7,10 +7,12 @@
 
 #include "misc.h"
 #include "assignment.h"
+#include "parser.h"
 
 int digits(int value);
 char *genName(char *name, int frame);
 char *stringConvert(char *string);
+char *getDataTypeFromInt(Token *token);
 char *genTmpVarName();
 char *genLabelName();
 char *genTmpVarDef();
@@ -36,8 +38,12 @@ int genSubstrFunction(char *target, Token *string, double start, int end, int fr
 void genFnCallInit();
 void genFnCall(char *name);
 void genFnDef(char *name);
-void genFnDefRet();
-void genWrite(Token *tokne, int frame);
+void genPopframe();
+void genReturnInstruction();
+void genComment(char *comment);
+void genComment2(char *comment);
+void genWriteVariable(char *name, char *frame);
+void genWriteLiteral(Token *token, char *frame);
 char *genLower(SStackElem *element1, SStackElem *element2);
 char *genGreater(SStackElem *element1, SStackElem *element2);
 char *genEqual(SStackElem *element1, SStackElem *element2);
@@ -48,13 +54,14 @@ int genPassParam(char *varInLF, char *varInTF);
 int genMove(char *dest, char *src);
 void genJumpIfFalse(char *label, char *varName);
 char *genParamName();
-int genPassParam(char *varInLF, char *varInTF);
+char *genRetName();
+int genReturn(char *varInLF, char *varInTF);
 void genUnconditionalJump(char *labelName);
 
 // --------------------------------------------------------------------------------
 // FUNCTIONS FOR MULTIPLE ASSIGMENT
 void genExprLabel(char *name);
-void genExprJump(char *label);
+//void genExprJump(char *label); robí to isté ako genUnconditionalJump
 char *getExprLabelName(int num);
 char *getExprEndName();
 void genExprFirst(AssignElement *element);

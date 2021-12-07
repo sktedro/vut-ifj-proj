@@ -24,7 +24,7 @@ Token *tokenMem = NULL;
 int stashToken(Token **token) {
   if (tokenMem) {
     fprintf(stderr, "ERROR: An attempt to stash two tokens was made.\n");
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   tokenMem = *token;
   *token = NULL;
@@ -236,7 +236,7 @@ int scanner(Token **token) {
 
         // ELSE
       } else {
-        vypluj err(LEX_ERR);
+        vypluj ERR(LEX_ERR);
       }
 
       break;
@@ -360,7 +360,7 @@ int scanner(Token **token) {
       } else if (isNum(c)) {
         state = s_sciNum;
       } else {
-        vypluj err(LEX_ERR);
+        vypluj ERR(LEX_ERR);
       }
       break;
 
@@ -371,7 +371,7 @@ int scanner(Token **token) {
       if (isNum(c)) {
         state = s_sciNum;
       } else {
-        vypluj err(LEX_ERR);
+        vypluj ERR(LEX_ERR);
       }
       break;
 
@@ -413,7 +413,7 @@ int scanner(Token **token) {
         // state = s_strOp
         return returnToken(token, t_strOp, buf);
       } else {
-        vypluj err(LEX_ERR);
+        vypluj ERR(LEX_ERR);
       }
       break;
 
@@ -423,7 +423,7 @@ int scanner(Token **token) {
         // state = s_relOp
         return returnToken(token, t_relOp, buf);
       } else {
-        vypluj err(LEX_ERR);
+        vypluj ERR(LEX_ERR);
       }
       break;
 

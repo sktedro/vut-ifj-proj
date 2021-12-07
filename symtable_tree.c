@@ -40,6 +40,7 @@ int newSTTreeNode(STTreeNode **node, char *key, int frame) {
   (*node)->data->varDataType = -1;
   (*node)->data->varAddress = -1;
   (*node)->data->fnDefined = false;
+  (*node)->data->fnDefined = false;
   (*node)->data->fnParamTypesBuf = NULL;
   (*node)->data->fnParamNamesBuf = NULL;
   (*node)->data->fnRetTypesBuf = NULL;

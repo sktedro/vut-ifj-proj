@@ -1,0 +1,39 @@
+function chr(i : integer) : string
+  if i == nil then
+    error("ERROR 8: Unexpected nil value in the parameter.")
+  end 
+  if i < 0 or i > 255 then
+    return nil
+  end
+  return string.char(i)
+end
+
+
+.IFJcode21
+
+LABEL _CHR_
+
+PUSHFRAME
+
+     DEFVAR LF@%STR%RET_
+    MOVE LF@%STR%RET_ nil@nil
+
+    DEFVAR LF@%STR%PAR1_
+    MOVE LF@%STR%PAR1_ LF@%STRPARAM1% #i : integer
+
+    JUMPIFEQ _ERROR_ LF@%STR%PAR1_ nil@nil #(if i == nil)
+
+    GT _VAR PAR1_ 255 #if i > 255
+
+    LT _VAR PAR1_ 0 #if i < 0
+
+LABEL _RET_
+    POPFRAME
+    RETURN #ret string
+
+LABEL _ERROR_
+    EXIT int@57
+
+CALL _CHR_
+
+

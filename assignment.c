@@ -9,22 +9,22 @@ int AListInit(AssignElement **element) {
 
   GCMalloc(*element, sizeof(AssignElement));
   if (!(*element)) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   
   GCMalloc((*element)->name, sizeof(char) * 30);
   if (!(*element)->name) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
 
   GCMalloc((*element)->label, sizeof(char) * 30);
   if (!(*element)->label) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
 
   GCMalloc((*element)->end, sizeof(char) * 30);
   if (!(*element)->end) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
 
   (*element)->next = NULL;

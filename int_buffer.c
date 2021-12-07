@@ -42,7 +42,7 @@ int intBufAppend(IntBuffer *buf, int i) {
     (buf->len)++;
     return 0;
   } 
-  return err(INTERN_ERR);
+  return ERR(INTERN_ERR);
 }
 
 /**

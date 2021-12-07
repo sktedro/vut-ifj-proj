@@ -132,7 +132,7 @@ void STSetVarAddress(STStack *stack, char *key, int address) {
 }
 
 /**
- * @brief Use to mark a function as defined or not
+ * @brief Use to mark a function as defined
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
@@ -142,6 +142,20 @@ void STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
   STElem *data = STFind(stack, key);
   if (data) {
     data->fnDefined = fnDefined;
+  }
+}
+
+/**
+ * @brief Use to mark a function as declared 
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ * @param fnDeclared - boolean value to be written to STElem->fnDeclared
+ */
+void STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) {
+  STElem *data = STFind(stack, key);
+  if (data) {
+    data->fnDeclared = fnDeclared;
   }
 }
 
@@ -190,7 +204,7 @@ char *STGetName(STStack *stack, char *key) {
 int STAppendParamType(STStack *stack, char *key, int paramType) {
   STElem *data = STFind(stack, key);
   if(paramType == -1){
-    return err(SYNTAX_ERR);
+    return ERR(SYNTAX_ERR);
   }
   if (data) {
     if (!data->fnParamTypesBuf) {
@@ -213,7 +227,7 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
 int STAppendParamName(STStack *stack, char *key, char *paramName) {
   STElem *data = STFind(stack, key);
   if(!paramName){
-    return err(SYNTAX_ERR);
+    return ERR(SYNTAX_ERR);
   }
   if (data) {
     if (!data->fnParamNamesBuf) {
@@ -326,6 +340,22 @@ bool STGetFnDefined(STStack *stack, char *key) {
   STElem *data = STFind(stack, key);
   if (data) {
     return data->fnDefined;
+  }
+  return false;
+}
+
+/**
+ * @brief Returns true if a function with name 'key' was already declared
+ *
+ * @param stack - symbol table
+ * @param key (name) of the symbol table element
+ *
+ * @return true if the function was already declared
+ */
+bool STGetFnDeclared(STStack *stack, char *key) {
+  STElem *data = STFind(stack, key);
+  if (data) {
+    return data->fnDeclared;
   }
   return false;
 }

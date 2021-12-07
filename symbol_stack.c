@@ -19,7 +19,7 @@ extern int ret;
 int SStackInit(SStack **stack) {
   GCMalloc(*stack, sizeof(SStack));
   if (!(*stack)) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   (*stack)->top = NULL;
   return 0;
@@ -35,10 +35,10 @@ int SStackInit(SStack **stack) {
  */
 int SStackPush(SStack *stack, SStackElem *newElem) {
   if (!stack) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   if (!newElem) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   newElem->next = stack->top;
   stack->top = newElem;
@@ -106,10 +106,10 @@ SStackElem *SStackTopTerminal(SStack *stack) {
  */
 int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   if (!stack || !stack->top) {
-    vypluj err(SYNTAX_ERR); // TODO errcode
+    vypluj ERR(SYNTAX_ERR); // TODO errcode
   }
   if (!newElem) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
 
   SStackElem *tmp = stack->top;
@@ -130,7 +130,7 @@ int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) {
   }
 
   // This line should never be ran, but in case it does...
-  return err(SYNTAX_ERR);
+  return ERR(SYNTAX_ERR);
 }
 
 #endif

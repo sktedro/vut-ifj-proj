@@ -34,7 +34,7 @@ int tokenInit(Token **token, int type) {
  */
 int tokenAddAttrib(Token *token, char *data) {
   if (!token) {
-    return 1;
+    return ERR(INTERN_ERR);
   }
 
   // Allocate space for data and write the data to the allocated space
@@ -50,6 +50,9 @@ int tokenAddAttrib(Token *token, char *data) {
  * @param token
  */
 void printToken(Token *token) {
+  if(!DEBUGTOGGLE){
+    return;
+  }
   char *type;
   switch (token->type) {
     case t_idOrKeyword:

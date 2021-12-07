@@ -33,12 +33,12 @@ int pNextAssign();
 int pFnDefinitionParamTypeList(char *fnName);
 int pNextFnDefinitionParamType(char *fnName, int paramCount);
 int pRetArgList(char *fnName);
-int pRetNextArg();
+int pRetNextArg(char *fnName, int argCount);
 int pFnDeclarationParamTypeList(char *fnName);
 int pNextFnDeclarationParamType(char *fnName, int paramCount);
 int pFnRetTypeList(char *fnName);
 int pNextRetType(char *fnName);
-int pNewIdAssign();
+int pNewIdAssign(char *varName);
 int pExpr();
 
 /*
@@ -46,13 +46,13 @@ int pExpr();
  * HELPER FUNCTIONS
  *
  */
-int builtInFunctions();
+int writeFunction();
 int typeFnDeclaration(char *fnName);
 int fnDefinitionParamType(char *fnName, int counter);
 int typeVar(char *varName);
 int createParamVariables(char *fnName);
 int varDataType(char *varName);
-int fnDeclarationParamType(char *fnName, Token *token);
+int fnDeclarationParamType(char *fnName, char* data);
 int fnRetDataType(char *fnName);
 
 /**
@@ -91,28 +91,12 @@ bool isStringOperationFunction(char *data);
  */
 bool readFunction(Token *token);
 
-/** TODO do we ever use this?
- * @brief returns value of data type in IFJ21DataTypes
- *
- * @param string
- *
- * @return return value in range <0, 3> if it is in datastructure, else -1
- */
-int getDataTypeInt(char *data);
-
 /**
  * @brief Check if string is built in function
  *
  * @return if string is built in function return true, else false
  */
 bool isBuiltInFunction(char *data);
-
-/**
- * @brief Check if token is keyword
- *
- * @return if token is keyword return true, else false
- */
-bool isKeyword(Token *token);
 
 /**
  * @brief If the function wasn't already defiend, define it (add it to the

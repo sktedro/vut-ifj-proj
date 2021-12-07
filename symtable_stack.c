@@ -32,7 +32,7 @@ int STStackInit(STStack **stack) {
  */
 int STStackPush(STStack *stack, STTreeNode *table, int depth) {
   if (!stack) {
-    return err(INTERN_ERR);
+    return ERR(INTERN_ERR);
   }
   STStackElem *newElem = NULL;
   GCMalloc(newElem, sizeof(STStackElem));

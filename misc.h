@@ -43,10 +43,19 @@
 #define vypluj return
 #define condVypluj CondReturn
 
+#define ERR(errCode)                                                           \
+  DEBUGTOGGLE ?                                                                \
+    fprintf(stderr, "LOG: %s:%d:%s(): ", __FILE__, __LINE__, __func__) * 0     \
+      + err(errCode)                                                           \
+    :                                                                          \
+    err(errCode)
+
 // If ret is non-zero, return it
 #define CondReturn                                                             \
-  if (ret)                                                                     \
-    vypluj err(ret)
+  if (ret){                                                                    \
+    LOG("A function returned %d", ret);                                        \
+    vypluj err(ret);                                                           \
+  }
 
 // Call a function and return its return value if it is non-zero
 #define TryCall(FN, ...)                                                       \
@@ -67,15 +76,16 @@
   fprintf(stderr, "--------------------------------------------------\n");     \
   LOG();                                                                       \
   Token *token = NULL;                                                         \
-  (void)token
+  (void) token;
 
 #define GetToken                                                               \
   ret = scanner(&token);                                                       \
   if(ret){                                                                     \
+    LOG("Scanner returned %d", ret);                                           \
     return err(ret);                                                           \
   }                                                                            \
   if(!token){                                                                  \
-    LOG("TOKEN FETCHED IS NULL\n");                                            \
+    LOG("Scanner returned NULL token\n");                                      \
     return err(SYNTAX_ERR);                                                    \
   }                                                                            \
   printToken(token);
@@ -96,6 +106,7 @@
 #define RequireTokenType(tokenType)                                            \
   GetToken;                                                                    \
   if(token->type != tokenType) {                                               \
+    LOG("An unexpected token was received");                                   \
     vypluj err(SYNTAX_ERR);                                                    \
   }
 
@@ -104,6 +115,7 @@
   GetToken;                                                                    \
   if(token->type != tokenType                                                  \
       || strcmp(token->data, tokenData) != 0) {                                \
+    LOG("An unexpected token was received");                                   \
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 
@@ -298,6 +310,7 @@ typedef struct {
   int varDataType;
   int varAddress;
   bool fnDefined;
+  bool fnDeclared;
   IntBuffer *fnParamTypesBuf;
   StringBuffer *fnParamNamesBuf;
   IntBuffer *fnRetTypesBuf;

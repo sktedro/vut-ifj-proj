@@ -47,7 +47,7 @@ int charBufAppend(CharBuffer *buf, char c) {
     buf->data[buf->len] = '\0';
     return 0;
   }
-  return err(INTERN_ERR);
+  return ERR(INTERN_ERR);
 }
 
 /**
@@ -90,7 +90,7 @@ int charBufAppendString(char *orig, CharBuffer **buffer) {
     }
     return 0;
   }
-  return err(INTERN_ERR);
+  return ERR(INTERN_ERR);
 }
 
 #endif
