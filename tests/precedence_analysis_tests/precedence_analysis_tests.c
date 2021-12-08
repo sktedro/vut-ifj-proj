@@ -11,6 +11,7 @@ STStack *symtable = NULL;
 Token *token = NULL;
 
 char *retVarName = NULL;
+int retDataType = -1;
 
 /*
  * Helper functions
@@ -76,7 +77,7 @@ int main(){
   printTokenData();
 
   // Run the test
-  int ret = parseExpression(symtable, token, &retVarName);
+  int ret = parseExpression(symtable, token, &retVarName, &retDataType);
   printf("Testing: Expression result is in: %s\n", retVarName);
   printf("Testing: Precedence analysis returned %d\n", ret);
 
