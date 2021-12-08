@@ -689,6 +689,7 @@ int pStat(char *fnName) {
       *   genMoveToLF(retVarName, retVarName);
       * }
       */
+    resetRetCounter();
 
     // Code gen RETURN from the function
     genReturnInstruction();
@@ -753,6 +754,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 
       AListAdd(&assignmentElement2, b, NULL, false, dataType, NULL);
     }
+    resetRetCounter();
 
     // gen label to jump to the end
     genUnconditionalJump(endLabel);
@@ -896,29 +898,11 @@ int pStatWithId(char *idName) {
       }
 
 
-<<<<<<< Updated upstream
-      } else {
-        genAssignLiteral(id2Var, -1, retVarName, "LF");
-      }
-      vypluj 0;
-      // ,
-      RequireTokenType(t_comma);
-
-      // <expr>
-      // Call the shift-reduce parser and assign the result to id1Var
-      retVarName = NULL;
-      //printf("IDEME GENEROVAŤ 1 ");
-      AListGenerate(assignmentElement);
-      TryCall(pExpr, &retVarName, type);
-      if(retVarName == NULL) {
-        vypluj ERR(SYNTAX_ERR);
-=======
       // tu vygenerovať jumpy na labels v labelBuffer 
       int labelCount = labelBuffer->len;
       for(int i = labelCount - 1; i > 0; i--){
         char *label = labelBuffer->data[i];
         genUnconditionalJump(label);
->>>>>>> Stashed changes
       }
 
       // vygenerovať label endLabel

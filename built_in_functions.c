@@ -38,9 +38,9 @@ LABEL *retnil                                                                \n\
                                                                              \n\
 # Function end                                                               \n\
 LABEL *reads_end                                                             \n\
-  POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
-  MOVE LF@!ret_0 TF@result                                                   \n\
+  MOVE LF@!ret_0 LF@result                                                   \n\
+  POPFRAME                                                                   \n\
   RETURN                                                                     \n\
                                                                              \n\
 ";
@@ -63,9 +63,9 @@ LABEL *readi_retnil                                                          \n\
                                                                              \n\
 # Function end                                                               \n\
 LABEL *readi_end                                                             \n\
-  POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
-  MOVE LF@!ret_0 TF@result                                                   \n\
+  MOVE LF@!ret_0 LF@result                                                   \n\
+  POPFRAME                                                                   \n\
   RETURN                                                                     \n\
                                                                              \n\
 ";
@@ -88,9 +88,9 @@ LABEL *readn_retnil                                                          \n\
                                                                              \n\
 # Function end                                                               \n\
 LABEL *readn_end                                                             \n\
-  POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
-  MOVE LF@!ret_0 TF@result                                                   \n\
+  MOVE LF@!ret_0 LF@result                                                   \n\
+  POPFRAME                                                                   \n\
   RETURN                                                                     \n\
                                                                              \n\
 ";
@@ -115,9 +115,9 @@ LABEL *tointeger_retnil                                                      \n\
                                                                              \n\
 # Function end                                                               \n\
 LABEL *tointeger_end                                                         \n\
-  POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
-  MOVE LF@!ret_0 TF@result                                                   \n\
+  MOVE LF@!ret_0 LF@result                                                   \n\
+  POPFRAME                                                                   \n\
   RETURN                                                                     \n\
                                                                              \n\
 ";
@@ -241,9 +241,9 @@ LABEL *ord_retnil                                                            \n\
                                                                              \n\
 # Function end                                                               \n\
 LABEL *ord_end                                                               \n\
-  POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
-  MOVE LF@!ret_0 TF@result                                                   \n\
+  MOVE LF@!ret_0 LF@result                                                   \n\
+  POPFRAME                                                                   \n\
   RETURN                                                                     \n\
                                                                              \n\
 ";
