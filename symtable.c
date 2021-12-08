@@ -133,6 +133,7 @@ int STSetVarDataType(STStack *stack, char *key, int type) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param address - new address of the element
+ * TODO remove
  */
 int STSetVarAddress(STStack *stack, char *key, int address) {
   if(!STFind(stack, key)){
