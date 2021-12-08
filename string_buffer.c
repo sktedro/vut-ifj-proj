@@ -7,9 +7,6 @@
 
 #include "string_buffer.h"
 
-// Initial buffer data length (space allocated)
-#define STRINGBUFINITLEN 256
-
 extern int ret;
 
 /**

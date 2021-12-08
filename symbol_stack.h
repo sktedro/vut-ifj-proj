@@ -40,7 +40,7 @@ SStackElem *SStackPop(SStack *stack);
  *
  * @return top element
  */
-SStackElem *SStackTop(SStack *stack);
+SStackElem *SStackTop(SStack *stack) ForceRetUse;
 
 /*
  * @brief get an element of type terminal that is closest to the top of the
@@ -50,7 +50,7 @@ SStackElem *SStackTop(SStack *stack);
  *
  * @return top terminal element
  */
-SStackElem *SStackTopTerminal(SStack *stack);
+SStackElem *SStackTopTerminal(SStack *stack) ForceRetUse;
 
 /*
  * @brief finds an element of type terminal that is closest to the top of the
@@ -62,6 +62,13 @@ SStackElem *SStackTopTerminal(SStack *stack);
  * @return 0 if successful, errcode otherwise
  */
 int SStackPushAfterTopTerminal(SStack *stack, SStackElem *newElem) ForceRetUse;
+
+/**
+ * @brief Simple debugging function to print all elements on the symbol stack
+ *
+ * @param stack to print out
+ */
+void printSymbolStack(SStack *stack);
 
 #endif
 /* end of file symbol_stack.h */

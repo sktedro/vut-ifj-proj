@@ -303,15 +303,6 @@ bool isBinArithmOp(SStackElem *op);
 bool isTokenAllowedInExpr(Token *token);
 
 /**
- * @brief checks if the token is an ID or a literal
- *
- * @param token
- *
- * @return true if the token is an ID or a literal
- */
-bool isTokenIdOrLiteral(Token *token);
-
-/**
  * @brief Checks if there is only $E in the stack
  *
  * @param symstack: symbol stack
@@ -319,13 +310,6 @@ bool isTokenIdOrLiteral(Token *token);
  * @returns true if there is only $E in the stack
  */
 bool isExprAtomic(SStack *symstack);
-
-/**
- * @brief Simple debugging function to print all elements on the symbol stack
- *
- * @param stack to print out
- */
-void debugPrint(SStack *stack);
 
 #endif
 /* end of file precedence_analysis.h*/

@@ -400,6 +400,15 @@ int countDigits(int value);
  */
 int err(int errCode) ForceRetUse;
 
+/**
+ * @brief checks if the token is an ID or a literal
+ *
+ * @param token
+ *
+ * @return true if the token is an ID or a literal
+ */
+bool isTokenIdOrLiteral(Token *token) ForceRetUse;
+
 int GCInit() ForceRetUse;
 
 int GCInsert(void *ptr) ForceRetUse;

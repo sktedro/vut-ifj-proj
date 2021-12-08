@@ -10,6 +10,16 @@
 #include "token.h"
 
 /**
+ * @brief Main scanner function - returns the next token based on lexical
+ * analysis of characters from the standard input
+ *
+ * @param token: address to memory where the next token should be written
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int scanner(Token **token) ForceRetUse;
+
+/**
  * @brief Stash a token (to be returned on next scanner() call)
  *
  * @param token to be stashed
@@ -70,16 +80,6 @@ int returnToken(Token **token, int type, CharBuffer *buf);
  * @param c: character to be returned
  */
 void returnCharacterToStdin(char c);
-
-/**
- * @brief Main scanner function - returns the next token based on lexical
- * analysis of characters from the standard input
- *
- * @param token: address to memory where the next token should be written
- *
- * @return 0 if successful, errcode otherwise
- */
-int scanner(Token **token) ForceRetUse;
 
 #endif
 /* end of file scanner.h */

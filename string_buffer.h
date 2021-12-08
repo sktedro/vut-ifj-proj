@@ -7,6 +7,9 @@
 
 #include "misc.h"
 
+// Initial buffer data length (space allocated)
+#define STRINGBUFINITLEN 256
+
 /**
  * @brief Allocate a new buffer
  *

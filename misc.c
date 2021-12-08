@@ -141,6 +141,21 @@ int err(int errCode) {
   vypluj errCode;
 }
 
+/**
+ * @brief checks if the token is an ID or a literal
+ *
+ * @param token
+ *
+ * @return true if the token is an ID or a literal
+ */
+bool isTokenIdOrLiteral(Token *token) {
+  return token->type == t_idOrKeyword 
+    || token->type == t_int 
+    || token->type == t_num 
+    || token->type == t_sciNum 
+    || token->type == t_str;
+}
+
 int GCInit(){
   garbageCollector.pointers = malloc(sizeof(void*) * GCINITLEN);
   if(!garbageCollector.pointers){

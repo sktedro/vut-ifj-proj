@@ -7,6 +7,9 @@
 
 #include "misc.h"
 
+// Initial buffer data length (space allocated)
+#define CHARBUFINITLEN 16
+
 /**
  * @brief Allocate a new buffer
  *
@@ -48,7 +51,7 @@ void charBufClear(CharBuffer *buf);
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppendString(CharBuffer *buffer, char *str);
+int charBufAppendString(CharBuffer *buffer, char *str) ForceRetUse;
 
 #endif
 /* end of file char_buffer.h */

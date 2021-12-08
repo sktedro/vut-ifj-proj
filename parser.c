@@ -763,7 +763,8 @@ int pStatWithId(char *idName) {
       }
     vypluj 0;
     } 
-// In idName we have a name of the first variable in this statement
+    
+    // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
     // -> , [id] <nextAssign> <expr> , <expr>
     if (token->type == t_comma) {

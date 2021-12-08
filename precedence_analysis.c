@@ -11,8 +11,6 @@ extern int ret;
 
 extern STStack *symtab;
 
-extern StringBuffer *varDefBuff;
-
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
@@ -738,12 +736,6 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
  * @return 0 if successful, errcode otherwise 
  */
 int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
-  // Initialize the buffer for var definitions if it is null
-  // This is only for the tests to work
-  if(!varDefBuff){
-    TryCall(stringBufInit, &varDefBuff);
-  }
-
   // Initialize a symbol stack
   TryCall(SStackInit, symstack);
 
@@ -893,21 +885,6 @@ bool isTokenAllowedInExpr(Token *token) {
 }
 
 /**
- * @brief checks if the token is an ID or a literal
- *
- * @param token
- *
- * @return true if the token is an ID or a literal
- */
-bool isTokenIdOrLiteral(Token *token) {
-  return token->type == t_idOrKeyword 
-    || token->type == t_int 
-    || token->type == t_num 
-    || token->type == t_sciNum 
-    || token->type == t_str;
-}
-
-/**
  * @brief Checks if there is only $E in the stack
  *
  * @param symstack: symbol stack
@@ -923,43 +900,5 @@ bool isExprAtomic(SStack *symstack) {
   return false;
 }
 
-/**
- * @brief Simple debugging function to print all elements on the symbol stack
- *
- * @param stack to print out
- */
-void debugPrint(SStack *stack) {
-  if(!DEBUGTOGGLE){
-    return;
-  }
-  int len = 0;
-  SStackElem *element = SStackTop(stack);
-  fprintf(stderr, "--------STACK------------\n");
-  while (element != NULL) {
-    fprintf(stderr, "Element type: %d\n", element->type);
-    fprintf(stderr, "Element op: %d\n", element->op);
-    if (element->data != NULL) {
-      fprintf(stderr, "Element data: %s\n", element->data);
-    } else {
-      fprintf(stderr, "Element data is NULL\n");
-    }
-    fprintf(stderr, "Element isId: %d\n", element->isId);
-    fprintf(stderr, "Element dataType: %d\n", element->dataType);
-    fprintf(stderr, "-------------------------\n");
-
-    if (element->next == NULL) {
-      fprintf(stderr, "Next element is NULL\n");
-      fprintf(stderr, "Total length is: %d\n", len + 1);
-      fprintf(stderr, "-------------------------\n");
-      return;
-    } else {
-      element = element->next;
-      len++;
-    }
-  }
-  fprintf(stderr, "Stack is empty\n");
-}
-
-
 #endif
-/* end of file precedence_analysis.c*/
+/* end of file precedence_analysis.c */

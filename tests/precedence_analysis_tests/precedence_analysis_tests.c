@@ -13,6 +13,8 @@ Token *token = NULL;
 char *retVarName = NULL;
 int retDataType = -1;
 
+extern StringBuffer *varDefBuff;
+
 /*
  * Helper functions
  */
@@ -68,6 +70,9 @@ int main(){
   // Init a symtable and push one frame
   STStackInit(&symtable);
   STPush(symtable);
+
+  // Init the vardef buffer
+  TryCall(stringBufInit, &varDefBuff);
 
   // Push 5 IDs to the symtab for every data type: fn1, fn2...fn3, varInt1, ...
   initPushToSymtab();

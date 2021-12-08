@@ -7,9 +7,6 @@
 
 #include "char_buffer.h"
 
-// Initial buffer data length (space allocated)
-#define CHARBUFINITLEN 16
-
 extern int ret;
 
 /**

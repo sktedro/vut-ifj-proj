@@ -19,8 +19,8 @@ extern int ret;
 int intBufInit(IntBuffer **buf) {
   GCMalloc(*buf, sizeof(IntBuffer));
   GCMalloc((*buf)->data, INTBUFINITLEN * sizeof(int));
-  (*buf)->size = INTBUFINITLEN;
   (*buf)->len = 0;
+  (*buf)->size = INTBUFINITLEN / sizeof(int);
   return 0;
 }
 
@@ -64,7 +64,6 @@ void intBufPop(IntBuffer *buf) {
 void intBufClear(IntBuffer *buf) {
   buf->len = 0;
 }
-
 
 #endif
 /* end of file int_buffer.c */
