@@ -207,7 +207,7 @@ enum FSMEnum {
 
 // Enumeration of the token types
 enum TokenTypeEnum {
-  /*00*/ t_idOrKeyword, // one token for both identificator and a keyword??
+  /*00*/ t_idOrKeyword,
   /*01*/ t_int,
   /*02*/ t_num,
   /*03*/ t_sciNum,
@@ -220,7 +220,6 @@ enum TokenTypeEnum {
   /*10*/ t_strOp,
   /*11*/ t_relOp,
   /*12*/ t_assignment,
-  // t_nil ???? Wasn't there, but probably should be
 };
 
 // Enumeration of the precedence table (SStackElem->op)

@@ -209,7 +209,6 @@ int iRule(SStack *symstack, SStackElem *op) {
     op->type = st_expr;
     // If it is literal, save it into a variable and assign it a value
     if (!op->isId) {
-      /** char *newName = genTmpVarDef(); */
       char *newName = genTmpVarName();
       TryCall(condAppendToStringBuff, newName);
       // TODO change this and check the data types

@@ -514,7 +514,6 @@ int pStat(char *fnName) {
 
   // 19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
   if (strcmp(token->data, "local") == 0) {
-    fprintf(stderr, "-> local [id] : <type> <newIdAssign> <stat>\n");
 
     // [id]
     RequireIDToken(token);
@@ -737,10 +736,13 @@ int pStatWithId(char *idName) {
       TryCall(pExpr, &retVarName);
       if(!retVarName){
         // If this is null, the expr was a function call and we need to fetch
-        // the values from ret_0
+        // the values from ret_0 (which is in TF!)
         retVarName = "!ret_0";
+        genMoveToLF(destVarName, retVarName);
+      }else{
+        // Otherwise the ret val is in LF
+        genMove(destVarName, retVarName);
       }
-      genMove(destVarName, retVarName);
     
     // -> , [id] <nextAssign> <expr> , <expr>
     // In idName we have a name of the first variable in this statement
@@ -1219,7 +1221,15 @@ int pNewIdAssign(char *varName) {
     vypluj ERR(SYNTAX_ERR);
   }
 
-  genMove(var->name, retVarName);
+  if(!retVarName){
+    // If this is null, the expr was a function call and we need to fetch
+    // the values from ret_0 (which is in TF!)
+    retVarName = "!ret_0";
+    genMoveToLF(var->name, retVarName);
+  }else{
+    // Otherwise the ret val is in LF
+    genMove(var->name, retVarName);
+  }
 
   vypluj 0;
 }
@@ -1246,7 +1256,7 @@ int pExpr(char **retVarName) {
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
-    *retVarName = genTmpVarDef();
+    *retVarName = genTmpVarName();
     // TODO what to insert as the last param? (char *frame)
     genAssignLiteral(*retVarName, dt_nil, "nil", "LF"); 
 
@@ -1259,7 +1269,6 @@ int pExpr(char **retVarName) {
 
   // An expression
   } else {
-    LOG("TOK: %s", token->data);
     TryCall(parseExpression, symtab, token, retVarName);
     LOG("Expr result is in %s", *retVarName);
     // An expression is required but the precedence analysis didn't find any
