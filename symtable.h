@@ -24,7 +24,7 @@ int STInit(STStack **stack) ForceRetUse;
  * @param stack - stack with frames
  *
  * @return 0 if successful, errcode otherwise
- */
+ * */
 int STPush(STStack *stack) ForceRetUse;
 
 /**
@@ -35,24 +35,6 @@ int STPush(STStack *stack) ForceRetUse;
 void STPop(STStack *stack);
 
 /**
- * @brief Sets name parameter of STStackElem on IFJcode21 generated name
- * 
- * @param stack 
- * @param key 
- * @param name 
- */
-int STSetName(STStack *stack, char *key, char *name) ForceRetUse;
-
-/**
- * @brief Returns name of STElement
- * 
- * @param stack 
- * @param key 
- * @return char* 
- */
-int STGetName(STStack *stack, char **destPtr, char *key) ForceRetUse;
-
-/**
  * @brief Insert a new element to the symbol table (at the top of the stack)
  *
  * @param stack - symbol table (stack)
@@ -60,7 +42,7 @@ int STGetName(STStack *stack, char **destPtr, char *key) ForceRetUse;
  *
  * @return 0 if successful, errcode otherwise
  */
-int STInsert(STStack *stack, char *key) ForceRetUse ForceRetUse;
+int STInsert(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief Finds element in tree by key and return its data as a pointer
@@ -73,12 +55,25 @@ int STInsert(STStack *stack, char *key) ForceRetUse ForceRetUse;
 STElem *STFind(STStack *stack, char *key);
 
 /**
+ * @brief Sets name name of the element - name in IFJcode21 language
+ * 
+ * @param stack: symable
+ * @param key
+ * @param name of the new
+
+ * @return 0 if successful, errcode otherwise
+ */
+int STSetName(STStack *stack, char *key, char *name) ForceRetUse;
+
+/**
  * @brief Set isVariable boolean of a symbol table element (a variable or a 
  * function)
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param val boolean - true if it is a variable, false if it is a function
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetIsVariable(STStack *stack, char *key, bool val) ForceRetUse;
 
@@ -88,17 +83,10 @@ int STSetIsVariable(STStack *stack, char *key, bool val) ForceRetUse;
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param type - data type the element represents
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetVarDataType(STStack *stack, char *key, int type) ForceRetUse;
-
-/**
- * @brief Set address of a variable in a symbol table
- *
- * @param stack - symbol table
- * @param key (name) of the symbol table element
- * @param address - new address of the element
- */
-int STSetVarAddress(STStack *stack, char *key, int address) ForceRetUse;
 
 /**
  * @brief Use to mark a function as defined
@@ -106,6 +94,8 @@ int STSetVarAddress(STStack *stack, char *key, int address) ForceRetUse;
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param fnDefined - boolean value to be written to STElem->fnDefined
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetFnDefined(STStack *stack, char *key, bool fnDefined) ForceRetUse;
 
@@ -115,6 +105,8 @@ int STSetFnDefined(STStack *stack, char *key, bool fnDefined) ForceRetUse;
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param fnDeclared - boolean value to be written to STElem->fnDeclared
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) ForceRetUse;
 
@@ -158,9 +150,20 @@ int STAppendRetType(STStack *stack, char *key, int retType) ForceRetUse;
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return -1 if an element doesn't exist, depth otherwise
+ * @return depth of the element, -1 if an element doesn't exist
  */
-int STGetDepth(STStack *stack, char *key);
+int STGetDepth(STStack *stack, char *key) ForceRetUse;
+
+/**
+ * @brief Returns name of STElement in ifjcode21
+ * 
+ * @param stack: symtable
+ * @param destPtr: destination pointer
+ * @param key
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STGetName(STStack *stack, char **destPtr, char *key) ForceRetUse;
 
 /**
  * @brief Returns true if an element with name 'key' is a variable
@@ -170,7 +173,7 @@ int STGetDepth(STStack *stack, char *key);
  *
  * @return true if the element is a variable
  */
-bool STGetIsVariable(STStack *stack, char *key);
+bool STGetIsVariable(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief Returns the data type of a variable in a symbol table
@@ -180,17 +183,7 @@ bool STGetIsVariable(STStack *stack, char *key);
  *
  * @return data type of the variable
  */
-int STGetVarDataType(STStack *stack, char *key);
-
-/**
- * @brief Returns an address of a variable in a symbol table
- *
- * @param stack - symbol table
- * @param key (name) of the symbol table element
- *
- * @return address of the variable
- */
-int STGetVarAddress(STStack *stack, char *key);
+int STGetVarDataType(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief Returns true if a function with name 'key' was already defined
@@ -198,9 +191,9 @@ int STGetVarAddress(STStack *stack, char *key);
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return true if the function was already defined
+ * @return true if the function was defined
  */
-bool STGetFnDefined(STStack *stack, char *key);
+bool STGetFnDefined(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief Returns true if a function with name 'key' was already declared
@@ -208,9 +201,9 @@ bool STGetFnDefined(STStack *stack, char *key);
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return true if the function was already declared
+ * @return true if the function was declared
  */
-bool STGetFnDeclared(STStack *stack, char *key);
+bool STGetFnDeclared(STStack *stack, char *key) ForceRetUse;
 
 /**
  * @brief returns a data type of a parameter of a function at index 'index'
@@ -222,7 +215,7 @@ bool STGetFnDeclared(STStack *stack, char *key);
  * @return data type of a parameter of a function, -1 if the function doesn't 
  * exist
  */
-int STGetParamType(STStack *stack, char *key, int index);
+int STGetParamType(STStack *stack, char *key, int index) ForceRetUse;
 
 /**
  * @brief returns a data type of a return value of a function at index 'index'
@@ -234,7 +227,7 @@ int STGetParamType(STStack *stack, char *key, int index);
  * @return data type of a return value of a function, -1 if the function 
  * doesn't exist
  */
-int STGetRetType(STStack *stack, char *key, int index);
+int STGetRetType(STStack *stack, char *key, int index) ForceRetUse;
 
 /**
  * @brief returns a name of a parameter of a function at index 'index'

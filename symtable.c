@@ -9,8 +9,6 @@
 
 extern int ret;
 
-// TODO documentation might be outdated
-
 /**
  * @brief initialization of symbol table (stack)
  *
@@ -97,12 +95,34 @@ STElem *STFind(STStack *stack, char *key) {
 }
 
 /**
+ * @brief Sets name name of the element - name in IFJcode21 language
+ * 
+ * @param stack: symable
+ * @param key
+ * @param name of the new
+
+ * @return 0 if successful, errcode otherwise
+ */
+int STSetName(STStack *stack, char *key, char *name) {
+  if(!STFind(stack, key)){
+    return ERR(SYNTAX_ERR);
+  }
+  char *newName;
+  GCMalloc(newName, sizeof(char) * (strlen(name) + 1));
+  memcpy(newName, name, strlen(name) + 1);
+  STFind(stack, key)->name = newName;
+  return 0;
+}
+
+/**
  * @brief Set isVariable boolean of a symbol table element (a variable or a 
  * function)
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param val boolean - true if it is a variable, false if it is a function
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetIsVariable(STStack *stack, char *key, bool val) {
   if(!STFind(stack, key)){
@@ -118,6 +138,8 @@ int STSetIsVariable(STStack *stack, char *key, bool val) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param type - data type the element represents
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetVarDataType(STStack *stack, char *key, int type) {
   if(!STFind(stack, key)){
@@ -128,27 +150,13 @@ int STSetVarDataType(STStack *stack, char *key, int type) {
 }
 
 /**
- * @brief Set address of a variable in a symbol table
- *
- * @param stack - symbol table
- * @param key (name) of the symbol table element
- * @param address - new address of the element
- * TODO remove
- */
-int STSetVarAddress(STStack *stack, char *key, int address) {
-  if(!STFind(stack, key)){
-    return ERR(SYNTAX_ERR);
-  }
-  STFind(stack, key)->varAddress = address;
-  return 0;
-}
-
-/**
  * @brief Use to mark a function as defined
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param fnDefined - boolean value to be written to STElem->fnDefined
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
   if(!STFind(stack, key)){
@@ -169,6 +177,8 @@ int STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  * @param fnDeclared - boolean value to be written to STElem->fnDeclared
+
+ * @return 0 if successful, errcode otherwise
  */
 int STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) {
   if(!STFind(stack, key)){
@@ -183,40 +193,6 @@ int STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) {
     return ERR(ID_DEF_ERR);
   }
   STFind(stack, key)->fnDeclared = fnDeclared;
-  return 0;
-}
-
-/**
- * @brief Sets name parameter of STStackElem on IFJcode21 generated name
- * 
- * @param stack 
- * @param key 
- * @param name 
- */
-int STSetName(STStack *stack, char *key, char *name) {
-  if(!STFind(stack, key)){
-    return ERR(SYNTAX_ERR);
-  }
-  char *newName;
-  GCMalloc(newName, sizeof(char) * (strlen(name) + 1));
-  memcpy(newName, name, strlen(name) + 1);
-  STFind(stack, key)->name = newName;
-  return 0;
-}
-
-/**
- * @brief Returns name of STElement in ifjcode21
- * 
- * @param stack 
- * @param key 
- *
- * @return char*
- */
-int STGetName(STStack *stack, char **destPtr, char *key) {
-  if(!STFind(stack, key)){
-    return ERR(SYNTAX_ERR);
-  }
-  *destPtr = STFind(stack, key)->name;
   return 0;
 }
 
@@ -284,7 +260,7 @@ int STAppendRetType(STStack *stack, char *key, int retType) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return -1 if an element doesn't exist, depth otherwise
+ * @return depth of the element, -1 if an element doesn't exist
  */
 int STGetDepth(STStack *stack, char *key) {
   if(!STFind(stack, key)){
@@ -300,6 +276,23 @@ int STGetDepth(STStack *stack, char *key) {
     tmp = STStackNthElem(stack, i);
   }
   return -1;
+}
+
+/**
+ * @brief Returns name of STElement in ifjcode21
+ * 
+ * @param stack: symtable
+ * @param destPtr: destination pointer
+ * @param key
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int STGetName(STStack *stack, char **destPtr, char *key) {
+  if(!STFind(stack, key)){
+    return ERR(SYNTAX_ERR);
+  }
+  *destPtr = STFind(stack, key)->name;
+  return 0;
 }
 
 /**
@@ -335,27 +328,12 @@ int STGetVarDataType(STStack *stack, char *key) {
 }
 
 /**
- * @brief Returns an address of a variable in a symbol table
- *
- * @param stack - symbol table
- * @param key (name) of the symbol table element
- *
- * @return address of the variable
- */
-int STGetVarAddress(STStack *stack, char *key) {
-  if(!STFind(stack, key)){
-    return ERR(-1);
-  }
-  return STFind(stack, key)->varAddress;
-}
-
-/**
  * @brief Returns true if a function with name 'key' was already defined
  *
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return true if the function was already defined
+ * @return true if the function was defined
  */
 bool STGetFnDefined(STStack *stack, char *key) {
   // TODO check if elem exists
@@ -372,7 +350,7 @@ bool STGetFnDefined(STStack *stack, char *key) {
  * @param stack - symbol table
  * @param key (name) of the symbol table element
  *
- * @return true if the function was already declared
+ * @return true if the function was declared
  */
 bool STGetFnDeclared(STStack *stack, char *key) {
   // TODO check if elem exists
