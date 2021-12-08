@@ -1,3 +1,10 @@
+# VUT FIT - IFJ 2021
+#
+# Patrik Skaloš (xskalo01)
+# Jana Kováčiková (xkovac59)
+# Alexaner Okrucký (xokruc00)
+# Jiřina Frýbortová (xfrybo01)
+
 CC=gcc
 CFLAGS=-Wall -Wextra -std=c99 -g -Wno-unused-parameter
 
@@ -29,17 +36,15 @@ TESTSCRIPT=./ifjtest
 OUTPUTDIR=./build
 
 
-
 .PHONY: all
 all:
 	mkdir -p $(OUTPUTDIR)
 	$(CC) $(MAIN) $(LIBS) -o $(OUTPUTDIR)/main $(CFLAGS)
-
+	# $(CC) $(MAIN) $(LIBS) -o main $(CFLAGS)
 
 .PHONY: run
 run: all
 	$(OUTPUTDIR)/main
-
 
 .PHONY: tests
 tests: all
@@ -55,9 +60,11 @@ test: all
 pack: clean
 	mkdir -p pack
 	cp *.c *.h Makefile pack/
+	cp misc/rozdeleni pack/
+	cp doc/doc.pdf pack/dokumentace.pdf
 	cd pack && zip xskalo01.zip ./*
 	mv pack/xskalo01.zip ./
 	rm -rf pack
 
 clean:
-	rm -rf build logs pack
+	rm -rf build logs pack main xskalo01.zip
