@@ -25,7 +25,7 @@
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName) 
+int parseExpression(STStack *symtab, Token *token, char **returnVarName, int *returnVarType)
   ForceRetUse;
 
 /**

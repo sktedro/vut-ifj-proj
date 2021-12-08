@@ -730,7 +730,7 @@ int pStatWithId(char *idName) {
     TryCall(pFnCall, idName);
 
   // Not a function call but an assignment
-  }else{
+  } else {
     // Get new token (to see if it is a ',' of '=')
     GetToken;
     printToken(token);
@@ -745,9 +745,11 @@ int pStatWithId(char *idName) {
       // TODO check data types
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
-      TryCall(pExpr, &retVarName);
-      if(!retVarName){
+      int idType = STGetVarDataType(symtab, idName);
+      LOG("ID TYPE: %d", idType);
+      TryCall(pExpr, &retVarName, idType);
 
+      if(!retVarName){
         //alex edit
         // If this is null, the expr was a function call and we need to fetch
         // the values from ret_0 (which is in TF!)
@@ -810,7 +812,7 @@ int pStatWithId(char *idName) {
       char *retVarName = NULL;
       //printf("IDEME GENEROVAŤ 2 ");
       AListGenerate(assignmentElement);
-      TryCall(pExpr, &retVarName);
+      TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
 
       if(AListGetLast(assignmentElement)->generated) {
         genExprEnd(assignmentElement);
@@ -830,7 +832,7 @@ int pStatWithId(char *idName) {
       retVarName = NULL;
       //printf("IDEME GENEROVAŤ 1 ");
       AListGenerate(assignmentElement);
-      TryCall(pExpr, &retVarName);
+      TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
 
       
 
@@ -899,7 +901,7 @@ int pNextAssign() {
 
   char *varName = AListGetElementByIndex(assignmentElement, assigmentGeneratedCounter)->name;
   char *retVarName;
-  TryCall(pExpr, &retVarName);
+  TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
   
   if(retVarName == NULL) {
     vypluj err(SYNTAX_ERR);
@@ -1035,7 +1037,8 @@ int pRetArgList(char *fnName) {
   // TODO If the function should return more than zero values, return nils
   // This will be tough... How do we know where the return ends???
 
-  TryCall(pExpr, &retVarName);
+  int expectedType = STFind(symtab, fnName)->fnRetTypesBuf->data[0];
+  TryCall(pExpr, &retVarName, expectedType);
 
   // 35. <retArgList>      -> <expr> <retNextArg>
   int argCount = 1;
@@ -1082,11 +1085,12 @@ int pRetNextArg(char *fnName, int argCount) {
   }
 
   // -> , <expr> <retNextArg>
+  int expectedType = STFind(symtab, fnName)->fnRetTypesBuf->data[argCount];
   argCount++;
   char *retVarName = NULL;
 
   // <expr>
-  TryCall(pExpr, &retVarName);
+  TryCall(pExpr, &retVarName, expectedType);
   if(!retVarName){
     // No expr found after the comma!
     LOG("An expression is required but none was received");
@@ -1239,11 +1243,11 @@ int pNewIdAssign(char *varName) {
     vypluj 0;
   }
 
-  // -> = <exprList>
   // <expr>
   // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
-  TryCall(pExpr, &retVarName);
+  int type = STGetVarDataType(symtab, varName);
+  TryCall(pExpr, &retVarName, type);
   
   STElem *var = STFind(symtab, varName);
   if(!var) {
@@ -1268,7 +1272,7 @@ int pNewIdAssign(char *varName) {
  *
  * @return error code
  */
-int pExpr(char **retVarName) {
+int pExpr(char **retVarName, int expectedType) {
   RuleFnInit;
 
   GetToken;
@@ -1277,6 +1281,12 @@ int pExpr(char **retVarName) {
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
+    // check types
+    int type = STGetRetType(symtab, token->data, 0); // TODO some magic for more returns
+    LOG("TYPE FROM PEXPR: %d", type);
+    if(type != expectedType) {
+      vypluj err(ASS_ERR);
+    }
     *retVarName = token->data;
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
@@ -1286,7 +1296,7 @@ int pExpr(char **retVarName) {
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarName();
-    // TODO what to insert as the last param? (char *frame)
+
     genAssignLiteral(*retVarName, dt_nil, "nil", "LF"); 
 
   } else if(strEq(token->data, "else")) {
@@ -1298,11 +1308,19 @@ int pExpr(char **retVarName) {
 
   // An expression
   } else {
-    TryCall(parseExpression, symtab, token, retVarName);
+    int retVarType = -1;
+    TryCall(parseExpression, symtab, token, retVarName, &retVarType);
     LOG("Expr result is in %s", *retVarName);
     // An expression is required but the precedence analysis didn't find any
     if(!(*retVarName)){
-      return ERR(SYNTAX_ERR);
+      vypluj ERR(SYNTAX_ERR);
+    }
+    if(retVarType == -1) {
+      vypluj err(INTERN_ERR);
+    }
+    if(retVarType != expectedType) {
+      LOG("TYPE FROM PA: %d EXPECTED: %d ", retVarType, expectedType);
+      vypluj err(ASS_ERR);
     }
   }
   vypluj 0;

@@ -49,7 +49,7 @@ char precTab[12][12] = {
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
+int parseExpression(STStack *symtab, Token *token, char **returnVarName, int *returnVarType) {
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
@@ -125,7 +125,8 @@ int parseExpression(STStack *symtab, Token *token, char **returnVarName) {
   // Return the name of the variable where the result of the expression is 
   // stored
   *returnVarName = symstack->top->data;
-
+  *returnVarType = symstack->top->dataType;
+  LOG("\nTYPE FROM PA: %d\n\n", symstack->top->dataType);
   vypluj 0;
 }
 
