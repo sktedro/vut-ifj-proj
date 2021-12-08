@@ -1,5 +1,12 @@
-/*
- * Enumerators, structure definitions and miscellaneous functions
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file misc.c
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef MISC_C
@@ -13,8 +20,49 @@ int LOCCount = 1;
 bool errMessageWritten = false;
 GarbageCollector garbageCollector;
 
+/**
+ * @brief Writes an error message to stdout and returns the error code
+ *
+ * @param errCode
+ *
+ * @return errCode
+ */
+int err(int errCode) {
+  if(!errMessageWritten){
+    fprintf(stderr, "ERROR: ");
+    if (errCode == LEX_ERR) {
+      fprintf(stderr, "Lexical analysis error ");
+    } else if (errCode == SYNTAX_ERR) {
+      fprintf(stderr, "Syntax error ");
+    } else if (errCode == ID_DEF_ERR) {
+      fprintf(stderr, "Function/variable definition error ");
+    } else if (errCode == ASS_ERR) {
+      fprintf(stderr, "Assignment error (types might be uncompatible) ");
+    } else if (errCode == PARAM_RET_ERR) {
+      fprintf(stderr, "Function parameters or return values error. Check types ");
+    } else if (errCode == TYPE_EXPR_ERR) {
+      fprintf(stderr, "Data types of operands in an expression are not compatible ");
+    } else if (errCode == OTHER_SEM_ERR) {
+      fprintf(stderr, "Semantic error ");
+    } else if (errCode == NIL_ERR) {
+      fprintf(stderr, "Unexpected nil ");
+    } else if (errCode == DIV_BY_ZERO_ERR) {
+      fprintf(stderr, "Division by zero error ");
+    } else if (errCode == INTERN_ERR) {
+      fprintf(stderr, "Internal error ");
+    }else{
+      fprintf(stderr, "Unknown error (code %d) ", errCode);
+    }
+    fprintf(stderr, "at (around) line %d.\n", LOCCount);
+    errMessageWritten = true;
+  }
+  vypluj errCode;
+}
+
 /*
+ *
  * Miscellaneous functions
+ *
  */
 
 /**
@@ -88,6 +136,13 @@ bool isIFJ21Keyword(Token *token) {
   return false;
 }
 
+/**
+ * @brief counts digits in an integer. If the integer is zero, returns 1
+ *
+ * @param value: input integer
+ *
+ * @return digits in value (1 if value equals 0)
+ */
 int countDigits(int value) {
   if(value == 0) {
     return 1;
@@ -98,48 +153,6 @@ int countDigits(int value) {
     result++;
   }
   return result;
-}
-
-
-
-
-/**
- * @brief Writes an error message to stdout and returns back the error code
- *
- * @param errCode
- *
- * @return errCode
- */
-int err(int errCode) {
-  if(!errMessageWritten){
-    fprintf(stderr, "ERROR: ");
-    if (errCode == LEX_ERR) {
-      fprintf(stderr, "Lexical analysis error ");
-    } else if (errCode == SYNTAX_ERR) {
-      fprintf(stderr, "Syntax error ");
-    } else if (errCode == ID_DEF_ERR) {
-      fprintf(stderr, "Function/variable definition error "); //TODO
-    } else if (errCode == ASS_ERR) {
-      fprintf(stderr, "Assignment error (types might be uncompatible) "); //TODO
-    } else if (errCode == PARAM_RET_ERR) {
-      fprintf(stderr, "Function parameters or return values error. Check types "); //TODO
-    } else if (errCode == TYPE_EXPR_ERR) {
-      fprintf(stderr, "Data types of operands in an expression are not compatible "); //TODO
-    } else if (errCode == OTHER_SEM_ERR) {
-      fprintf(stderr, "Semantic error "); //TODO
-    } else if (errCode == NIL_ERR) {
-      fprintf(stderr, "Unexpected nil "); //TODO
-    } else if (errCode == DIV_BY_ZERO_ERR) {
-      fprintf(stderr, "Division by zero error "); //TODO
-    } else if (errCode == INTERN_ERR) {
-      fprintf(stderr, "Internal error "); //TODO
-    }else{
-      fprintf(stderr, "Unknown error (code %d) ", errCode);
-    }
-    fprintf(stderr, "at (around) line %d.\n", LOCCount);
-    errMessageWritten = true;
-  }
-  vypluj errCode;
 }
 
 /**
@@ -157,6 +170,18 @@ bool isTokenIdOrLiteral(Token *token) {
     || token->type == t_str;
 }
 
+/*
+ *
+ * Garbage collector
+ *
+ */
+
+/**
+ * @brief Initialize the garbage collector by allocating a dynamic array of
+ * pointers
+ *
+ * @return 0 if successful, errcode otherwise
+ */
 int GCInit(){
   garbageCollector.pointers = malloc(sizeof(void*) * GCINITLEN);
   if(!garbageCollector.pointers){
@@ -167,6 +192,14 @@ int GCInit(){
   return 0;
 }
 
+/**
+ * @brief Inserts a new pointer to a allocated variable to the garbage
+ * collector dynamic array
+ *
+ * @param ptr
+ *
+ * @return 0 if successful, errcode otherwise
+ */
 int GCInsert(void *ptr) {
   // We need to test if we have some allocated or the tests won't run well
   if(garbageCollector.ptrsAllocated != 0){
@@ -184,6 +217,12 @@ int GCInsert(void *ptr) {
   return 0;
 }
 
+/**
+ * @brief Removes a pointer from the garbage collector array (used when
+ * reallocating)
+ *
+ * @param ptr
+ */
 void GCDelete(void *ptr) {
   for(int i = 0; i < garbageCollector.ptrsUsed; i++){
     if(ptr == garbageCollector.pointers[i]){
@@ -192,11 +231,20 @@ void GCDelete(void *ptr) {
   }
 }
 
+/**
+ * @brief Frees all memory ever allocated
+ */
 void GCCollect(){
   for(int i = 0; i < garbageCollector.ptrsUsed; i++){
     free(garbageCollector.pointers[i]);
   }
 }
+
+/*
+ *
+ * Built-in functions
+ *
+ */
 
 /**
  * @brief Initialize all built in functions (add them to the symtable)

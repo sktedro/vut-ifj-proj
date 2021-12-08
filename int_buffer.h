@@ -1,5 +1,12 @@
-/*
- * A buffer - basically just a dynamic-sized string
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file int_buffer.h
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef INT_BUFFER_H

@@ -1,16 +1,14 @@
+build/
+logs/
+main
+*.zip
+tests/*/outputs/
+misc/rozdeleni
+
+# Temporary files and garbage
 vgcore*
+.idea/
 tmp*
 .vscode
 *.save
-automake
 *.swp
-build/
-btree
-logs/
-.idea/
-tests/test
-tests/*/outputs/
-cmake-build-debug/
-CMakeLists.txt
-*.zip
-ic21int

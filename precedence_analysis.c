@@ -1,5 +1,12 @@
-/*
- * Precedence analysis
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file precedence_analysis.c
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef PRECEDENCE_ANALYSIS_C

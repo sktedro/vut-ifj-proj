@@ -1,3 +1,14 @@
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file assignment.c
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
+ */
+
 #ifndef ASSIGNMENT_C
 #define ASSIGNMENT_C
 

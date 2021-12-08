@@ -1,5 +1,12 @@
-/*
- * Binary search tree
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file symtable_tree.c
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef SYMTABLE_TREE_C
