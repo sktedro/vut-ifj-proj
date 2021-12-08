@@ -29,6 +29,7 @@ void genJumpIfTrue(char *label, char *varName);
 void genVarDefLF(char *name);
 void genVarDefTF(char *name);
 void genSubStrFnDef();
+void genAssignLiteralStringNil(char *name, char *frame);
 int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame);
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2);
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2);

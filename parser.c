@@ -296,7 +296,7 @@ int pFnCall(char *fnName) {
   // (
   RequireTokenType(t_leftParen);
 
-  if(strEq(fnName, "write")){
+  if(strEq(fnName, "write")) {
     genComment("Calling write functions");
     resetParamCounter();
     genFnCallInit();
@@ -349,7 +349,7 @@ int pFnCallArgList(char *fnName) {
   GetToken;
   printToken(token);
 
-  // -> eps
+  // 10. <fnCallArgList>   -> eps
   if(token->type == t_rightParen) {
     LOG("-> eps");
 
@@ -366,7 +366,7 @@ int pFnCallArgList(char *fnName) {
     vypluj stashToken(&token);
   } 
 
-  // -> <fnCallArg> <nextFnCallArg>
+  // 11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
 
   LOG("-> <fnCallArg> <nextFnCallArg>\n");
   argCount++;
@@ -467,7 +467,11 @@ int pFnCallArg(char *fnName, int argCount) {
     }
 
     genVarDefTF(paramName);
-    genAssignLiteral(paramName, dataType, token->data, "TF");
+    if(strcmp(fnName, "write") == 0 && strcmp(token->data, "nil") == 0) {
+      genAssignLiteralStringNil(paramName, "TF");
+    } else {
+      genAssignLiteral(paramName, dataType, token->data, "TF");
+    }
 
   } else {
     if(token->type == t_idOrKeyword) {

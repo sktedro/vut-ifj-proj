@@ -289,9 +289,17 @@ int genReturn(char *src1, char *src2){
   return 0;
 }
 
+/**
+ * for write function assing string@nil not nill@nil
+ * @return
+ */
+void genAssignLiteralStringNil(char *name, char *frame) {
+  printf("MOVE %s@%s string@nil\n",frame, name);
+}
+
 int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
   if(dataType == dt_nil) {
-    printf("MOVE %s@%s string@nil\n",frame, name);
+    printf("MOVE %s@%s nil@nil\n",frame, name);
   } else if(dataType == dt_integer) {
     // Convert to int and check if the conversion was successful
     char *tolptr = NULL;
