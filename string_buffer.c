@@ -8,7 +8,7 @@
 #include "string_buffer.h"
 
 // Initial buffer data length (space allocated)
-#define STRINGBUFINITLEN 16
+#define STRINGBUFINITLEN 256
 
 extern int ret;
 
@@ -23,7 +23,7 @@ int stringBufInit(StringBuffer **buf) {
   GCMalloc(*buf, sizeof(StringBuffer));
   GCMalloc((*buf)->data, STRINGBUFINITLEN * sizeof(char));
   (*buf)->len = 0;
-  (*buf)->size = STRINGBUFINITLEN;
+  (*buf)->size = STRINGBUFINITLEN / sizeof(char *);
   return 0;
 }
 
@@ -36,16 +36,15 @@ int stringBufInit(StringBuffer **buf) {
  * @return 0 if successful, errcode otherwise
  */
 int stringBufAppend(StringBuffer *buf, char *str) {
-  if(!buf) {
+  if(!buf || !str || !buf->data) {
     return ERR(INTERN_ERR);
   } 
   if (buf->len + 1 == buf->size) {
     GCRealloc(buf->data, 2 * buf->size * sizeof(char *));
     buf->size *= 2;
   }
-  
   GCMalloc(buf->data[buf->len], sizeof(char) * (strlen(str) + 1));
-  memcpy(buf->data[buf->len], str, strlen(str) + 1);
+  sprintf(buf->data[buf->len], "%s", str);
   (buf->len)++;
   
   return 0;
