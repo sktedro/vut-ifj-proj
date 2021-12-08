@@ -46,10 +46,12 @@ char precTab[12][12] = {
  * @param returnVarName: pointer to a string where this function writes the 
  * name of the variable where the expression result is stored (in the generated
  * code)
+ * @param returnVarType: data type of the variable represented by returnVarName
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName, int *returnVarType) {
+int parseExpression(STStack *symtab, Token *token, char **returnVarName, 
+    int *returnVarType) {
   // Init
   SStack *symstack = NULL;
   SStackElem *topSymbol = NULL, *inputSymbol = NULL;
@@ -212,7 +214,6 @@ int iRule(SStack *symstack, SStackElem *op) {
     if (!op->isId) {
       char *newName = genTmpVarName();
       TryCall(condAppendToStringBuff, newName);
-      // TODO change this and check the data types
       TryCall(genAssignLiteral, newName, op->dataType, op->data, "LF");
       op->data = newName;
       op->isId = true;
@@ -928,34 +929,35 @@ bool isExprAtomic(SStack *symstack) {
  * @param stack to print out
  */
 void debugPrint(SStack *stack) {
-  if(DEBUGTOGGLE){
-    int len = 0;
-    SStackElem *element = SStackTop(stack);
-    fprintf(stderr, "--------STACK------------\n");
-    while (element != NULL) {
-      fprintf(stderr, "Element type: %d\n", element->type);
-      fprintf(stderr, "Element op: %d\n", element->op);
-      if (element->data != NULL) {
-        fprintf(stderr, "Element data: %s\n", element->data);
-      } else {
-        fprintf(stderr, "Element data is NULL\n");
-      }
-      fprintf(stderr, "Element isId: %d\n", element->isId);
-      fprintf(stderr, "Element dataType: %d\n", element->dataType);
-      fprintf(stderr, "-------------------------\n");
-
-      if (element->next == NULL) {
-        fprintf(stderr, "Next element is NULL\n");
-        fprintf(stderr, "Total length is: %d\n", len + 1);
-        fprintf(stderr, "-------------------------\n");
-        return;
-      } else {
-        element = element->next;
-        len++;
-      }
-    }
-    fprintf(stderr, "Stack is empty\n");
+  if(!DEBUGTOGGLE){
+    return;
   }
+  int len = 0;
+  SStackElem *element = SStackTop(stack);
+  fprintf(stderr, "--------STACK------------\n");
+  while (element != NULL) {
+    fprintf(stderr, "Element type: %d\n", element->type);
+    fprintf(stderr, "Element op: %d\n", element->op);
+    if (element->data != NULL) {
+      fprintf(stderr, "Element data: %s\n", element->data);
+    } else {
+      fprintf(stderr, "Element data is NULL\n");
+    }
+    fprintf(stderr, "Element isId: %d\n", element->isId);
+    fprintf(stderr, "Element dataType: %d\n", element->dataType);
+    fprintf(stderr, "-------------------------\n");
+
+    if (element->next == NULL) {
+      fprintf(stderr, "Next element is NULL\n");
+      fprintf(stderr, "Total length is: %d\n", len + 1);
+      fprintf(stderr, "-------------------------\n");
+      return;
+    } else {
+      element = element->next;
+      len++;
+    }
+  }
+  fprintf(stderr, "Stack is empty\n");
 }
 
 

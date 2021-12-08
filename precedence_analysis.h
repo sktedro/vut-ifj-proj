@@ -22,11 +22,12 @@
  * @param returnVarName: pointer to a string where this function writes the 
  * name of the variable where the expression result is stored (in the generated
  * code)
+ * @param returnVarType: data type of the variable represented by returnVarName
  *
  * @return 0 if successful, errcode otherwise 
  */
-int parseExpression(STStack *symtab, Token *token, char **returnVarName, int *returnVarType)
-  ForceRetUse;
+int parseExpression(STStack *symtab, Token *token, char **returnVarName, 
+    int *returnVarType) ForceRetUse;
 
 /**
  * @brief Reduce step of the precedence analysis - reduce an atomic expression

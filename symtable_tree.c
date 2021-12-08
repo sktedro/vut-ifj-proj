@@ -10,47 +10,6 @@
 extern int ret;
 
 /**
- * @brief Creates a new node with the given key and key, allocates memory.
- *
- * @param node: destination pointer
- * @param key key of the new node
- * @param frame: number of the frame in which the variable is
- *
- * @return 0 if successful, errcode otherwise
- */
-int newSTTreeNode(STTreeNode **node, char *key, int frame) {
-  GCMalloc(*node, sizeof(STTreeNode));
-
-  // Init children
-  (*node)->rightChild = NULL;
-  (*node)->leftChild = NULL;
-
-  // Copy the key
-  GCMalloc((*node)->key, (strlen(key) + 1) * sizeof(char));
-  memcpy((*node)->key, key, (strlen(key) + 1) * sizeof(char));
-
-  // Init data
-  GCMalloc((*node)->data, sizeof(STElem));
-
-  // Set the name (generate a name for the ifjcode21 variable)
-  (*node)->data->name = genVarName(key, frame);
-
-  // Init other data
-  (*node)->data->isVariable = true;
-  (*node)->data->varDataType = -1;
-  (*node)->data->varAddress = -1;
-  (*node)->data->fnDefined = false;
-  (*node)->data->fnDefined = false;
-  (*node)->data->fnParamTypesBuf = NULL;
-  (*node)->data->fnParamNamesBuf = NULL;
-  (*node)->data->fnRetTypesBuf = NULL;
-  TryCall(intBufInit, &((*node)->data->fnParamTypesBuf));
-  TryCall(stringBufInit, &((*node)->data->fnParamNamesBuf));
-  TryCall(intBufInit, &((*node)->data->fnRetTypesBuf));
-  vypluj 0;
-}
-
-/**
  * @brief Creates and inserts a new node to the tree, placing it accordingly to
  * the key value.
  * 
@@ -70,30 +29,10 @@ int treeInsert(STTreeNode **root, char *key, int frame) {
   } else if (strcmp(key, (*root)->key) > 0) {
     TryCall(treeInsert, &((*root)->rightChild), key, frame);
   } else {
-    /** return ERR(ID_DEF_ERR); */
+    /** return ERR(ID_DEF_ERR); */ // TODO remove this if it is not needed
     LOG("WARNING: Inserting a key into a binary tree that is already there.");
   }
   vypluj 0;
-}
-
-/**
- * @brief Replaces the target node with the rightmost node from the given 
- * subtree.
- * 
- * @param target node to replace
- * @param tree an initialised tree with at least one right child
- */
-void replaceByRightmost(STTreeNode *target, STTreeNode **tree) {
-  // TODO memory leaks? target's key and data are simply overwritten
-  if ((*tree)->rightChild != NULL) {
-    replaceByRightmost(target, &(*tree)->rightChild);
-    vypluj;
-  }
-  STTreeNode *tmp;
-  target->key = (*tree)->key;
-  target->data = (*tree)->data;
-  tmp = (*tree)->leftChild;
-  *tree = tmp;
 }
 
 /**
@@ -136,8 +75,7 @@ void treeDelete(STTreeNode **root, char *key) {
  * @brief Finds a node and returns a pointer to all its data
  *
  * @param root of a tree
- * @param key this is the key we are looking for
- * @param data where the data will be saved (buffer does not have to be initialised)
+ * @param key 
  *
  * @return pointer to symbol table tree element
  */
@@ -154,6 +92,65 @@ STElem *treeGetData(STTreeNode *root, char *key) {
 
   // key found
   return root->data;
+}
+
+/**
+ * @brief Creates a new node with the given key and key, allocates memory.
+ *
+ * @param node: destination pointer
+ * @param key key of the new node
+ * @param frame: number of the frame in which the variable is
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int newSTTreeNode(STTreeNode **node, char *key, int frame) {
+  GCMalloc(*node, sizeof(STTreeNode));
+
+  // Init children
+  (*node)->rightChild = NULL;
+  (*node)->leftChild = NULL;
+
+  // Copy the key
+  GCMalloc((*node)->key, (strlen(key) + 1) * sizeof(char));
+  memcpy((*node)->key, key, (strlen(key) + 1) * sizeof(char));
+
+  // Init data
+  GCMalloc((*node)->data, sizeof(STElem));
+
+  // Set the name (generate a name for the ifjcode21 variable)
+  (*node)->data->name = genVarName(key, frame);
+
+  // Init other data
+  (*node)->data->isVariable = true;
+  (*node)->data->varDataType = -1;
+  (*node)->data->fnDefined = false;
+  (*node)->data->fnDefined = false;
+  (*node)->data->fnParamTypesBuf = NULL;
+  (*node)->data->fnParamNamesBuf = NULL;
+  (*node)->data->fnRetTypesBuf = NULL;
+  TryCall(intBufInit, &((*node)->data->fnParamTypesBuf));
+  TryCall(stringBufInit, &((*node)->data->fnParamNamesBuf));
+  TryCall(intBufInit, &((*node)->data->fnRetTypesBuf));
+  vypluj 0;
+}
+
+/**
+ * @brief Replaces the target node with the rightmost node from the given 
+ * subtree.
+ * 
+ * @param target node to replace
+ * @param tree an initialised tree with at least one right child
+ */
+void replaceByRightmost(STTreeNode *target, STTreeNode **tree) {
+  if ((*tree)->rightChild != NULL) {
+    replaceByRightmost(target, &(*tree)->rightChild);
+    vypluj;
+  }
+  STTreeNode *tmp;
+  target->key = (*tree)->key;
+  target->data = (*tree)->data;
+  tmp = (*tree)->leftChild;
+  *tree = tmp;
 }
 
 #endif

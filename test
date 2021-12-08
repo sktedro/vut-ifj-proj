@@ -1,4 +1,7 @@
 .ifjcode21
+
+# END OF BUILT IN FUNCTIONS DEFINITIONS
+
 # New function definition
 JUMP *label__0
 LABEL ret0
@@ -82,9 +85,6 @@ JUMP *label__7
 
 # Skip variable declaration
 LABEL *label__8
-
-WRITE LF@%var_a_1
-
 POPFRAME
 RETURN
 # Function definition done
@@ -101,4 +101,3 @@ CREATEFRAME
 
 CALL main0
 # Function call from the global frame done
-

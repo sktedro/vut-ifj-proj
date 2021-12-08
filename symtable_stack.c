@@ -11,7 +11,7 @@ extern int ret;
 
 /**
  * @brief Allocate a new stack, initialize it and return it
- *genVarAssign
+ *
  * @param stack: destination pointer
  *
  * @return 0 if successful, errcode otherwise
@@ -26,7 +26,8 @@ int STStackInit(STStack **stack) {
  * @brief allocate and push a new element to the top of the stack
  *
  * @param stack
- * @param name - new element's name
+ * @param table - new tree
+ * @param depth of the new tree
  *
  * @return 0 if successful, errcode otherwise
  */
@@ -91,6 +92,7 @@ STStackElem *STStackBottom(STStack *stack) {
  * @brief get the element n elements from the top of the stack
  *
  * @param stack
+ * @param n: number of the element
  *
  * @return n-th element (if n = 0, returns stack top)
  */

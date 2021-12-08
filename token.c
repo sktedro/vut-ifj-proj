@@ -36,11 +36,9 @@ int tokenAddAttrib(Token *token, char *data) {
   if (!token) {
     return ERR(INTERN_ERR);
   }
-
   // Allocate space for data and write the data to the allocated space
   GCMalloc(token->data, strlen(data) + 1);
   memcpy(token->data, data, strlen(data) + 1);
-
   return 0;
 }
 

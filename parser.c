@@ -728,32 +728,30 @@ int pStatWithId(char *idName) {
   retVarCounter = 0;
 
   // -> <fnCall>
-  if(STFind(symtab, idName) 
-      && !STGetIsVariable(symtab, idName)){
+  if(STFind(symtab, idName) && !STGetIsVariable(symtab, idName)){
     TryCall(pFnCall, idName);
+    vypluj 0;
+  }
 
   // Not a function call but an assignment
-  } else {
-    // Get new token (to see if it is a ',' of '=')
-    GetToken;
-    printToken(token);
-    // idName must be a variable
-    if(!STFind(symtab, idName) || !STGetIsVariable(symtab, idName)){
+  GetToken;
+  printToken(token);
+    
+  // idName must be a variable
+  if(!STFind(symtab, idName) || !STGetIsVariable(symtab, idName)){
       vypluj ERR(SYNTAX_ERR);
-    }
+  }
     // -> = <expr>
-    if (token->type == t_assignment) {
+  if (token->type == t_assignment) {
       char *destVarName;
       TryCall(STGetName, symtab, &destVarName, idName);
       // TODO check data types
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       int idType = STGetVarDataType(symtab, idName);
-      LOG("ID TYPE: %d", idType);
       TryCall(pExpr, &retVarName, idType);
 
       if(!retVarName){
-        //alex edit
         // If this is null, the expr was a function call and we need to fetch
         // the values from ret_0 (which is in TF!)
         sprintf(retname,"!ret_%d", retVarCounter);
@@ -763,11 +761,12 @@ int pStatWithId(char *idName) {
         // Otherwise the ret val is in LF
         genMove(destVarName, retVarName);
       }
-    
-    // -> , [id] <nextAssign> <expr> , <expr>
-    // In idName we have a name of the first variable in this statement
+    vypluj 0;
+    } 
+// In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
-    } else if (token->type == t_comma) {
+    // -> , [id] <nextAssign> <expr> , <expr>
+    if (token->type == t_comma) {
       if(AListGetLength(assignmentElement) == 0) {
         TryCall(STGetName, symtab, &assignmentElement->name, idName);
         assignmentElement->end = getExprEndName();
@@ -851,7 +850,7 @@ int pStatWithId(char *idName) {
     }else{
       vypluj ERR(SYNTAX_ERR);
     }
-  }
+  
   vypluj 0;
 }
 

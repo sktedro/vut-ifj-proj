@@ -17,11 +17,12 @@
  */
 int STStackInit(STStack **stack) ForceRetUse;
 
-/**
+ /**
  * @brief allocate and push a new element to the top of the stack
  *
  * @param stack
- * @param name - new element's name
+ * @param table - new tree
+ * @param depth of the new tree
  *
  * @return 0 if successful, errcode otherwise
  */
@@ -41,7 +42,7 @@ void STStackPop(STStack *stack);
  *
  * @return top element
  */
-STStackElem *STStackTop(STStack *stack);
+STStackElem *STStackTop(STStack *stack) ForceRetUse;
 
 /**
  * @brief get the element at the bottom of the stack
@@ -50,16 +51,17 @@ STStackElem *STStackTop(STStack *stack);
  *
  * @return bottom element
  */
-STStackElem *STStackBottom(STStack *stack);
+STStackElem *STStackBottom(STStack *stack) ForceRetUse;
 
 /**
  * @brief get the element n elements from the top of the stack
  *
  * @param stack
+ * @param n: number of the element
  *
  * @return n-th element (if n = 0, returns stack top)
  */
-STStackElem *STStackNthElem(STStack *stack, int n);
+STStackElem *STStackNthElem(STStack *stack, int n) ForceRetUse;
 
 #endif
 /* end of file symtable_stack.h */
