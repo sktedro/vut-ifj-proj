@@ -1,9 +1,104 @@
 .ifjcode21
+# New function definition
+JUMP *label__0
+LABEL ret0
 
+PUSHFRAME
+
+# Jumping to variable declaration
+JUMP *label__1
+
+# Jump back here from declarations
+LABEL *label__2
+MOVE LF@?tmpvar_0 int@10
+MOVE LF@%var_r_1 LF@?tmpvar_0
+
+# Return encountered - returning
+DEFVAR LF@!ret_0
+MOVE LF@!ret_0 LF@%var_r_1
+POPFRAME
+RETURN
+# Return done
+
+JUMP *label__3
+
+# Variable declarations
+LABEL *label__1
+DEFVAR LF@%var_r_1
+MOVE LF@%var_r_1 nil@nil
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 nil@nil
+
+# Jump from var declarations
+JUMP *label__2
+
+# Skip variable declaration
+LABEL *label__3
+DEFVAR LF@!ret_1
+MOVE LF@!ret_1 nil@nil
+POPFRAME
+RETURN
+# Function definition done
+
+LABEL *label__0
+
+# New function definition
+JUMP *label__5
+LABEL main0
+
+PUSHFRAME
+
+# Jumping to variable declaration
+JUMP *label__6
+
+# Jump back here from declarations
+LABEL *label__7
+
+# Calling a function inside a function
+
+# Calling a function
 CREATEFRAME
 
-DEFVAR TF@VAR
+# Processing function call arguments
+# Processing function call arguments done
 
-READ TF@VAR int
+CALL ret0
 
-WRITE TF@VAR
+# Function call inside a function done
+MOVE LF@%var_a_1 TF@!ret_0
+JUMP *label__8
+
+# Variable declarations
+LABEL *label__6
+DEFVAR LF@%var_r_1
+MOVE LF@%var_r_1 nil@nil
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 nil@nil
+DEFVAR LF@%var_a_1
+MOVE LF@%var_a_1 nil@nil
+
+# Jump from var declarations
+JUMP *label__7
+
+# Skip variable declaration
+LABEL *label__8
+
+WRITE LF@%var_a_1
+
+POPFRAME
+RETURN
+# Function definition done
+
+LABEL *label__5
+
+# Calling a function from the global frame
+
+# Calling a function
+CREATEFRAME
+
+# Processing function call arguments
+# Processing function call arguments done
+
+CALL main0
+# Function call from the global frame done
+

@@ -559,7 +559,7 @@ int pStat(char *fnName) {
 
     // <expr>
     char *exprResultVarName = NULL;
-    TryCall(pExpr, &exprResultVarName);
+    TryCall(pExpr, &exprResultVarName, dt_boolean); // bool
 
     // then
     RequireToken(t_idOrKeyword, "then");
@@ -613,7 +613,7 @@ int pStat(char *fnName) {
     // TODO ano - v pExpr dávať do bufferu
     // <expr>
     char *exprResultVarName = NULL;
-    TryCall(pExpr, &exprResultVarName);
+    TryCall(pExpr, &exprResultVarName, dt_boolean);
 
     // Code gen conditional jump to 'while'
     genJumpIfTrue(whileLabelName, exprResultVarName);
@@ -722,6 +722,9 @@ vypluj pStat(fnName);
 int pStatWithId(char *idName) {
   RuleFnInit;
 
+  char *retname;
+  GCMalloc(retname, sizeof(char) * 20);
+
   retVarCounter = 0;
 
   // -> <fnCall>
@@ -753,8 +756,9 @@ int pStatWithId(char *idName) {
         //alex edit
         // If this is null, the expr was a function call and we need to fetch
         // the values from ret_0 (which is in TF!)
-        retVarName = "!ret_0";
-        genMoveToLF(destVarName, retVarName);
+        sprintf(retname,"!ret_%d", retVarCounter);
+        retVarCounter++;
+        genMoveToLF(destVarName, retname);
       }else{
         // Otherwise the ret val is in LF
         genMove(destVarName, retVarName);
@@ -1287,7 +1291,7 @@ int pExpr(char **retVarName, int expectedType) {
     if(type != expectedType) {
       vypluj err(ASS_ERR);
     }
-    *retVarName = token->data;
+    //*retVarName = token->data;
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
