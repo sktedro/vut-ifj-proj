@@ -1,8 +1,8 @@
 ERROR: Unexpected nil at (around) line 3.
 Testing: Token type is '0' and data 'nil'
 DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 nil@nil
+MOVE LF@?tmpvar_0 string@nil
 DEFVAR LF@?tmpvar_1
-MOVE LF@?tmpvar_1 nil@nil
+MOVE LF@?tmpvar_1 string@nil
 Testing: Expression result is in: (null)
 Testing: Precedence analysis returned 8

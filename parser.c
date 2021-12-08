@@ -160,6 +160,8 @@ int pCodeBody() {
     TryCall(newFunctionDefinition, token);
     genFnDef(fnName);
 
+    TryCall(STPush, symtab);
+
     // generate an unconditional jump to definitions
     genComment("Jumping to variable declaration");
     genUnconditionalJump(varDefStart);
@@ -185,9 +187,7 @@ int pCodeBody() {
     // TODO
 
     // <stat>
-    TryCall(STPush, symtab);
     TryCall(pStat, fnName);
-    STPop(symtab);
 
     // end
     RequireToken(t_idOrKeyword, "end");
@@ -216,6 +216,8 @@ int pCodeBody() {
    
     genComment2("Function definition done");
     genLabel(fnBypassLabelName);
+
+    STPop(symtab);
     
     // <codeBody>
     TryCall(pCodeBody);
@@ -261,10 +263,6 @@ int pCodeBody() {
     // The function name must be in the symtab, must be a function
     if(!STFind(symtab, token->data) || STGetIsVariable(symtab, token->data)){
       LOG("Calling an undeclared function or maybe it is not even a fn");
-      vypluj ERR(SYNTAX_ERR);
-    }
-    // The function must not have any return values
-    if(STGetRetType(symtab, token->data, 0) == -1){
       vypluj ERR(SYNTAX_ERR);
     }
 
@@ -358,7 +356,7 @@ int pFnCallArgList(char *fnName) {
       // Amount of arguments doesn't match
       if(fn->fnParamTypesBuf && fn->fnParamTypesBuf->len != 0){
         LOG("Param amount doesn't match\n");
-        vypluj ERR(SYNTAX_ERR);
+        vypluj ERR(PARAM_RET_ERR);
       }
     }
     
@@ -412,7 +410,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
       // Amount of arguments doesn't match
       if(!fn->fnParamTypesBuf || fn->fnParamTypesBuf->len != argCount){
         LOG("Param amount doesn't match");
-        vypluj ERR(SYNTAX_ERR);
+        vypluj ERR(PARAM_RET_ERR);
       }
     }
 
@@ -483,7 +481,7 @@ int pFnCallArg(char *fnName, int argCount) {
   // A parameter data type doesn't match
   }else if(STGetParamType(symtab, fnName, argCount - 1) != dataType){
     LOG("Param data type doesn't match\n");
-    vypluj ERR(SYNTAX_ERR);
+    vypluj ERR(PARAM_RET_ERR);
   }
 
   vypluj 0;
@@ -723,6 +721,7 @@ int pStatWithId(char *idName) {
 
     // -> = <expr>
     if (token->type == t_assignment) {
+      // TODO check data types
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
@@ -981,7 +980,7 @@ int pRetArgList(char *fnName) {
     // But if the function needs more than zero parameters, it's a syntax err
     if(fn->fnRetTypesBuf->len != 0){
       LOG("A function requires some return arguments but we received 0");
-      return ERR(SYNTAX_ERR);
+      return ERR(PARAM_RET_ERR);
     // Otherwise all is good
     }else{
       return 0;
@@ -1022,7 +1021,7 @@ int pRetNextArg(char *fnName, int argCount) {
     // Check if the amount of return arguments is right
     if(argCount != STFind(symtab, fnName)->fnRetTypesBuf->len){
       LOG("The amount of return arguments is not right");
-      return ERR(SYNTAX_ERR);
+      return ERR(PARAM_RET_ERR);
     }
     // Otherwise just stash that token (this is the end of the return stat)
     TryCall(stashToken, &token);
@@ -1237,6 +1236,7 @@ int pExpr(char **retVarName) {
 
   // An expression
   } else {
+    LOG("TOK: %s", token->data);
     TryCall(parseExpression, symtab, token, retVarName);
     LOG("Expr result is in %s", *retVarName);
     // An expression is required but the precedence analysis didn't find any
@@ -1449,7 +1449,7 @@ int fnRetDataType(char *fnName){
     // If they don't match -> err
     if(dataTypeInSymtab != dataType){
       LOG("Parameter types between fn decl and def don't match");
-      vypluj ERR(SYNTAX_ERR);
+      vypluj ERR(PARAM_RET_ERR);
     }
 
   // Otherwise, append the new data type to the function in the symtab
@@ -1495,7 +1495,7 @@ int fnDefinitionParamType(char *fnName, int paramCount){
     // If they don't match -> err
     if(dataTypeInSymtable != dataType){
       LOG("Parameter types between fn decl and def don't match");
-      return ERR(SYNTAX_ERR);
+      return ERR(PARAM_RET_ERR);
     }
 
   // Otherwise, append the new data type to the function in the symtab

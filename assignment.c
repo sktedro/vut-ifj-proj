@@ -154,20 +154,35 @@ AssignElement *AListGetLast(AssignElement *element) {
   return tmp;
 }
 
+bool AListIsLast(AssignElement *element) {
+
+  if(element->next == NULL) {
+    vypluj true;
+  }
+  vypluj false;
+}
+
 void AListGenerate(AssignElement *element) {
   AssignElement *tmp = element;
+  
+  
   int cnt = 0;
 
   while(tmp != NULL) {
-    if(tmp->generated == false) {
+    if(tmp != NULL) {
+      if(tmp->generated == false) {
       if(cnt == 0) {
-        genExprFirst(element);
+        genExprFirst(tmp);
         return;
       } else if(cnt == 2) {
-        genExprSecond(element);
+        
+        genExprSecond(tmp);
+        if(AListIsLast(tmp)) {
+          genExprEnd(element);
+        }
         return;
       } else if(tmp->next == NULL) {
-        genExprLast(element);
+        genExprLast(tmp);
         return;
       } else {
         genExpr(tmp);
@@ -177,9 +192,8 @@ void AListGenerate(AssignElement *element) {
       tmp = tmp->next;
       cnt++;
     }
+  }  
   }
-  
-
 }
 
 /*

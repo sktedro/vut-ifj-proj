@@ -7,8 +7,9 @@
 
 #include "precedence_analysis.h"
 
-
 extern int ret;
+
+extern STStack *symtab;
 
 // Precedence table
 // Could be simpler since rows (columns) repeat
@@ -27,7 +28,6 @@ char precTab[12][12] = {
     {'>', '>', '>', '>', '>', '>', '>', '>', '_', '>', '_', '>'}, // pt_id
     {'<', '<', '<', '<', '<', '<', '<', '<', '<', '_', '<', '_'}  // pt_dollar
 };
-
 
 /*
  *
@@ -874,7 +874,9 @@ bool isTokenAllowedInExpr(Token *token) {
   if (token->type == t_colon 
       || token->type == t_comma 
       || token->type == t_assignment 
-      || (!strEq(token->data, "nil") && isIFJ21Keyword(token))) {
+      || (!strEq(token->data, "nil") && isIFJ21Keyword(token))
+      || (STFind(symtab, token->data) 
+        && !STGetIsVariable(symtab, token->data))){
     return false;
   }
   return true;

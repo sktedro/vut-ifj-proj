@@ -1,0 +1,11 @@
+Testing: Token type is '0' and data 'varInt1'
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 float@0x1p+0
+DEFVAR LF@?tmpvar_1
+INT2FLOAT LF@?tmpvar_1 LF@varInt1_0
+DEFVAR LF@?tmpvar_2
+EQ LF@?tmpvar_2 LF@?tmpvar_1 LF@?tmpvar_0
+DEFVAR LF@?tmpvar_3
+NOT LF@?tmpvar_3 LF@?tmpvar_2
+Testing: Expression result is in: ?tmpvar_3
+Testing: Precedence analysis returned 0

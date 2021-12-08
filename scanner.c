@@ -144,10 +144,15 @@ int scanner(Token **token) {
   while (!lastChar) {
 
     c = fgetc(stdin);
-    /** fprintf(stderr, "%c\n", c); */
     if (c == EOF) {
+      // TODO: more state should be here
+      if(state == s_multiLineComment
+          || state == s_multiLineCommentPossibleEnd
+          || state == s_sciNum
+          || state == s_strStart){
+        return ERR(LEX_ERR);
+      }
       lastChar = true;
-      // TODO vyplut token?
     } else if (c == '\n') {
       LOCCount++;
     }

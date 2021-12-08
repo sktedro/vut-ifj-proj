@@ -1,6 +1,6 @@
 Testing: Token type is '8' and data '('
 DEFVAR LF@?tmpvar_0
-MUL LF@?tmpvar_0 LF@varInt1_0 LF@varInt2_0
+MUL LF@?tmpvar_0 LF@%var_varInt1_0 LF@%var_varInt2_0
 DEFVAR LF@?tmpvar_1
 MOVE LF@?tmpvar_1 int@1
 DEFVAR LF@?tmpvar_2
@@ -12,7 +12,7 @@ MOVE LF@?tmpvar_4 int@2
 DEFVAR LF@?tmpvar_5
 SUB LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
 DEFVAR LF@?tmpvar_6
-STRLEN LF@?tmpvar_6 LF@varStr1_0
+STRLEN LF@?tmpvar_6 LF@%var_varStr1_0
 DEFVAR LF@?tmpvar_7
 ADD LF@?tmpvar_7 LF@?tmpvar_5 LF@?tmpvar_6
 DEFVAR LF@?tmpvar_8
@@ -22,9 +22,9 @@ INT2FLOAT LF@?tmpvar_9 LF@?tmpvar_7
 DEFVAR LF@?tmpvar_10
 DIV LF@?tmpvar_10 LF@?tmpvar_8 LF@?tmpvar_9
 DEFVAR LF@?tmpvar_11
-FLOAT2INT LF@?tmpvar_11 LF@varNum1_0
+FLOAT2INT LF@?tmpvar_11 LF@%var_varNum1_0
 DEFVAR LF@?tmpvar_12
-IDIV LF@?tmpvar_12 LF@?tmpvar_11 LF@varInt3_0
+IDIV LF@?tmpvar_12 LF@?tmpvar_11 LF@%var_varInt3_0
 DEFVAR LF@?tmpvar_13
 MOVE LF@?tmpvar_13 int@2
 DEFVAR LF@?tmpvar_14

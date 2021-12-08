@@ -1,5 +1,5 @@
 Testing: Token type is '0' and data 'varNum1'
 DEFVAR LF@?tmpvar_0
-SUB LF@?tmpvar_0 LF@varNum1_0 LF@varNum2_0
+SUB LF@?tmpvar_0 LF@%var_varNum1_0 LF@%var_varNum2_0
 Testing: Expression result is in: ?tmpvar_0
 Testing: Precedence analysis returned 0

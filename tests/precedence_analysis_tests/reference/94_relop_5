@@ -1,8 +1,8 @@
 Testing: Token type is '0' and data 'varInt1'
 DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 nil@nil
+MOVE LF@?tmpvar_0 string@nil
 DEFVAR LF@?tmpvar_1
-EQ LF@?tmpvar_1 LF@varInt1_0 LF@?tmpvar_0
+EQ LF@?tmpvar_1 LF@%var_varInt1_0 LF@?tmpvar_0
 DEFVAR LF@?tmpvar_2
 NOT LF@?tmpvar_2 LF@?tmpvar_1
 Testing: Expression result is in: ?tmpvar_2

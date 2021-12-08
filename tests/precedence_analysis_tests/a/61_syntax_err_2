@@ -1,0 +1,6 @@
+ERROR: Syntax error at (around) line 3.
+Testing: Token type is '10' and data '..'
+DEFVAR LF@?tmpvar_0
+MOVE LF@?tmpvar_0 string@abc
+Testing: Expression result is in: (null)
+Testing: Precedence analysis returned 2

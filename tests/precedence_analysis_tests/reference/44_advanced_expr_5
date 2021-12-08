@@ -4,7 +4,7 @@ MOVE LF@?tmpvar_0 string@abc
 DEFVAR LF@?tmpvar_1
 STRLEN LF@?tmpvar_1 LF@?tmpvar_0
 DEFVAR LF@?tmpvar_2
-ADD LF@?tmpvar_2 LF@varInt1_0 LF@?tmpvar_1
+ADD LF@?tmpvar_2 LF@%var_varInt1_0 LF@?tmpvar_1
 DEFVAR LF@?tmpvar_3
 MOVE LF@?tmpvar_3 int@1
 DEFVAR LF@?tmpvar_4
@@ -18,7 +18,7 @@ ADD LF@?tmpvar_7 LF@?tmpvar_5 LF@?tmpvar_6
 DEFVAR LF@?tmpvar_8
 FLOAT2INT LF@?tmpvar_8 LF@?tmpvar_7
 DEFVAR LF@?tmpvar_9
-FLOAT2INT LF@?tmpvar_9 LF@varNum1_0
+FLOAT2INT LF@?tmpvar_9 LF@%var_varNum1_0
 DEFVAR LF@?tmpvar_10
 IDIV LF@?tmpvar_10 LF@?tmpvar_8 LF@?tmpvar_9
 DEFVAR LF@?tmpvar_11

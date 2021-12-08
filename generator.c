@@ -781,7 +781,7 @@ void genSubStrFnRet(char *varName) {
 // FUNCTIONS FOR MULTIPLE ASSIGMENT
 
 void genExprLabel(char *name) {
-  printf("LABEL %s\n", name);
+  printf("\nLABEL %s\n", name);
 }
 
 /*void genExprJump(char *label) {
@@ -810,21 +810,29 @@ char *getExprEndName() {
 
 void genExprFirst(AssignElement *element) {
   AssignElement *tmp = AListGetLast(element);
-  //AListDebugPrint(element);
   
+  
+  printf("\n\n");
   genUnconditionalJump(tmp->label);
+  //printf("ss\n");
   genExprLabel(element->label);
+  //printf("ss\n");
+  //printf("ss\n");
   element->generated = true;
 }
 
 void genExprLast(AssignElement *element) {
   AssignElement *tmp = AListGetLast(element);
 
+  genUnconditionalJump(element->prev->end);
+  //printf("KK\n");
   genUnconditionalJump(element->label);
   genExprLabel(tmp->label);
 
   tmp->generated = true;
 }
+
+
 
 void genExprSecond(AssignElement *element) {
   genUnconditionalJump(element->end);
