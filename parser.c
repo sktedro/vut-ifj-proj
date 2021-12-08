@@ -526,6 +526,11 @@ int pStat(char *fnName) {
     // [id]
     RequireIDToken(token);
 
+    // Check if the name doesn't already exist as a function
+    if(STFind(symtab, token->data) && !STGetIsVariable(symtab, token->data)){
+      return ERR(ID_DEF_ERR);
+    }
+
     // Insert the new ID to the symtable
     char *newVarName = token->data;
     TryCall(STInsert, symtab, newVarName);
