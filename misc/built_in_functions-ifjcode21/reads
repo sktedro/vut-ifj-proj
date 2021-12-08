@@ -1,0 +1,50 @@
+  # .ifjcode21
+  # JUMP *BYPASS
+
+
+
+LABEL reads0
+  PUSHFRAME
+
+  DEFVAR LF@result
+  READ LF@result string
+
+  JUMPIFEQ *reads_retnil LF@result string@EOF
+
+  JUMP *reads_end
+
+# Return nil
+LABEL *reads_retnil
+  MOVE LF@result nil@nil
+  JUMP *reads_end
+
+# Function end
+LABEL *reads_end
+  POPFRAME
+  DEFVAR LF@!ret_0
+  MOVE LF@!ret_0 TF@result
+  RETURN
+
+
+
+# LABEL *BYPASS
+#   CREATEFRAME
+#   PUSHFRAME
+#   CREATEFRAME
+#   CALL reads0
+#   WRITE LF@!ret_0
+# 
+#   # check if ret is nil
+#   JUMPIFEQ isnil LF@!ret_0 nil@nil
+# LABEL back
+# 
+#   # write a newline for debugging
+#   WRITE string@\010
+#   POPFRAME
+#   JUMP END
+# 
+# LABEL isnil
+#   WRITE string@is\032nil\010
+#   JUMP back
+# 
+# LABEL END

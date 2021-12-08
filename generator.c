@@ -653,9 +653,13 @@ int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
 
 void genBuiltInFunctions(){
   genUnconditionalJump("*built_in_functions_bypass");
-  // TODO add built in functions when they are done
+  printf("%s\n", reads);
+  printf("%s\n", readi);
+  printf("%s\n", readn);
+  printf("%s\n", tointeger);
   printf("%s\n", substr);
   printf("%s\n", ord);
+  printf("%s\n", chr);
   genLabel("*built_in_functions_bypass");
   printf("\n# END OF BUILT IN FUNCTIONS DEFINITIONS\n");
 }

@@ -6,6 +6,7 @@
 #define MISC_C
 
 #include "misc.h"
+#include "symtable.h"
 
 int ret = 0;
 int LOCCount = 1;
@@ -195,6 +196,85 @@ void GCCollect(){
   for(int i = 0; i < garbageCollector.ptrsUsed; i++){
     free(garbageCollector.pointers[i]);
   }
+}
+
+/**
+ * @brief Initialize all built in functions (add them to the symtable)
+ *
+ * @param symtab
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int initBuiltInFunctions(STStack *symtab){
+  // write
+  TryCall(STInsert, symtab, "write");
+  TryCall(STSetIsVariable, symtab, "write", false);
+  TryCall(STSetFnDefined, symtab, "write", true);
+
+  // reads
+  TryCall(STInsert, symtab, "reads");
+  TryCall(STSetName, symtab, "reads", "reads0");
+  TryCall(STSetIsVariable, symtab, "reads", false);
+  TryCall(STSetFnDefined, symtab, "reads", true);
+  TryCall(STAppendRetType, symtab, "reads", dt_string);
+
+  // readi
+  TryCall(STInsert, symtab, "readi");
+  TryCall(STSetName, symtab, "readi", "readi0");
+  TryCall(STSetIsVariable, symtab, "readi", false);
+  TryCall(STSetFnDefined, symtab, "readi", true);
+  TryCall(STAppendRetType, symtab, "readi", dt_integer);
+
+  // readn
+  TryCall(STInsert, symtab, "readn");
+  TryCall(STSetName, symtab, "readn", "readn0");
+  TryCall(STSetIsVariable, symtab, "readn", false);
+  TryCall(STSetFnDefined, symtab, "readn", true);
+  TryCall(STAppendRetType, symtab, "readn", dt_number);
+
+  // tointeger
+  TryCall(STInsert, symtab, "tointeger");
+  TryCall(STSetName, symtab, "tointeger", "tointeger0");
+  TryCall(STSetIsVariable, symtab, "tointeger", false);
+  TryCall(STSetFnDefined, symtab, "tointeger", true);
+  TryCall(STAppendParamType, symtab, "tointeger", dt_number);
+  TryCall(STAppendParamName, symtab, "tointeger", "f");
+  TryCall(STAppendRetType, symtab, "tointeger", dt_integer);
+
+  // substr
+  TryCall(STInsert, symtab, "substr");
+  TryCall(STSetName, symtab, "substr", "substr0");
+  TryCall(STSetIsVariable, symtab, "substr", false);
+  TryCall(STSetFnDefined, symtab, "substr", true);
+  TryCall(STAppendParamType, symtab, "substr", dt_string);
+  TryCall(STAppendParamType, symtab, "substr", dt_integer);
+  TryCall(STAppendParamType, symtab, "substr", dt_integer);
+  TryCall(STAppendParamName, symtab, "substr", "s");
+  TryCall(STAppendParamName, symtab, "substr", "i");
+  TryCall(STAppendParamName, symtab, "substr", "j");
+  TryCall(STAppendRetType, symtab, "substr", dt_string);
+
+  // ord
+  TryCall(STInsert, symtab, "ord");
+  TryCall(STSetName, symtab, "ord", "ord0");
+  TryCall(STSetIsVariable, symtab, "ord", false);
+  TryCall(STSetFnDefined, symtab, "ord", true);
+  TryCall(STAppendParamType, symtab, "ord", dt_string);
+  TryCall(STAppendParamType, symtab, "ord", dt_integer);
+  TryCall(STAppendParamName, symtab, "ord", "s");
+  TryCall(STAppendParamName, symtab, "ord", "i");
+  TryCall(STAppendRetType, symtab, "ord", dt_integer);
+
+  // chr
+  TryCall(STInsert, symtab, "chr");
+  TryCall(STSetName, symtab, "chr", "chr0");
+  TryCall(STSetIsVariable, symtab, "chr", false);
+  TryCall(STSetFnDefined, symtab, "chr", true);
+  TryCall(STAppendParamType, symtab, "chr", dt_integer);
+  TryCall(STAppendParamName, symtab, "chr", "i");
+  TryCall(STAppendRetType, symtab, "chr", dt_string);
+
+  return 0;
 }
 
 #endif

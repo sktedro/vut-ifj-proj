@@ -417,6 +417,14 @@ void GCDelete();
 
 void GCCollect();
 
+/**
+ * @brief Initialize all built in functions (add them to the symtable)
+ *
+ * @param symtab
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int initBuiltInFunctions(STStack *symtab) ForceRetUse;
 
 #endif
 /* end of file misc.h */

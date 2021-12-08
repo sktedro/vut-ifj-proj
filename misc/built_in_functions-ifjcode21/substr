@@ -2,7 +2,7 @@
 
 #JUMP _STR$NEXT_
 
-LABEL _$SUBSTR_
+LABEL substr0
 
     PUSHFRAME
 
@@ -94,7 +94,7 @@ LABEL _STR$RET_
 #DEFVAR TF@$$STRPARAM3
 #MOVE TF@$$STRPARAM3 int@2
 
-#CALL _$SUBSTR_
+#CALL substr0
 
 #DEFVAR GF@vysledok
 #MOVE GF@vysledok TF@$$STRRET

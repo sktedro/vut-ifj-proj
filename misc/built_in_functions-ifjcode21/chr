@@ -1,6 +1,6 @@
 # .ifjcode21
 
-LABEL _$CHR_
+LABEL chr0
   PUSHFRAME
 
   DEFVAR LF@$$CHRRET
@@ -46,7 +46,7 @@ LABEL _CHR$RET_
 # DEFVAR TF@$$CHRPARAM1
 # MOVE TF@$$CHRPARAM1 nil@nil
 # 
-# CALL _$CHR_ 
+# CALL chr0
 # 
 # DEFVAR GF@vysledok
 # MOVE GF@vysledok TF@$$CHRRET

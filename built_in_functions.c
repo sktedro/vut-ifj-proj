@@ -13,23 +13,110 @@
 #ifndef BUILT_IN_FUNCTIONS_C
 #define BUILT_IN_FUNCTIONS_C
 
-const char *reads = "                                                              \n\
+const char *reads = "                                                        \n\
+LABEL reads0                                                                 \n\
+  PUSHFRAME                                                                  \n\
+                                                                             \n\
+  DEFVAR LF@result                                                           \n\
+  READ LF@result string                                                      \n\
+                                                                             \n\
+  JUMPIFEQ *retnil LF@result string@EOF                                      \n\
+                                                                             \n\
+  JUMP *reads_end                                                            \n\
+                                                                             \n\
+# Return nil                                                                 \n\
+LABEL *retnil                                                                \n\
+  MOVE LF@result nil@nil                                                     \n\
+  JUMP *reads_end                                                            \n\
+                                                                             \n\
+# Function end                                                               \n\
+LABEL *reads_end                                                             \n\
+  POPFRAME                                                                   \n\
+  DEFVAR LF@!ret_0                                                           \n\
+  MOVE LF@!ret_0 TF@result                                                   \n\
+  RETURN                                                                     \n\
+                                                                             \n\
 ";
 
-const char *readi = "                                                              \n\
+const char *readi = "                                                        \n\
+LABEL readi0                                                                 \n\
+  PUSHFRAME                                                                  \n\
+                                                                             \n\
+  DEFVAR LF@result                                                           \n\
+  READ LF@result int                                                         \n\
+                                                                             \n\
+  JUMPIFEQ *readi_retnil LF@result int@-1                                    \n\
+                                                                             \n\
+  JUMP *readi_end                                                            \n\
+                                                                             \n\
+# Return nil                                                                 \n\
+LABEL *readi_retnil                                                          \n\
+  MOVE LF@result nil@nil                                                     \n\
+  JUMP *readi_end                                                            \n\
+                                                                             \n\
+# Function end                                                               \n\
+LABEL *readi_end                                                             \n\
+  POPFRAME                                                                   \n\
+  DEFVAR LF@!ret_0                                                           \n\
+  MOVE LF@!ret_0 TF@result                                                   \n\
+  RETURN                                                                     \n\
+                                                                             \n\
 ";
 
-const char *readn = "                                                              \n\
+const char *readn = "                                                        \n\
+LABEL readn0                                                                 \n\
+  PUSHFRAME                                                                  \n\
+                                                                             \n\
+  DEFVAR LF@result                                                           \n\
+  READ LF@result float                                                       \n\
+                                                                             \n\
+  JUMPIFEQ *readn_retnil LF@result float@-0x1p+0                             \n\
+                                                                             \n\
+  JUMP *readn_end                                                            \n\
+                                                                             \n\
+# Return nil                                                                 \n\
+LABEL *readn_retnil                                                          \n\
+  MOVE LF@result nil@nil                                                     \n\
+  JUMP *readn_end                                                            \n\
+                                                                             \n\
+# Function end                                                               \n\
+LABEL *readn_end                                                             \n\
+  POPFRAME                                                                   \n\
+  DEFVAR LF@!ret_0                                                           \n\
+  MOVE LF@!ret_0 TF@result                                                   \n\
+  RETURN                                                                     \n\
+                                                                             \n\
 ";
 
-const char *write = "                                                              \n\
+const char *tointeger = "                                                    \n\
+LABEL tointeger0                                                             \n\
+  PUSHFRAME                                                                  \n\
+                                                                             \n\
+  DEFVAR LF@type                                                             \n\
+  TYPE LF@type LF@$param_0                                                   \n\
+  JUMPIFNEQ *tointeger_retnil LF@type string@float                           \n\
+                                                                             \n\
+  DEFVAR LF@result                                                           \n\
+  FLOAT2INT LF@result LF@$param_0                                            \n\
+                                                                             \n\
+  JUMP *tointeger_end                                                        \n\
+                                                                             \n\
+# Return nil                                                                 \n\
+LABEL *tointeger_retnil                                                      \n\
+  MOVE LF@result nil@nil                                                     \n\
+  JUMP *tointeger_end                                                        \n\
+                                                                             \n\
+# Function end                                                               \n\
+LABEL *tointeger_end                                                         \n\
+  POPFRAME                                                                   \n\
+  DEFVAR LF@!ret_0                                                           \n\
+  MOVE LF@!ret_0 TF@result                                                   \n\
+  RETURN                                                                     \n\
+                                                                             \n\
 ";
 
-const char *tointeger = "                                                          \n\
-";
-
-const char *substr = "                                                             \n\
-LABEL _$SUBSTR_                                                              \n\
+const char *substr = "                                                       \n\
+LABEL substr0                                                                \n\
                                                                              \n\
     PUSHFRAME                                                                \n\
                                                                              \n\
@@ -110,7 +197,7 @@ LABEL _STR$RET_                                                              \n\
                                                                              \n\
 ";
 
-const char *ord = "                                                                \n\
+const char *ord = "                                                          \n\
 LABEL ord0                                                                   \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\
@@ -125,28 +212,28 @@ LABEL ord0                                                                   \n\
   DEFVAR LF@strlenGTi                                                        \n\
   STRLEN LF@len LF@$param_0                                                  \n\
   GT LF@strlenGTi LF@len LF@$param_1                                         \n\
-  JUMPIFEQ *retnil LF@strlenGTi bool@false                                   \n\
+  JUMPIFEQ *ord_retnil LF@strlenGTi bool@false                               \n\
                                                                              \n\
 # Return nil if i < 0                                                        \n\
   DEFVAR LF@iLT0                                                             \n\
   LT LF@iLT0 LF@$param_1 int@0                                               \n\
-  JUMPIFEQ *retnil LF@iLT0 bool@true                                         \n\
+  JUMPIFEQ *ord_retnil LF@iLT0 bool@true                                     \n\
                                                                              \n\
 # Get the result and return                                                  \n\
   STRI2INT LF@result LF@$param_0 LF@$param_1                                 \n\
-  JUMP *ordEnd                                                               \n\
+  JUMP *ord_end                                                              \n\
                                                                              \n\
 # Exit with err                                                              \n\
 LABEL *ord_err                                                               \n\
   EXIT int@8                                                                 \n\
                                                                              \n\
 # Return nil                                                                 \n\
-LABEL *retnil                                                                \n\
+LABEL *ord_retnil                                                            \n\
   MOVE LF@result nil@nil                                                     \n\
-  JUMP *ordEnd                                                               \n\
+  JUMP *ord_end                                                              \n\
                                                                              \n\
 # Function end                                                               \n\
-LABEL *ordEnd                                                                \n\
+LABEL *ord_end                                                               \n\
   POPFRAME                                                                   \n\
   DEFVAR LF@!ret_0                                                           \n\
   MOVE LF@!ret_0 TF@result                                                   \n\
@@ -154,8 +241,8 @@ LABEL *ordEnd                                                                \n\
                                                                              \n\
 ";
 
-const char *chr = "                                                                \n\
-LABEL _$CHR_                                                                 \n\
+const char *chr = "                                                          \n\
+LABEL chr0                                                                   \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\
   DEFVAR LF@$$CHRRET                                                         \n\
