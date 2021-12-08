@@ -2,5 +2,5 @@ ERROR: Data types of operands in an expression are not compatible at (around) li
 Testing: Token type is '10' and data '#'
 STRLEN LF@?tmpvar_0 LF@%var_varStr1_0
 MOVE LF@?tmpvar_1 string@abc
-Testing: Expression result is in: (null)
+Testing: Expression result is in: (null) and has data type of -1
 Testing: Precedence analysis returned 6

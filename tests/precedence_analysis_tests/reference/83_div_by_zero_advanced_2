@@ -8,5 +8,5 @@ MOVE LF@?tmpvar_4 int@0
 ADD LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
 INT2FLOAT LF@?tmpvar_6 LF@?tmpvar_0
 INT2FLOAT LF@?tmpvar_7 LF@?tmpvar_5
-Testing: Expression result is in: (null)
+Testing: Expression result is in: (null) and has data type of -1
 Testing: Precedence analysis returned 9

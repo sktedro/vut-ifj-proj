@@ -1,4 +1,4 @@
 Testing: Token type is '0' and data 'varInt1'
 EQ LF@?tmpvar_0 LF@%var_varInt1_0 LF@%var_varInt2_0
-Testing: Expression result is in: ?tmpvar_0
+Testing: Expression result is in: ?tmpvar_0 and has data type of 4
 Testing: Precedence analysis returned 0

@@ -1,4 +1,4 @@
 Testing: Token type is '1' and data '1'
 MOVE LF@?tmpvar_0 int@1
-Testing: Expression result is in: ?tmpvar_0
+Testing: Expression result is in: ?tmpvar_0 and has data type of 0
 Testing: Precedence analysis returned 0

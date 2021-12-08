@@ -2,5 +2,5 @@ Testing: Token type is '4' and data 'abc'
 MOVE LF@?tmpvar_0 string@abc
 MOVE LF@?tmpvar_1 string@def
 CONCAT LF@?tmpvar_2 LF@?tmpvar_0 LF@?tmpvar_1
-Testing: Expression result is in: ?tmpvar_2
+Testing: Expression result is in: ?tmpvar_2 and has data type of 2
 Testing: Precedence analysis returned 0

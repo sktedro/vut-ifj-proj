@@ -1,5 +1,5 @@
 Testing: Token type is '0' and data 'varInt1'
 MOVE LF@?tmpvar_0 int@1
 SUB LF@?tmpvar_1 LF@%var_varInt1_0 LF@?tmpvar_0
-Testing: Expression result is in: ?tmpvar_1
+Testing: Expression result is in: ?tmpvar_1 and has data type of 0
 Testing: Precedence analysis returned 0

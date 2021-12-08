@@ -4,5 +4,5 @@ FLOAT2INT LF@?tmpvar_1 LF@%var_varNum1_0
 IDIV LF@?tmpvar_2 LF@?tmpvar_1 LF@?tmpvar_0
 INT2FLOAT LF@?tmpvar_3 LF@?tmpvar_2
 ADD LF@?tmpvar_4 LF@?tmpvar_3 LF@%var_varNum2_0
-Testing: Expression result is in: ?tmpvar_4
+Testing: Expression result is in: ?tmpvar_4 and has data type of 1
 Testing: Precedence analysis returned 0

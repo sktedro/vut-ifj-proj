@@ -1,5 +1,5 @@
 Testing: Token type is '0' and data 'varNum1'
 FLOAT2INT LF@?tmpvar_0 LF@%var_varNum1_0
 IDIV LF@?tmpvar_1 LF@?tmpvar_0 LF@%var_varInt1_0
-Testing: Expression result is in: ?tmpvar_1
+Testing: Expression result is in: ?tmpvar_1 and has data type of 0
 Testing: Precedence analysis returned 0

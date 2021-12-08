@@ -3,5 +3,5 @@ MOVE LF@?tmpvar_0 float@0x1p+1
 FLOAT2INT LF@?tmpvar_1 LF@%var_varNum1_0
 FLOAT2INT LF@?tmpvar_2 LF@?tmpvar_0
 IDIV LF@?tmpvar_3 LF@?tmpvar_1 LF@?tmpvar_2
-Testing: Expression result is in: ?tmpvar_3
+Testing: Expression result is in: ?tmpvar_3 and has data type of 0
 Testing: Precedence analysis returned 0

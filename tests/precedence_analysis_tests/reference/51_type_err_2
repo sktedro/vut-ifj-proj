@@ -1,5 +1,5 @@
 ERROR: Data types of operands in an expression are not compatible at (around) line 3.
 Testing: Token type is '0' and data 'varStr1'
 MOVE LF@?tmpvar_0 int@2
-Testing: Expression result is in: (null)
+Testing: Expression result is in: (null) and has data type of -1
 Testing: Precedence analysis returned 6

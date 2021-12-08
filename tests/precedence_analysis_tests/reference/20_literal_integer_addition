@@ -2,5 +2,5 @@ Testing: Token type is '1' and data '1'
 MOVE LF@?tmpvar_0 int@1
 MOVE LF@?tmpvar_1 int@2
 ADD LF@?tmpvar_2 LF@?tmpvar_0 LF@?tmpvar_1
-Testing: Expression result is in: ?tmpvar_2
+Testing: Expression result is in: ?tmpvar_2 and has data type of 0
 Testing: Precedence analysis returned 0

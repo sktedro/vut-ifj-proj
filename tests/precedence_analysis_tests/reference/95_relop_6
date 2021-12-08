@@ -4,5 +4,5 @@ ADD LF@?tmpvar_1 LF@?tmpvar_0 LF@%var_varNum1_0
 INT2FLOAT LF@?tmpvar_2 LF@%var_varInt2_0
 MUL LF@?tmpvar_3 LF@%var_varNum2_0 LF@?tmpvar_2
 GT LF@?tmpvar_4 LF@?tmpvar_1 LF@?tmpvar_3
-Testing: Expression result is in: ?tmpvar_4
+Testing: Expression result is in: ?tmpvar_4 and has data type of 4
 Testing: Precedence analysis returned 0

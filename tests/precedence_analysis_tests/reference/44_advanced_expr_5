@@ -11,5 +11,5 @@ FLOAT2INT LF@?tmpvar_8 LF@?tmpvar_7
 FLOAT2INT LF@?tmpvar_9 LF@%var_varNum1_0
 IDIV LF@?tmpvar_10 LF@?tmpvar_8 LF@?tmpvar_9
 MUL LF@?tmpvar_11 LF@?tmpvar_4 LF@?tmpvar_10
-Testing: Expression result is in: ?tmpvar_11
+Testing: Expression result is in: ?tmpvar_11 and has data type of 0
 Testing: Precedence analysis returned 0

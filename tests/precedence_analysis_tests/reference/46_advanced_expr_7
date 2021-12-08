@@ -22,5 +22,5 @@ INT2FLOAT LF@?tmpvar_19 LF@?tmpvar_18
 DIV LF@?tmpvar_20 LF@?tmpvar_17 LF@?tmpvar_19
 ADD LF@?tmpvar_21 LF@?tmpvar_16 LF@?tmpvar_20
 MUL LF@?tmpvar_22 LF@?tmpvar_10 LF@?tmpvar_21
-Testing: Expression result is in: ?tmpvar_22
+Testing: Expression result is in: ?tmpvar_22 and has data type of 1
 Testing: Precedence analysis returned 0

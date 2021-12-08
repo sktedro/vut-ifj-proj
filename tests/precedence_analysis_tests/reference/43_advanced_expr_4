@@ -6,5 +6,5 @@ IDIV LF@?tmpvar_3 LF@%var_varInt2_0 LF@?tmpvar_2
 MOVE LF@?tmpvar_4 int@2
 ADD LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
 MUL LF@?tmpvar_6 LF@?tmpvar_0 LF@?tmpvar_5
-Testing: Expression result is in: ?tmpvar_6
+Testing: Expression result is in: ?tmpvar_6 and has data type of 0
 Testing: Precedence analysis returned 0

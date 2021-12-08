@@ -5,5 +5,5 @@ CONCAT LF@?tmpvar_2 LF@?tmpvar_1 LF@%var_varStr3_0
 CONCAT LF@?tmpvar_3 LF@?tmpvar_0 LF@?tmpvar_2
 CONCAT LF@?tmpvar_4 LF@%var_varStr2_0 LF@?tmpvar_3
 CONCAT LF@?tmpvar_5 LF@%var_varStr1_0 LF@?tmpvar_4
-Testing: Expression result is in: ?tmpvar_5
+Testing: Expression result is in: ?tmpvar_5 and has data type of 2
 Testing: Precedence analysis returned 0

@@ -1,4 +1,4 @@
 ERROR: Syntax error at (around) line 3.
 Testing: Token type is '8' and data '('
-Testing: Expression result is in: (null)
+Testing: Expression result is in: (null) and has data type of -1
 Testing: Precedence analysis returned 2

@@ -5,5 +5,5 @@ INT2FLOAT LF@?tmpvar_2 LF@?tmpvar_0
 DIV LF@?tmpvar_3 LF@?tmpvar_1 LF@?tmpvar_2
 INT2FLOAT LF@?tmpvar_4 LF@%var_varInt1_0
 ADD LF@?tmpvar_5 LF@?tmpvar_4 LF@?tmpvar_3
-Testing: Expression result is in: ?tmpvar_5
+Testing: Expression result is in: ?tmpvar_5 and has data type of 1
 Testing: Precedence analysis returned 0

@@ -1,4 +1,4 @@
 Testing: Token type is '8' and data '('
 MOVE LF@?tmpvar_0 int@2
-Testing: Expression result is in: ?tmpvar_0
+Testing: Expression result is in: ?tmpvar_0 and has data type of 0
 Testing: Precedence analysis returned 0

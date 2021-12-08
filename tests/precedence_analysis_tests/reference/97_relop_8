@@ -5,5 +5,5 @@ MOVE LF@?tmpvar_2 float@0x1.8p+1
 INT2FLOAT LF@?tmpvar_3 LF@?tmpvar_1
 GT LF@?tmpvar_4 LF@?tmpvar_3 LF@?tmpvar_2
 NOT LF@?tmpvar_5 LF@?tmpvar_4
-Testing: Expression result is in: ?tmpvar_5
+Testing: Expression result is in: ?tmpvar_5 and has data type of 4
 Testing: Precedence analysis returned 0

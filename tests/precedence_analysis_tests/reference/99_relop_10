@@ -10,5 +10,5 @@ MUL LF@?tmpvar_7 LF@%var_varNum1_0 LF@?tmpvar_6
 DIV LF@?tmpvar_8 LF@?tmpvar_7 LF@%var_varNum2_0
 LT LF@?tmpvar_9 LF@?tmpvar_5 LF@?tmpvar_8
 NOT LF@?tmpvar_10 LF@?tmpvar_9
-Testing: Expression result is in: ?tmpvar_10
+Testing: Expression result is in: ?tmpvar_10 and has data type of 4
 Testing: Precedence analysis returned 0

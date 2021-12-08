@@ -1,6 +1,6 @@
 Testing: Token type is '0' and data 'varInt1'
-MOVE LF@?tmpvar_0 string@nil
+MOVE LF@?tmpvar_0 nil@nil
 EQ LF@?tmpvar_1 LF@%var_varInt1_0 LF@?tmpvar_0
 NOT LF@?tmpvar_2 LF@?tmpvar_1
-Testing: Expression result is in: ?tmpvar_2
+Testing: Expression result is in: ?tmpvar_2 and has data type of 4
 Testing: Precedence analysis returned 0

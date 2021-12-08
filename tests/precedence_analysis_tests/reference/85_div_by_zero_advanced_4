@@ -6,5 +6,5 @@ MOVE LF@?tmpvar_2 int@0
 INT2FLOAT LF@?tmpvar_3 LF@?tmpvar_2
 MUL LF@?tmpvar_4 LF@?tmpvar_1 LF@?tmpvar_3
 INT2FLOAT LF@?tmpvar_5 LF@?tmpvar_0
-Testing: Expression result is in: (null)
+Testing: Expression result is in: (null) and has data type of -1
 Testing: Precedence analysis returned 9

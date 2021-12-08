@@ -1,4 +1,4 @@
 Testing: Token type is '0' and data 'varStr1'
 CONCAT LF@?tmpvar_0 LF@%var_varStr1_0 LF@%var_varStr2_0
-Testing: Expression result is in: ?tmpvar_0
+Testing: Expression result is in: ?tmpvar_0 and has data type of 2
 Testing: Precedence analysis returned 0
