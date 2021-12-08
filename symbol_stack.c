@@ -1,5 +1,12 @@
-/*
- * A stack structure implemented as a linked list
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file symbol_stack.c
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef SYMBOL_STACK_C

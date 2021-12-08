@@ -1,5 +1,12 @@
-/*
- * Enumerators, structure definitions and miscellaneous functions
+/**
+ * VUT FIT - IFJ 2021
+ *
+ * @file misc.h
+ *
+ * @author Patrik Skaloš (xskalo01)
+ * @author Jana Kováčiková (xkovac59)
+ * @author Alexaner Okrucký (xokruc00)
+ * @author Jiřina Frýbortová (xfrybo01)
  */
 
 #ifndef MISC_H
