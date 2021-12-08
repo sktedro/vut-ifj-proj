@@ -248,5 +248,15 @@ int STGetRetType(STStack *stack, char *key, int index);
  */
 int STGetParamName(STStack *stack, char **destPtr, char *key, int index) ForceRetUse;
 
+/**
+ * @brief Deletes all elements of the symtable one by one and if an undefined
+ * function is found, returns an error
+ *
+ * @param stack: symtable
+ *
+ * @return 0 if no undefined function was found, errcode otherwise
+ */
+int STFindUndefinedFunctions(STStack *stack) ForceRetUse;
+
 #endif
 /* end of file symtable.h */

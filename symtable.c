@@ -59,8 +59,10 @@ void STPop(STStack *stack) {
  * @return 0 if successful, errcode otherwise
  */
 int STInsert(STStack *stack, char *key) {
-  if(STFind(stack, key) && STFind(stack, key)->isVariable == false){
-    // There is a function with that name already in the symtab!!
+  // Error if there is a variable with the same key already in that frame
+  STTreeNode *tree = stack->top->table;
+  STElem *existingElem = treeGetData(tree, key);
+  if(existingElem && existingElem->isVariable){
     return ERR(ID_DEF_ERR);
   }
   STStackElem *frame = STStackTop(stack);
@@ -151,6 +153,11 @@ int STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
   if(!STFind(stack, key)){
     return ERR(SYNTAX_ERR);
   }
+  // Redefinition of a function!
+  if(STFind(stack, key)->fnDefined == true){
+    return ERR(ID_DEF_ERR);
+  }
+  // Declaring a function after it has been already defined!
   STFind(stack, key)->fnDefined = fnDefined;
   return 0;
 }
@@ -165,6 +172,14 @@ int STSetFnDefined(STStack *stack, char *key, bool fnDefined) {
 int STSetFnDeclared(STStack *stack, char *key, bool fnDeclared) {
   if(!STFind(stack, key)){
     return ERR(SYNTAX_ERR);
+  }
+  // Redeclaration of a function!
+  if(STFind(stack, key)->fnDeclared == true){
+    return ERR(ID_DEF_ERR);
+  }
+  // Declaring a function after it has been already defined!
+  if(STFind(stack, key)->fnDefined == true){
+    return ERR(ID_DEF_ERR);
   }
   STFind(stack, key)->fnDeclared = fnDeclared;
   return 0;
@@ -429,6 +444,27 @@ int STGetParamName(STStack *stack, char **destPtr, char *key, int index) {
     return 0;
   }
   return -1;
+}
+
+/**
+ * @brief Deletes all elements of the symtable one by one and if an undefined
+ * function is found, returns an error
+ *
+ * @param stack: symtable
+ *
+ * @return 0 if no undefined function was found, errcode otherwise
+ */
+int STFindUndefinedFunctions(STStack *stack){
+  STStackElem *tree = stack->top;
+  while(tree->table){
+    if(STFind(stack, tree->table->key)
+        && !STGetIsVariable(stack, tree->table->key) 
+        && !STGetFnDefined(stack, tree->table->key)){
+      return ERR(ID_DEF_ERR);
+    }
+    treeDelete(&(tree->table), tree->table->key);
+  }
+  return 0;
 }
 
 #endif

@@ -70,8 +70,8 @@ int treeInsert(STTreeNode **root, char *key, int frame) {
   } else if (strcmp(key, (*root)->key) > 0) {
     TryCall(treeInsert, &((*root)->rightChild), key, frame);
   } else {
-    return ERR(ID_DEF_ERR);
-    fprintf(stderr, "Inserting a key into a binary tree that is already there.\n");
+    /** return ERR(ID_DEF_ERR); */
+    LOG("WARNING: Inserting a key into a binary tree that is already there.");
   }
   vypluj 0;
 }

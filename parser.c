@@ -200,6 +200,7 @@ int pCodeBody() {
     genLabel(varDefStart);
     for(int i = 0; i < varDefBuff->len; i++) {
       genVarDefLF(varDefBuff->data[i]);
+      genAssignLiteral(varDefBuff->data[i], dt_nil, "nil", "LF");
     }
     genComment("Jump from var declarations");
     genUnconditionalJump(varDefJumpBack);

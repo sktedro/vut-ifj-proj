@@ -59,12 +59,21 @@ int main() {
   TryCall(STAppendParamName, symtab, "chr", "i");
   TryCall(STAppendRetType, symtab, "chr", dt_string);
   
+  // TODO check if there is a function in the symtable that is not defined!
+  // If so -> error
+
 
   ret = pStart();
   if(ret){
-    /** GCCollect(); */
+    GCCollect();
     free(garbageCollector.pointers);
+    return ret;
   }
+
+  ret = STFindUndefinedFunctions(symtab);
+
+  GCCollect();
+  free(garbageCollector.pointers);
 
   return ret;
 }
