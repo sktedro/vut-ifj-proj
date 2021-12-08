@@ -825,8 +825,8 @@ int pStatWithId(char *idName) {
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       AListGenerate(assignmentElement);
-      TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
-
+      int type = STGetVarDataType(symtab, idName);
+      TryCall(pExpr, &retVarName, type);
       if(AListGetLast(assignmentElement)->generated) {
         genExprEnd(assignmentElement);
       }
@@ -852,7 +852,7 @@ int pStatWithId(char *idName) {
       retVarName = NULL;
       //printf("IDEME GENEROVAŤ 1 ");
       AListGenerate(assignmentElement);
-      TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
+      TryCall(pExpr, &retVarName, type);
       if(retVarName == NULL) {
         vypluj ERR(SYNTAX_ERR);
       }
