@@ -30,9 +30,17 @@ int AListInit(AssignElement **element) {
   return 0;
 }
 
-void AListAdd(AssignElement **head, char *name, char *label, bool first, char *end) {
-  AssignElement *element;
+void AListAdd(AssignElement **head, char *name, char *label, bool first,int dataType, char *end) {
+  
+   AssignElement *element;
   AssignElement *tmp = *head;
+
+  if((*head) != NULL && (*head)->name == NULL) {
+    (*head)->name = name;
+    (*head)->label = label;
+    (*head)->dataType = dataType;
+    return;
+  }
 
   AListInit(&element);
 
@@ -323,8 +331,15 @@ na stack ukladáme identifikátory
 generujeme pekne postupne zľava a výsledok hádžeme do fronty
 ak máme funkciu, do fronty hodíme n krát TF@!ret, keď n je počet ret arg 
 
-stack: id1, id2, id3, id4
-fronta: ret_1, ret_2, expr2result, expr1result
+fronta: id1, id2, id3, id4 <- mame
+stack: ret_1, ret_2, expr2result, expr1result
+
+fn
+
+fo(fn)
+
+stack(fn)
+
 
 
 jump last

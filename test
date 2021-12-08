@@ -1,5 +1,7 @@
 .ifjcode21
 
+# END OF BUILT IN FUNCTIONS DEFINITIONS
+
 # New function definition
 JUMP *label__0
 LABEL ret0
@@ -11,16 +13,14 @@ JUMP *label__1
 
 # Jump back here from declarations
 LABEL *label__2
-MOVE LF@?tmpvar_0 int@10
-MOVE LF@%var_r_1 LF@?tmpvar_0
-MOVE LF@?tmpvar_1 int@20
-MOVE LF@%var_s_1 LF@?tmpvar_1
 
 # Return encountered - returning
+MOVE LF@?tmpvar_0 int@10
 DEFVAR LF@!ret_0
-MOVE LF@!ret_0 LF@%var_r_1
+MOVE LF@!ret_0 LF@?tmpvar_0
+MOVE LF@?tmpvar_1 int@20
 DEFVAR LF@!ret_1
-MOVE LF@!ret_1 LF@%var_s_1
+MOVE LF@!ret_1 LF@?tmpvar_1
 POPFRAME
 RETURN
 # Return done
@@ -29,12 +29,8 @@ JUMP *label__3
 
 # Variable declarations
 LABEL *label__1
-DEFVAR LF@%var_r_1
-MOVE LF@%var_r_1 nil@nil
 DEFVAR LF@?tmpvar_0
 MOVE LF@?tmpvar_0 nil@nil
-DEFVAR LF@%var_s_1
-MOVE LF@%var_s_1 nil@nil
 DEFVAR LF@?tmpvar_1
 MOVE LF@?tmpvar_1 nil@nil
 
@@ -64,18 +60,8 @@ JUMP *label__6
 
 # Jump back here from declarations
 LABEL *label__7
-
-
-JUMP *label_EXPR1
-
-LABEL *label_EXPR0
-JUMP *label_EXPREND0
-
-LABEL *label_EXPR1
-JUMP *label_EXPR0
-
-LABEL *label_EXPREND0
-MOVE LF@%var_a_1 LF@!ret_0
+JUMP *label_bypass_11
+LABEL *label_eval_12
 
 # Calling a function inside a function
 
@@ -88,20 +74,33 @@ CREATEFRAME
 CALL ret0
 
 # Function call inside a function done
-JUMP *label_EXPR0
+JUMP *label_ASSEND_10
+LABEL *label_bypass_11
 
-LABEL *label_EXPREND0
-MOVE LF@%var_a_1 TF@!ret_0
+# Calling write functions
+CREATEFRAME
+DEFVAR TF@$param__0
+JUMPIFEQ *label_isnil_13 LF@%var_a_1 nil@nil
+MOVE TF@$param__0 LF@%var_a_1
+JUMP *label_notnil_14
+LABEL *label_isnil_13
+MOVE TF@$param__0 string@nil
+LABEL *label_notnil_14
+WRITE TF@$param__0
+DEFVAR TF@$param__1
+JUMPIFEQ *label_isnil_15 LF@%var_b_1 nil@nil
+MOVE TF@$param__1 LF@%var_b_1
+JUMP *label_notnil_16
+LABEL *label_isnil_15
+MOVE TF@$param__1 string@nil
+LABEL *label_notnil_16
+WRITE TF@$param__1
 JUMP *label__8
 
 # Variable declarations
 LABEL *label__6
-DEFVAR LF@%var_r_1
-MOVE LF@%var_r_1 nil@nil
 DEFVAR LF@?tmpvar_0
 MOVE LF@?tmpvar_0 nil@nil
-DEFVAR LF@%var_s_1
-MOVE LF@%var_s_1 nil@nil
 DEFVAR LF@?tmpvar_1
 MOVE LF@?tmpvar_1 nil@nil
 DEFVAR LF@%var_a_1

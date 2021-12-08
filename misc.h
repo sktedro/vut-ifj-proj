@@ -374,6 +374,7 @@ typedef struct assignmentElement {
   char *name;    // id string
   char *label;   // id value
   bool first;
+  int dataType;
   bool generated;
   char *end;
   struct assignmentElement *prev; 

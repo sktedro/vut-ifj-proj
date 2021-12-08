@@ -24,7 +24,7 @@ int pStringFunctions(char *varName);
 /*
  * Rules
  */
-
+int processExpr(bool *assignmentDone, char *endLabel);
 int pStart();
 int pReq();
 int pCodeBody();
@@ -35,7 +35,7 @@ int pNextFnCallArg();
 int pFnCallArg();
 int pStat();
 int pStatWithId();
-int pNextAssign();
+int pNextAssign(bool *assignmentDone, char *endLabel);
 int pFnDefinitionParamTypeList(char *fnName);
 int pNextFnDefinitionParamType(char *fnName, int paramCount);
 int pRetArgList(char *fnName);

@@ -1,15 +1,14 @@
 require "ifj21"
 
 function ret() : integer, integer
-    local r : integer = 10
-    local s : integer = 20
-    return r, s
+    return 10, 20
 end
 
 function main()
     local a : integer
     local b : integer
-    a,b  = ret()
+    a, b = ret()
+    write(a, b)
 end
 
 

@@ -16,7 +16,7 @@
 #include "generator.h"
 
 int AListInit(AssignElement **element);
-void AListAdd(AssignElement **head, char *name, char *label, bool first, char *end);
+void AListAdd(AssignElement **head, char *name, char *label, bool first, int dataType,char *end);
 int AListGetLength(AssignElement *element);
 AssignElement *AListGetElementByIndex(AssignElement *element, int index);
 AssignElement *AListGetLast(AssignElement *element);
