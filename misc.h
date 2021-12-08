@@ -11,7 +11,9 @@
 #include <string.h>
 
 /*
+ *
  * Constants
+ *
  */
 
 // If set to 0, no debug prints will be written
@@ -21,7 +23,9 @@
 #define GCINITLEN 1024
 
 /*
+ *
  *  Error codes
+ *
  */
 
 #define LEX_ERR 1         // lexical analysis error
@@ -36,13 +40,20 @@
 #define INTERN_ERR 99     // intern error (memory allocation etc.)
 
 /*
+ *
  * Macros
+ *
  */
+
+// Append this after every declaration of a function which might return an
+// errcode (eg. "int fn() ForceRetUse")
+#define ForceRetUse __attribute__((warn_unused_result))
 
 // ♥
 #define vypluj return
 #define condVypluj CondReturn
 
+// If DEBUGTOGGLE is set to 1, print debugging info when returning an error
 #define ERR(errCode)                                                           \
   DEBUGTOGGLE ?                                                                \
     fprintf(stderr, "LOG: %s:%d:%s(): ", __FILE__, __LINE__, __func__) * 0     \
@@ -72,6 +83,8 @@
     }                                                                          \
   } while (0)
 
+// Initialize a p* function in parser
+// If DEBUGTOGGLE is set to 1, also print debugging info
 #define RuleFnInit                                                             \
   do {                                                                         \
     if (DEBUGTOGGLE) {                                                         \
@@ -82,6 +95,8 @@
   Token *token = NULL;                                                         \
   (void) token;
 
+// Get a new token. If the scanner returned nonzero, return it. If the scanner
+// returned NULL, throw a syntax err
 #define GetToken                                                               \
   ret = scanner(&token);                                                       \
   if(ret){                                                                     \
@@ -111,6 +126,7 @@
     vypluj err(SYNTAX_ERR);                                                    \
   }                                                                            \
 
+// Get a new token and if it is not an identifier, throw a syntax err
 #define RequireIDToken(tok)                                                    \
   GetToken;                                                                    \
   if(tok->type != t_idOrKeyword                                                \
@@ -154,10 +170,10 @@
     /*TODO return err(ret);                                                           */\
   }
 
-#define ForceRetUse __attribute__((warn_unused_result))
-
 /*
+ *
  * Enumerations
+ *
  */
 
 // Enumeration of states of the finite state machine
@@ -260,33 +276,35 @@ enum IFJ21DataTypes {
 };
 
 /*
+ *
  * Structures
+ *
  */
 
 // Structure defining the char buffer
 typedef struct {
   char *data;
-  int len;  // Actual buffer data length
-  int size; // Size allocated for the buffer
+  int len;      // Actual buffer data length
+  int size;     // Size allocated for the buffer
 } CharBuffer;
 
 // Structure defining the int buffer
 typedef struct {
   int *data;
-  int len;  // Actual buffer data length
-  int size; // Size allocated for the buffer
+  int len;      // Actual buffer data length
+  int size;     // Size allocated for the buffer
 } IntBuffer;
 
 typedef struct {
   char **data;
-  int len;
-  int size;
+  int len;      // Actual buffer data length
+  int size;     // Size allocated for the buffer
 } StringBuffer;
 
 // Structure defining a token
 typedef struct {
-  int type;
-  char *data;
+  int type;     // t_* enum
+  char *data;   // identifier name or a literal value
 } Token;
 
 // Symbol stack element
@@ -307,20 +325,20 @@ typedef struct {
 
 // Symbol table element
 typedef struct {
-  char *name;
-  bool isVariable; // var or fn
+  char *name;                   // Name of the identifier in the IFJcode21
+  bool isVariable;              // It is a function if this is false
   int varDataType;
-  bool fnDefined;
-  bool fnDeclared;
+  bool fnDefined;               // True if there was a definition in the code
+  bool fnDeclared;              // True if there was a declaration in the code
   IntBuffer *fnParamTypesBuf;
-  StringBuffer *fnParamNamesBuf;
+  StringBuffer *fnParamNamesBuf;// Names of the function parameters
   IntBuffer *fnRetTypesBuf;
 } STElem;
 
 // Symbol table tree structure for the binary search tree.
 typedef struct symbolTableTreeNode {
-  char *key;    // id string
-  STElem *data; // id value
+  char *key;                             // Identifier name
+  STElem *data;
   struct symbolTableTreeNode *leftChild;
   struct symbolTableTreeNode *rightChild;
 } STTreeNode;
@@ -347,7 +365,7 @@ typedef struct {
 // for multiple assignment element
 typedef struct assignmentElement {
   char *name;    // id string
-  char *label; // id value
+  char *label;   // id value
   bool first;
   bool generated;
   char *end;
@@ -356,8 +374,19 @@ typedef struct assignmentElement {
 } AssignElement;
 
 
+/**
+ * @brief Writes an error message to stdout and returns the error code
+ *
+ * @param errCode
+ *
+ * @return errCode
+ */
+int err(int errCode) ForceRetUse;
+
 /*
+ *
  * Miscellaneous functions
+ *
  */
 
 /**
@@ -389,16 +418,14 @@ int getDataTypeFromString(char *str);
  */
 bool isIFJ21Keyword(Token *token);
 
-int countDigits(int value);
-
 /**
- * @brief Writes an error message to stdout and returns back the error code
+ * @brief counts digits in an integer. If the integer is zero, returns 1
  *
- * @param errCode
+ * @param value: input integer
  *
- * @return errCode
+ * @return digits in value (1 if value equals 0)
  */
-int err(int errCode) ForceRetUse;
+int countDigits(int value);
 
 /**
  * @brief checks if the token is an ID or a literal
@@ -407,15 +434,50 @@ int err(int errCode) ForceRetUse;
  *
  * @return true if the token is an ID or a literal
  */
-bool isTokenIdOrLiteral(Token *token) ForceRetUse;
+bool isTokenIdOrLiteral(Token *token);
 
+/*
+ *
+ * Garbage collector
+ *
+ */
+
+/**
+ * @brief Initialize the garbage collector by allocating a dynamic array of
+ * pointers
+ *
+ * @return 0 if successful, errcode otherwise
+ */
 int GCInit() ForceRetUse;
 
+/**
+ * @brief Inserts a new pointer to a allocated variable to the garbage
+ * collector dynamic array
+ *
+ * @param ptr
+ *
+ * @return 0 if successful, errcode otherwise
+ */
 int GCInsert(void *ptr) ForceRetUse;
 
-void GCDelete();
+/**
+ * @brief Removes a pointer from the garbage collector array (used when
+ * reallocating)
+ *
+ * @param ptr
+ */
+void GCDelete(void *ptr);
 
+/**
+ * @brief Frees all memory ever allocated
+ */
 void GCCollect();
+
+/*
+ *
+ * Built-in functions
+ *
+ */
 
 /**
  * @brief Initialize all built in functions (add them to the symtable)
@@ -424,7 +486,7 @@ void GCCollect();
  *
  * @return 0 if successful, errcode otherwise
  */
-int initBuiltInFunctions(STStack *symtab) ForceRetUse;
+int initBuiltInFunctions(STStack *symtab);
 
 #endif
 /* end of file misc.h */
