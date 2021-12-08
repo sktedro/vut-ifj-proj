@@ -568,7 +568,7 @@ int pStat(char *fnName) {
 
     // <expr>
     char *exprResultVarName = NULL;
-    TryCall(pExpr, &exprResultVarName, dt_boolean); // bool
+    TryCall(pExpr, &exprResultVarName, dt_boolean);
 
     // then
     RequireToken(t_idOrKeyword, "then");
@@ -1378,7 +1378,7 @@ int pExpr(char **retVarName, int expectedType) {
     if(retVarType == -1) {
       vypluj err(INTERN_ERR);
     }
-    if(retVarType != expectedType) {
+    if(retVarType != expectedType && expectedType != dt_boolean) { // bool is weird
       LOG("TYPE FROM PA: %d EXPECTED: %d ", retVarType, expectedType);
       vypluj err(ASS_ERR);
     }
