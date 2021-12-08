@@ -9,6 +9,7 @@
 #include "assignment.h"
 #include "parser.h"
 
+int genNilsReturn(int amount);
 
 void genBuiltInFunctions();
 void genPushFrame();

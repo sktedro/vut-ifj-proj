@@ -1001,25 +1001,24 @@ int pRetArgList(char *fnName) {
 
   STElem *fn = STFind(symtab, fnName);
 
-  TryCall(pExpr, &retVarName);
 
   // 34. <retArgList>      -> eps
-  // If the pExpr gave us no retVarName, token wasn't an expression
-  if(!retVarName){
-    // But if the function needs more than zero parameters, it's a syntax err
-    if(fn->fnRetTypesBuf->len != 0){
-      LOG("A function requires some return arguments but we received 0");
-      return ERR(PARAM_RET_ERR);
-    // Otherwise all is good
-    }else{
-      return 0;
-    }
+  // Generate simple return with no arguments
+  if(fn->fnRetTypesBuf->len == 0){
+    genPopframe();
+    genReturnInstruction();
+    return 0;
   }
+
+  // TODO If the function should return more than zero values, return nils
+  // This will be tough... How do we know where the return ends???
+
+  TryCall(pExpr, &retVarName);
 
   // 35. <retArgList>      -> <expr> <retNextArg>
   int argCount = 1;
 
-  // Code gen Pass the return values down by one frame
+  // Code gen Define and assign the return values
   // Generate a new name where the return value will be written (in LF)
   char *retArgName = genRetVarName("");
   // Define the retArgName

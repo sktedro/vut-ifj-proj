@@ -42,6 +42,19 @@ int exprEndCnt = 0;
 
 // ----------------------------------------------------------------------------
 
+// Return x nils
+
+int genNilsReturn(int amount){
+  for(int i = 0; i < amount; i++){
+    // Generate and define the retArgName
+    char *retArgName = genRetVarName("");
+    genVarDefLF(retArgName);
+    // Pass nil to retVarName
+    genAssignLiteral(retArgName, dt_nil, "nil", "LF");
+  }
+  return 0;
+}
+
 /*
  * Generating names for variables and labels
  */
