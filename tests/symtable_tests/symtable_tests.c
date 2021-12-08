@@ -294,7 +294,6 @@ int main(){
   STSetIsVariable(stack, "var", true);
   STSetIsVariable(stack, "fn", false);
   STSetVarDataType(stack, "var", 2);
-  STSetVarAddress(stack, "var", 3);
   STSetFnDefined(stack, "fn", false);
   STAppendParamType(stack, "fn", 4);
   STAppendRetType(stack, "fn", 5);
@@ -309,10 +308,6 @@ int main(){
   }
   if(STGetVarDataType(stack, "var") != 2){
     printf("Data type of 'var' is wrong\n");
-    return 1;
-  }
-  if(STGetVarAddress(stack, "var") != 3){
-    printf("Address of 'var' is wrong\n");
     return 1;
   }
   if(STGetDepth(stack, "fn") != 0){
@@ -347,11 +342,6 @@ int main(){
   STSetVarDataType(stack, "var", 22);
   if(STGetVarDataType(stack, "var") != 22){
     printf("Data type of 'var' is wrong\n");
-    return 1;
-  }
-  STSetVarAddress(stack, "var", 33);
-  if(STGetVarAddress(stack, "var") != 33){
-    printf("Address of 'var' is wrong\n");
     return 1;
   }
   STSetFnDefined(stack, "fn", true);
@@ -416,8 +406,6 @@ int main(){
   STSetIsVariable(stack, "2", false);
   STSetVarDataType(stack, "0", 2);
   STSetVarDataType(stack, "1", 3);
-  STSetVarAddress(stack, "0", 4);
-  STSetVarAddress(stack, "1", 5);
   STSetFnDefined(stack, "2", false);
   STAppendParamType(stack, "2", 6);
   STAppendRetType(stack, "2", 7);
@@ -437,11 +425,6 @@ int main(){
   if(STGetVarDataType(stack, "0") != 2
       || STGetVarDataType(stack, "1") != 3){
     printf("Data type of 0/1 is wrong\n");
-    return 1;
-  }
-  if(STGetVarAddress(stack, "0") != 4
-      || STGetVarAddress(stack, "1") != 5){
-    printf("Address of 0/1 is wrong\n");
     return 1;
   }
   if(STGetFnDefined(stack, "2") != false){
@@ -476,10 +459,6 @@ int main(){
   }
   if(STGetVarDataType(stack, "var") != 22){
     printf("Data type of 'var' is wrong\n");
-    return 1;
-  }
-  if(STGetVarAddress(stack, "var") != 33){
-    printf("Address of 'var' is wrong\n");
     return 1;
   }
   if(STGetFnDefined(stack, "fn") != true){
@@ -537,10 +516,6 @@ int main(){
   }
   if(STGetVarDataType(stack, "var") != 22){
     printf("Data type of 'var' is wrong\n");
-    return 1;
-  }
-  if(STGetVarAddress(stack, "var") != 33){
-    printf("Address of 'var' is wrong\n");
     return 1;
   }
   if(STGetFnDefined(stack, "fn") != true){
