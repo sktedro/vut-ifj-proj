@@ -15,6 +15,7 @@ void AListClear(AssignElement **element);
 void AListPrintElement(AssignElement *element, int num);
 void AListDebugPrint(AssignElement *element);
 bool AListIsLast(AssignElement *element);
+AssignElement *AListGetHead(AssignElement *element);
 
 #endif
 /* end of file assignment.h */

@@ -808,37 +808,33 @@ char *getExprEndName() {
   return tmp;
 }
 
+
+
 void genExprFirst(AssignElement *element) {
   AssignElement *tmp = AListGetLast(element);
   
-  
-  printf("\n\n");
+  printf("\n\n");;
   genUnconditionalJump(tmp->label);
-  //printf("ss\n");
   genExprLabel(element->label);
-  //printf("ss\n");
-  //printf("ss\n");
   element->generated = true;
 }
 
 void genExprLast(AssignElement *element) {
-  AssignElement *tmp = AListGetLast(element);
 
-  genUnconditionalJump(element->prev->end);
-  //printf("KK\n");
-  genUnconditionalJump(element->label);
-  genExprLabel(tmp->label);
 
-  tmp->generated = true;
+  genUnconditionalJump(element->prev->prev->label);
+  genExprLabel(element->label);
+
+  element->generated = true;
 }
 
 
 
 void genExprSecond(AssignElement *element) {
-  genUnconditionalJump(element->end);
-  genExprLabel(element->next->label);
+  genUnconditionalJump(element->prev->end);
+  genExprLabel(element->label);
 
-  element->next->generated = true;
+  element->generated = true;
 
 }
 
@@ -850,7 +846,6 @@ void genExpr(AssignElement *element) {
 
 void genExprEnd(AssignElement *element) {
   AssignElement *last = AListGetLast(element);
-
   genUnconditionalJump(last->prev->label);
   genExprLabel(element->end);
   

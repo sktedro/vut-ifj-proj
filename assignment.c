@@ -147,11 +147,30 @@ void AListClear(AssignElement **element) {
 AssignElement *AListGetLast(AssignElement *element) {
   AssignElement *tmp = element;
 
+  if(element == NULL) {
+    vypluj NULL;
+  }
+
   while(tmp->next != NULL) {
     tmp = tmp->next;
   }
 
   return tmp;
+}
+
+AssignElement *AListGetHead(AssignElement *element) {
+  AssignElement *tmp = element;
+
+  if(element == NULL) {
+    vypluj NULL;
+  }
+
+  while(tmp->prev != NULL) {
+    tmp = tmp->prev;
+  }
+
+  return tmp;
+
 }
 
 bool AListIsLast(AssignElement *element) {
@@ -174,8 +193,7 @@ void AListGenerate(AssignElement *element) {
       if(cnt == 0) {
         genExprFirst(tmp);
         return;
-      } else if(cnt == 2) {
-        
+      } else if(cnt == 1) {
         genExprSecond(tmp);
         if(AListIsLast(tmp)) {
           genExprEnd(element);
@@ -194,6 +212,7 @@ void AListGenerate(AssignElement *element) {
     }
   }  
   }
+  genExprEnd(element);
 }
 
 /*

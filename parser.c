@@ -733,7 +733,6 @@ int pStatWithId(char *idName) {
     // In idName we have a name of the first variable in this statement
     // In token->data we'll have a name of the second one
     } else if (token->type == t_comma) {
-      //AListDebugPrint(assignmentElement);
       if(AListGetLength(assignmentElement) == 0) {
         TryCall(STGetName, symtab, &assignmentElement->name, idName);
         assignmentElement->end = getExprEndName();
@@ -741,7 +740,6 @@ int pStatWithId(char *idName) {
         assignmentElement->label = getExprLabelName(assigmentCounter);
         assignmentElement->next = NULL;
         assigmentCounter++;
-        //AListDebugPrint(assignmentElement);
       }
       // [id]
       RequireTokenType(t_idOrKeyword);
@@ -755,6 +753,8 @@ int pStatWithId(char *idName) {
       TryCall(STGetName, symtab, &id1Var, idName);
       TryCall(STGetName, symtab, &id2Var, token->data);
 
+      //printf("ID1 %s-------------------\n",id1Var);
+      //printf("ID2 %s-------------------\n",id2Var);
 
       AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
       assigmentCounter++;
@@ -766,8 +766,13 @@ int pStatWithId(char *idName) {
       // <expr>
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
+      //printf("IDEME GENEROVAŤ 2 ");
       AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName);
+
+      if(AListGetLast(assignmentElement)->generated) {
+        genExprEnd(assignmentElement);
+      }
 
       if(retVarName == NULL) {
         vypluj ERR(SYNTAX_ERR);
@@ -775,22 +780,26 @@ int pStatWithId(char *idName) {
       
       genAssignLiteral(id2Var, -1, retVarName, "LF");
 
-      //alex
       // ,
       RequireTokenType(t_comma);
 
       // <expr>
       // Call the shift-reduce parser and assign the result to id1Var
       retVarName = NULL;
+      //printf("IDEME GENEROVAŤ 1 ");
       AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName);
+
+      
 
       if(retVarName == NULL) {
         vypluj ERR(SYNTAX_ERR);
       }
 
       genAssignLiteral(id1Var, -1, retVarName, "LF");
-
+      if(AListGetLast(assignmentElement)->generated) {
+        genExprEnd(assignmentElement);
+      }
     }else{
       vypluj ERR(SYNTAX_ERR);
     }
