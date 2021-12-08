@@ -209,6 +209,9 @@ int pCodeBody() {
     genComment("Skip variable declaration");
     genLabel(varDefBypass);
 
+    // Return the required amount of nils
+    genNilsReturn(STFind(symtab, fnName)->fnRetTypesBuf->len);
+
     // Return from the function
     genPopframe();
     genReturnInstruction();
@@ -1047,11 +1050,14 @@ int pRetNextArg(char *fnName, int argCount) {
   // -> eps
   if (token->type != t_comma) {
     // Check if the amount of return arguments is right
-    if(argCount != STFind(symtab, fnName)->fnRetTypesBuf->len){
-      LOG("The amount of return arguments is not right");
+    if(argCount > STFind(symtab, fnName)->fnRetTypesBuf->len){
+      LOG("Returning too many values from a function");
       return ERR(PARAM_RET_ERR);
     }
-    // Otherwise just stash that token (this is the end of the return stat)
+    // Otherwise, we received the last argument - if there are not enough of
+    // them, fill the rest up with nils
+    genNilsReturn(STFind(symtab, fnName)->fnRetTypesBuf->len - argCount);
+    // And just stash that token
     TryCall(stashToken, &token);
     vypluj 0;
   }
