@@ -928,34 +928,34 @@ bool isExprAtomic(SStack *symstack) {
  * @param stack to print out
  */
 void debugPrint(SStack *stack) {
-  return;
-  int len = 0;
-  SStackElem *element = SStackTop(stack);
-  ;
-  fprintf(stderr, "--------STACK------------\n");
-  while (element != NULL) {
-    fprintf(stderr, "Element type: %d\n", element->type);
-    fprintf(stderr, "Element op: %d\n", element->op);
-    if (element->data != NULL) {
-      fprintf(stderr, "Element data: %s\n", element->data);
-    } else {
-      fprintf(stderr, "Element data is NULL\n");
-    }
-    fprintf(stderr, "Element isId: %d\n", element->isId);
-    fprintf(stderr, "Element dataType: %d\n", element->dataType);
-    fprintf(stderr, "-------------------------\n");
-
-    if (element->next == NULL) {
-      fprintf(stderr, "Next element is NULL\n");
-      fprintf(stderr, "Total length is: %d\n", len + 1);
+  if(DEBUGTOGGLE){
+    int len = 0;
+    SStackElem *element = SStackTop(stack);
+    fprintf(stderr, "--------STACK------------\n");
+    while (element != NULL) {
+      fprintf(stderr, "Element type: %d\n", element->type);
+      fprintf(stderr, "Element op: %d\n", element->op);
+      if (element->data != NULL) {
+        fprintf(stderr, "Element data: %s\n", element->data);
+      } else {
+        fprintf(stderr, "Element data is NULL\n");
+      }
+      fprintf(stderr, "Element isId: %d\n", element->isId);
+      fprintf(stderr, "Element dataType: %d\n", element->dataType);
       fprintf(stderr, "-------------------------\n");
-      return;
-    } else {
-      element = element->next;
-      len++;
+
+      if (element->next == NULL) {
+        fprintf(stderr, "Next element is NULL\n");
+        fprintf(stderr, "Total length is: %d\n", len + 1);
+        fprintf(stderr, "-------------------------\n");
+        return;
+      } else {
+        element = element->next;
+        len++;
+      }
     }
+    fprintf(stderr, "Stack is empty\n");
   }
-  fprintf(stderr, "Stack is empty\n");
 }
 
 

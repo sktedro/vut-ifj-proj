@@ -295,7 +295,7 @@ typedef struct SStackElem {
   int op;                  // Precedence table enum (pt_)
   bool isId;               // So we know if there's an ID or a literal in *data
   int dataType;            // If it is an ID or a literal, we need the datatype
-                           // Will be -1 for boolean
+                           // Will be -1 for boolean. TODO is this true?
   char *data;              // ID (or expr) name or a literal value
   bool isZero;             // Will be true if the elem is a literal equal to 0
   struct SStackElem *next;
@@ -311,7 +311,7 @@ typedef struct {
   char *name;
   bool isVariable; // var or fn
   int varDataType;
-  int varAddress;
+  int varAddress; // TODO remove
   bool fnDefined;
   bool fnDeclared;
   IntBuffer *fnParamTypesBuf;
