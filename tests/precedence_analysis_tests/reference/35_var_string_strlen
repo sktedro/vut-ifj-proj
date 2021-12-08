@@ -1,5 +1,4 @@
 Testing: Token type is '10' and data '#'
-DEFVAR LF@?tmpvar_0
 STRLEN LF@?tmpvar_0 LF@%var_varStr1_0
 Testing: Expression result is in: ?tmpvar_0
 Testing: Precedence analysis returned 0

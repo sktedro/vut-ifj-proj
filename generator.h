@@ -63,7 +63,7 @@ int genMove(char *dest, char *src);
 void genJumpIfFalse(char *label, char *varName);
 char *genParamVarName(char *baseName);
 char *genRetVarName(char *baseName);
-int genReturn(char *varInLF, char *varInTF);
+int genReturn(char *src1, char *src2);
 void genUnconditionalJump(char *labelName);
 
 // --------------------------------------------------------------------------------

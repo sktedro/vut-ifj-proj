@@ -1,49 +1,26 @@
 Testing: Token type is '8' and data '('
-DEFVAR LF@?tmpvar_0
 MUL LF@?tmpvar_0 LF@%var_varInt1_0 LF@%var_varInt2_0
-DEFVAR LF@?tmpvar_1
 MOVE LF@?tmpvar_1 int@1
-DEFVAR LF@?tmpvar_2
 ADD LF@?tmpvar_2 LF@?tmpvar_0 LF@?tmpvar_1
-DEFVAR LF@?tmpvar_3
 MOVE LF@?tmpvar_3 int@3
-DEFVAR LF@?tmpvar_4
 MOVE LF@?tmpvar_4 int@2
-DEFVAR LF@?tmpvar_5
 SUB LF@?tmpvar_5 LF@?tmpvar_3 LF@?tmpvar_4
-DEFVAR LF@?tmpvar_6
 STRLEN LF@?tmpvar_6 LF@%var_varStr1_0
-DEFVAR LF@?tmpvar_7
 ADD LF@?tmpvar_7 LF@?tmpvar_5 LF@?tmpvar_6
-DEFVAR LF@?tmpvar_8
 INT2FLOAT LF@?tmpvar_8 LF@?tmpvar_2
-DEFVAR LF@?tmpvar_9
 INT2FLOAT LF@?tmpvar_9 LF@?tmpvar_7
-DEFVAR LF@?tmpvar_10
 DIV LF@?tmpvar_10 LF@?tmpvar_8 LF@?tmpvar_9
-DEFVAR LF@?tmpvar_11
 FLOAT2INT LF@?tmpvar_11 LF@%var_varNum1_0
-DEFVAR LF@?tmpvar_12
 IDIV LF@?tmpvar_12 LF@?tmpvar_11 LF@%var_varInt3_0
-DEFVAR LF@?tmpvar_13
 MOVE LF@?tmpvar_13 int@2
-DEFVAR LF@?tmpvar_14
 INT2FLOAT LF@?tmpvar_14 LF@?tmpvar_12
-DEFVAR LF@?tmpvar_15
 INT2FLOAT LF@?tmpvar_15 LF@?tmpvar_13
-DEFVAR LF@?tmpvar_16
 DIV LF@?tmpvar_16 LF@?tmpvar_14 LF@?tmpvar_15
-DEFVAR LF@?tmpvar_17
 MOVE LF@?tmpvar_17 float@0x1.999999999999ap-5
-DEFVAR LF@?tmpvar_18
 MOVE LF@?tmpvar_18 int@1
-DEFVAR LF@?tmpvar_19
 INT2FLOAT LF@?tmpvar_19 LF@?tmpvar_18
-DEFVAR LF@?tmpvar_20
 DIV LF@?tmpvar_20 LF@?tmpvar_17 LF@?tmpvar_19
-DEFVAR LF@?tmpvar_21
 ADD LF@?tmpvar_21 LF@?tmpvar_16 LF@?tmpvar_20
-DEFVAR LF@?tmpvar_22
 MUL LF@?tmpvar_22 LF@?tmpvar_10 LF@?tmpvar_21
 Testing: Expression result is in: ?tmpvar_22
 Testing: Precedence analysis returned 0

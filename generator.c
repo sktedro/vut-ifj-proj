@@ -10,31 +10,29 @@
 extern int ret;
 extern GarbageCollector garbageCollector;
 
-extern char *reads;
-extern char *readi;
-extern char *readn;
-extern char *write;
-extern char *tointeger;
-extern char *substr;
-extern char *ord;
-extern char *chr;
+extern const char *reads;
+extern const char *readi;
+extern const char *readn;
+extern const char *write;
+extern const char *tointeger;
+extern const char *substr;
+extern const char *ord;
+extern const char *chr;
 
-char *labelPrefix = "*label_";
-char *varPrefix = "%var_";
-char *tmpVarPrefix = "?tmpvar_";
-char *paramPrefix = "$param_";
-char *retPrefix = "!ret_";
-char *fnPrefix = "&fn_";
+extern StringBuffer *varDefBuff;
+
+const char *labelPrefix = "*label_";
+const char *varPrefix = "%var_";
+const char *tmpVarPrefix = "?tmpvar_";
+const char *paramPrefix = "$param_";
+const char *retPrefix = "!ret_";
+const char *fnPrefix = "&fn_";
 
 int tmpCounter = 0;
 int labelCounter = 0;
 int paramCounter = 0;
 int retCounter = 0;
 int writeCount = 0;
-
-/* do not remove until var redefinition is solved
-VarDefStack *varDefStack = NULL;
-*/
 
 // ----------------------------------------------------------------------------
 // VARIABLES FOR MULTIPLE ASSIGMENT
@@ -43,25 +41,6 @@ int exprLabelCnt = 0;
 int exprEndCnt = 0;
 
 // ----------------------------------------------------------------------------
-
-/*
- * Functions to help generate the definitions of variables
- */
-
-/* do not remove until var redefinition is solved
-int varDefStackInit(){
-  GCMalloc(varDefStack, sizeof(VarDefStack));
-}
-
-int varDefStackPush(){
-  GCMalloc(varDefStack->next, sizeof(VarDefStack));
-}
-
-void defineBufferedVars(){
-  // def all vars in the string buffer in the vardef buffer top
-  // Pop the vardef buffer top
-}
-*/
 
 /*
  * Generating names for variables and labels
@@ -74,7 +53,7 @@ char *genVarName(char *name, int frame) {
   // TODO do we need that if? I think it is redundant now
   if(name[0] != '%') {
     char *newName;
-    int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 1;
+    int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 2;
     GCMalloc(newName, sizeof(char) * mallocLen);
     sprintf(newName, "%s%s_%d", varPrefix, name, frame);
     return newName;
@@ -93,6 +72,7 @@ char *genTmpVarName() {
   GCMalloc(varName, sizeof(char) * mallocLen);
   sprintf(varName, "%s%d", tmpVarPrefix, tmpCounter);
   tmpCounter++;
+  condAppendToStringBuff(varName);
   return varName;
 }
 
@@ -107,7 +87,7 @@ char *genRetVarName(char *baseName) {
 
 char *genLabelName(char *baseName) {
   char *varName;
-  int mallocLen = strlen(labelPrefix) + strlen(baseName) + countDigits(labelCounter) + 1;
+  int mallocLen = strlen(labelPrefix) + strlen(baseName) + countDigits(labelCounter) + 2;
   GCMalloc(varName, sizeof(char) * mallocLen);
   sprintf(varName, "%s%s_%d", labelPrefix, baseName, labelCounter);
   labelCounter++;
@@ -116,7 +96,7 @@ char *genLabelName(char *baseName) {
 
 char *genParamVarName(char *baseName) {
   char *tmp;
-  int mallocLen = strlen(paramPrefix) + strlen(baseName) + countDigits(paramCounter) + 1;
+  int mallocLen = strlen(paramPrefix) + strlen(baseName) + countDigits(paramCounter) + 2;
   GCMalloc(tmp, sizeof(char) * mallocLen);
   sprintf(tmp, "%s%s_%d", paramPrefix, baseName, paramCounter);
   paramCounter++;
@@ -304,8 +284,8 @@ int genPassParam(char *varInTF, char *varInLF){
   return 0;
 }
 
-int genReturn(char *varInLF, char *varInTF){
-  printf("MOVE LF@%s TF@%s\n", varInLF, varInTF);
+int genReturn(char *src1, char *src2){
+  printf("MOVE LF@%s LF@%s\n", src1, src2);
   return 0;
 }
 
@@ -360,7 +340,8 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
 }
 
 char *genType(char *varName){
-  char *newVarName = genTmpVarDef();
+  char *newVarName = genTmpVarName();
+  condAppendToStringBuff(newVarName);
   printf("TYPE LF@%s LF@%s\n", newVarName, varName);
   return newVarName;
 }
@@ -482,81 +463,81 @@ void genConditionalJump(char *label, char *varName, bool condition){
  */
 
 char *genBinaryOperationAdd(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("ADD LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationSub(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("SUB LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationMul(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("MUL LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationDiv(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("DIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationIDiv(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("IDIV LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genBinaryOperationConcat(SStackElem *src1, SStackElem *src2) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("CONCAT LF@%s LF@%s LF@%s\n", dest, src1->data, src2->data);
   return dest;
 }
 
 char *genConvertFloatToInt(SStackElem *src) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("FLOAT2INT LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genConvertIntToFloat(SStackElem *src) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("INT2FLOAT LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genStrlen(SStackElem *src) {
-  char *dest = genTmpVarDef();
+  char *dest = genTmpVarName();
   printf("STRLEN LF@%s LF@%s\n", dest, src->data);
   return dest;
 }
 
 char *genLower(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVarDef();
-  printf("LT LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
-  return tmp;
+  char *dest = genTmpVarName();
+  printf("LT LF@%s LF@%s LF@%s\n", dest, element1->data, element2->data);
+  return dest;
 }
 
 char *genGreater(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVarDef();
-  printf("GT LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
-  return tmp;
+  char *dest = genTmpVarName();
+  printf("GT LF@%s LF@%s LF@%s\n", dest, element1->data, element2->data);
+  return dest;
 }
 
 char *genEqual(SStackElem *element1, SStackElem *element2) {
-  char *tmp = genTmpVarDef();
-  printf("EQ LF@%s LF@%s LF@%s\n", tmp, element1->data, element2->data);
-  return tmp;
+  char *dest = genTmpVarName();
+  printf("EQ LF@%s LF@%s LF@%s\n", dest, element1->data, element2->data);
+  return dest;
 }
 
 char *genNot(SStackElem *src) {
-  char *tmp = genTmpVarDef();
-  printf("NOT LF@%s LF@%s\n", tmp, src->data);
-  return tmp;
+  char *dest = genTmpVarName();
+  printf("NOT LF@%s LF@%s\n", dest, src->data);
+  return dest;
 }
 
 /*

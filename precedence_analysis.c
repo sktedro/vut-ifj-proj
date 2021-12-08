@@ -11,6 +11,8 @@ extern int ret;
 
 extern STStack *symtab;
 
+extern StringBuffer *varDefBuff;
+
 // Precedence table
 // Could be simpler since rows (columns) repeat
 char precTab[12][12] = {
@@ -207,7 +209,9 @@ int iRule(SStack *symstack, SStackElem *op) {
     op->type = st_expr;
     // If it is literal, save it into a variable and assign it a value
     if (!op->isId) {
-      char *newName = genTmpVarDef();
+      /** char *newName = genTmpVarDef(); */
+      char *newName = genTmpVarName();
+      TryCall(condAppendToStringBuff, newName);
       // TODO change this and check the data types
       TryCall(genAssignLiteral, newName, op->dataType, op->data, "LF");
       op->data = newName;
@@ -733,6 +737,11 @@ int createSymbol(SStackElem **newSymbol, int type, int op, bool isId,
  * @return 0 if successful, errcode otherwise 
  */
 int precedenceAnalysisInit(STStack *symtab, SStack **symstack, Token **token) {
+  // Initialize the buffer for var definitions if it is null
+  // This is only for the tests to work
+  if(!varDefBuff){
+    TryCall(stringBufInit, &varDefBuff);
+  }
 
   // Initialize a symbol stack
   TryCall(SStackInit, symstack);

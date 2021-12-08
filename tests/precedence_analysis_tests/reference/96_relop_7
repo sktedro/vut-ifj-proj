@@ -1,9 +1,6 @@
 Testing: Token type is '4' and data 'abc'
-DEFVAR LF@?tmpvar_0
 MOVE LF@?tmpvar_0 string@abc
-DEFVAR LF@?tmpvar_1
 LT LF@?tmpvar_1 LF@?tmpvar_0 LF@%var_varStr1_0
-DEFVAR LF@?tmpvar_2
 NOT LF@?tmpvar_2 LF@?tmpvar_1
 Testing: Expression result is in: ?tmpvar_2
 Testing: Precedence analysis returned 0

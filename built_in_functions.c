@@ -13,22 +13,22 @@
 #ifndef BUILT_IN_FUNCTIONS_C
 #define BUILT_IN_FUNCTIONS_C
 
-char *reads = "                                                              \n\
+const char *reads = "                                                              \n\
 ";
 
-char *readi = "                                                              \n\
+const char *readi = "                                                              \n\
 ";
 
-char *readn = "                                                              \n\
+const char *readn = "                                                              \n\
 ";
 
-char *write = "                                                              \n\
+const char *write = "                                                              \n\
 ";
 
-char *tointeger = "                                                          \n\
+const char *tointeger = "                                                          \n\
 ";
 
-char *substr = "                                                             \n\
+const char *substr = "                                                             \n\
 LABEL _$SUBSTR_                                                              \n\
                                                                              \n\
     PUSHFRAME                                                                \n\
@@ -110,7 +110,7 @@ LABEL _STR$RET_                                                              \n\
                                                                              \n\
 ";
 
-char *ord = "                                                                \n\
+const char *ord = "                                                                \n\
 LABEL ord0                                                                   \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\
@@ -154,7 +154,7 @@ LABEL *ordEnd                                                                \n\
                                                                              \n\
 ";
 
-char *chr = "                                                                \n\
+const char *chr = "                                                                \n\
 LABEL _$CHR_                                                                 \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\

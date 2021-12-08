@@ -218,6 +218,8 @@ int pCodeBody() {
     genLabel(fnBypassLabelName);
 
     STPop(symtab);
+
+    resetParamCounter();
     
     // <codeBody>
     TryCall(pCodeBody);
@@ -298,7 +300,6 @@ int pFnCall(char *fnName) {
     resetParamCounter();
     genFnCallInit();
     TryCall(pFnCallArgList, fnName);
-    //genPopframe();
 
   } else {
     genComment("Calling a function");
@@ -507,7 +508,6 @@ int pStat(char *fnName) {
 
   // 17. <stat>            -> eps
   if (token->type != t_idOrKeyword || (token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
-    fprintf(stderr, " <stat>            -> eps\n");
     TryCall(stashToken, &token);
     vypluj 0;
   }
@@ -540,7 +540,8 @@ int pStat(char *fnName) {
 
   // 20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
   } else if (strcmp(token->data, "if") == 0) {
-    fprintf(stderr, "-> if <expr> then <stat> else <stat> end <stat>\n");
+    genComment("IF start");
+
     // Generate new label names for 'else' and 'end' (don't generate code yet)
     char *elseLabelName = genLabelName("else"), *endLabelName = genLabelName("end");
 
@@ -578,9 +579,12 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
+    genComment("IF done");
+
     // 21. <stat>            -> while <expr> do <stat> end <stat>
   } else if (strcmp(token->data, "while") == 0) {
-    fprintf(stderr, "-> while <expr> do <stat> end <stat>\n");
+    genComment("WHILE start");
+
     // Generate new label names (don't generate code yet)
     char *whileLabelName = genLabelName("");
     char *startLabelName = genLabelName("");
@@ -594,8 +598,7 @@ int pStat(char *fnName) {
      */
     // TODO Treba toto robiť nejak na novom frame??? lebo sa budú každým cyklom 
     // definovať a deklarovať nové tmp premenné
-    // !!! We can't call vardef on the same variable (in one frame) more than once !!!
-    // Maybe we can't `vardef_i vardef_i` but we can do `label vardef_i jump_label` ?? :shrunk:
+    // TODO ano - v pExpr dávať do bufferu
     // <expr>
     char *exprResultVarName = NULL;
     TryCall(pExpr, &exprResultVarName);
@@ -625,6 +628,8 @@ int pStat(char *fnName) {
     // Code gen label for 'end'
     genLabel(endLabelName);
 
+    genComment("WHILE done");
+
   // 22. <stat>            -> return <retArgList> <stat>
   } else if (strcmp(token->data, "return") == 0) {
     LOG("-> return <retArgList> <stat>\n");
@@ -648,11 +653,14 @@ int pStat(char *fnName) {
       i++;
     }
     // TODO move all !ret vars from TF to LF now
-    resetRetCounter();
-    for(i = 0; i < retArgsCount; i++){
-      char *retVarName = genRetVarName("");
-      genMoveToLF(retVarName, retVarName);
-    }
+    // NO! Move outside the function. Not here
+    /**
+      * resetRetCounter();
+      * for(i = 0; i < retArgsCount; i++){
+      *   char *retVarName = genRetVarName("");
+      *   genMoveToLF(retVarName, retVarName);
+      * }
+      */
 
     // Code gen RETURN from the function
     genReturnInstruction();
@@ -705,7 +713,7 @@ int pStatWithId(char *idName) {
   // -> <fnCall>
   if(STFind(symtab, idName) 
       && !STGetIsVariable(symtab, idName)){
-    vypluj pFnCall(idName);
+    TryCall(pFnCall, idName);
 
   // Not a function call but an assignment
   }else{
@@ -721,13 +729,18 @@ int pStatWithId(char *idName) {
 
     // -> = <expr>
     if (token->type == t_assignment) {
+      char *destVarName;
+      TryCall(STGetName, symtab, &destVarName, idName);
       // TODO check data types
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
-      char *varName;
-      TryCall(STGetName, symtab, &varName, idName);
-      genMove(varName, retVarName);
+      if(!retVarName){
+        // If this is null, the expr was a function call and we need to fetch
+        // the values from ret_0
+        retVarName = "!ret_0";
+      }
+      genMove(destVarName, retVarName);
     
     // -> , [id] <nextAssign> <expr> , <expr>
     // In idName we have a name of the first variable in this statement
@@ -1004,7 +1017,7 @@ int pRetArgList(char *fnName) {
   char *retArgName = genRetVarName("");
   // Define the retArgName
   genVarDefLF(retArgName);
-  // Pass from TF (retArgName) to LF (retVarName)
+  // Pass from retArgName to retVarName
   genReturn(retArgName, retVarName);
 
   TryCall(pRetNextArg, fnName, argCount);
@@ -1224,11 +1237,12 @@ int pExpr(char **retVarName) {
 
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
-    && !STGetIsVariable(symtab, token->data)) {
+      && !STGetIsVariable(symtab, token->data)) {
  
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
+
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
@@ -1268,6 +1282,9 @@ int pExpr(char **retVarName) {
  * @return err code
  */
 int condAppendToStringBuff(char *name) {
+  if(!varDefBuff){
+    return ERR(INTERN_ERR);
+  }
   for(int i = 0; i < varDefBuff->len; i++) {
     if(strcmp(name, varDefBuff->data[i]) == 0) {
       vypluj 0;
