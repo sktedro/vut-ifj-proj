@@ -173,6 +173,51 @@ AssignElement *AListGetHead(AssignElement *element) {
 
 }
 
+int AListGetFirstNotGeneratedIndex(AssignElement *element) {
+  AssignElement *tmp = AListGetHead(element);
+  int cnt = 0;
+  
+  if(element == NULL) {
+    vypluj -1;
+  }
+
+  if(tmp->generated == false) {
+    vypluj 0;
+  }
+
+  while(tmp->next != NULL) {
+    tmp = tmp->next;
+    cnt++;
+    if(tmp != NULL && tmp->generated == false) {
+      vypluj cnt;
+    }
+  }
+
+  return -1;
+}
+
+AssignElement *AListGetFirstNotGenerated(AssignElement *element) {
+  AssignElement *tmp = AListGetHead(element);
+
+  if(element == NULL) {
+    vypluj NULL;
+  }
+
+  if(tmp->generated == false) {
+    vypluj tmp;
+  }
+
+  while(tmp->next != NULL) {
+    tmp = tmp->next;
+  
+    if(tmp != NULL && tmp->generated == false) {
+      vypluj tmp;
+    }
+  }
+
+  return NULL;
+}
+
 bool AListIsLast(AssignElement *element) {
 
   if(element->next == NULL) {
@@ -259,6 +304,17 @@ a,b = c, 20
 a = 3
 b = 20
 --
+
+TEDRO:
+id1, id2, id3, id4 = expr1, expr2, fn2
+fn2 vracia dve premenne
+na stack ukladáme identifikátory
+generujeme pekne postupne zľava a výsledok hádžeme do fronty
+ak máme funkciu, do fronty hodíme n krát TF@!ret, keď n je počet ret arg 
+
+stack: id1, id2, id3, id4
+fronta: ret_1, ret_2, expr2result, expr1result
+
 
 jump last
 label prvy

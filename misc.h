@@ -15,7 +15,7 @@
  */
 
 // If set to 0, no debug prints will be written
-#define DEBUGTOGGLE 1
+#define DEBUGTOGGLE 0
 
 // Garbage collector - initial length of the pointer array
 #define GCINITLEN 1024

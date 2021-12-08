@@ -836,8 +836,7 @@ int pStatWithId(char *idName) {
       } else {
         genAssignLiteral(id2Var, -1, retVarName, "LF");
       }
-      
-      LOG("RET VAAAAAAAAAAAAAAAAAAAAAAAR NAAAAAAAAAAAAAAAAAAAAAAAM\n");
+      vypluj 0;
       // ,
       RequireTokenType(t_comma);
 
@@ -847,7 +846,6 @@ int pStatWithId(char *idName) {
       //printf("IDEME GENEROVAŤ 1 ");
       AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
-      LOG("RET VAAAAAAAAAAAAAAAAAAAAAAAR NAAAAAAAAAAAAAAAAAAAAAAAME:%s:\n", retVarName);
       if(retVarName == NULL) {
         vypluj ERR(SYNTAX_ERR);
       }
@@ -1306,10 +1304,36 @@ int pExpr(char **retVarName, int expectedType) {
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
     // check types
+    LOG("WE IN \n");
     STElem *element =  STFind(symtab, token->data);
     int fnRetCount = element->fnRetTypesBuf->len;
+    LOG("WE IN \n");
+    AssignElement *tmp;
+    int generatedIndex = AListGetFirstNotGeneratedIndex(assignmentElement) - 1;
+    LOG("WE IN %d\n", generatedIndex);
+    char *genretname;
+    GCMalloc(genretname, sizeof(char) * 20);
+    LOG("WE IN \n");
+
+    //AListDebugPrint(assignmentElement);
 
 
+    for(int i = 0; i < fnRetCount; i++) {
+      LOG("start \n");
+      tmp = AListGetFirstNotGenerated(assignmentElement);
+      if(tmp == NULL) {
+        break;
+      }
+      LOG("dva\n");
+      AListGenerate(assignmentElement);
+      LOG("tri \n");
+      sprintf(genretname, "!ret_%d", i);
+      LOG("styri %s\n", tmp->name);
+      LOG("%s\n",AListGetElementByIndex(assignmentElement, generatedIndex)->name);
+      genMove(AListGetElementByIndex(assignmentElement, generatedIndex)->name, genretname);
+      LOG("kon \n");
+      generatedIndex++;
+    }
 
     int type = STGetRetType(symtab, token->data, 0); // TODO some magic for more returns
     LOG("TYPE FROM PEXPR: %d", type);

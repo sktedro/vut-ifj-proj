@@ -603,7 +603,6 @@ void genWrite(char *name) {
     * writeCount++;
     */
   // tedro: nestačí to takto?
-  LOG("ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg\n");
   printf("WRITE TF@%s\n", name);
 }
 

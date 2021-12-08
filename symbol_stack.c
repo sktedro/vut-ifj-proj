@@ -9,7 +9,7 @@
 
 extern int ret;
 
-/*
+/**
  * @brief Allocate a new stack, initialize it and return it
  *
  * @param stack: destination pointer
@@ -25,7 +25,7 @@ int SStackInit(SStack **stack) {
   return 0;
 }
 
-/*
+/**
  * @brief Push a new element to the top of the stack
  *
  * @param stack
@@ -45,7 +45,7 @@ int SStackPush(SStack *stack, SStackElem *newElem) {
   return 0;
 }
 
-/*
+/**
  * @brief remove (and <edited not to> free it's allocated memory) the top element
  *
  * @param stack
@@ -59,7 +59,7 @@ SStackElem *SStackPop(SStack *stack) {
   return tmp;
 }
 
-/*
+/**
  * @brief get the element at the top of the stack
  *
  * @param stack
@@ -73,7 +73,7 @@ SStackElem *SStackTop(SStack *stack) {
   return stack->top;
 }
 
-/*
+/**
  * @brief get an element of type terminal that is closest to the top of the
  * stack. Returns NULL if none exists
  *
@@ -95,7 +95,7 @@ SStackElem *SStackTopTerminal(SStack *stack) {
   vypluj NULL;
 }
 
-/*
+/**
  * @brief finds an element of type terminal that is closest to the top of the
  * stack and appends a new element after it (above)
  *
