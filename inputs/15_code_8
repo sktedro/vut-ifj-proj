@@ -1,11 +1,18 @@
 require "ifj21"
 
+function ret() : integer
+    local r : integer = 10
+    return r
+end
+
 function main()
     local a : integer
-    local b : integer
-    local c : integer
-
-    a, b, c = 1, 2, 3
+    --local b : integer
+    --local c : integer
+    a = ret()
+    --a, b, c = 1, 2, 3
 end
+
+
 
 main()

@@ -722,6 +722,8 @@ vypluj pStat(fnName);
 int pStatWithId(char *idName) {
   RuleFnInit;
 
+  retVarCounter = 0;
+
   // -> <fnCall>
   if(STFind(symtab, idName) 
       && !STGetIsVariable(symtab, idName)){
@@ -729,16 +731,13 @@ int pStatWithId(char *idName) {
 
   // Not a function call but an assignment
   }else{
-
     // Get new token (to see if it is a ',' of '=')
     GetToken;
     printToken(token);
-
     // idName must be a variable
     if(!STFind(symtab, idName) || !STGetIsVariable(symtab, idName)){
       vypluj ERR(SYNTAX_ERR);
     }
-
     // -> = <expr>
     if (token->type == t_assignment) {
       char *destVarName;
@@ -748,6 +747,8 @@ int pStatWithId(char *idName) {
       char *retVarName = NULL;
       TryCall(pExpr, &retVarName);
       if(!retVarName){
+
+        //alex edit
         // If this is null, the expr was a function call and we need to fetch
         // the values from ret_0 (which is in TF!)
         retVarName = "!ret_0";
@@ -779,14 +780,27 @@ int pStatWithId(char *idName) {
       // Get their names (in the generated code)
       char *id1Var, *id2Var; 
       TryCall(STGetName, symtab, &id1Var, idName);
-      TryCall(STGetName, symtab, &id2Var, token->data);
+      //TryCall(STGetName, symtab, &id2Var, token->data);
+
+      STElem *el2 = STFind(symtab, token->data);
+
+      if(el2 == NULL) {
+        vypluj err(SYNTAX_ERR);
+      }
+      
+      if(el2->isVariable == false && (el2->fnDeclared || el2->fnDefined)) {
+        id2Var = el2->fnParamNamesBuf->data[retVarCounter]; 
+        retVarCounter++;
+      } else {
+        TryCall(STGetName, symtab, &id2Var, idName);
+      }
 
       //printf("ID1 %s-------------------\n",id1Var);
       //printf("ID2 %s-------------------\n",id2Var);
 
       AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
       assigmentCounter++;
-      //AListDebugPrint(assignmentElement);
+      AListDebugPrint(assignmentElement);
       // <nextAssign>
       // Check and generate more assignments if there are some
       TryCall(pNextAssign);
@@ -1262,12 +1276,12 @@ int pExpr(char **retVarName) {
 
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
-      && !STGetIsVariable(symtab, token->data)) {
- 
+    && !STGetIsVariable(symtab, token->data)) {
+    *retVarName = token->data;
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
-
+    
   // If it is a nil
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName

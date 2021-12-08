@@ -1,0 +1,9 @@
+.ifjcode21
+
+CREATEFRAME
+
+DEFVAR TF@VAR
+
+READ TF@VAR int
+
+WRITE TF@VAR
