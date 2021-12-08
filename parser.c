@@ -55,6 +55,8 @@ int assigmentCounter = 0;
 int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
 StringBuffer *varDefBuff = NULL;
+int fnRetArgStashedInExpr = -1; // -1 -> nothing, otherwise returne the nth parameter of a function
+
 
 /*
  *
@@ -806,15 +808,15 @@ int pStatWithId(char *idName) {
 
       AListAdd(&assignmentElement, id2Var, getExprLabelName(assigmentCounter), false, NULL);
       assigmentCounter++;
-      AListDebugPrint(assignmentElement);
+      //AListDebugPrint(assignmentElement);
       // <nextAssign>
       // Check and generate more assignments if there are some
+      
       TryCall(pNextAssign);
 
       // <expr>
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
-      //printf("IDEME GENEROVAŤ 2 ");
       AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
 
@@ -823,11 +825,19 @@ int pStatWithId(char *idName) {
       }
 
       if(retVarName == NULL) {
-        vypluj ERR(SYNTAX_ERR);
+        char *destVarName;
+        TryCall(STGetName, symtab, &destVarName, idName);
+
+
+        sprintf(retname,"!ret_%d", retVarCounter);
+        retVarCounter++;
+        genMoveToLF(destVarName, retname);
+
+      } else {
+        genAssignLiteral(id2Var, -1, retVarName, "LF");
       }
       
-      genAssignLiteral(id2Var, -1, retVarName, "LF");
-
+      LOG("RET VAAAAAAAAAAAAAAAAAAAAAAAR NAAAAAAAAAAAAAAAAAAAAAAAM\n");
       // ,
       RequireTokenType(t_comma);
 
@@ -837,9 +847,7 @@ int pStatWithId(char *idName) {
       //printf("IDEME GENEROVAŤ 1 ");
       AListGenerate(assignmentElement);
       TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
-
-      
-
+      LOG("RET VAAAAAAAAAAAAAAAAAAAAAAAR NAAAAAAAAAAAAAAAAAAAAAAAME:%s:\n", retVarName);
       if(retVarName == NULL) {
         vypluj ERR(SYNTAX_ERR);
       }
@@ -848,7 +856,7 @@ int pStatWithId(char *idName) {
       if(AListGetLast(assignmentElement)->generated) {
         genExprEnd(assignmentElement);
       }
-    }else{
+    } else {
       vypluj ERR(SYNTAX_ERR);
     }
   
@@ -866,6 +874,9 @@ int pStatWithId(char *idName) {
 int pNextAssign() {
   RuleFnInit;
 
+  char *retname;
+  GCMalloc(retname, sizeof(char) * 20);
+  
   GetToken;
   printToken(token);
 
@@ -875,6 +886,7 @@ int pNextAssign() {
   }
 
   // -> , [id] <nextAssign> <expr> ,
+  LOG("-> , [id] <nextAssign> <expr> ,");
   if(token->type != t_comma) {
     vypluj ERR(SYNTAX_ERR);
   }
@@ -908,10 +920,18 @@ int pNextAssign() {
   TryCall(pExpr, &retVarName, 0); // TODO alex pls add expected type
   
   if(retVarName == NULL) {
-    vypluj err(SYNTAX_ERR);
-  }
-  LOG("WE BACK");
+    char *destVarName;
+    TryCall(STGetName, symtab, &destVarName, varName);
+
+
+    vypluj ERR(SYNTAX_ERR); sprintf(retname,"!ret_%d", retVarCounter);
+    retVarCounter++;
+    genMoveToLF(destVarName, retname);
+  } else {
   genMove(varName, retVarName);
+  }
+  LOG("WE BACK-----------------------------------------------------");
+ 
 
   // ','
   RequireTokenType(t_comma);
@@ -1286,12 +1306,17 @@ int pExpr(char **retVarName, int expectedType) {
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
     // check types
+    STElem *element =  STFind(symtab, token->data);
+    int fnRetCount = element->fnRetTypesBuf->len;
+
+
+
     int type = STGetRetType(symtab, token->data, 0); // TODO some magic for more returns
     LOG("TYPE FROM PEXPR: %d", type);
     if(type != expectedType) {
       vypluj err(ASS_ERR);
     }
-    //*retVarName = token->data;
+    
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
