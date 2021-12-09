@@ -173,7 +173,7 @@ int pCodeBody() {
     genLabel(varDefStart);
     for(int i = 0; i < varDefBuf->len; i++) {
       genVarDefLF(varDefBuf->data[i]);
-      genAssignLiteral(varDefBuf->data[i], dt_nil, "nil", "LF");
+      TryCall(genAssignLiteral, varDefBuf->data[i], dt_nil, "nil", "LF");
     }
     genComment("Jump from var declarations");
     genUnconditionalJump(varDefJumpBack);
@@ -183,7 +183,7 @@ int pCodeBody() {
     genLabel(varDefBypass);
 
     // Return the required amount of nils
-    genNilsReturn(STFind(symtab, fnName)->fnRetTypesBuf->len);
+    TryCall(genNilsReturn, STFind(symtab, fnName)->fnRetTypesBuf->len);
 
     // Return from the function
     genPopframe();
@@ -275,13 +275,13 @@ int pFnCall(char *fnName) {
   if(strEq(fnName, "write")) {
     genComment("Calling write functions");
     resetParamCounter();
-    genFnCallInit();
+    genCreateframe();
     TryCall(pFnCallArgList, fnName);
 
   } else {
     genComment("Calling a function");
 
-    genFnCallInit();
+    genCreateframe();
 
     genComment("Processing function call arguments");
     resetParamCounter();
@@ -419,7 +419,7 @@ int pFnCallArg(char *fnName, int argCount) {
     char *varName = NULL;
     TryCall(STGetName, symtab, &varName, token->data);
     genVarDefTF(paramName);
-    genPassParam(paramName, varName);
+    TryCall(genPassParam, paramName, varName);
 
   // 15. <fnCallArg>       -> [literal]
   } else if (token->type == t_int || token->type == t_num ||
@@ -440,7 +440,7 @@ int pFnCallArg(char *fnName, int argCount) {
     if(strcmp(fnName, "write") == 0 && strcmp(token->data, "nil") == 0) {
       genAssignLiteralStringNil(paramName, "TF");
     } else {
-      genAssignLiteral(paramName, dataType, token->data, "TF");
+      TryCall(genAssignLiteral, paramName, dataType, token->data, "TF");
     }
 
   } else {
@@ -1034,7 +1034,7 @@ int pRetArgList(char *fnName) {
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from retArgName to retVarName
-  genReturn(retArgName, retVarName);
+  genMove(retArgName, retVarName);
 
   TryCall(pRetNextArg, fnName, argCount);
 
@@ -1063,7 +1063,8 @@ int pRetNextArg(char *fnName, int argCount) {
     }
     // Otherwise, we received the last argument - if there are not enough of
     // them, fill the rest up with nils
-    genNilsReturn(STFind(symtab, fnName)->fnRetTypesBuf->len - argCount);
+    int nilsAmount = STFind(symtab, fnName)->fnRetTypesBuf->len - argCount;
+    TryCall(genNilsReturn, nilsAmount);
     // And just stash that token
     TryCall(stashToken, &token);
     vypluj 0;
@@ -1088,7 +1089,7 @@ int pRetNextArg(char *fnName, int argCount) {
   // Define the retArgName
   genVarDefLF(retArgName);
   // Pass from TF (retArgName) to LF (retVarName)
-  genReturn(retArgName, retVarName);
+  genMove(retArgName, retVarName);
 
   // <retNextArg>
   vypluj pRetNextArg(fnName, argCount);
@@ -1275,7 +1276,7 @@ int pExpr(char **retVarName, int expectedType) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarName();
 
-    genAssignLiteral(*retVarName, dt_nil, "nil", "LF"); 
+    TryCall(genAssignLiteral, *retVarName, dt_nil, "nil", "LF"); 
 
   } else if(strEq(token->data, "else")) {
     vypluj stashToken(&token); 
