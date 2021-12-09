@@ -17,21 +17,26 @@ int main() {
   // Init the garbage collector
   TryCall(GCInit);
 
-  // INIT - symtab
+  // Init the symtable
   TryCall(STInit, &symtab);
   TryCall(STPush, symtab);
 
+  // Insert the built-in functions into the symtable
   TryCall(initBuiltInFunctions, symtab);
 
+  // Run the parser
   ret = pStart();
   if(ret){
+    // Free all allocated memory
     GCCollect();
     free(garbageCollector.pointers);
     return ret;
   }
 
+  // Check for functions that have been declared but not defined
   ret = STFindUndefinedFunctions(symtab);
 
+  // Free all allocated memory
   GCCollect();
   free(garbageCollector.pointers);
 

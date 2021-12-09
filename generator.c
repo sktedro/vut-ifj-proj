@@ -63,22 +63,20 @@ int genNilsReturn(int amount){
 }
 
 /*
+ *
  * Generating names for variables and labels
+ *
  */
 
 /**
  * @brief Generates unique name for variables in ifj21code
  */
 char *genVarName(char *name, int frame) {
-  // TODO do we need that if? I think it is redundant now
-  if(name[0] != '%') {
-    char *newName;
-    int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 2;
-    GCMalloc(newName, sizeof(char) * mallocLen);
-    sprintf(newName, "%s%s_%d", varPrefix, name, frame);
-    return newName;
-  }
-  return name;
+  char *newName;
+  int mallocLen = strlen(varPrefix) + strlen(name) + countDigits(frame) + 2;
+  GCMalloc(newName, sizeof(char) * mallocLen);
+  sprintf(newName, "%s%s_%d", varPrefix, name, frame);
+  return newName;
 }
 
 /**
@@ -153,7 +151,6 @@ char *getDataTypeFromInt(Token *token) {
  * @param ifj21 string 
  * @return ifj21code string
  */
-// todo is there a nicer and simpler way to do the escaped chars?
 int stringConvert(char **destPtr, char *string) {
   CharBuffer *newString;
   CharBuffer *tempBuffer;
@@ -295,7 +292,7 @@ int genMoveToLF(char *dest, char *src){
 int genPassParam(char *varInTF, char *varInLF){
   char *isNil = genLabelName("isnil");
   char *notNil = genLabelName("notnil");
-  printf("JUMPIFEQ %s LF@%s nil@nil\n", isNil, varInLF); // TODO use gen function?
+  printf("JUMPIFEQ %s LF@%s nil@nil\n", isNil, varInLF);
   printf("MOVE TF@%s LF@%s\n", varInTF, varInLF);
   genUnconditionalJump(notNil);
   genLabel(isNil);

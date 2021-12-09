@@ -9,45 +9,6 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-/** IMPORTANT !!! READ FIRST, BEFORE EDITING
- *
- * --------------------------------------------------
- * TOP PRIORITY
- * WE NEED MORE STATES FOR BUILT IN FUNCTIONS
- * ADD THEM TO OUR CFG TOO !!!!!!!!!!!!
- * --------------------------------------------------
- *
- * 1. code in testing
- *
- * --------------------------------------------------
- * Function             State
- * --------------------------------------------------
- ****** OUTDATED (5.12.)
- * pStart                             FULLY DONE
- * pReq                               FULLY DONE
- * pCodeBody                          seems like done
- * pFnCall                            Built in functions! 
- * pFnCallArgList                     FULLY DONE (minor TODOs)
- * pNextFnCallArg                     FULLY DONE (minor TODOs)
- * pFnCallArg                         FULLY DONE (hopefully) (TODO errcode)
- * pStat                              how to program the while cycle?
- * pStatWithId                        might work
- * pNextAssign                        might work
- * pFnDefinitionParamTypeList         might work but dependant on type
- * pNextFnDefinitionParamType         might work but dependant on type
- * pRetArgList        
- * pRetNextArg        
- * pFnDeclarationParamTypeList 
- * pNextFnDeclarationParamType   
- * pFnRetTypeList   
- * pNextRetType     
- * pNewIdAssign
- * pExpr                              could work
-
-
-* -----------------------------------------------------------------------
- */
-
 #ifndef PARSER_C
 #define PARSER_C
 
@@ -62,12 +23,8 @@ AssignElement *assignmentElement;
 AssignElement *assignmentElement2;
 StringBuffer *labelBuffer;
 
-
-int assigmentCounter = 0;
-int assigmentGeneratedCounter = 0;
 int retVarCounter = 0;
 StringBuffer *varDefBuff = NULL;
-int fnRetArgStashedInExpr = -1; // -1 -> nothing, otherwise returne the nth parameter of a function
 
 
 /*
@@ -200,7 +157,6 @@ int pCodeBody() {
 
     // Generate definitions of parameter variables of this function
     createParamVariables(fnName);
-    // TODO
 
     // <stat>
     TryCall(pStat, fnName);
@@ -340,8 +296,6 @@ int pFnCall(char *fnName) {
     genFnCall(fnName);
     retVarCounter = 0;
     resetParamCounter();
-    assigmentCounter = 0;
-    assigmentGeneratedCounter = 0;
   }
 
   // )
@@ -459,12 +413,8 @@ int pFnCallArg(char *fnName, int argCount) {
   // Pass a parameter to the function
   // 14. <fnCallArg>       -> [id]
   if (STFind(symtab, token->data) && STGetIsVariable(symtab, token->data)) {
-    LOG("-> [id]\n");
     dataType = STGetVarDataType(symtab, token->data);
     // Pass the parameter by MOVE TF@paramName LF@token->data
-    //char *paramName = fn->fnParamNamesBuf->data[argCount - 1]; UNUSED VARIABLE
-    // TODO shouldn't we use this?
-
     char *varName = NULL;
     TryCall(STGetName, symtab, &varName, token->data);
     genVarDefTF(paramName);
@@ -621,12 +571,6 @@ int pStat(char *fnName) {
     // Code gen 'start' label
     genLabel(startLabelName);
 
-    /*
-     * TODO
-     */
-    // TODO Treba toto robiť nejak na novom frame??? lebo sa budú každým cyklom 
-    // definovať a deklarovať nové tmp premenné
-    // TODO ano - v pExpr dávať do bufferu
     // <expr>
     char *exprResultVarName = NULL;
     TryCall(pExpr, &exprResultVarName, dt_boolean);
@@ -680,15 +624,6 @@ int pStat(char *fnName) {
       retArgsCount ++;
       i++;
     }
-    // TODO move all !ret vars from TF to LF now
-    // NO! Move outside the function. Not here
-    /**
-      * resetRetCounter();
-      * for(i = 0; i < retArgsCount; i++){
-      *   char *retVarName = genRetVarName("");
-      *   genMoveToLF(retVarName, retVarName);
-      * }
-      */
     resetRetCounter();
 
     // Code gen RETURN from the function
@@ -747,7 +682,6 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     for(int i = 0; i < retVarsAmount; i++){
       retVarName = genRetVarName("");
       dataType = STGetRetType(symtab, fnName, i);
-      // TODO gen move to LF
       char *b = genTmpVarName();
       condAppendToStringBuff(b);
       genMoveToLF(b, retVarName);
@@ -832,7 +766,6 @@ int pStatWithId(char *idName) {
   if (token->type == t_assignment) {
       char *destVarName;
       TryCall(STGetName, symtab, &destVarName, idName);
-      // TODO check data types
       // Call the shift-reduce parser and assign the result to id2Var
       char *retVarName = NULL;
       int idType = STGetVarDataType(symtab, idName);
@@ -999,8 +932,6 @@ int pFnDefinitionParamTypeList(char *fnName) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
-  // TODO môže byť param definovaný? Ak áno, musí byť premenná. Ak nie, nemôže 
-  // byť definovaný (to treba ocheckovať)
 
   // -> [id] : [type] <nextFnDefinitionParamType>
 
@@ -1050,8 +981,6 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
 
   // [id]
   // Must be an ID, can't be a keyword
-  // TODO môže byť param definovaný? Ak áno, musí byť premenná. Ak nie, nemôže 
-  // byť definovaný (to treba ocheckovať)
   RequireIDToken(token);
   paramCount++;
   // Append the name of the new parameter to the symtable
@@ -1059,8 +988,6 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
 
   TryCall(STInsert, symtab, token->data);
   TryCall(STSetName, symtab, token->data, genVarName(token->data, symtab->top->depth));
-  // TODO uncomment if it is correct
-  // genVarDef(STGetName(symtab, token->data));
 
   // :
   RequireTokenType(t_colon);
@@ -1096,9 +1023,6 @@ int pRetArgList(char *fnName) {
     genReturnInstruction();
     return 0;
   }
-
-  // TODO If the function should return more than zero values, return nils
-  // This will be tough... How do we know where the return ends???
 
   int expectedType = STFind(symtab, fnName)->fnRetTypesBuf->data[0];
   TryCall(pExpr, &retVarName, expectedType);
@@ -1307,7 +1231,6 @@ int pNewIdAssign(char *varName) {
   }
 
   // <expr>
-  // TODO semantic actions - use that retVarName - the result of the expr is there
   char *retVarName = NULL;
   int type = STGetVarDataType(symtab, varName);
   TryCall(pExpr, &retVarName, type);
@@ -1540,7 +1463,7 @@ int newFunctionDefinition(Token *token) {
 int newFunctionDeclaration(char *fnName) {
   if (STFind(symtab, fnName)) {
     LOG("Function already declared");
-    vypluj ERR(1); // TODO errcode (declaration when fn is already declared/defined)
+    vypluj ERR(ID_DEF_ERR);
   } else {
     LOG("Adding declaration of %s (function) to the symtable", fnName);
     TryCall(STInsert, symtab, fnName);
@@ -1613,9 +1536,6 @@ int fnDeclarationParamType(char *fnName, char *data) {
   vypluj 0;
 }
 
-/**
- * TODO comment
-*/
 int fnDefinitionParamType(char *fnName, int paramCount){
   LOG();
   Token *token = NULL;
@@ -1670,59 +1590,6 @@ int varDataType(char *varName){
   vypluj 0;
 }
 
-// TODO remove this???
-int stringFunctions(char *varName) {
-  Token *token = NULL;
-
-  GetToken;
-  printToken(token);
-
-  if(strcmp(token->data, "substr") == 0) {
-
-    RequireTokenType(t_leftParen);
-
-    GetToken;
-    Token *string = NULL;
-    double i;
-    double j;
-    char *endPtr;
-
-    if(token->type != t_str || token->type != t_idOrKeyword) {
-      vypluj ERR(-1); // TODO CHANGE ERR CODE
-    }
-
-    string = token;
-
-    GetToken;
-
-    if(token->type != t_int || token->type != t_num) {
-      vypluj ERR(-1); // TODO CHANGE ERR CODE
-    }
-
-    i = strtod(token->data, &endPtr);
-
-
-    GetToken;
-
-    if(token->type != t_int || token->type != t_num) {
-      vypluj ERR(-1); // TODO CHANGE ERR CODE
-    }
-
-    j = strtod(token->data, &endPtr);
-
-
-    RequireTokenType(t_rightParen);
-
-    genSubstrFunction(varName, string, i, j, symtab->top->depth);
-
-    vypluj 0;
-
-  }
-
-  vypluj ERR(1);
-
-}
-
 int createParamVariables(char *fnName){
   // Get the function element from the symtable
   STElem *fnElement = STFind(symtab, fnName);
@@ -1747,14 +1614,6 @@ int createParamVariables(char *fnName){
   }
   vypluj 0;
 }
-
-int declareVariable(){
-  // TODO declare all variables at the end of file? (instead of calling DEFVAR
-  // instantly, just call this function which saves the variable name to 
-  // a string buffer and at the end of the program we define all variables??
-  return 0;
-}
-
 
 #endif
 /* end of file parser.c */
