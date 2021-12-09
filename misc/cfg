@@ -20,10 +20,10 @@
 20. <stat>                       -> if <expr> then <stat> else <stat> end <stat>
 21. <stat>                       -> while <expr> do <stat> end <stat>
 22. <stat>                       -> return <retArgList> <stat> 
-23. <statWithId>                 -> , [id] <nextAssign> <expr> , <expr>
+23. <statWithId>                 -> , [id] <nextAssign> <expr>
 24. <statWithId>                 -> = <expr>
 25. <statWithId>                 -> <fnCall>
-26. <nextAssign>                 -> , [id] <nextAssign> <expr> ,
+26. <nextAssign>                 -> , [id] <nextAssign> <expr>
 27. <nextAssign>                 -> =
 28. 
 29. <fnDefinitionParamTypeList>  -> eps

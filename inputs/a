@@ -1,6 +1,0 @@
-require "ifj21"
-
-function f()
-    local a : integer = 5
-    local a : string = "huhu"
-end

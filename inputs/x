@@ -1,7 +1,0 @@
-require "ifj21"
-
-function main():integer
-  return
-end
-
-main()

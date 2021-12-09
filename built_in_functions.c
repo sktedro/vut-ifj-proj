@@ -122,13 +122,14 @@ LABEL *tointeger_end                                                         \n\
                                                                              \n\
 ";
 
+// Not working
 const char *substr = "                                                       \n\
 LABEL substr0                                                                \n\
                                                                              \n\
     PUSHFRAME                                                                \n\
                                                                              \n\
-    DEFVAR LF@$$STRRET                                                       \n\
-    MOVE LF@$$STRRET string@                                                 \n\
+    DEFVAR LF@!ret_0                                                         \n\
+    MOVE LF@!ret_0 string@                                                   \n\
                                                                              \n\
     DEFVAR LF@$$STRPAR1                                                      \n\
     MOVE LF@$$STRPAR1 LF@$$STRPARAM1                                         \n\
@@ -182,7 +183,7 @@ LABEL substr0                                                                \n\
         JUMPIFEQ _STR$RET_ LF@$$STRHELP bool@false                           \n\
                                                                              \n\
         GETCHAR LF@$$STRTMP LF@$$STRPAR1 LF@$$STRPAR2                        \n\
-        CONCAT LF@$$STRRET LF@$$STRRET LF@$$STRTMP                           \n\
+        CONCAT LF@!ret_0 LF@!ret_0 LF@$$STRTMP                               \n\
                                                                              \n\
         ADD LF@$$STRINDEX LF@$$STRINDEX int@1                                \n\
         ADD LF@$$STRPAR2 LF@$$STRPAR2 int@1                                  \n\
@@ -192,7 +193,7 @@ LABEL substr0                                                                \n\
     JUMP _STR$RET_                                                           \n\
                                                                              \n\
 LABEL _STR$EMPTY_                                                            \n\
-    MOVE LF@$$STRRET string@                                                 \n\
+    MOVE LF@!ret_0 string@                                                   \n\
     JUMP _STR$RET_                                                           \n\
                                                                              \n\
 LABEL _STR$ERROR_                                                            \n\
@@ -248,12 +249,13 @@ LABEL *ord_end                                                               \n\
                                                                              \n\
 ";
 
+// Not working
 const char *chr = "                                                          \n\
 LABEL chr0                                                                   \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\
-  DEFVAR LF@$$CHRRET                                                         \n\
-  MOVE LF@$$CHRRET string@                                                   \n\
+  DEFVAR LF@!ret_0                                                           \n\
+  MOVE LF@!ret_0 string@                                                     \n\
                                                                              \n\
   DEFVAR LF@$$CHRPAR1                                                        \n\
   MOVE LF@$$CHRPAR1 LF@$$CHRPARAM1                                           \n\
@@ -270,13 +272,13 @@ LABEL chr0                                                                   \n\
   GT LF@$$CHRHELP LF@$$CHRPAR1 int@255                                       \n\
   JUMPIFEQ _CHR$NILL_ LF@$$CHRHELP bool@true                                 \n\
                                                                              \n\
-  INT2CHAR LF@$$CHRRET LF@$$CHRPAR1                                          \n\
+  INT2CHAR LF@!ret_0 LF@$$CHRPAR1                                            \n\
                                                                              \n\
 JUMP _CHR$RET_                                                               \n\
                                                                              \n\
                                                                              \n\
 LABEL _CHR$NILL_                                                             \n\
-MOVE LF@$$CHRRET nil@nil                                                     \n\
+MOVE LF@!ret_0 nil@nil                                                       \n\
 JUMP _CHR$RET_                                                               \n\
                                                                              \n\
 LABEL _CHR$ERROR_                                                            \n\
