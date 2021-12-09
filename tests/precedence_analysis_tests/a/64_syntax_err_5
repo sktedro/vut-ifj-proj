@@ -1,8 +1,0 @@
-ERROR: Syntax error at (around) line 3.
-Testing: Token type is '0' and data 'varInt1'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 int@2
-DEFVAR LF@?tmpvar_1
-MUL LF@?tmpvar_1 LF@varInt2_0 LF@?tmpvar_0
-Testing: Expression result is in: (null)
-Testing: Precedence analysis returned 2

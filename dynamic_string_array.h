@@ -1,7 +1,7 @@
 /**
  * VUT FIT - IFJ 2021
  *
- * @file string_buffer.h
+ * @file dynamic_string_array.h
  *
  * @author Patrik Skaloš (xskalo01)
  * @author Jana Kováčiková (xkovac59)
@@ -37,4 +37,4 @@ int stringBufInit(StringBuffer **buf) ForceRetUse;
 int stringBufAppend(StringBuffer *buf, char *str) ForceRetUse;
 
 #endif
-/* end of file string_buffer.h */
+/* end of file dynamic_string_array.h */

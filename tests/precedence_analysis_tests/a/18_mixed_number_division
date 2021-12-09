@@ -1,7 +1,0 @@
-Testing: Token type is '0' and data 'varNum1'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 float@0x1p+1
-DEFVAR LF@?tmpvar_1
-DIV LF@?tmpvar_1 LF@varNum1_0 LF@?tmpvar_0
-Testing: Expression result is in: ?tmpvar_1
-Testing: Precedence analysis returned 0

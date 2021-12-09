@@ -12,13 +12,13 @@ MAIN=main.c
 LIBS=\
 linked_list.c \
 built_in_functions.c \
-char_buffer.c \
+dynamic_char_array.c \
 generator.c \
-int_buffer.c \
+dynamic_int_array.c \
 misc.c \
 precedence_analysis.c \
 scanner.c \
-string_buffer.c \
+dynamic_string_array.c \
 symbol_stack.c \
 symtable.c \
 symtable_stack.c \

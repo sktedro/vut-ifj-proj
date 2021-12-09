@@ -1,5 +1,0 @@
-Testing: Token type is '3' and data '1.1e-2'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 float@0x1.6872b020c49bap-7
-Testing: Expression result is in: ?tmpvar_0
-Testing: Precedence analysis returned 0

@@ -1,5 +1,0 @@
-Testing: Token type is '4' and data 'abc'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 string@abc
-Testing: Expression result is in: ?tmpvar_0
-Testing: Precedence analysis returned 0

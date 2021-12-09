@@ -1,7 +1,0 @@
-Testing: Token type is '10' and data '#'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 string@abc
-DEFVAR LF@?tmpvar_1
-STRLEN LF@?tmpvar_1 LF@?tmpvar_0
-Testing: Expression result is in: ?tmpvar_1
-Testing: Precedence analysis returned 0

@@ -1,9 +1,0 @@
-Testing: Token type is '0' and data 'nil'
-DEFVAR LF@?tmpvar_0
-MOVE LF@?tmpvar_0 nil@nil
-DEFVAR LF@?tmpvar_1
-MOVE LF@?tmpvar_1 nil@nil
-DEFVAR LF@?tmpvar_2
-EQ LF@?tmpvar_2 LF@?tmpvar_0 LF@?tmpvar_1
-Testing: Expression result is in: ?tmpvar_2
-Testing: Precedence analysis returned 0

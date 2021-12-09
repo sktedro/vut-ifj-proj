@@ -12,7 +12,7 @@
 #ifndef PRECEDENCE_ANALYSIS_H
 #define PRECEDENCE_ANALYSIS_H
 
-#include "char_buffer.h"
+#include "dynamic_char_array.h"
 #include "misc.h"
 #include "scanner.h"
 #include "symbol_stack.h"

@@ -1,7 +1,7 @@
 /**
  * VUT FIT - IFJ 2021
  *
- * @file int_buffer.h
+ * @file dynamic_int_array.h
  *
  * @author Patrik Skaloš (xskalo01)
  * @author Jana Kováčiková (xkovac59)
@@ -52,4 +52,4 @@ void intBufClear(IntBuffer *buf);
 
 
 #endif
-/* end of file int_buffer.h */
+/* end of file dynamic_int_array.h */

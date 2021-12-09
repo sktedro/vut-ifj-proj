@@ -1,7 +1,7 @@
 /**
  * VUT FIT - IFJ 2021
  *
- * @file char_buffer.h
+ * @file dynamic_char_array.h
  *
  * @author Patrik Skaloš (xskalo01)
  * @author Jana Kováčiková (xkovac59)
@@ -61,4 +61,4 @@ void charBufClear(CharBuffer *buf);
 int charBufAppendString(CharBuffer *buffer, char *str) ForceRetUse;
 
 #endif
-/* end of file char_buffer.h */
+/* end of file dynamic_char_array.h */

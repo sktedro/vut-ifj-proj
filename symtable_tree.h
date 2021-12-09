@@ -12,8 +12,8 @@
 #ifndef SYMTABLE_TREE
 #define SYMTABLE_TREE
 
-#include "int_buffer.h"
-#include "string_buffer.h"
+#include "dynamic_int_array.h"
+#include "dynamic_string_array.h"
 #include "generator.h"
 #include "misc.h"
 

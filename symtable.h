@@ -14,7 +14,7 @@
 
 #include "misc.h"
 #include "symtable_stack.h"
-#include "string_buffer.h"
+#include "dynamic_string_array.h"
 
 /**
  * @brief initialization of symbol table (stack)

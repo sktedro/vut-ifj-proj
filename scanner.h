@@ -12,7 +12,7 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include "char_buffer.h"
+#include "dynamic_char_array.h"
 #include "misc.h"
 #include "token.h"
 

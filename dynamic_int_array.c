@@ -1,7 +1,7 @@
 /**
  * VUT FIT - IFJ 2021
  *
- * @file int_buffer.c
+ * @file dynamic_int_array.c
  *
  * @author Patrik Skaloš (xskalo01)
  * @author Jana Kováčiková (xkovac59)
@@ -12,7 +12,7 @@
 #ifndef INT_BUFFER_C
 #define INT_BUFFER_C
 
-#include "int_buffer.h"
+#include "dynamic_int_array.h"
 
 extern int ret;
 
@@ -73,4 +73,4 @@ void intBufClear(IntBuffer *buf) {
 }
 
 #endif
-/* end of file int_buffer.c */
+/* end of file dynamic_int_array.c */
