@@ -14,18 +14,17 @@
 
 #include "parser.h"
 
-
 extern int ret;
 
 STStack *symtab;
 
-AssignElement *assignmentElement;
-AssignElement *assignmentElement2;
+StringBuffer *varDefBuf = NULL;
+
+AssignElement *multiAssignIdList;
+AssignElement *multiAssignRetList;
 StringBuffer *labelBuffer;
 
 int retVarCounter = 0;
-StringBuffer *varDefBuff = NULL;
-
 
 /*
  *
@@ -42,9 +41,11 @@ StringBuffer *varDefBuff = NULL;
  */
 int pStart() {
   RuleFnInit;
-  TryCall(stringBufInit, &varDefBuff);
-  AListInit(&assignmentElement);
-  AListInit(&assignmentElement2);
+
+  TryCall(stringBufInit, &varDefBuf);
+
+  AListInit(&multiAssignIdList);
+  AListInit(&multiAssignRetList);
   TryCall(stringBufInit, &labelBuffer);
 
   // require
@@ -170,9 +171,9 @@ int pCodeBody() {
     // generate all declarations and jump back
     genComment("Variable declarations");
     genLabel(varDefStart);
-    for(int i = 0; i < varDefBuff->len; i++) {
-      genVarDefLF(varDefBuff->data[i]);
-      genAssignLiteral(varDefBuff->data[i], dt_nil, "nil", "LF");
+    for(int i = 0; i < varDefBuf->len; i++) {
+      genVarDefLF(varDefBuf->data[i]);
+      genAssignLiteral(varDefBuf->data[i], dt_nil, "nil", "LF");
     }
     genComment("Jump from var declarations");
     genUnconditionalJump(varDefJumpBack);
@@ -677,7 +678,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 
     TryCall(pExpr, &retVarName, &dataType);
     
-    // Append all return values to assignmentElement2 one by one
+    // Append all return values to multiAssignRetList one by one
     resetRetCounter();
     for(int i = 0; i < retVarsAmount; i++){
       retVarName = genRetVarName("");
@@ -686,7 +687,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
       condAppendToStringBuff(b);
       genMoveToLF(b, retVarName);
 
-      AListAdd(&assignmentElement2, b, NULL, false, dataType, NULL);
+      AListAdd(&multiAssignRetList, b, NULL, false, dataType, NULL);
     }
     resetRetCounter();
 
@@ -718,11 +719,11 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     // gen bypass label
     genLabel(bypassLabel);
 
-    // Add the return value (result) to assignmentElement2
-    AListAdd(&assignmentElement2, retVarName, NULL, false, dataType, NULL);
+    // Add the return value (result) to multiAssignRetList
+    AListAdd(&multiAssignRetList, retVarName, NULL, false, dataType, NULL);
   }
 
-  if(AListGetLength(assignmentElement) <= AListGetLength(assignmentElement2)){
+  if(AListGetLength(multiAssignIdList) <= AListGetLength(multiAssignRetList)){
     *assignmentDone = true;
   }
 
@@ -792,7 +793,7 @@ int pStatWithId(char *idName) {
 
       char *name = NULL;
       TryCall(STGetName, symtab, &name, idName);
-      AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, idName), NULL);
+      AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, idName), NULL);
 
       // [id]
       RequireTokenType(t_idOrKeyword);
@@ -802,11 +803,10 @@ int pStatWithId(char *idName) {
       }
 
       TryCall(STGetName, symtab, &name, token->data);
-      AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
+      AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
 
       // [id]
 
-      //AListDebugPrint(assignmentElement);
       bool assignmentDone = false;
 
 
@@ -820,7 +820,6 @@ int pStatWithId(char *idName) {
         TryCall(processExpr, &assignmentDone, endLabel);
       }
 
-
       if(!assignmentDone){
         // ,
         GetToken;
@@ -829,7 +828,6 @@ int pStatWithId(char *idName) {
           TryCall(processExpr, &assignmentDone, endLabel);
         }
       }
-
 
       // tu vygenerovať jumpy na labels v labelBuffer 
       int labelCount = labelBuffer->len;
@@ -843,13 +841,11 @@ int pStatWithId(char *idName) {
 
       // a priradenia 
       // hodnôt - v asselem sú idčká a v asselem2 sú results expr
-      int varCount = AListGetLength(assignmentElement);
+      int varCount = AListGetLength(multiAssignIdList);
       for(int i = 1; i < varCount; i++) {
-        genMove(AListGetElementByIndex(assignmentElement, i)->name,
-        AListGetElementByIndex(assignmentElement2, i)->name);
+        genMove(AListGetElementByIndex(multiAssignIdList, i)->name,
+        AListGetElementByIndex(multiAssignRetList, i)->name);
       }
-        
-
 
     } else {
       vypluj ERR(SYNTAX_ERR);
@@ -893,7 +889,7 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
   }
   char *name = NULL;
   TryCall(STGetName, symtab, &name, token->data);
-  AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
+  AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
 
   // <nextAssign>
   TryCall(pNextAssign, assignmentDone, endLabel);
@@ -1318,15 +1314,15 @@ int pExpr(char **retVarName, int expectedType) {
  * @return err code
  */
 int condAppendToStringBuff(char *name) {
-  if(!varDefBuff){
+  if(!varDefBuf){
     return ERR(INTERN_ERR);
   }
-  for(int i = 0; i < varDefBuff->len; i++) {
-    if(strcmp(name, varDefBuff->data[i]) == 0) {
+  for(int i = 0; i < varDefBuf->len; i++) {
+    if(strcmp(name, varDefBuf->data[i]) == 0) {
       vypluj 0;
     }
   }
-  TryCall(stringBufAppend, varDefBuff, name)
+  TryCall(stringBufAppend, varDefBuf, name)
   vypluj 0;
 }
 
@@ -1348,62 +1344,6 @@ bool isDataType(char *data) {
   } else { 
     vypluj false;
   }
-}
-
-/**
- * @brief check if token is read function
- * 
- * @param data 
- * @return true if data is read function
- * @return false otherwise
- */
-bool isReadFunction(char *data) {
-  LOG();
-
-  if(    strcmp(data, "readi") == 0 
-      || strcmp(data, "reads") == 0 
-      || strcmp(data, "readn") == 0) {
-    vypluj true;
-  } 
-  vypluj false;
-}
-
-/**
- * @brief check if token is string operation function
- * 
- * @param data 
- * @return true if data is string operation function
- * @return false otherwise
- */
-bool isStringOperationFunction(char *data) {
-  if(    strcmp(data, "substr") == 0 
-      || strcmp(data, "ord") == 0 
-      || strcmp(data, "chr") == 0) {
-    vypluj true;
-  } 
-  vypluj false;
-}
-
-/**
- * @brief check if token is read function in ifj21
- * 
- * @param token 
- * @return true if it is read function, destroys () behind read, generates code
- * 
- */
-bool readFunction(Token *token) {
-  // if token is not a keyword returns false and stashToken
-  if(token->type != t_idOrKeyword) {
-    TryCall(stashToken, &token);
-    vypluj false;
-  }
-
-  // if token is not a read function, returns false and stashToken
-  if(!isReadFunction(token->data)) {
-    TryCall(stashToken, &token);
-    vypluj false;
-  }
-  vypluj true;
 }
 
 /**

@@ -100,11 +100,11 @@ LABEL tointeger0                                                             \n\
   PUSHFRAME                                                                  \n\
                                                                              \n\
   DEFVAR LF@type                                                             \n\
-  TYPE LF@type LF@$param_0                                                   \n\
+  TYPE LF@type LF@$param__0                                                  \n\
   JUMPIFNEQ *tointeger_retnil LF@type string@float                           \n\
                                                                              \n\
   DEFVAR LF@result                                                           \n\
-  FLOAT2INT LF@result LF@$param_0                                            \n\
+  FLOAT2INT LF@result LF@$param__0                                           \n\
                                                                              \n\
   JUMP *tointeger_end                                                        \n\
                                                                              \n\
@@ -132,13 +132,13 @@ LABEL substr0                                                                \n\
     MOVE LF@!ret_0 string@                                                   \n\
                                                                              \n\
     DEFVAR LF@$$STRPAR1                                                      \n\
-    MOVE LF@$$STRPAR1 LF@$$STRPARAM1                                         \n\
+    MOVE LF@$$STRPAR1 LF@$param__0                                           \n\
                                                                              \n\
     DEFVAR LF@$$STRPAR2                                                      \n\
-    MOVE LF@$$STRPAR2 LF@$$STRPARAM2                                         \n\
+    MOVE LF@$$STRPAR2 LF@$param__1                                           \n\
                                                                              \n\
     DEFVAR LF@$$STRPAR3                                                      \n\
-    MOVE LF@$$STRPAR3 LF@$$STRPARAM3                                         \n\
+    MOVE LF@$$STRPAR3 LF@$param__2                                           \n\
                                                                              \n\
     JUMPIFEQ _STR$ERROR_ LF@$$STRPAR1 nil@nil                                \n\
     JUMPIFEQ _STR$ERROR_ LF@$$STRPAR2 nil@nil                                \n\
@@ -212,23 +212,23 @@ LABEL ord0                                                                   \n\
   DEFVAR LF@result                                                           \n\
                                                                              \n\
 # Check if the input string or the input integer equals nil                  \n\
-  JUMPIFEQ *ord_err LF@$param_0 nil@nil                                      \n\
-  JUMPIFEQ *ord_err LF@$param_1 nil@nil                                      \n\
+  JUMPIFEQ *ord_err LF@$param__0 nil@nil                                     \n\
+  JUMPIFEQ *ord_err LF@$param__1 nil@nil                                     \n\
                                                                              \n\
 # Return nil if !(strlen(s) > i)                                             \n\
   DEFVAR LF@len                                                              \n\
   DEFVAR LF@strlenGTi                                                        \n\
-  STRLEN LF@len LF@$param_0                                                  \n\
-  GT LF@strlenGTi LF@len LF@$param_1                                         \n\
+  STRLEN LF@len LF@$param__0                                                 \n\
+  GT LF@strlenGTi LF@len LF@$param__1                                        \n\
   JUMPIFEQ *ord_retnil LF@strlenGTi bool@false                               \n\
                                                                              \n\
 # Return nil if i < 0                                                        \n\
   DEFVAR LF@iLT0                                                             \n\
-  LT LF@iLT0 LF@$param_1 int@0                                               \n\
+  LT LF@iLT0 LF@$param__1 int@0                                              \n\
   JUMPIFEQ *ord_retnil LF@iLT0 bool@true                                     \n\
                                                                              \n\
 # Get the result and return                                                  \n\
-  STRI2INT LF@result LF@$param_0 LF@$param_1                                 \n\
+  STRI2INT LF@result LF@$param__0 LF@$param__1                               \n\
   JUMP *ord_end                                                              \n\
                                                                              \n\
 # Exit with err                                                              \n\
@@ -249,7 +249,6 @@ LABEL *ord_end                                                               \n\
                                                                              \n\
 ";
 
-// Not working
 const char *chr = "                                                          \n\
 LABEL chr0                                                                   \n\
   PUSHFRAME                                                                  \n\
@@ -258,7 +257,7 @@ LABEL chr0                                                                   \n\
   MOVE LF@!ret_0 string@                                                     \n\
                                                                              \n\
   DEFVAR LF@$$CHRPAR1                                                        \n\
-  MOVE LF@$$CHRPAR1 LF@$$CHRPARAM1                                           \n\
+  MOVE LF@$$CHRPAR1 LF@$param__0                                             \n\
                                                                              \n\
   DEFVAR LF@$$CHRHELP                                                        \n\
                                                                              \n\
