@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef INT_BUFFER_C
-#define INT_BUFFER_C
+#ifndef DYNAMIC_INT_ARRAY_C
+#define DYNAMIC_INT_ARRAY_C
 
 #include "dynamic_int_array.h"
 
@@ -23,8 +23,8 @@ extern int ret;
  *
  * @return 0 if successful, errcode otherwise
  */
-int intBufInit(IntBuffer **buf) {
-  GCMalloc(*buf, sizeof(IntBuffer));
+int dynIntArrInit(DynamicIntArray **buf) {
+  GCMalloc(*buf, sizeof(DynamicIntArray));
   GCMalloc((*buf)->data, INTBUFINITLEN * sizeof(int));
   (*buf)->len = 0;
   (*buf)->size = INTBUFINITLEN / sizeof(int);
@@ -39,7 +39,7 @@ int intBufInit(IntBuffer **buf) {
  *
  * @return 0 if successful, errcode otherwise
  */
-int intBufAppend(IntBuffer *buf, int i) {
+int dynIntArrAppend(DynamicIntArray *buf, int i) {
   if(buf) {
     if (buf->len + 1 == buf->size) {
       GCRealloc(buf->data, 2 * buf->size * sizeof(int));
@@ -57,7 +57,7 @@ int intBufAppend(IntBuffer *buf, int i) {
  *
  * @param buf: from which the int should be removed
  */
-void intBufPop(IntBuffer *buf) {
+void dynIntArrPop(DynamicIntArray *buf) {
   if (buf && buf->len) {
     (buf->len)--;
   }
@@ -68,7 +68,7 @@ void intBufPop(IntBuffer *buf) {
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void intBufClear(IntBuffer *buf) {
+void dynIntArrClear(DynamicIntArray *buf) {
   buf->len = 0;
 }
 

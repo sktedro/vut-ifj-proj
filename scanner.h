@@ -78,7 +78,7 @@ bool isWhitespace(char c);
  *
  * @return true if char is a space, newline or tabulator
  */
-int returnToken(Token **token, int type, CharBuffer *buf);
+int returnToken(Token **token, int type, DynamicCharArray *buf);
 
 /**
  * @brief Pretty much just calling ungetc(), but if the character is a newline,

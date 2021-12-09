@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef CHAR_BUFFER_H
-#define CHAR_BUFFER_H
+#ifndef DYNAMIC_CHAR_ARRAY_H
+#define DYNAMIC_CHAR_ARRAY_H
 
 #include "misc.h"
 
@@ -24,7 +24,7 @@
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufInit(CharBuffer **buf) ForceRetUse;
+int dynCharArrInit(DynamicCharArray **buf) ForceRetUse;
 
 /**
  * @brief Append a new character to the buffer data
@@ -34,21 +34,21 @@ int charBufInit(CharBuffer **buf) ForceRetUse;
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppend(CharBuffer *buf, char c) ForceRetUse;
+int dynCharArrAppend(DynamicCharArray *buf, char c) ForceRetUse;
 
 /**
  * @brief Remove the last character from the buffer
  *
  * @param buf: from which the character should be removed
  */
-void charBufPop(CharBuffer *buf);
+void dynCharArrPop(DynamicCharArray *buf);
 
 /**
  * @brief Clear all characters of the buffer
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void charBufClear(CharBuffer *buf);
+void dynCharArrClear(DynamicCharArray *buf);
 
 /**
  * @brief Appends a string to a buffer 
@@ -58,7 +58,7 @@ void charBufClear(CharBuffer *buf);
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppendString(CharBuffer *buffer, char *str) ForceRetUse;
+int dynCharArrAppendString(DynamicCharArray *buffer, char *str) ForceRetUse;
 
 #endif
 /* end of file dynamic_char_array.h */

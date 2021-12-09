@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef STRING_BUFFER_C
-#define STRING_BUFFER_C
+#ifndef DYNAMIC_STRING_ARRAY_C
+#define DYNAMIC_STRING_ARRAY_C
 
 #include "dynamic_string_array.h"
 
@@ -23,8 +23,8 @@ extern int ret;
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufInit(StringBuffer **buf) {
-  GCMalloc(*buf, sizeof(StringBuffer));
+int dynStrArrInit(DynamicStringArray **buf) {
+  GCMalloc(*buf, sizeof(DynamicStringArray));
   GCMalloc((*buf)->data, STRINGBUFINITLEN * sizeof(char));
   (*buf)->len = 0;
   (*buf)->size = STRINGBUFINITLEN / sizeof(char *);
@@ -39,7 +39,7 @@ int stringBufInit(StringBuffer **buf) {
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufAppend(StringBuffer *buf, char *str) {
+int dynStrArrAppend(DynamicStringArray *buf, char *str) {
   if(!buf || !str || !buf->data) {
     return ERR(INTERN_ERR);
   } 

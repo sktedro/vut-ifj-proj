@@ -13,7 +13,7 @@ Token *token = NULL;
 char *retVarName = NULL;
 int retDataType = -1;
 
-extern StringBuffer *varDefBuf;
+extern DynamicStringArray *varDefBuf;
 
 /*
  * Helper functions
@@ -72,7 +72,7 @@ int main(){
   STPush(symtable);
 
   // Init the vardef buffer
-  TryCall(stringBufInit, &varDefBuf);
+  TryCall(dynStrArrInit, &varDefBuf);
 
   // Push 5 IDs to the symtab for every data type: fn1, fn2...fn3, varInt1, ...
   initPushToSymtab();

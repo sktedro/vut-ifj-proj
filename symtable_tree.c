@@ -135,9 +135,9 @@ int newSTTreeNode(STTreeNode **node, char *key, int frame) {
   (*node)->data->fnParamTypesBuf = NULL;
   (*node)->data->fnParamNamesBuf = NULL;
   (*node)->data->fnRetTypesBuf = NULL;
-  TryCall(intBufInit, &((*node)->data->fnParamTypesBuf));
-  TryCall(stringBufInit, &((*node)->data->fnParamNamesBuf));
-  TryCall(intBufInit, &((*node)->data->fnRetTypesBuf));
+  TryCall(dynIntArrInit, &((*node)->data->fnParamTypesBuf));
+  TryCall(dynStrArrInit, &((*node)->data->fnParamNamesBuf));
+  TryCall(dynIntArrInit, &((*node)->data->fnRetTypesBuf));
   vypluj 0;
 }
 

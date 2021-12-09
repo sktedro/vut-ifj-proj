@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef INT_BUFFER_H
-#define INT_BUFFER_H
+#ifndef DYNAMIC_INT_ARRAY_H
+#define DYNAMIC_INT_ARRAY_H
 
 #include "misc.h"
 
@@ -24,7 +24,7 @@
  *
  * @return 0 if successful, errcode otherwise
  */
-int intBufInit(IntBuffer **buf) ForceRetUse;
+int dynIntArrInit(DynamicIntArray **buf) ForceRetUse;
 
 /**
  * @brief Append a new int to the buffer data
@@ -34,21 +34,21 @@ int intBufInit(IntBuffer **buf) ForceRetUse;
  *
  * @return 0 if successful, errcode otherwise
  */
-int intBufAppend(IntBuffer *buf, int i) ForceRetUse;
+int dynIntArrAppend(DynamicIntArray *buf, int i) ForceRetUse;
 
 /**
  * @brief Remove the last int from the buffer
  *
  * @param buf: from which the int should be removed
  */
-void intBufPop(IntBuffer *buf);
+void dynIntArrPop(DynamicIntArray *buf);
 
 /**
  * @brief Clear all ints of the buffer
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void intBufClear(IntBuffer *buf);
+void dynIntArrClear(DynamicIntArray *buf);
 
 
 #endif

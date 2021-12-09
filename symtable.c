@@ -219,7 +219,7 @@ int STAppendParamType(STStack *stack, char *key, int paramType) {
   if(paramType == -1){
     return ERR(SYNTAX_ERR);
   }
-  TryCall(intBufAppend, STFind(stack, key)->fnParamTypesBuf, paramType);
+  TryCall(dynIntArrAppend, STFind(stack, key)->fnParamTypesBuf, paramType);
   return 0;
 }
 
@@ -239,7 +239,7 @@ int STAppendParamName(STStack *stack, char *key, char *paramName) {
   if(!paramName){
     return ERR(SYNTAX_ERR);
   }
-  TryCall(stringBufAppend, STFind(stack, key)->fnParamNamesBuf, paramName);
+  TryCall(dynStrArrAppend, STFind(stack, key)->fnParamNamesBuf, paramName);
   return 0;
 }
 
@@ -256,7 +256,7 @@ int STAppendRetType(STStack *stack, char *key, int retType) {
   if(!STFind(stack, key)){
     return ERR(SYNTAX_ERR);
   }
-  TryCall(intBufAppend, STFind(stack, key)->fnRetTypesBuf, retType);
+  TryCall(dynIntArrAppend, STFind(stack, key)->fnRetTypesBuf, retType);
   return 0;
 }
 

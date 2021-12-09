@@ -38,8 +38,8 @@ int scanner(Token **token) {
   }
 
   // Token data (characters composing it) will be written here
-  CharBuffer *buf = NULL;
-  TryCall(charBufInit, &buf);
+  DynamicCharArray *buf = NULL;
+  TryCall(dynCharArrInit, &buf);
 
   // Starting state of the finite state machine is s_start
   int state = s_start;
@@ -69,7 +69,7 @@ int scanner(Token **token) {
       LOCCount++;
     }
 
-    TryCall(charBufAppend, buf, c);
+    TryCall(dynCharArrAppend, buf, c);
 
     // Main switch to change the program flow based on the actual FSM state
     switch (state) {
@@ -77,7 +77,7 @@ int scanner(Token **token) {
       // "
       if (c == '"') {
         // We don't need (and want) the starting '"'
-        charBufPop(buf);
+        dynCharArrPop(buf);
         state = s_strStart;
 
         // 0-9
@@ -145,7 +145,7 @@ int scanner(Token **token) {
         // space, \n, \t
       } else if (isWhitespace(c)) {
         // Ignoring the whitespaces
-        charBufPop(buf);
+        dynCharArrPop(buf);
 
         // EOF
       } else if (c == EOF) {
@@ -161,9 +161,9 @@ int scanner(Token **token) {
 
     // Got a dash - could be an arithmetic operator (minus) or a comment (--)
     case s_arithmOpDash:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == '-') {
-        charBufPop(buf);
+        dynCharArrPop(buf);
         state = s_comment;
       } else {
         returnCharacterToStdin(c);
@@ -174,7 +174,7 @@ int scanner(Token **token) {
     // Definitely a comment (got --). Don't yet know if it is a singleline or
     // a multiline comment
     case s_comment:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == '[') {
         state = s_unknownComment;
       } else if (c == '\n') {
@@ -186,7 +186,7 @@ int scanner(Token **token) {
 
     // Got a '[', so it could be a multiline, based on the next character
     case s_unknownComment:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == '[') {
         state = s_multiLineComment;
       } else if (c == '\n') {
@@ -198,16 +198,16 @@ int scanner(Token **token) {
 
     // Definitely a singleline comment
     case s_singleLineComment:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == '\n') {
-        charBufClear(buf);
+        dynCharArrClear(buf);
         state = s_start;
       }
       break;
 
     // Definitely a multiline comment
     case s_multiLineComment:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == ']') {
         state = s_multiLineCommentPossibleEnd;
       }
@@ -215,7 +215,7 @@ int scanner(Token **token) {
 
     // Got a ']' in a multiline comment, receiving another ']' ends it
     case s_multiLineCommentPossibleEnd:
-      charBufPop(buf);
+      dynCharArrPop(buf);
       if (c == ']') {
         state = s_start;
       } else {
@@ -227,13 +227,13 @@ int scanner(Token **token) {
     case s_strStart:
       // End of string
       if (c == '"') {
-        charBufPop(buf);
+        dynCharArrPop(buf);
         // state = s_strEnd
         return returnToken(token, t_str, buf);
         // If there is an escaped character, instantly append it
       } else if (c == '\\') {
         c = fgetc(stdin);
-        TryCall(charBufAppend, buf, c);
+        TryCall(dynCharArrAppend, buf, c);
       } 
       break;
 
@@ -248,7 +248,7 @@ int scanner(Token **token) {
           if (!isWhitespace(c)) {
             returnCharacterToStdin(c);
           }
-          charBufPop(buf);
+          dynCharArrPop(buf);
           return returnToken(token, t_int, buf);
         }
       }
@@ -264,7 +264,7 @@ int scanner(Token **token) {
           if (!isWhitespace(c)) {
             returnCharacterToStdin(c);
           }
-          charBufPop(buf);
+          dynCharArrPop(buf);
           return returnToken(token, t_num, buf);
         }
       }
@@ -298,7 +298,7 @@ int scanner(Token **token) {
     case s_sciNum:
       if (!isNum(c)) {
         returnCharacterToStdin(c);
-        charBufPop(buf);
+        dynCharArrPop(buf);
         return returnToken(token, t_sciNum, buf);
       }
       break;
@@ -307,7 +307,7 @@ int scanner(Token **token) {
     case s_idOrKeyword:
       if (!(isLetter(c) || isNum(c) || c == '_')) {
         returnCharacterToStdin(c);
-        charBufPop(buf);
+        dynCharArrPop(buf);
         vypluj returnToken(token, t_idOrKeyword, buf);
       }
       break;
@@ -320,7 +320,7 @@ int scanner(Token **token) {
         return returnToken(token, t_arithmOp, buf);
       } else {
         returnCharacterToStdin(c);
-        charBufPop(buf);
+        dynCharArrPop(buf);
         return returnToken(token, t_arithmOp, buf);
       }
       break;
@@ -352,7 +352,7 @@ int scanner(Token **token) {
         return returnToken(token, t_relOp, buf);
       } else {
         returnCharacterToStdin(c);
-        charBufPop(buf);
+        dynCharArrPop(buf);
         return returnToken(token, t_relOp, buf);
       }
       break;
@@ -364,7 +364,7 @@ int scanner(Token **token) {
         return returnToken(token, t_relOp, buf);
       } else {
         returnCharacterToStdin(c);
-        charBufPop(buf);
+        dynCharArrPop(buf);
         return returnToken(token, t_assignment, buf);
       }
       break;
@@ -450,7 +450,7 @@ bool isWhitespace(char c) {
  *
  * @return true if char is a space, newline or tabulator
  */
-int returnToken(Token **token, int type, CharBuffer *buf) {
+int returnToken(Token **token, int type, DynamicCharArray *buf) {
   TryCall(tokenInit, token, type);
   TryCall(tokenAddAttrib, *token, buf->data);
   vypluj 0;

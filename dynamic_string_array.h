@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef STRING_BUFFER_H
-#define STRING_BUFFER_H
+#ifndef DYNAMIC_STRING_ARRAY_H
+#define DYNAMIC_STRING_ARRAY_H
 
 #include "misc.h"
 
@@ -24,7 +24,7 @@
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufInit(StringBuffer **buf) ForceRetUse;
+int dynStrArrInit(DynamicStringArray **buf) ForceRetUse;
 
 /**
  * @brief Append a new string to the buffer
@@ -34,7 +34,7 @@ int stringBufInit(StringBuffer **buf) ForceRetUse;
  *
  * @return 0 if successful, errcode otherwise
  */
-int stringBufAppend(StringBuffer *buf, char *str) ForceRetUse;
+int dynStrArrAppend(DynamicStringArray *buf, char *str) ForceRetUse;
 
 #endif
 /* end of file dynamic_string_array.h */

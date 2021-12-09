@@ -9,8 +9,8 @@
  * @author Jiřina Frýbortová (xfrybo01)
  */
 
-#ifndef CHAR_BUFFER_C
-#define CHAR_BUFFER_C
+#ifndef DYNAMIC_CHAR_ARRAY_C
+#define DYNAMIC_CHAR_ARRAY_C
 
 #include "dynamic_char_array.h"
 
@@ -23,8 +23,8 @@ extern int ret;
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufInit(CharBuffer **buf) {
-  GCMalloc(*buf, sizeof(CharBuffer));
+int dynCharArrInit(DynamicCharArray **buf) {
+  GCMalloc(*buf, sizeof(DynamicCharArray));
   GCMalloc((*buf)->data, CHARBUFINITLEN * sizeof(char));
   (*buf)->len = 0;
   (*buf)->size = CHARBUFINITLEN;
@@ -40,7 +40,7 @@ int charBufInit(CharBuffer **buf) {
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppend(CharBuffer *buf, char c) {
+int dynCharArrAppend(DynamicCharArray *buf, char c) {
   if(buf){
     if (buf->len + 1 == buf->size) {
       GCRealloc(buf->data, 2 * buf->size * sizeof(char));
@@ -59,7 +59,7 @@ int charBufAppend(CharBuffer *buf, char c) {
  *
  * @param buf: from which the character should be removed
  */
-void charBufPop(CharBuffer *buf) {
+void dynCharArrPop(DynamicCharArray *buf) {
   if (buf && buf->len) {
     (buf->len)--;
     buf->data[buf->len] = '\0';
@@ -71,7 +71,7 @@ void charBufPop(CharBuffer *buf) {
  *
  * @param buf: pointer to the buffer that is to be cleared
  */
-void charBufClear(CharBuffer *buf) {
+void dynCharArrClear(DynamicCharArray *buf) {
   if(buf && buf->data){
     buf->data[0] = '\0';
     buf->len = 0;
@@ -86,11 +86,11 @@ void charBufClear(CharBuffer *buf) {
  *
  * @return 0 if successful, errcode otherwise
  */
-int charBufAppendString(CharBuffer *buffer, char *str) {
+int dynCharArrAppendString(DynamicCharArray *buffer, char *str) {
   if (str && buffer) {
     int len = strlen(str);
     for(int i = 0; i < len; i++){
-      TryCall(charBufAppend, buffer, str[i]);
+      TryCall(dynCharArrAppend, buffer, str[i]);
     }
     return 0;
   }

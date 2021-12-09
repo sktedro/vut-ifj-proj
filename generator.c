@@ -738,10 +738,10 @@ char *getDataTypeFromInt(Token *token) {
  * @return 0 if successful, errcode otherwise
  */
 int stringConvert(char **destPtr, char *string) {
-  CharBuffer *newString;
-  CharBuffer *tempBuffer;
-  TryCall(charBufInit, &newString);
-  TryCall(charBufInit, &tempBuffer);
+  DynamicCharArray *newString;
+  DynamicCharArray *tempBuffer;
+  TryCall(dynCharArrInit, &newString);
+  TryCall(dynCharArrInit, &tempBuffer);
 
   int i = 0;
   while(string[i] != '\0'){
@@ -750,7 +750,7 @@ int stringConvert(char **destPtr, char *string) {
     if((string[i] >= 'a' && string[i] <= 'z') 
         || (string[i] >= 'A' && string[i] <= 'Z') 
         || (string[i] >= '0' && string[i] <= '9')) {
-      TryCall(charBufAppend, newString, string[i]);
+      TryCall(dynCharArrAppend, newString, string[i]);
 
     // After a '\' we can get
     // Special characters: \n \t \" and \\ (backslash)
@@ -770,19 +770,19 @@ int stringConvert(char **destPtr, char *string) {
         string[i] = '"';
         continue;
       }else if(string[i] == '\\'){
-        TryCall(charBufAppendString, newString, "\\092");
+        TryCall(dynCharArrAppendString, newString, "\\092");
         i++;
         continue;
       }
 
       // Escaped ascii value: \000 to \255
       // Add the number digits to the tempBuffer
-      TryCall(charBufAppend, newString, '\\');
+      TryCall(dynCharArrAppend, newString, '\\');
       for(int j = 0; j < 3; j++){
         if((int)strlen(string) < i){
           return ERR(LEX_ERR);
         }
-        TryCall(charBufAppend, tempBuffer, string[i]);
+        TryCall(dynCharArrAppend, tempBuffer, string[i]);
         i++;
       }
       // Check if the value is a number below 255 (and above 0)
@@ -793,9 +793,9 @@ int stringConvert(char **destPtr, char *string) {
         return ERR(LEX_ERR);
       }
       // If the value is all right, append the temp data to the new string
-      TryCall(charBufAppendString, newString, tempBuffer->data);
+      TryCall(dynCharArrAppendString, newString, tempBuffer->data);
       // Clear the temp buffer
-      charBufClear(tempBuffer);
+      dynCharArrClear(tempBuffer);
       
     // Other special character
     } else {
@@ -803,7 +803,7 @@ int stringConvert(char **destPtr, char *string) {
       GCMalloc(escapedSeq, sizeof(char) * 5);
       sprintf(escapedSeq, "\\%03d", (int) string[i]);
       LOG("got %s", escapedSeq);
-      TryCall(charBufAppendString, newString, escapedSeq);
+      TryCall(dynCharArrAppendString, newString, escapedSeq);
     }
 
     i++;

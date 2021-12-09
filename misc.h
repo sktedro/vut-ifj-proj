@@ -293,20 +293,20 @@ typedef struct {
   char *data;
   int len;      // Actual buffer data length
   int size;     // Size allocated for the buffer
-} CharBuffer;
+} DynamicCharArray;
 
 // Structure defining the int buffer
 typedef struct {
   int *data;
   int len;      // Actual buffer data length
   int size;     // Size allocated for the buffer
-} IntBuffer;
+} DynamicIntArray;
 
 typedef struct {
   char **data;
   int len;      // Actual buffer data length
   int size;     // Size allocated for the buffer
-} StringBuffer;
+} DynamicStringArray;
 
 // Structure defining a token
 typedef struct {
@@ -337,9 +337,9 @@ typedef struct {
   int varDataType;
   bool fnDefined;               // True if there was a definition in the code
   bool fnDeclared;              // True if there was a declaration in the code
-  IntBuffer *fnParamTypesBuf;
-  StringBuffer *fnParamNamesBuf;// Names of the function parameters
-  IntBuffer *fnRetTypesBuf;
+  DynamicIntArray *fnParamTypesBuf;
+  DynamicStringArray *fnParamNamesBuf;// Names of the function parameters
+  DynamicIntArray *fnRetTypesBuf;
 } STElem;
 
 // Symbol table tree structure for the binary search tree.

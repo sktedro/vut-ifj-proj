@@ -18,11 +18,11 @@ extern int ret;
 
 STStack *symtab;
 
-StringBuffer *varDefBuf = NULL;
+DynamicStringArray *varDefBuf = NULL;
 
 LinkedList *multiAssignIdList;
 LinkedList *multiAssignRetList;
-StringBuffer *labelBuffer;
+DynamicStringArray *labelBuffer;
 
 int retVarCounter = 0;
 
@@ -42,11 +42,11 @@ int retVarCounter = 0;
 int pStart() {
   RuleFnInit;
 
-  TryCall(stringBufInit, &varDefBuf);
+  TryCall(dynStrArrInit, &varDefBuf);
 
   TryCall(LLInit, &multiAssignIdList);
   TryCall(LLInit, &multiAssignRetList);
-  TryCall(stringBufInit, &labelBuffer);
+  TryCall(dynStrArrInit, &labelBuffer);
 
   // require
   RequireToken(t_idOrKeyword, "require");
@@ -671,7 +671,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     genUnconditionalJump(bypassLabel);
 
     char *evalLabel = genLabelName("eval");
-    TryCall(stringBufAppend, labelBuffer, evalLabel);
+    TryCall(dynStrArrAppend, labelBuffer, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -706,7 +706,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 
     // gen label to eval expr
     char *evalLabel = genLabelName("eval");
-    TryCall(stringBufAppend, labelBuffer, evalLabel);
+    TryCall(dynStrArrAppend, labelBuffer, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -1325,7 +1325,7 @@ int condAppendToStringBuff(char *name) {
       vypluj 0;
     }
   }
-  TryCall(stringBufAppend, varDefBuf, name)
+  TryCall(dynStrArrAppend, varDefBuf, name)
   vypluj 0;
 }
 
