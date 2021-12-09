@@ -15,6 +15,7 @@
 #include "generator.h"
 
 extern int ret;
+
 extern GarbageCollector garbageCollector;
 
 extern const char *reads;
@@ -26,8 +27,6 @@ extern const char *substr;
 extern const char *ord;
 extern const char *chr;
 
-extern StringBuffer *varDefBuff;
-
 const char *labelPrefix = "*label_";
 const char *varPrefix = "%var_";
 const char *tmpVarPrefix = "?tmpvar_";
@@ -35,22 +34,15 @@ const char *paramPrefix = "$param_";
 const char *retPrefix = "!ret_";
 const char *fnPrefix = "&fn_";
 
+extern StringBuffer *varDefBuff;
+
 int tmpCounter = 0;
 int labelCounter = 0;
 int paramCounter = 0;
 int retCounter = 0;
 int writeCount = 0;
 
-// ----------------------------------------------------------------------------
-// VARIABLES FOR MULTIPLE ASSIGMENT
-
-int exprLabelCnt = 0;
-int exprEndCnt = 0;
-
-// ----------------------------------------------------------------------------
-
 // Return x nils
-
 int genNilsReturn(int amount){
   for(int i = 0; i < amount; i++){
     // Generate and define the retArgName
@@ -268,12 +260,6 @@ void genVarDefTF(char *name) {
   printf("DEFVAR TF@%s\n", name);
 }
 
-char *genTmpVarDef() {
-  char *name = genTmpVarName();
-  genVarDefLF(name);
-  return name;
-}
-
 int genMove(char *dest, char *src){
   printf("MOVE LF@%s LF@%s\n", dest, src);
   return 0;
@@ -346,15 +332,6 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
   } else if(strcmp(assignValue, "nil") == 0) {
     printf("MOVE %s@%s nil@nil\n", frame, name);
   
-  } else if(strcmp(assignValue, "readi") == 0) {
-    printf("READ %s@%s int\n",frame, name);
-  
-  } else if(strcmp(assignValue, "readn") == 0) {
-    printf("READ %s@%s float\n",frame, name);
-  
-  } else if(strcmp(assignValue, "reads") == 0) {
-    printf("READ %s@%s string\n",frame, name);
-  
   } else if(dataType == -1) {
     printf("MOVE %s@%s %s@%s\n",frame, name, frame, assignValue);
   } else {
@@ -389,10 +366,6 @@ void genFnDef(char *name) {
 // Create a TF
 void genFnCallInit(){
   printf("CREATEFRAME\n");
-}
-
-void genPushFrame(){
-  printf("PUSHFRAME\n");
 }
 
 void genPopframe() {
@@ -565,93 +538,10 @@ char *genNot(SStackElem *src) {
   return dest;
 }
 
-/*
- * Vypíše to literál nemazať
- * 
- */
-int genWriteLiteral(Token *token, char *frame) {
-  char *string;
-  char *dataType = getDataTypeFromInt(token);
-
-  if(strcmp(token->data, "nil") == 0) {
-    printf("\n");
-    printf("DEFVAR %s@$W%d\n",frame, writeCount);
-    printf("MOVE %s@$W%d string@nil\n",frame, writeCount);
-    printf("WRITE %s@$W%d\n", frame, writeCount);
-    writeCount++;
-  } else if(token->type == t_str) {
-    stringConvert(&string, token->data);
-    printf("\n");
-    printf("DEFVAR %s@$W%d\n",frame, writeCount);
-    printf("MOVE %s@$W%d %s@%s\n",frame, writeCount, dataType, string);
-    printf("WRITE %s@$W%d\n", frame, writeCount);
-    writeCount++;
-  } else {
-    printf("\n");
-    printf("DEFVAR %s@W%d\n",frame, writeCount);
-    printf("MOVE %s@W%d %s@%s\n",frame, writeCount, dataType, token->data);
-    printf("WRITE %s@W%d\n", frame, writeCount);
-    writeCount++;
-  }
-  return 0;
-}
-
 void genWrite(char *name) {
-/** void genWriteVariable(char *name, char *frame) { */
-  /**
-    * LOG("FRAME : %s", frame);
-    * printf("\n");
-    * printf("DEFVAR %s@$W%d\n", frame, writeCount);
-    * printf("MOVE %s@$W%d %s@%s\n", frame, writeCount, frame, name);
-    * printf("WRITE %s@$W%d\n", frame, writeCount);
-    * writeCount++;
-    */
-  // tedro: nestačí to takto?
   printf("WRITE TF@%s\n", name);
 }
 
-int genReadFunction(char *varName, char *builtInFnName) {
-  
-  if(strcmp(builtInFnName, "readi") == 0) {
-    printf("READ LF@%s int\n", varName);
-  } else if(strcmp(builtInFnName, "readn") == 0) {
-    printf("READ LF@%s float\n", varName);
-  } else if(strcmp(builtInFnName, "reads") == 0) {
-    printf("READ LF@%s string\n", varName);
-  } else {
-    vypluj ERR(SYNTAX_ERR);
-  }
-
-  vypluj 0;
-}
-
-int genSubstrFunction(char *target, Token *string, double start, int end, int frame) {
-
-  /*printf("LABEL: $substr");
-
-  printf("PUSHFRAME");
-
-  printf("DEFVAR LF@$substrRET");
-  printf("MOVE LF@$substrRET nil@nil");
-
-  printf("DEFVAR LF@$in1");
-  printf("MOVE LF@$in1 $STRING");
-
-  printf("DEFVAR LF@$in2");
-  printf("MOVE LF@$in2 $START");
-
-  printf("DEFVAR LF@$in3");
-  printf("MOVE LF@$in3 $END");*/
-
-  return 0;
-}
-
-int genSubstrFunstionCall(Token *string, Token *start, Token *end) {
-  
-  return 0;
-}
-
-// --------------------------------------------------------------------------------
 // FUNCTIONS FOR generating built in functions
 
 void genBuiltInFunctions(){
@@ -665,125 +555,6 @@ void genBuiltInFunctions(){
   printf("%s\n", chr);
   genLabel("*built_in_functions_bypass");
   printf("\n# END OF BUILT IN FUNCTIONS DEFINITIONS\n");
-}
-
-void genSubStrFnDef() {
-
-  printf("\nLABEL _$SUBSTR_\n");
-
-  printf("\nPUSHFRAME\n");
-
-  printf("\nDEFVAR LF@$$STRRET\n");
-  printf("MOVE LF@$$STRRET string@\n");
-
-  printf("\nDEFVAR LF@$$STRPAR1\n");
-  printf("MOVE LF@LF@$$STRPAR1 LF@$$STRPARAM1\n");
-  
-  printf("\nDEFVAR LF@LF@$$STRPAR2\n");
-  printf("MOVE LF@LF@$$STRPAR2 LF@$$STRPARAM2\n");
-
-  printf("\nDEFVAR LF@LF@$$STRPAR3\n");
-  printf("MOVE LF@LF@$$STRPAR3 LF@$$STRPARAM3\n");
-
-  printf("\nJUMPIFEQ _STR$ERROR_ LF@$$STRPAR1 nil@nil\n");
-  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR2 nil@nil\n");
-  printf("JUMPIFEQ _STR$ERROR_ LF@$$STRPAR3 nil@nil\n");
-
-  printf("\nDEFVAR LF@$$STRHELP\n");
-  printf("MOVE LF@LF@LF@$$STRHELP nil@nil\n");
-
-  printf("\nDEFVAR LF@$$STRLEN\n");
-  printf("MOVE LF@LF@LF@$$STRLEN LF@$$STRPAR1\n");
-
-  printf("\n# if (param3 < param2)\n");
-  printf("LT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRPAR2\n");
-  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
-
-  printf("\n# if (param2 < 1)\n");
-  printf("LT LF@$$STRHELP LF@$$STRPAR2 int@1\n");
-  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
-
-  printf("\n# if (param2 > len(param1))\n");
-  printf("GT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRLEN\n");
-  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
-
-  printf("\n# if (param3 < 1)\n");
-  printf("LT LF@$$STRHELP LF@$$STRPAR3 int@1\n");
-  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
-
-  printf("\n# if (param3 > len(param1))\n");
-  printf("GT LF@$$STRHELP LF@$$STRPAR3 LF@$$STRLEN\n");
-  printf("JUMPIFEQ _STR$EMPTY_ LF@$$STRHELP bool@true\n");
-
-  printf("\n#---------------------------------\n");
-
-  printf("\nDEFVAR LF@$$STRINDEX\n");
-  printf("MOVE LF@$$STRINDEX int@0\n");
-
-  printf("DEFVAR LF@$$STRTMP\n");
-  printf("ADD LF@$$STRPAR3 LF@$$STRPAR3 int@1\n");
-
-  printf("\nLABEL _STR$WHILE_\n");
-
-  printf("\n# if (param2 < param3)\n");
-  printf("LT LF@$$STRHELP LF@$$STRPAR2 LF@$$STRPAR3\n");
-  printf("JUMPIFEQ _STR$RET_ LF@$$STRHELP bool@false\n");
-
-  printf("\nGETCHAR LF@$$STRTMP LF@$$STRPAR1 LF@$$STRPAR2\n");
-  printf("CONCAT LF@$$STRRET LF@$$STRRET LF@$$STRTMP\n");
-
-  printf("\nADD LF@$$STRINDEX LF@$$STRINDEX int@1\n");
-  printf("ADD LF@$$STRPAR2 LF@$$STRPAR2 int@1\n");
-
-  printf("\nJUMP _STR$WHILE_\n");
-
-  printf("\nJUMP _STR$RET_\n");
-
-  printf("\nLABEL _STR$EMPTY_\n");
-  printf("MOVE LF@$$STRRET string@\n");
-  printf("JUMP _STR$RET_\n");
-
-  printf("\nLABEL _STR$ERROR_\n");
-  printf("EXIT int@8\n");
-
-  printf("\nLABEL _STR$RET_\n");
-  printf("POPFRAME\n");
-  printf("RETURN\n");
-}
-
-int genSubStrFnParamVar(char *varName, int param) {
-  
-  if(param == 1) {
-    printf("\nCREATEFRAME\n");
-  } else if(param < 1 || param > 3) {
-    vypluj err(INTERN_ERR);
-  }
-  
-  printf("DEFVAR TF@$$STRPARAM%d\n", param);
-
-  printf("MOVE TF@$$STRPARAM%d LF@%s\n",param ,varName);
-  vypluj 0;
-}
-
-int genSubStrFnParamLiteral(Token *token, int param) {
-  
-  if(param == 1) {
-    printf("\nCREATEFRAME\n");
-  } else if(param < 1 || param > 3) {
-    vypluj err(INTERN_ERR);
-  }
-  
-  printf("DEFVAR TF@$$STRPARAM%d\n", param);
-  printf("MOVE TF@$$STRPARAM%d %s@%s\n", param, getDataTypeFromInt(token), token->data);
-  vypluj 0;
-}
-
-void genSubStrFnCall() {
-  printf("CALL _$SUBSTR_\n");
-}
-
-void genSubStrFnRet(char *varName) {
-  printf("MOVE LF@%s TF@$$STRRET\n", varName);
 }
 
 #endif

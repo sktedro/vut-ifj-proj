@@ -47,7 +47,7 @@ int LLAppend(LinkedList **head, char *name, int dataType) {
   GCMalloc(element->name, sizeof(char) * (strlen(name) + 1));
 
   // Copy the data
-  memcpy(element, name, strlen(name) + 1);
+  memcpy(element->name, name, strlen(name) + 1);
   element->dataType = dataType;
 
   // Append it to the end
