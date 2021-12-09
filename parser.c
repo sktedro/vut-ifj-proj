@@ -88,7 +88,7 @@ int pStart() {
   TryCall(stringBufInit, &varDefBuff);
   AListInit(&assignmentElement);
   AListInit(&assignmentElement2);
-  stringBufInit(&labelBuffer);
+  TryCall(stringBufInit, &labelBuffer);
 
   // require
   RequireToken(t_idOrKeyword, "require");
@@ -720,7 +720,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
   Token *token = NULL;
   GetToken;
   char *fnName = token->data;
-  stashToken(&token);
+  TryCall(stashToken, &token);
 
   char *retVarName = NULL;
   int dataType = -1;
@@ -735,7 +735,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     genUnconditionalJump(bypassLabel);
 
     char *evalLabel = genLabelName("eval");
-    stringBufAppend(labelBuffer, evalLabel);
+    TryCall(stringBufAppend, labelBuffer, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -771,7 +771,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 
     // gen label to eval expr
     char *evalLabel = genLabelName("eval");
-    stringBufAppend(labelBuffer, evalLabel);
+    TryCall(stringBufAppend, labelBuffer, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -858,7 +858,7 @@ int pStatWithId(char *idName) {
       char *endLabel = genLabelName("ASSEND");
 
       char *name = NULL;
-      STGetName(symtab, &name, idName);
+      TryCall(STGetName, symtab, &name, idName);
       AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, idName), NULL);
 
       // [id]
@@ -868,7 +868,7 @@ int pStatWithId(char *idName) {
         vypluj ERR(SYNTAX_ERR);
       }
 
-      STGetName(symtab, &name, token->data);
+      TryCall(STGetName, symtab, &name, token->data);
       AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
 
       // [id]
@@ -959,7 +959,7 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
     vypluj ERR(SYNTAX_ERR);
   }
   char *name = NULL;
-  STGetName(symtab, &name, token->data);
+  TryCall(STGetName, symtab, &name, token->data);
   AListAdd(&assignmentElement, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
 
   // <nextAssign>
@@ -972,7 +972,7 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
 
   GetToken;
   if(token->type != t_comma){
-    stashToken(&token);
+    TryCall(stashToken, &token);
   }
 
   vypluj 0;
@@ -1344,19 +1344,7 @@ int pExpr(char **retVarName, int expectedType) {
   // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
-    // check types
-    LOG("WE IN \n");
-    STElem *element =  STFind(symtab, token->data);
-    
 
-    // tikodime asi
-
-    // int type = STGetRetType(symtab, token->data, 0); // TODO some magic for more returns
-    // LOG("TYPE FROM PEXPR: %d", type);
-    // if(type != expectedType) {
-    //   vypluj ERR(ASS_ERR);
-    // }
-    
     genComment("Calling a function inside a function");
     TryCall(pFnCall, token->data);
     genComment("Function call inside a function done");
