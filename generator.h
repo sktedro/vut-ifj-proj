@@ -13,7 +13,7 @@
 #define GENERATOR_H
 
 #include "misc.h"
-#include "assignment.h"
+#include "linked_list.h"
 #include "parser.h"
 
 int genNilsReturn(int amount);
@@ -75,18 +75,5 @@ char *genRetVarName(char *baseName);
 int genReturn(char *src1, char *src2);
 void genUnconditionalJump(char *labelName);
 
-// --------------------------------------------------------------------------------
-// FUNCTIONS FOR MULTIPLE ASSIGMENT
-void genExprLabel(char *name);
-//void genExprJump(char *label); robí to isté ako genUnconditionalJump
-char *getExprLabelName(int num);
-char *getExprEndName();
-void genExprFirst(AssignElement *element);
-void genExpr(AssignElement *element);
-void genExprSecond(AssignElement *element);
-void genExprLast(AssignElement *element);
-void genExprEnd(AssignElement *element);
-// --------------------------------------------------------------------------------
-
 #endif
-/* end of file generator.c */
+/* end of file generator.h */

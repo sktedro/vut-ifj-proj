@@ -16,7 +16,7 @@
 #include "scanner.h"
 #include "symtable.h"
 #include "generator.h"
-#include "assignment.h"
+#include "linked_list.h"
 #include "precedence_analysis.h"
 
 int pStringFunctions(char *varName);

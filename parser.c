@@ -20,8 +20,8 @@ STStack *symtab;
 
 StringBuffer *varDefBuf = NULL;
 
-AssignElement *multiAssignIdList;
-AssignElement *multiAssignRetList;
+LinkedList *multiAssignIdList;
+LinkedList *multiAssignRetList;
 StringBuffer *labelBuffer;
 
 int retVarCounter = 0;
@@ -44,8 +44,8 @@ int pStart() {
 
   TryCall(stringBufInit, &varDefBuf);
 
-  AListInit(&multiAssignIdList);
-  AListInit(&multiAssignRetList);
+  TryCall(LLInit, &multiAssignIdList);
+  TryCall(LLInit, &multiAssignRetList);
   TryCall(stringBufInit, &labelBuffer);
 
   // require
@@ -687,7 +687,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
       condAppendToStringBuff(b);
       genMoveToLF(b, retVarName);
 
-      AListAdd(&multiAssignRetList, b, NULL, false, dataType, NULL);
+      TryCall(LLAppend, &multiAssignRetList, b, dataType);
     }
     resetRetCounter();
 
@@ -720,10 +720,10 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     genLabel(bypassLabel);
 
     // Add the return value (result) to multiAssignRetList
-    AListAdd(&multiAssignRetList, retVarName, NULL, false, dataType, NULL);
+    TryCall(LLAppend, &multiAssignRetList, retVarName, dataType);
   }
 
-  if(AListGetLength(multiAssignIdList) <= AListGetLength(multiAssignRetList)){
+  if(LLGetLength(multiAssignIdList) <= LLGetLength(multiAssignRetList)){
     *assignmentDone = true;
   }
 
@@ -793,7 +793,7 @@ int pStatWithId(char *idName) {
 
       char *name = NULL;
       TryCall(STGetName, symtab, &name, idName);
-      AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, idName), NULL);
+      TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, idName));
 
       // [id]
       RequireTokenType(t_idOrKeyword);
@@ -803,7 +803,7 @@ int pStatWithId(char *idName) {
       }
 
       TryCall(STGetName, symtab, &name, token->data);
-      AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
+      TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, token->data));
 
       // [id]
 
@@ -841,10 +841,12 @@ int pStatWithId(char *idName) {
 
       // a priradenia 
       // hodnôt - v asselem sú idčká a v asselem2 sú results expr
-      int varCount = AListGetLength(multiAssignIdList);
+      int varCount = LLGetLength(multiAssignIdList);
       for(int i = 1; i < varCount; i++) {
-        genMove(AListGetElementByIndex(multiAssignIdList, i)->name,
-        AListGetElementByIndex(multiAssignRetList, i)->name);
+        char *id = LLGetElemByIndex(multiAssignIdList, i)->name;
+        char *ret = LLGetElemByIndex(multiAssignRetList, i)->name;
+        // Code gen
+        genMove(id, ret);
       }
 
     } else {
@@ -889,7 +891,7 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
   }
   char *name = NULL;
   TryCall(STGetName, symtab, &name, token->data);
-  AListAdd(&multiAssignIdList, name, NULL, false, STGetVarDataType(symtab, token->data), NULL);
+  TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, token->data));
 
   // <nextAssign>
   TryCall(pNextAssign, assignmentDone, endLabel);

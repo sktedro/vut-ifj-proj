@@ -3,7 +3,7 @@ CFLAGS=-g -Wno-unused-result
 
 
 LIBS=\
-../assignment.c \
+../linked_list.c \
 ../built_in_functions.c \
 ../char_buffer.c \
 ../generator.c \

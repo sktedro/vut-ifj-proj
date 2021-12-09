@@ -319,4 +319,4 @@ bool isTokenAllowedInExpr(Token *token);
 bool isExprAtomic(SStack *symstack);
 
 #endif
-/* end of file precedence_analysis.h*/
+/* end of file precedence_analysis.h */

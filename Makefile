@@ -10,7 +10,7 @@ CFLAGS=-Wall -Wextra -std=c99 -g -Wno-unused-parameter
 
 MAIN=main.c
 LIBS=\
-assignment.c \
+linked_list.c \
 built_in_functions.c \
 char_buffer.c \
 generator.c \

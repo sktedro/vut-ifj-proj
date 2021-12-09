@@ -369,17 +369,12 @@ typedef struct {
   int ptrsUsed;
 } GarbageCollector;
 
-// for multiple assignment element
-typedef struct assignmentElement {
-  char *name;    // id string
-  char *label;   // id value
-  bool first;
+// A linked list for identificators and return values
+typedef struct linkedList {
+  char *name;
   int dataType;
-  bool generated;
-  char *end;
-  struct assignmentElement *prev; 
-  struct assignmentElement *next;
-} AssignElement;
+  struct linkedList *next;
+} LinkedList;
 
 
 /**
