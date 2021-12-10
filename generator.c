@@ -76,7 +76,7 @@ char *genTmpVarName() {
   GCMalloc(varName, sizeof(char) * mallocLen);
   sprintf(varName, "%s%d", tmpVarPrefix, tmpCounter);
   tmpCounter++;
-  condAppendToStringBuff(varName);
+  appendToVarDeclarationList(varName);
   return varName;
 }
 
@@ -332,7 +332,7 @@ int genAssignLiteral(char *name, int dataType, char *assignValue, char *frame) {
  */
 char *genType(char *varName){
   char *newVarName = genTmpVarName();
-  condAppendToStringBuff(newVarName);
+  appendToVarDeclarationList(newVarName);
   printf("TYPE LF@%s LF@%s\n", newVarName, varName);
   return newVarName;
 }

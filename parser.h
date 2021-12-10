@@ -19,48 +19,268 @@
 #include "linked_list.h"
 #include "precedence_analysis.h"
 
-int pStringFunctions(char *varName);
-
 /*
- * Rules
+ *
+ * Rules 
+ *
  */
-int processExpr(bool *assignmentDone, char *endLabel);
-int pStart();
-int pReq();
-int pCodeBody();
-int pFnCall();
-int pFnRet();
-int pFnCallArgList();
-int pNextFnCallArg();
-int pFnCallArg();
-int pStat();
-int pStatWithId();
-int pNextAssign(bool *assignmentDone, char *endLabel);
-int pFnDefinitionParamTypeList(char *fnName);
-int pNextFnDefinitionParamType(char *fnName, int paramCount);
-int pRetArgList(char *fnName);
-int pRetNextArg(char *fnName, int argCount);
-int pFnDeclarationParamTypeList(char *fnName);
-int pNextFnDeclarationParamType(char *fnName, int paramCount);
-int pFnRetTypeList(char *fnName);
-int pNextRetType(char *fnName);
-int pNewIdAssign(char *varName);
-int pExpr();
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 01. <start>                      -> require <req> <codeBody>
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pStart() ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 02. <req>                        -> "ifj21"
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pReq() ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 04. <codeBody>        -> eps
+ * 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) 
+ *   <fnRetTypeList> <stat> end <codeBody>
+ * 06. <codeBody>        -> global [id] : function ( 
+ *   <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
+ * 07. <codeBody>        -> [id] <fnCall> <codeBody>
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pCodeBody() ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 09. <fnCall>          -> ( <fnCallArgList> )
+ *
+ * @param fnName: name of the function which is being called
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnCall(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 10. <fnCallArgList>   -> eps
+ * 11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+ *
+ * @param fnName: name of the function which is being called
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnCallArgList(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 14. <fnCallArg>       -> [id]
+ * 15. <fnCallArg>       -> [literal]
+ *
+ * @param fnName: name of the function which is being called
+ * @param argCount: number of arguments already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnCallArg(char *fnName, int argCount) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 12. <nextFnCallArg>   -> eps
+ * 13. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+ *
+ * @param fnName: name of the function which is being called
+ * @param argCount: number of arguments already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNextFnCallArg(char *fnName, int argCount) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 17. <stat>            -> eps
+ * 18. <stat>            -> [id] <statWithId> <stat>
+ * 19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
+ * 20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
+ * 21. <stat>            -> while <expr> do <stat> end <stat>
+ * 22. <stat>            -> return <retArgList> <stat> 
+ *
+ * @param fnName: name of the function in which the statements are
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pStat(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 23. <statWithId>      -> , [id] <nextAssign> <expr>
+ * 24. <statWithId>      -> = <expr>
+ * 25. <statWithId>      -> <fnCall>
+ *
+ * @param idName: name of the id that is at the beginning of the statement
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pStatWithId(char *idName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 26. <nextAssign>      -> , [id] <nextAssign> <expr>
+ * 27. <nextAssign>      -> =
+ *
+ * @param assignmentDone: true if we already received enough values to fill the
+ * id list on the left side of the multiassignment
+ * @param endLabel: where to jump after the multiassignment is done
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNextAssign(bool *assignmentDone, char *endLabel) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 29. <fnDefinitionParamTypeList>       -> eps
+ * 30. <fnDefinitionParamTypeList>       -> [id] : [type] <nextFnDefinitionParamType>
+ *
+ * @param fnName: name of the function of which param types we are processing
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnDefinitionParamTypeList(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 31. <nextFnDefinitionParamType>       -> eps
+ * 32. <nextFnDefinitionParamType>       -> , [id] : [type] <nextFnDefinitionParamType>
+ *
+ * @param fnName: name of the function of which param types we are processing
+ * @param paramCount: number of parameters already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNextFnDefinitionParamType(char *fnName, int paramCount) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 34. <retArgList>      -> eps
+ * 35. <retArgList>      -> <expr> <retNextArg>
+ *
+ * @param fnName: name of the function of which ret types we are processing
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pRetArgList(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 36. <retNextArg>      -> eps
+ * 37. <retNextArg>      -> , <expr> <retNextArg>
+ *
+ * @param fnName: name of the function of which ret types we are processing
+ * @param argCount: the amount of ret arguments already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pRetNextArg(char *fnName, int argCount) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 39. <fnDeclarationParamTypeList> -> eps
+ * 40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
+ *
+ * @param fnName: name of the function of which param types we are processing
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnDeclarationParamTypeList(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 41. <nextFnDeclarationParamType>   -> eps
+ * 42. <nextFnDeclarationParamType>   -> , [type] <nextFnDeclarationParamType>
+ *
+ * @param fnName: name of the function of which param types we are processing
+ * @param paramCount: number of parameters already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNextFnDeclarationParamType(char *fnName, int paramCount) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 44. <fnRetTypeList>   -> eps 
+ * 45. <fnRetTypeList>   -> : [type] <nextRetType>
+ *
+ * @param fnName: name of the function of which ret types we are processing
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pFnRetTypeList(char *fnName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 46. <pNextRetType>     -> eps
+ * 47. <pNextRetType>     -> , [type] <nextRetType>
+ *
+ * @param fnName: name of the function of which ret types we are processing
+ * @param retVarCounter: number of return values already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNextRetType(char *fnName, int *retVarCounter) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 49. <newIdAssign>     -> eps
+ * 50. <newIdAssign>     -> = <expr>
+ *
+ * @param varName: name of the variable to which we are assigning
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pNewIdAssign(char *varName) ForceRetUse;
+
+/**
+ * @brief A function representing rules for a non-terminal in the CFG
+ * <expr>
+ *
+ * @param retVarName: destination pointer for the expression result
+ * @param expectedType: data type the result of the expression should be
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int pExpr(char **retVarName, int expectedType) ForceRetUse;
 
 /*
  *
- * HELPER FUNCTIONS
+ * Helper functions
  *
  */
-int writeFunction();
-int typeFnDeclaration(char *fnName);
-int fnDefinitionParamType(char *fnName, int counter);
-int typeVar(char *varName);
-int createParamVariables(char *fnName);
-int varDataType(char *varName);
-int fnDeclarationParamType(char *fnName, char* data);
-int fnRetDataType(char *fnName);
-int condAppendToStringBuff(char *name);
+
+/** 
+ * @brief Process an expression (or a function call) for multiassignment
+ *
+ * @param assignmentDone: pointer that is set to true if we received enough
+ * return values from expressions and function calls on the right side to fill
+ * all ids in the id list (left side)
+ * @param endLabel: name of the label generated after the assignment
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int processExpr(bool *assignmentDone, char *endLabel) ForceRetUse;
+
+/**
+ * @brief Appends a variables name (in ifjcode) to the declaration list so it
+ * can be declared later (to avoid multiple declarations)
+ *
+ * @param name of the variable in ifjcode
+ *
+ * @return err code
+ */
+int appendToVarDeclarationList(char *name);
+
 /**
  * @brief Check if a string represents a data type
  *
@@ -71,48 +291,14 @@ int condAppendToStringBuff(char *name);
 bool isDataType(char *data);
 
 /**
- * @brief check if token is read function
- * 
- * @param data 
- * @return true if data is read function
- * @return false otherwise
- */
-bool isReadFunction(char *data);
-
-/**
- * @brief check if token is string operation function
- * 
- * @param data 
- * @return true if data is string operation function
- * @return false otherwise
- */
-bool isStringOperationFunction(char *data);
-
-/**
- * @brief check if token is read function in ifj21
- * 
- * @param token 
- * @return true if it is read function, destroys () behind read, generates code
- * 
- */
-bool readFunction(Token *token);
-
-/**
- * @brief Check if string is built in function
- *
- * @return if string is built in function return true, else false
- */
-bool isBuiltInFunction(char *data);
-
-/**
  * @brief If the function wasn't already defiend, define it (add it to the
  * symtable)
  *
- * @param fnName: name of the function
+ * @param token containing the name of the function
  *
- * @return error code
+ * @return 0 if successful, errcode otherwise
  */
-int newFunctionDefinition(Token *token);
+int newFunctionDefinition(Token *token) ForceRetUse;
 
 /**
  * @brief If the function wasn't already declared, declare it (add it to the
@@ -120,9 +306,71 @@ int newFunctionDefinition(Token *token);
  *
  * @param fnName: name of the function
  *
- * @return error code
+ * @return 0 if successful, errcode otherwise
  */
-int newFunctionDeclaration(char *fnName);
+int newFunctionDeclaration(char *fnName) ForceRetUse;
+
+/**
+ * @brief Returns true if the token represents a literal (integer, number or a
+ * string)
+ *
+ * @param token
+ *
+ * @return true if the token is a literal
+ */
+bool isLiteral(Token *token);
+
+/**
+ * @brief Process a data type of a return value of a function (when declaring
+ * or defining it)
+ *
+ * @param fnName: name of the function
+ * @param retVarCounter: number of return values already processed
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int fnRetDataType(char *fnName, int *retVarCounter) ForceRetUse;
+
+/**
+ * @brief Process a data type of a parameter of a function when declaring it
+ *
+ * @param fnName: name of the function
+ * @param data: data type in a string
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int fnDeclarationParamType(char *fnName, char *data) ForceRetUse;
+
+/**
+ * @brief Process a data type of a parameter of a function when defining it
+ *
+ * @param fnName: name of the function
+ * @param paramCount: the counter of parameters
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int fnDefinitionParamType(char *fnName, int paramCount) ForceRetUse;
+
+/**
+ * @brief Process data type of a variable when declaring or defining it
+ *
+ * @param varName: name of the variable
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int varDataType(char *varName) ForceRetUse;
+
+/**
+ * @brief Define all parameters needed so we can successfully pass the
+ * parameters to a function when calling it (define a 'param' variable to which
+ * the parameter will be passed and generate code to assign the value of this
+ * variable to the parameter name)
+ *
+ * @param fnName
+ *
+ * @return 0 if successful, errcode otherwise
+ */
+int createParamVariables(char *fnName) ForceRetUse;
 
 #endif
 /* end of file parser.h */
