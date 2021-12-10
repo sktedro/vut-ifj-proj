@@ -18,12 +18,15 @@ extern int ret;
 
 STStack *symtab;
 
+// Used to define all variables of a function at its end
 DynamicStringArray *varDefBuf = NULL;
 
+// Used for multi-assignments
 LinkedList *multiAssignIdList;
 LinkedList *multiAssignRetList;
-DynamicStringArray *labelBuffer;
+DynamicStringArray *labelList;
 
+// Used to keep track of how many variables were returned in a single function
 int retVarCounter = 0;
 
 /*
@@ -33,20 +36,21 @@ int retVarCounter = 0;
  */
 
 /**
- * @brief Starting rule for require
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 01. <start>                      -> require <req> <codeBody>
  *
- * @return int - 0 if success, else on error
- *
- * 01. <start>           -> require <req> <codeBody>
+ * @return 0 if successful, errcode otherwise
  */
 int pStart() {
   RuleFnInit;
 
+  // Initialize the dynamic array for variable declaration ('VARDEF')
   TryCall(dynStrArrInit, &varDefBuf);
 
+  // Initialize the data structures for the multiassignment
   TryCall(LLInit, &multiAssignIdList);
   TryCall(LLInit, &multiAssignRetList);
-  TryCall(dynStrArrInit, &labelBuffer);
+  TryCall(dynStrArrInit, &labelList);
 
   // require
   RequireToken(t_idOrKeyword, "require");
@@ -54,6 +58,7 @@ int pStart() {
   // <req>
   TryCall(pReq);
 
+  // Generate code for all built in functions
   genBuiltInFunctions();
 
   // <codeBody>
@@ -63,13 +68,10 @@ int pStart() {
 }
 
 /**
- * @brief 
- * 
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 02. <req>                        -> "ifj21"
  *
- *
- * @return error code
- *
- * 02. <req>             -> "ifj21"
+ * @return 0 if successful, errcode otherwise
  */
 int pReq() {
   RuleFnInit;
@@ -87,14 +89,15 @@ int pReq() {
 }
 
 /**
- * @brief Rule for <codebody> string
- *
- * @return int - 0 if success, else on error
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 04. <codeBody>        -> eps
- * 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) <fnRetTypeList> <stat> end <codeBody>
- * 06. <codeBody>        -> global [id] : function ( <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
+ * 05. <codeBody>        -> function [id] ( <fnDefinitionParamTypeList> ) 
+ *   <fnRetTypeList> <stat> end <codeBody>
+ * 06. <codeBody>        -> global [id] : function ( 
+ *   <fnDeclarationParamTypeList> ) <fnRetTypeList> <codeBody>
  * 07. <codeBody>        -> [id] <fnCall> <codeBody>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pCodeBody() {
   RuleFnInit;
@@ -106,7 +109,7 @@ int pCodeBody() {
     LOG("An unexpected token in codeBody");
     vypluj ERR(SYNTAX_ERR);
 
-    // 04. <codeBody>        -> eps
+  // 04. <codeBody>        -> eps
   } else if(!token) {
     vypluj 0;
   }
@@ -117,7 +120,7 @@ int pCodeBody() {
 
     genComment("New function definition");
 
-    // labels
+    // Labels
     char *fnBypassLabelName = genLabelName("");
     char *varDefStart = genLabelName("");
     char *varDefJumpBack = genLabelName("");
@@ -134,13 +137,14 @@ int pCodeBody() {
     TryCall(newFunctionDefinition, token);
     genFnDef(fnName);
 
+    // Push a new empty frame to the symtable
     TryCall(STPush, symtab);
 
-    // generate an unconditional jump to definitions
+    // Generate an unconditional jump for variable declarations
     genComment("Jumping to variable declaration");
     genUnconditionalJump(varDefStart);
    
-    // start of fn body code
+    // Start of fn body code
     genComment("Jump back here from declarations");
     genLabel(varDefJumpBack);
     
@@ -165,10 +169,10 @@ int pCodeBody() {
     // end
     RequireToken(t_idOrKeyword, "end");
 
-    // jump past the declarations
+    // Jump past the declarations
     genUnconditionalJump(varDefBypass);
 
-    // generate all declarations and jump back
+    // Generate all declarations (and assign nils) and jump back
     genComment("Variable declarations");
     genLabel(varDefStart);
     for(int i = 0; i < varDefBuf->len; i++) {
@@ -178,7 +182,7 @@ int pCodeBody() {
     genComment("Jump from var declarations");
     genUnconditionalJump(varDefJumpBack);
 
-    // end of function label
+    // End of function label
     genComment("Skip variable declaration");
     genLabel(varDefBypass);
 
@@ -189,11 +193,11 @@ int pCodeBody() {
     genPopframe();
     genReturnInstruction();
 
-    // Code gen Create a label here, behind the function
-   
+    // Bypass the function by jumping here from the start
     genComment2("Function definition done");
     genLabel(fnBypassLabelName);
 
+    // Pop the new frame from the symtable
     STPop(symtab);
 
     resetParamCounter();
@@ -239,7 +243,7 @@ int pCodeBody() {
 
     genComment("Calling a function from the global frame");
 
-    // The function name must be in the symtab, must be a function
+    // The functions name must be in the symtab, must be a function
     if(!STFind(symtab, token->data) || STGetIsVariable(symtab, token->data)){
       LOG("Calling an undeclared function or maybe it is not even a fn");
       vypluj ERR(SYNTAX_ERR);
@@ -261,17 +265,18 @@ int pCodeBody() {
 }
 
 /**
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 09. <fnCall>          -> ( <fnCallArgList> )
-*/
+ *
+ * @return 0 if successful, errcode otherwise
+ */
 int pFnCall(char *fnName) {
   RuleFnInit;
 
   // (
   RequireTokenType(t_leftParen);
 
+  // Treat the 'write' function call specially
   if(strEq(fnName, "write")) {
     genComment("Calling write functions");
     resetParamCounter();
@@ -283,17 +288,18 @@ int pFnCall(char *fnName) {
 
     genCreateframe();
 
+    // Pass call arguments to the functino
     genComment("Processing function call arguments");
     resetParamCounter();
     TryCall(pFnCallArgList, fnName);
     genComment2("Processing function call arguments done");
 
-    // Get the function element from the symtable
-    STElem *fnElement = STFind(symtab, fnName);
-    if(!fnElement){
-      return ERR(SYNTAX_ERR);
+    // Check if the function is in the symtable
+    if(!STFind(symtab, fnName)){
+      return ERR(ID_DEF_ERR);
     }
-
+    
+    // Generate the function call and reset the counters
     genFnCall(fnName);
     retVarCounter = 0;
     resetParamCounter();
@@ -306,12 +312,11 @@ int pFnCall(char *fnName) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 10. <fnCallArgList>   -> eps
  * 11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pFnCallArgList(char *fnName) {
   RuleFnInit;
@@ -321,12 +326,11 @@ int pFnCallArgList(char *fnName) {
   int argCount = 0;
 
   GetToken;
-  printToken(token);
 
   // 10. <fnCallArgList>   -> eps
   if(token->type == t_rightParen) {
-    LOG("-> eps");
 
+    // Check if the amount of parameters is fine (not for 'write' function)
     if(!strEq(fnName, "write")){
       STElem *fn = STFind(symtab, fnName);
       // Amount of arguments doesn't match
@@ -341,27 +345,25 @@ int pFnCallArgList(char *fnName) {
   } 
 
   // 11. <fnCallArgList>   -> <fnCallArg> <nextFnCallArg>
-
-  LOG("-> <fnCallArg> <nextFnCallArg>\n");
   argCount++;
 
-  TryCall(stashToken, &token); // cause we didn't actually process the first arg
-
+  // Stash the token, cause we didn't actually process the first arg
+  TryCall(stashToken, &token); 
   // <fnCallArg>
   TryCall(pFnCallArg, fnName, argCount);
 
   // <nextFnCallArg>
   TryCall(pNextFnCallArg, fnName, argCount);
+
   vypluj 0;
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 12. <nextFnCallArg>   -> eps
  * 13. <nextFnCallArg>   -> , <fnCallArg> <nextFnCallArg>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNextFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
@@ -369,7 +371,6 @@ int pNextFnCallArg(char *fnName, int argCount) {
   GetToken;
   
   // -> , <fnCallArg> <nextFnCallArg>
-  // ,
   if(token->type == t_comma) {
     argCount++;
 
@@ -381,6 +382,7 @@ int pNextFnCallArg(char *fnName, int argCount) {
 
   // -> eps
   }else{
+    // Check if the amount of parameters is fine (not for 'write' function)
     if(!strEq(fnName, "write")){
       STElem *fn = STFind(symtab, fnName);
       // Amount of arguments doesn't match
@@ -397,12 +399,11 @@ int pNextFnCallArg(char *fnName, int argCount) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 14. <fnCallArg>       -> [id]
  * 15. <fnCallArg>       -> [literal]
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pFnCallArg(char *fnName, int argCount) {
   RuleFnInit;
@@ -421,11 +422,11 @@ int pFnCallArg(char *fnName, int argCount) {
     genVarDefTF(paramName);
     TryCall(genPassParam, paramName, varName);
 
+  // Pass a literal
   // 15. <fnCallArg>       -> [literal]
-  } else if (token->type == t_int || token->type == t_num ||
-      token->type == t_sciNum || token->type == t_str ||
-      (token->type == t_idOrKeyword && strcmp(token->data, "nil") == 0)) {
-    LOG("-> [literal]\n");
+  } else if (token->type == t_int || token->type == t_num
+      || token->type == t_sciNum || token->type == t_str
+      || (token->type == t_idOrKeyword && strEq(token->data, "nil"))) {
     if(token->type == t_int){
       dataType = dt_integer;
     } else if(token->type == t_num || token->type == t_sciNum){
@@ -436,6 +437,7 @@ int pFnCallArg(char *fnName, int argCount) {
       dataType = dt_nil;
     }
 
+    // Pass the parameter
     genVarDefTF(paramName);
     if(strcmp(fnName, "write") == 0 && strcmp(token->data, "nil") == 0) {
       genAssignLiteralStringNil(paramName, "TF");
@@ -464,16 +466,15 @@ int pFnCallArg(char *fnName, int argCount) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 17. <stat>            -> eps
  * 18. <stat>            -> [id] <statWithId> <stat>
  * 19. <stat>            -> local [id] : [type] <newIdAssign> <stat>
  * 20. <stat>            -> if <expr> then <stat> else <stat> end <stat>
  * 21. <stat>            -> while <expr> do <stat> end <stat>
  * 22. <stat>            -> return <retArgList> <stat> 
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pStat(char *fnName) {
   RuleFnInit;
@@ -503,6 +504,7 @@ int pStat(char *fnName) {
     TryCall(STInsert, symtab, newVarName);
     TryCall(STSetIsVariable, symtab, newVarName, true);
     TryCall(STSetName, symtab, newVarName, genVarName(token->data, symtab->top->depth));
+
     // Code gen variable definition
     char *name;
     TryCall(STGetName, symtab, &name, newVarName);
@@ -605,8 +607,6 @@ int pStat(char *fnName) {
 
   // 22. <stat>            -> return <retArgList> <stat>
   } else if (strcmp(token->data, "return") == 0) {
-    LOG("-> return <retArgList> <stat>\n");
-
     genComment("Return encountered - returning");
 
     // <retArgList>
@@ -614,18 +614,11 @@ int pStat(char *fnName) {
       TryCall(pRetArgList, fnName);
     }
 
+    // Reset teh counter
+    resetRetCounter();
+
     // Code gen POPFRAME
     genPopframe();
-
-    
-    // Count how many return arguments we need
-    int retArgsCount = 0;
-    int i = 0;
-    while(STGetRetType(symtab, fnName, i) != -1){
-      retArgsCount ++;
-      i++;
-    }
-    resetRetCounter();
 
     // Code gen RETURN from the function
     genReturnInstruction();
@@ -634,21 +627,17 @@ int pStat(char *fnName) {
 
   // 22. <stat>            [id] <statWithId> <stat>
   } else if (STFind(symtab, token->data)) { // A function or a variable
-    LOG("<stat>            -> [id] <statWithId> <stat>\n");
-
     // <statWithId>
     TryCall(pStatWithId, token->data);
-    LOG("HUHU");
 
   // -> eps
   } else {
-    LOG("-> eps");
     TryCall(stashToken, &token);
     vypluj 0;
   }
 
-// <stat>
-vypluj pStat(fnName);  
+  // <stat>
+  vypluj pStat(fnName);  
 }
 
 int processExpr(bool *assignmentDone, char *endLabel) {
@@ -671,7 +660,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     genUnconditionalJump(bypassLabel);
 
     char *evalLabel = genLabelName("eval");
-    TryCall(dynStrArrAppend, labelBuffer, evalLabel);
+    TryCall(dynStrArrAppend, labelList, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -698,7 +687,6 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     genLabel(bypassLabel);
 
 
-
   // a variable, not a function
   }else{
     // gen jump to bypass
@@ -706,7 +694,7 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 
     // gen label to eval expr
     char *evalLabel = genLabelName("eval");
-    TryCall(dynStrArrAppend, labelBuffer, evalLabel);
+    TryCall(dynStrArrAppend, labelList, evalLabel);
 
     // gen label to eval expr
     genLabel(evalLabel);
@@ -727,19 +715,18 @@ int processExpr(bool *assignmentDone, char *endLabel) {
     *assignmentDone = true;
   }
 
-return 0;
+  return 0;
 }
     
 
 
 /**
- * @brief
- *
- * @return error code
- *
- * 23. <statWithId>      -> , [id] <nextAssign> <expr> , <expr>
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 23. <statWithId>      -> , [id] <nextAssign> <expr>
  * 24. <statWithId>      -> = <expr>
  * 25. <statWithId>      -> <fnCall>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pStatWithId(char *idName) {
   RuleFnInit;
@@ -829,10 +816,10 @@ int pStatWithId(char *idName) {
         }
       }
 
-      // tu vygenerovať jumpy na labels v labelBuffer 
-      int labelCount = labelBuffer->len;
+      // tu vygenerovať jumpy na labels v labelList 
+      int labelCount = labelList->len;
       for(int i = labelCount - 1; i > 0; i--){
-        char *label = labelBuffer->data[i];
+        char *label = labelList->data[i];
         genUnconditionalJump(label);
       }
 
@@ -857,12 +844,11 @@ int pStatWithId(char *idName) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
- * 26. <nextAssign>      -> , [id] <nextAssign> <expr> ,
+ * @brief A function representing rules for a non-terminal in the CFG
+ * 26. <nextAssign>      -> , [id] <nextAssign> <expr>
  * 27. <nextAssign>      -> =
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNextAssign(bool *assignmentDone, char *endLabel) {
   RuleFnInit;
@@ -910,12 +896,11 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 29. <fnDefinitionParamTypeList>       -> eps
  * 30. <fnDefinitionParamTypeList>       -> [id] : [type] <nextFnDefinitionParamType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pFnDefinitionParamTypeList(char *fnName) {
   RuleFnInit;
@@ -953,12 +938,11 @@ int pFnDefinitionParamTypeList(char *fnName) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 31. <nextFnDefinitionParamType>       -> eps
  * 32. <nextFnDefinitionParamType>       -> , [id] : [type] <nextFnDefinitionParamType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   RuleFnInit;
@@ -999,12 +983,11 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 34. <retArgList>      -> eps
  * 35. <retArgList>      -> <expr> <retNextArg>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pRetArgList(char *fnName) {
   RuleFnInit;
@@ -1042,12 +1025,11 @@ int pRetArgList(char *fnName) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 36. <retNextArg>      -> eps
  * 37. <retNextArg>      -> , <expr> <retNextArg>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pRetNextArg(char *fnName, int argCount) {
   RuleFnInit;
@@ -1096,10 +1078,11 @@ int pRetNextArg(char *fnName, int argCount) {
 }
 
 /**
- *
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 39. <fnDeclarationParamTypeList> -> eps
  * 40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pFnDeclarationParamTypeList(char *fnName) {
   RuleFnInit;
@@ -1129,10 +1112,11 @@ int pFnDeclarationParamTypeList(char *fnName) {
 }
 
 /**
- *
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 41. <nextFnDeclarationParamType>   -> eps
  * 42. <nextFnDeclarationParamType>   -> , [type] <nextFnDeclarationParamType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNextFnDeclarationParamType(char *fnName, int paramCount) {
   RuleFnInit;
@@ -1158,10 +1142,11 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
 }
 
 /**
- *
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 44. <fnRetTypeList>   -> eps 
  * 45. <fnRetTypeList>   -> : [type] <pNextRetType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pFnRetTypeList(char *fnName) {
   RuleFnInit;
@@ -1184,10 +1169,11 @@ int pFnRetTypeList(char *fnName) {
 }
 
 /**
- *
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 46. <pNextRetType>     -> eps
  * 47. <pNextRetType>     -> , [type] <nextRetType>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNextRetType(char *fnName) {
   RuleFnInit;
@@ -1209,12 +1195,11 @@ int pNextRetType(char *fnName) {
 }
 
 /**
- * @brief
- *
- * @return error code
- *
+ * @brief A function representing rules for a non-terminal in the CFG
  * 49. <newIdAssign>     -> eps
  * 50. <newIdAssign>     -> = <expr>
+ *
+ * @return 0 if successful, errcode otherwise
  */
 int pNewIdAssign(char *varName) {
   RuleFnInit;
@@ -1253,9 +1238,10 @@ int pNewIdAssign(char *varName) {
 }
 
 /**
- * @brief
+ * @brief A function representing rules for a non-terminal in the CFG
+ * <expr>
  *
- * @return error code
+ * @return 0 if successful, errcode otherwise
  */
 int pExpr(char **retVarName, int expectedType) {
   RuleFnInit;

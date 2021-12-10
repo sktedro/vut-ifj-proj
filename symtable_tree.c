@@ -36,7 +36,6 @@ int treeInsert(STTreeNode **root, char *key, int frame) {
   } else if (strcmp(key, (*root)->key) > 0) {
     TryCall(treeInsert, &((*root)->rightChild), key, frame);
   } else {
-    /** return ERR(ID_DEF_ERR); */ // TODO remove this if it is not needed
     LOG("WARNING: Inserting a key into a binary tree that is already there.");
   }
   vypluj 0;
