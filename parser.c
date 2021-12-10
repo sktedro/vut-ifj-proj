@@ -480,7 +480,6 @@ int pStat(char *fnName) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
 
   // 17. <stat>            -> eps
   if (token->type != t_idOrKeyword || (token->type == t_idOrKeyword && strcmp(token->data, "end") == 0)) {
@@ -614,7 +613,7 @@ int pStat(char *fnName) {
       TryCall(pRetArgList, fnName);
     }
 
-    // Reset teh counter
+    // Reset the counter
     resetRetCounter();
 
     // Code gen POPFRAME
@@ -640,85 +639,6 @@ int pStat(char *fnName) {
   vypluj pStat(fnName);  
 }
 
-int processExpr(bool *assignmentDone, char *endLabel) {
-  // Get next token info before calling pexpr
-  Token *token = NULL;
-  GetToken;
-  char *fnName = token->data;
-  TryCall(stashToken, &token);
-
-  char *retVarName = NULL;
-  int dataType = -1;
-
-  // We have a function
-  if(STFind(symtab, fnName) && !STGetIsVariable(symtab, fnName)){
-    int retVarsAmount = STFind(symtab, fnName)->fnRetTypesBuf->len;
-
-    char *bypassLabel = genLabelName("bypass");
-
-    // gen jump to bypass
-    genUnconditionalJump(bypassLabel);
-
-    char *evalLabel = genLabelName("eval");
-    TryCall(dynStrArrAppend, labelList, evalLabel);
-
-    // gen label to eval expr
-    genLabel(evalLabel);
-
-    TryCall(pExpr, &retVarName, &dataType);
-    
-    // Append all return values to multiAssignRetList one by one
-    resetRetCounter();
-    for(int i = 0; i < retVarsAmount; i++){
-      retVarName = genRetVarName("");
-      dataType = STGetRetType(symtab, fnName, i);
-      char *b = genTmpVarName();
-      condAppendToStringBuff(b);
-      genMoveToLF(b, retVarName);
-
-      TryCall(LLAppend, &multiAssignRetList, b, dataType);
-    }
-    resetRetCounter();
-
-    // gen label to jump to the end
-    genUnconditionalJump(endLabel);
-
-    // gen bypass label
-    genLabel(bypassLabel);
-
-
-  // a variable, not a function
-  }else{
-    // gen jump to bypass
-    char *bypassLabel = genLabelName("bypass");
-
-    // gen label to eval expr
-    char *evalLabel = genLabelName("eval");
-    TryCall(dynStrArrAppend, labelList, evalLabel);
-
-    // gen label to eval expr
-    genLabel(evalLabel);
-
-    TryCall(pExpr, &retVarName, &dataType);
-
-    // gen label to jump to the end
-    genUnconditionalJump(endLabel);
-
-    // gen bypass label
-    genLabel(bypassLabel);
-
-    // Add the return value (result) to multiAssignRetList
-    TryCall(LLAppend, &multiAssignRetList, retVarName, dataType);
-  }
-
-  if(LLGetLength(multiAssignIdList) <= LLGetLength(multiAssignRetList)){
-    *assignmentDone = true;
-  }
-
-  return 0;
-}
-    
-
 
 /**
  * @brief A function representing rules for a non-terminal in the CFG
@@ -731,11 +651,6 @@ int processExpr(bool *assignmentDone, char *endLabel) {
 int pStatWithId(char *idName) {
   RuleFnInit;
 
-  char *retname;
-  GCMalloc(retname, sizeof(char) * 20);
-
-  retVarCounter = 0;
-
   // -> <fnCall>
   if(STFind(symtab, idName) && !STGetIsVariable(symtab, idName)){
     TryCall(pFnCall, idName);
@@ -744,101 +659,100 @@ int pStatWithId(char *idName) {
 
   // Not a function call but an assignment
   GetToken;
-  printToken(token);
     
   // idName must be a variable
   if(!STFind(symtab, idName) || !STGetIsVariable(symtab, idName)){
-      vypluj ERR(SYNTAX_ERR);
+    vypluj ERR(SYNTAX_ERR);
   }
-    // -> = <expr>
+
+  // -> = <expr>
   if (token->type == t_assignment) {
-      char *destVarName;
-      TryCall(STGetName, symtab, &destVarName, idName);
-      // Call the shift-reduce parser and assign the result to id2Var
-      char *retVarName = NULL;
-      int idType = STGetVarDataType(symtab, idName);
-      TryCall(pExpr, &retVarName, idType);
 
-      if(!retVarName){
-        // If this is null, the expr was a function call and we need to fetch
-        // the values from ret_0 (which is in TF!)
-        sprintf(retname,"!ret_%d", retVarCounter);
-        retVarCounter++;
-        genMoveToLF(destVarName, retname);
-      }else{
-        // Otherwise the ret val is in LF
-        genMove(destVarName, retVarName);
-      }
-    vypluj 0;
-    } 
-    
-    // In idName we have a name of the first variable in this statement
-    // In token->data we'll have a name of the second one
-    // -> , [id] <nextAssign> <expr> , <expr>
-    if (token->type == t_comma) {
-      char *endLabel = genLabelName("ASSEND");
+    // Get the name of the variable where the expr result should be stored
+    char *destVarName;
+    TryCall(STGetName, symtab, &destVarName, idName);
 
-      char *name = NULL;
-      TryCall(STGetName, symtab, &name, idName);
-      TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, idName));
+    // Call the shift-reduce parser and assign the result to retVarName
+    char *retVarName = NULL;
+    int idType = STGetVarDataType(symtab, idName);
+    TryCall(pExpr, &retVarName, idType);
 
-      // [id]
-      RequireTokenType(t_idOrKeyword);
-      if (!STFind(symtab, token->data) 
-          || !STGetIsVariable(symtab, token->data)) {
-        vypluj ERR(SYNTAX_ERR);
-      }
+    if(!retVarName){
+      // If this is null, the expr was a function call and we need to fetch
+      // the return value from ret_0 (which is in TF!)
+      genMoveToLF(destVarName, "!ret_0");
+    }else{
+      // Otherwise the ret val is in LF
+      genMove(destVarName, retVarName);
+    }
 
-      TryCall(STGetName, symtab, &name, token->data);
-      TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, token->data));
+  // Multiassignment
+  // In idName we have a name of the first variable in this statement
+  // In token->data we'll have a name of the second one
+  // -> , [id] <nextAssign> <expr> , <expr>
+  }else if (token->type == t_comma) {
+    char *endLabel = genLabelName("multiassign_end");
 
-      // [id]
+    // Append the name (in ifjcode) of the first id in this multiassignment to
+    // the multiassignment id list
+    char *name = NULL;
+    TryCall(STGetName, symtab, &name, idName);
+    TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, idName));
 
-      bool assignmentDone = false;
+    // [id]
+    RequireTokenType(t_idOrKeyword);
+    if (!STFind(symtab, token->data) 
+        || !STGetIsVariable(symtab, token->data)) {
+      vypluj ERR(SYNTAX_ERR);
+    }
 
+    // Do the same with the second id (append to the id list)
+    TryCall(STGetName, symtab, &name, token->data);
+    TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, token->data));
 
-      // <nextAssign>
-      // Check and generate more assignments if there are some
-      // TryCall(pNextAssign);
+    // When this becomes true, it indicates we have enough return values (from 
+    // functions and expressions) to assign to all ids in the id list
+    bool assignmentDone = false;
+
+    // <nextAssign>
+    // Check and generate more assignments if there are some
+    GetToken;
+
+    // If we need more values, get more values
+    if(!assignmentDone){
+      // <expr>
+      TryCall(processExpr, &assignmentDone, endLabel);
+    }
+
+    // If we need more values, get more values
+    if(!assignmentDone){
+      // ,
       GetToken;
-
-      if(!assignmentDone){
+      if(token->type == t_comma){
         // <expr>
         TryCall(processExpr, &assignmentDone, endLabel);
       }
-
-      if(!assignmentDone){
-        // ,
-        GetToken;
-        if(token->type == t_comma){
-          // <expr>
-          TryCall(processExpr, &assignmentDone, endLabel);
-        }
-      }
-
-      // tu vygenerovať jumpy na labels v labelList 
-      int labelCount = labelList->len;
-      for(int i = labelCount - 1; i > 0; i--){
-        char *label = labelList->data[i];
-        genUnconditionalJump(label);
-      }
-
-      // vygenerovať label endLabel
-      genLabel(endLabel);
-
-      // a priradenia 
-      // hodnôt - v asselem sú idčká a v asselem2 sú results expr
-      int varCount = LLGetLength(multiAssignIdList);
-      for(int i = 1; i < varCount; i++) {
-        char *id = LLGetElemByIndex(multiAssignIdList, i)->name;
-        char *ret = LLGetElemByIndex(multiAssignRetList, i)->name;
-        // Code gen
-        genMove(id, ret);
-      }
-
-    } else {
-      vypluj ERR(SYNTAX_ERR);
     }
+
+    // Generate jumps to the function calls and expression evaluations
+    for(int i = labelList->len - 1; i > 0; i--){
+      genUnconditionalJump(labelList->data[i]);
+    }
+
+    // Generate the multiassignment end label
+    genLabel(endLabel);
+
+    // Finally, assign the return values from ret list to ids in id list
+    int varCount = LLGetLength(multiAssignIdList);
+    for(int i = 1; i < varCount; i++) {
+      char *id = LLGetElemByIndex(multiAssignIdList, i)->name;
+      char *ret = LLGetElemByIndex(multiAssignRetList, i)->name;
+      genMove(id, ret);
+    }
+
+  } else {
+    vypluj ERR(SYNTAX_ERR);
+  }
   
   vypluj 0;
 }
@@ -853,18 +767,14 @@ int pStatWithId(char *idName) {
 int pNextAssign(bool *assignmentDone, char *endLabel) {
   RuleFnInit;
 
-  char *retname;
-  GCMalloc(retname, sizeof(char) * 20);
-  
   GetToken;
-  printToken(token);
 
   // -> =
   if (token->type == t_assignment) {
+    // We're done fetching ids
     vypluj 0;
   }
 
-  // -> , [id] <nextAssign> <expr> ,
   if(token->type != t_comma) {
     vypluj ERR(SYNTAX_ERR);
   }
@@ -875,21 +785,25 @@ int pNextAssign(bool *assignmentDone, char *endLabel) {
   if (!STFind(symtab, token->data) || !STGetIsVariable(symtab, token->data)) {
     vypluj ERR(SYNTAX_ERR);
   }
+  // Get the variables name in ifjcode and append it to the id list
   char *name = NULL;
+  int dataType = STGetVarDataType(symtab, token->data);
   TryCall(STGetName, symtab, &name, token->data);
-  TryCall(LLAppend, &multiAssignIdList, name, STGetVarDataType(symtab, token->data));
+  TryCall(LLAppend, &multiAssignIdList, name, dataType);
 
   // <nextAssign>
   TryCall(pNextAssign, assignmentDone, endLabel);
 
+  // If we still don't have enough values to assign to all ids, get another
   if(!assignmentDone){
     // <expr>
     TryCall(processExpr, assignmentDone, endLabel);
-  }
 
-  GetToken;
-  if(token->type != t_comma){
-    TryCall(stashToken, &token);
+    // If the next token is a comma, consume it
+    GetToken;
+    if(token->type != t_comma){
+      TryCall(stashToken, &token);
+    }
   }
 
   vypluj 0;
@@ -906,9 +820,7 @@ int pFnDefinitionParamTypeList(char *fnName) {
   RuleFnInit;
   int paramCount = 0;
 
-
   GetToken;
-  printToken(token);
 
   // -> eps
   if(token->type != t_idOrKeyword || isIFJ21Keyword(token)) {
@@ -918,13 +830,15 @@ int pFnDefinitionParamTypeList(char *fnName) {
 
   // -> [id] : [type] <nextFnDefinitionParamType>
 
+  paramCount++;
+
   // [id]
-  // Append the name of the new parameter to the symtable
+  // Update the symtable
   TryCall(STAppendParamName, symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
   TryCall(STSetIsVariable, symtab, token->data, true);
-  TryCall(STSetName, symtab, token->data, genVarName(token->data, symtab->top->depth));
-  paramCount++;
+  char *newName = genVarName(token->data, symtab->top->depth);
+  TryCall(STSetName, symtab, token->data, newName);
 
   // :
   RequireTokenType(t_colon);
@@ -947,9 +861,7 @@ int pFnDefinitionParamTypeList(char *fnName) {
 int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   RuleFnInit;
 
-  // ,
   GetToken;
-  printToken(token);
 
   // -> eps
   if (token->type != t_comma) {
@@ -965,11 +877,13 @@ int pNextFnDefinitionParamType(char *fnName, int paramCount) {
   // Must be an ID, can't be a keyword
   RequireIDToken(token);
   paramCount++;
-  // Append the name of the new parameter to the symtable
-  TryCall(STAppendParamName, symtab, fnName, token->data);
 
+  // Update the symtable
+  TryCall(STAppendParamName, symtab, fnName, token->data);
   TryCall(STInsert, symtab, token->data);
-  TryCall(STSetName, symtab, token->data, genVarName(token->data, symtab->top->depth));
+  TryCall(STSetIsVariable, symtab, token->data, true);
+  char *newName = genVarName(token->data, symtab->top->depth);
+  TryCall(STSetName, symtab, token->data, newName);
 
   // :
   RequireTokenType(t_colon);
@@ -994,21 +908,19 @@ int pRetArgList(char *fnName) {
 
   char *retVarName = NULL;
 
-  STElem *fn = STFind(symtab, fnName);
-
-
   // 34. <retArgList>      -> eps
   // Generate simple return with no arguments
-  if(fn->fnRetTypesBuf->len == 0){
+  if(STFind(symtab, fnName) && STFind(symtab, fnName)->fnRetTypesBuf->len == 0){
     genPopframe();
     genReturnInstruction();
     return 0;
   }
 
-  int expectedType = STFind(symtab, fnName)->fnRetTypesBuf->data[0];
-  TryCall(pExpr, &retVarName, expectedType);
-
   // 35. <retArgList>      -> <expr> <retNextArg>
+
+  // Generate code for the expression
+  TryCall(pExpr, &retVarName, STGetRetType(symtab, fnName, 0));
+
   int argCount = 1;
 
   // Code gen Define and assign the return values
@@ -1019,6 +931,7 @@ int pRetArgList(char *fnName) {
   // Pass from retArgName to retVarName
   genMove(retArgName, retVarName);
 
+  // <retNextArg>
   TryCall(pRetNextArg, fnName, argCount);
 
   vypluj 0;
@@ -1088,7 +1001,6 @@ int pFnDeclarationParamTypeList(char *fnName) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
   
   // 39. <fnDeclarationParamTypeList> -> eps 
   if(token->type == t_rightParen) {
@@ -1097,18 +1009,15 @@ int pFnDeclarationParamTypeList(char *fnName) {
   }
 
   // 40. <fnDeclarationParamTypeList> -> [type] <nextFnDeclarationParamType>
-  LOG("-> [type] <nextFnDeclarationParamType>");
   int paramCount = 1;
   
   // [type]
   TryCall(fnDeclarationParamType, fnName, token->data);
 
-  // tu musíme ocheckovať či token neni prava zatvorka alebo čo, idk
-
   // <nextFnDeclarationParamType>
   TryCall(pNextFnDeclarationParamType, fnName, paramCount);
 
-  return 0;
+  vypluj 0;
 }
 
 /**
@@ -1134,8 +1043,10 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
 
   GetToken;
 
+  // [type]
   TryCall(fnDeclarationParamType, fnName, token->data);
   
+  // <nextFnDeclarationParamType>
   TryCall(pNextFnDeclarationParamType, fnName, paramCount);
 
   return 0;
@@ -1144,7 +1055,7 @@ int pNextFnDeclarationParamType(char *fnName, int paramCount) {
 /**
  * @brief A function representing rules for a non-terminal in the CFG
  * 44. <fnRetTypeList>   -> eps 
- * 45. <fnRetTypeList>   -> : [type] <pNextRetType>
+ * 45. <fnRetTypeList>   -> : [type] <nextRetType>
  *
  * @return 0 if successful, errcode otherwise
  */
@@ -1159,9 +1070,12 @@ int pFnRetTypeList(char *fnName) {
     vypluj 0;
   }
 
-  // 45. <fnRetTypeList>   -> : [type] <pNextRetType>
+  // 45. <fnRetTypeList>   -> : [type] <nextRetType>
+
+  // [type]
   TryCall(fnRetDataType, fnName);
 
+  // <nextRetType>
   TryCall(pNextRetType, fnName);
 
   vypluj 0;
@@ -1186,12 +1100,13 @@ int pNextRetType(char *fnName) {
     vypluj 0;
   }
 
+  // [type]
   TryCall(fnRetDataType, fnName);
 
+  // <nextRetType>
   TryCall(pNextRetType, fnName);
 
   vypluj 0;
-
 }
 
 /**
@@ -1205,11 +1120,9 @@ int pNewIdAssign(char *varName) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
 
   // -> eps
-  // =
-  if (!(token->type == t_assignment && !strcmp(token->data, "="))) {
+  if (token->type != t_assignment) {
     TryCall(stashToken, &token);
     vypluj 0;
   }
@@ -1220,6 +1133,8 @@ int pNewIdAssign(char *varName) {
   TryCall(pExpr, &retVarName, type);
   
   STElem *var = STFind(symtab, varName);
+
+  // Check if the variable exists in the symtable
   if(!var) {
     vypluj ERR(SYNTAX_ERR);
   }
@@ -1227,8 +1142,7 @@ int pNewIdAssign(char *varName) {
   if(!retVarName){
     // If this is null, the expr was a function call and we need to fetch
     // the values from ret_0 (which is in TF!)
-    retVarName = "!ret_0";
-    genMoveToLF(var->name, retVarName);
+    genMoveToLF(var->name, "!ret_0");
   }else{
     // Otherwise the ret val is in LF
     genMove(var->name, retVarName);
@@ -1247,9 +1161,9 @@ int pExpr(char **retVarName, int expectedType) {
   RuleFnInit;
 
   GetToken;
-  printToken(token);
 
-  // If it is a function call (and fn is defined), don't call the shift-reduce parser at all
+  // If it is a function call (and fn is defined), don't call the shift-reduce 
+  // parser at all
   if(token->type == t_idOrKeyword && STFind(symtab, token->data) 
     && !STGetIsVariable(symtab, token->data)) {
 
@@ -1261,30 +1175,28 @@ int pExpr(char **retVarName, int expectedType) {
   } else if(strEq(token->data, "nil")) {
     // Code gen define a var, assign nil and return the name in retVarName
     *retVarName = genTmpVarName();
-
     TryCall(genAssignLiteral, *retVarName, dt_nil, "nil", "LF"); 
 
+  // If it it the 'else' keyword, end
   } else if(strEq(token->data, "else")) {
-    vypluj stashToken(&token); 
+    TryCall(stashToken, &token); 
 
-  // A keyword
+  // A keyword is forbidden here
   } else if(token->type == t_idOrKeyword && isIFJ21Keyword(token)) {
     vypluj ERR(SYNTAX_ERR);
 
   // An expression
   } else {
     int retVarType = -1;
+    // Call the shift-reduce parser
     TryCall(parseExpression, symtab, token, retVarName, &retVarType);
-    LOG("Expr result is in %s", *retVarName);
-    // An expression is required but the precedence analysis didn't find any
+
     if(!(*retVarName)){
+      // An expression is required but the precedence analysis didn't find any
       vypluj ERR(SYNTAX_ERR);
     }
-    if(retVarType == -1) {
-      vypluj ERR(INTERN_ERR);
-    }
-    if(retVarType != expectedType && expectedType != dt_boolean) { // bool is weird
-      LOG("TYPE FROM PA: %d EXPECTED: %d ", retVarType, expectedType);
+    if(retVarType != expectedType && expectedType != dt_boolean) {
+      // Assignment error if the type doesn't match (can be a boolean though)
       vypluj ERR(ASS_ERR);
     }
   }
@@ -1296,6 +1208,86 @@ int pExpr(char **retVarName, int expectedType) {
  * HELPER FUNCTIONS
  *
  */
+
+int processExpr(bool *assignmentDone, char *endLabel) {
+  // Get next token info before calling pexpr
+  Token *token = NULL;
+  GetToken;
+  char *fnName = token->data;
+  TryCall(stashToken, &token);
+
+  char *retVarName = NULL;
+  int dataType = -1;
+
+  // We have a function
+  if(STFind(symtab, fnName) && !STGetIsVariable(symtab, fnName)){
+    int retVarsAmount = STFind(symtab, fnName)->fnRetTypesBuf->len;
+
+    char *bypassLabel = genLabelName("bypass");
+
+    // gen jump to bypass
+    genUnconditionalJump(bypassLabel);
+
+    char *evalLabel = genLabelName("eval");
+    TryCall(dynStrArrAppend, labelList, evalLabel);
+
+    // gen label to eval expr
+    genLabel(evalLabel);
+
+    TryCall(pExpr, &retVarName, dataType);
+    
+    // Append all return values to multiAssignRetList one by one
+    resetRetCounter();
+    for(int i = 0; i < retVarsAmount; i++){
+      retVarName = genRetVarName("");
+      dataType = STGetRetType(symtab, fnName, i);
+      char *b = genTmpVarName();
+      condAppendToStringBuff(b);
+      genMoveToLF(b, retVarName);
+
+      TryCall(LLAppend, &multiAssignRetList, b, dataType);
+    }
+    resetRetCounter();
+
+    // gen label to jump to the end
+    genUnconditionalJump(endLabel);
+
+    // gen bypass label
+    genLabel(bypassLabel);
+
+
+  // a variable, not a function
+  }else{
+    // gen jump to bypass
+    char *bypassLabel = genLabelName("bypass");
+
+    // gen label to eval expr
+    char *evalLabel = genLabelName("eval");
+    TryCall(dynStrArrAppend, labelList, evalLabel);
+
+    // gen label to eval expr
+    genLabel(evalLabel);
+
+    TryCall(pExpr, &retVarName, dataType);
+
+    // gen label to jump to the end
+    genUnconditionalJump(endLabel);
+
+    // gen bypass label
+    genLabel(bypassLabel);
+
+    // Add the return value (result) to multiAssignRetList
+    TryCall(LLAppend, &multiAssignRetList, retVarName, dataType);
+  }
+
+  if(LLGetLength(multiAssignIdList) <= LLGetLength(multiAssignRetList)){
+    *assignmentDone = true;
+  }
+
+  return 0;
+}
+    
+
 
 /**
  * @brief appends to the string buffer unless the string is already there
